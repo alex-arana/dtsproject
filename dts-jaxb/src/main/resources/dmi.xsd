@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The OGF takes no position regarding the validity or scope of any 
+  intellectual property or other rights that might be claimed to 
+  pertain to the implementation or use of the technology described in 
+  this document or the extent to which any license under such rights 
+  might or might not be available; neither does it represent that it 
+  has made any effort to identify any such rights.  Copies of claims 
+  of rights made available for publication and any assurances of 
+  licenses to be made available, or the result of an attempt made to 
+  obtain a general license or permission for the use of such 
+  proprietary rights by implementers or users of this specification 
+  can be obtained from the OGF Secretariat.
+  
+  The OGF invites any interested party to bring to its attention any 
+  copyrights, patents or patent applications, or other proprietary 
+  rights which may cover technology that may be required to practice 
+  this recommendation.  Please address the information to the OGF 
+  Executive Director.
+  
+  This document and the information contained herein is provided on an 
+  "As Is" basis and the OGF disclaims all warranties, express or 
+  implied, including but not limited to any warranty that the use of 
+  the information herein will not infringe any rights or any implied 
+  warranties of merchantability or fitness for a particular purpose.
+  
+  Copyright (C) Open Grid Forum (2007-2008). All Rights Reserved. 
+  
+  This document and translations of it may be copied and furnished to 
+  others, and derivative works that comment on or otherwise explain it 
+  or assist in its implementation may be prepared, copied, published 
+  and distributed, in whole or in part, without restriction of any 
+  kind, provided that the above copyright notice and this paragraph are 
+  included on all such copies and derivative works. However, this 
+  document itself may not be modified in any way, such as by removing 
+  the copyright notice or references to the OGF or other organizations, 
+  except as needed for the purpose of developing Grid Recommendations 
+  in which case the procedures for copyrights defined in the OGF 
+  Document process must be followed, or as required to translate it 
+  into languages other than English. 
+  
+  The limited permissions granted above are perpetual and will not be 
+  revoked by the OGF or its successors or assignees.
+-->
+<schema targetNamespace="http://schemas.ogf.org/dmi/2008/05/dmi" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:dmi="http://schemas.ogf.org/dmi/2008/05/dmi" xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" elementFormDefault="qualified">
+
+  <import namespace="http://www.w3.org/2005/08/addressing" schemaLocation="http://www.w3.org/2006/03/addressing/ws-addr.xsd"/>
+
+  <!-- ======================================================== -->
+  <!-- ==                                                    == -->
+  <!-- == Data Model for OGSA DMI                            == -->
+  <!-- ==                                                    == -->
+  <!-- == This XML Schema document defines the common        == -->
+  <!-- == OGSA-DMI data model used to describe the           == -->
+  <!-- == normative interfaces for the Data Transfer         == -->
+  <!-- == Factory (DTF) and the Data Transfer Instance (DTI).== -->
+  <!-- ======================================================== -->
+
+
+  <!-- ============================================== -->
+  <!-- == Data Transfer Factory related data model == -->
+  <!-- ============================================== -->
+
+  <!-- 
+    dmi:UndoStrategy
+  -->
+  <complexType name="UndoStrategyType">
+    <annotation>
+      <documentation>
+        An undo strategy is executed to clean up traces of a failed
+        data transfer attempt. Normative values for the 
+        dmi:UndoStrategy are defined in the OGSA-DMI Functional 
+        Specification.
+      </documentation>
+    </annotation>
+    <attribute name="name" type="anyURI" use="required"/>
+  </complexType>
+  <element name="UndoStrategy" type="dmi:UndoStrategyType"/>
+
+  <!--
+    dmi:SupportedProtocol
+  -->
+  <complexType name="SupportedProtocolType">
+    <annotation>
+      <documentation>
+        A DTF must advertise which data transfer protocols it supports.
+        Normative values for supported protocols are defined in the
+        OGSA-DMI Functional Specification. For each supported protocol,
+        the DTF must announce which undo strategy will be executed when
+        the requested data transfer has failed.
+      </documentation>
+    </annotation>
+    <sequence>
+      <element name="UndoStrategy" type="dmi:UndoStrategyType"/>
+    </sequence>
+    <attribute name="name" type="anyURI" use="required"/>
+  </complexType>
+  <element name="SupportedProtocol" type="dmi:SupportedProtocolType"/>
+
+  <!--
+    dmi:Credentials
+  -->
+  <complexType name="CredentialsType">
+    <annotation>
+      <documentation>
+        Credentials in OGSA-DMI are used to describe the security
+        related information elements that are necessary to invoke a
+        data transfer using a specific transport protocol. This element 
+        does not define any normative structure so that OGSA-DMI can be
+        orthogonally composed with security infrastructures.
+      </documentation>
+    </annotation>
+    <sequence>
+      <any namespace="##other" minOccurs="1" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+  <element name="Credentials" type="dmi:CredentialsType"/>
+
+  <!--
+    dmi:Data
+  -->
+  <complexType name="DataType">
+    <annotation>
+      <documentation>
+        The dmi:Data element describes for each data transfer protocol
+        (using the normalised values defined for dmi:SupportedProtocol)
+        the specific information that must be used to access the data.
+      </documentation>
+    </annotation>
+    <sequence>
+      <element name="Credentials" type="dmi:CredentialsType" minOccurs="0"/>
+    </sequence>
+    <attribute name="ProtocolUri" type="anyURI" use="required"/>
+    <attribute name="DataUrl" type="anyURI" use="required"/>
+  </complexType>
+  <element name="Data" type="dmi:DataType"/>
+
+  <!-- 
+    dmi:DataLocations
+  -->
+  <complexType name="DataLocationsType">
+    <annotation>
+      <documentation>
+        This element serves as a container aggregating one or more
+        dmi:Data elements. This container item MUST appear in the
+        wsa:Metadata section of the SourceDEPR and SinkDEPR as defined
+        in the OGSA-DMI Functional Specification 1.0.
+      </documentation>
+    </annotation>
+    <sequence>
+      <element name="Data" type="dmi:DataType" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+  <element name="DataLocations" type="dmi:DataLocationsType"/>
+
+  <!-- 
+    dmi:TransferRequirements
+  -->
+  <complexType name="TransferRequirementsType">
+    <annotation>
+      <documentation>
+        A client may specify a number of constraints to the data
+        transfer such as start and end time (e.g. when resource
+        reservations have been made).
+      </documentation>
+    </annotation>
+    <sequence>
+      <element name="StartNotBefore" type="dateTime" minOccurs="0"/>
+      <element name="EndNoLaterThan" type="dateTime" minOccurs="0" xsi:nillable="true"/>
+      <element name="StayAliveTime" type="unsignedInt" minOccurs="0"/>
+      <element name="MaxAttempts" type="unsignedInt" minOccurs="0"/>
+      <any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+  <element name="TransferRequirements" type="dmi:TransferRequirementsType"/>
+
+
+  <!-- =============================================== -->
+  <!-- == Data Transfer Instance related data model == -->
+  <!-- =============================================== -->
+
+
+  <!--
+    dmi:StartTime
+  -->
+  <element name="StartTime" type="dateTime" xsi:nillable="true">
+    <annotation>
+      <documentation>
+        The start time describes the point in time when an instantiated
+        data transfer is due to start moving bytes over the wire.
+      </documentation>
+    </annotation>
+  </element>
+
+  <!-- 
+    dmi:Detail
+  -->
+  <complexType name="DetailType">
+    <annotation>
+      <documentation>
+        The StateDetail is an extension element that an implementation
+        may use to provide proprietary information.
+      </documentation>
+    </annotation>
+    <sequence>
+      <any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+  <element name="Detail" type="dmi:DetailType"/>
+
+  <!--
+    dmi:StatusValue
+  -->
+  <simpleType name="StatusValueType">
+    <annotation>
+      <documentation>
+        This enumeration lists all possible values for the
+        dmi:Status/@value attribute.
+      </documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="Created"/>
+      <enumeration value="Scheduled"/>
+      <enumeration value="Transferring"/>
+      <enumeration value="Done"/>
+      <enumeration value="Suspended"/>
+      <enumeration value="Failed"/>
+      <enumeration value="Failed:Clean"/>
+      <enumeration value="Failed:Unclean"/>
+      <enumeration value="Failed:Unknown"/>
+    </restriction>
+  </simpleType>
+
+  <!--
+    dmi:State
+  -->
+  <complexType name="StateType">
+    <annotation>
+      <documentation>
+        The status describes the current configuration of the Data
+        Transfer Instance within its lifetime.
+      </documentation>
+    </annotation>
+    <sequence>
+      <element name="Detail" type="dmi:DetailType" minOccurs="0"/>
+    </sequence>
+    <attribute name="value" type="dmi:StatusValueType"/>
+  </complexType>
+  <element name="State" type="dmi:StateType"/>
+
+  <!--
+    dmi: CompletionTime
+  -->
+  <element name="CompletionTime" type="dateTime">
+    <annotation>
+      <documentation>
+        The completion time gives the point in time when the underling
+        data transfer is estimated to complete or has completed. The
+        value of this element is expected to be highly volatile, and
+        does not offer any level of guarantee of accuracy.
+      </documentation>
+    </annotation>
+  </element>
+
+  <!--
+    dmi:TotalDataSize
+  -->
+  <element name="TotalDataSize" type="unsignedLong">
+    <annotation>
+      <documentation>
+        This element defines the total number of bytes that the
+        underlying data transfer will send over the wire in order to
+        complete the data transfer.
+      </documentation>
+    </annotation>
+  </element>
+
+  <!--
+    dmi:BytesTransferred
+  -->
+  <element name="BytesTransferred" type="unsignedLong">
+    <annotation>
+      <documentation>
+        This element defines the number of bytes transferred at the 
+        time of request for this element. No guarantee of accuracy is 
+        given for the value; as it is - if supported - highly dependent 
+        on the underlying data transfer protocol.
+      </documentation>
+    </annotation>
+  </element>
+
+  <!--
+    dmi:Attempts
+  -->
+  <element name="Attempts" type="unsignedInt">
+    <annotation>
+      <documentation>
+        This element contains the number of attempts (including the
+        current one, if th e state is "Transferring") for the requested
+        data transfer. If the data transfer is scheduled to commence in
+        the future, this element must have the value of "0".
+      </documentation>
+    </annotation>
+  </element>
+
+</schema>
