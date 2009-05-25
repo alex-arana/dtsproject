@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <minx:DataTransferJob xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
 	xmlns:minx='http://dataMinx.xml.org/schema/2008/dataMinx'
-	xsi:schemaLocation='http://dataMinx.xml.org/schema/2008/dataMinx file:/home/gerson/Workspaces/dataminx/dts-jaxb/src/main/resources/DTSjob.xsd'>
+	xsi:schemaLocation='http://dataMinx.xml.org/schema/2008/dataMinx MINX-DTS-Job.xsd'>
 	<minx:JobName>my post data collection file transfer job </minx:JobName>
 	<minx:Description>move from my home to lab Ozzy SRS </minx:Description>
 	<minx:JobProject>my minx project </minx:JobProject>
