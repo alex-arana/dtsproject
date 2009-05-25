@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://schemas.dataminx.org/dts/2009/05/dts"
+	xmlns:minx="http://schemas.dataminx.org/dts/2009/05/dts"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	elementFormDefault="qualified" version="1">
+
+	<simpleType name="CreationFlagEnumeration">
+		<restriction base="string">
+			<enumeration value="Overwrite" />
+			<enumeration value="Append" />
+			<enumeration value="DontOverwrite" />
+		</restriction>
+	</simpleType>
+
+	<complexType name="TransferRequirementsType">
+		<annotation>
+			<documentation>
+				A client may specify a number of constraints to the data
+				transfer such as start and end time (e.g. when resource
+				reservations have been made).
+      		</documentation>
+		</annotation>
+		<sequence>
+			<element name="StartNotBefore" type="dateTime" minOccurs="0" />
+			<element name="EndNoLaterThan" type="dateTime" minOccurs="0"
+				xsi:nillable="true" />
+			<element name="StayAliveTime" type="unsignedInt" minOccurs="0" />
+			<element name="MaxAttempts" type="unsignedInt" minOccurs="0" />
+			<element name="CreationFlag" type="minx:CreationFlagEnumeration" minOccurs="1" />
+			<any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<complexType name="CredentialType">
+		<sequence>
+			<any minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<element name="URIProperties" abstract="true" />
+
+	<element name="SrbURIProperties" substitutionGroup="minx:URIProperties">
+		<complexType>
+			<sequence>
+				<element name="McatZone" minOccurs="0">
+					<simpleType>
+						<restriction base="string" />
+					</simpleType>
+				</element>
+				<element name="MdasDomain" minOccurs="0">
+					<simpleType>
+						<restriction base="string" />
+					</simpleType>
+				</element>
+				<element name="HomeDirectory" minOccurs="0">
+					<simpleType>
+						<restriction base="string" />
+					</simpleType>
+				</element>
+				<element name="DefaultResource" minOccurs="0">
+					<simpleType>
+						<restriction base="string" />
+					</simpleType>
+				</element>
+				<element ref="minx:PortRange" minOccurs="0" />
+			</sequence>
+		</complexType>
+	</element>
+
+	<element name="GridFtpURIProperties" substitutionGroup="minx:URIProperties">
+		<complexType>
+			<sequence>
+				<element ref="minx:PortRange" minOccurs="0" />
+			</sequence>
+		</complexType>
+	</element>
+
+	<complexType name="PortRangeType">
+		<sequence>
+			<element name="portMin" type="int"></element>
+			<element name="portMax" type="int"></element>
+		</sequence>
+	</complexType>
+	<element name="PortRange" type="minx:PortRangeType"></element>
+
+
+
+	<complexType name="SourceTargetType">
+		<sequence>
+			<element name="URI" type="anyURI" minOccurs="0" />
+			<element name="Credential" type="minx:CredentialType" minOccurs="0" />
+			<element ref="minx:URIProperties" minOccurs="0" />
+			<any namespace="##other" processContents="lax" minOccurs="0"
+				maxOccurs="unbounded" />
+		</sequence>
+		<anyAttribute namespace="##other"
+			processContents="lax" />
+	</complexType>
+
+
+	<complexType name="DataTransferType">
+		<sequence>
+		<!--  not needed
+			<element name="FileName" type="string" minOccurs="0" />
+		-->
+			<element name="Source" type="minx:SourceTargetType" minOccurs="1" />
+			<element name="Target" type="minx:SourceTargetType" minOccurs="1" />
+			<element name="TransferRequirements" type="minx:TransferRequirementsType" minOccurs="1"/>
+			<any minOccurs="0" />
+		</sequence>
+		<attribute name="name" type="NCName" use="optional" />
+		<anyAttribute namespace="##other" processContents="lax" />
+	</complexType>
+
+	<complexType name="JobIdentification_Type">
+		<sequence />
+	</complexType>
+
+	<simpleType name="DescriptionType">
+		<restriction base="string" />
+	</simpleType>
+
+	<complexType name="DataTransferRequestType">
+		<sequence>
+			<element name="JobName" type="string" />
+			<element name="Description" type="minx:DescriptionType" minOccurs="0" />
+			<element name="JobProject" type="string" maxOccurs="unbounded"
+				minOccurs="0" />
+			<element name="DataTransfer" type="minx:DataTransferType" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<element name="DataTransferRequest" type="minx:DataTransferRequestType" />
+
+
+
+	<!--
+
+<dataTransferRequest>
+  <transfer>
+      <src DEPR/>
+      <sink DEPR/>
+      <transfer requirements>
+  </transfer>
+  <transfer>
+      <src DEPR/>
+      <sink DEPR/>
+      <transfer requirements>
+  </transfer>
+</dataTransferRequest>
+
+OR
+
+<dataTransferRequest>
+  <transfer>
+      <jsdl srcURI/>
+      <jsdl targetURI/>
+      <transfer requirements>
+  </transfer>
+  <transfer>
+      <jsdl srcURI/>
+      <jsdl targetURI/>
+      <transfer requirements>
+  </transfer>
+</dataTransferRequest>
+
+	 -->
+
+</schema>
