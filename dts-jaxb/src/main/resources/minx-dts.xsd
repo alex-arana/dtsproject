@@ -16,7 +16,8 @@
 	<complexType name="TransferRequirementsType">
 		<annotation>
 			<documentation>
-				A client may specify a number of constraints to the data
+				A client may specify a number of constraints to the
+				data
 				transfer such as start and end time (e.g. when resource
 				reservations have been made).
       		</documentation>
@@ -27,7 +28,8 @@
 				xsi:nillable="true" />
 			<element name="StayAliveTime" type="unsignedInt" minOccurs="0" />
 			<element name="MaxAttempts" type="unsignedInt" minOccurs="0" />
-			<element name="CreationFlag" type="minx:CreationFlagEnumeration" minOccurs="1" />
+			<element name="CreationFlag" type="minx:CreationFlagEnumeration"
+				minOccurs="1" />
 			<any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
 		</sequence>
 	</complexType>
@@ -84,32 +86,33 @@
 	</complexType>
 	<element name="PortRange" type="minx:PortRangeType"></element>
 
-
-
 	<complexType name="SourceTargetType">
 		<sequence>
 			<element name="URI" type="anyURI" minOccurs="0" />
-			<element name="Credential" type="minx:CredentialType" minOccurs="0" />
+			<element name="Credential" type="minx:CredentialType"
+				minOccurs="0" />
 			<element ref="minx:URIProperties" minOccurs="0" />
 			<any namespace="##other" processContents="lax" minOccurs="0"
 				maxOccurs="unbounded" />
 		</sequence>
-		<anyAttribute namespace="##other"
-			processContents="lax" />
+		<anyAttribute namespace="##other" processContents="lax" />
 	</complexType>
 
 
 	<complexType name="DataTransferType">
 		<sequence>
-		<!--  not needed
-			<element name="FileName" type="string" minOccurs="0" />
-		-->
-			<element name="Source" type="minx:SourceTargetType" minOccurs="1" />
-			<element name="Target" type="minx:SourceTargetType" minOccurs="1" />
-			<element name="TransferRequirements" type="minx:TransferRequirementsType" minOccurs="1"/>
+			<!--
+				not needed <element name="FileName" type="string" minOccurs="0" />
+			-->
+			<element name="Source" type="minx:SourceTargetType"
+				minOccurs="1" />
+			<element name="Target" type="minx:SourceTargetType"
+				minOccurs="1" />
+			<element name="TransferRequirements" type="minx:TransferRequirementsType"
+				minOccurs="1" />
 			<any minOccurs="0" />
 		</sequence>
-		<attribute name="name" type="NCName" use="optional" />
+		<attribute name="name" type="string" use="optional" />
 		<anyAttribute namespace="##other" processContents="lax" />
 	</complexType>
 
@@ -121,50 +124,147 @@
 		<restriction base="string" />
 	</simpleType>
 
-	<complexType name="DataTransferRequestType">
+<!-- COMMENT THIS BIT OUT FIRST TIL I GET THE 'TYPE' APPROACH WORKING WITH SPRING-WS AND JAXB COMBO
+ 	<complexType name="DataTransferRequestType">
 		<sequence>
 			<element name="JobName" type="string" />
-			<element name="Description" type="minx:DescriptionType" minOccurs="0" />
-			<element name="JobProject" type="string" maxOccurs="unbounded"
+			<element name="Description" type="minx:DescriptionType"
 				minOccurs="0" />
-			<element name="DataTransfer" type="minx:DataTransferType" maxOccurs="unbounded" />
+			<element name="JobProject" type="string" maxOccurs="1"
+				minOccurs="0" />
+			<element name="DataTransfer" type="minx:DataTransferType"
+				maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<complexType name="DataTransferResponseType">
+		<sequence>
+			<element name="JobId" type="anyURI" />
 		</sequence>
 	</complexType>
 
 	<element name="DataTransferRequest" type="minx:DataTransferRequestType" />
 
+	<element name="DataTransferResponse" type="minx:DataTransferResponseType" />
+-->
 
+	<element name="DataTransferRequest">
+		<complexType>
+			<sequence>
+				<element name="JobName" type="string" />
+				<element name="Description" type="minx:DescriptionType"
+					minOccurs="0" />
+				<element name="JobProject" type="string" maxOccurs="1"
+					minOccurs="0" />
+				<element name="DataTransfer" type="minx:DataTransferType"
+					maxOccurs="unbounded" />
+			</sequence>
+		</complexType>
+	</element>
+
+	<element name="DataTransferResponse">
+		<complexType>
+			<sequence>
+				<element name="JobId" type="anyURI" />
+			</sequence>
+		</complexType>
+	</element>
+
+	<complexType name="DetailType">
+		<annotation>
+			<documentation>
+				The StateDetail is an extension element that an implementation
+				may use to provide proprietary information.
+      		</documentation>
+		</annotation>
+		<sequence>
+			<any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<element name="Detail" type="minx:DetailType" />
+
+	<!--
+    dmi:StatusValue
+  -->
+	<simpleType name="StatusValueType">
+		<annotation>
+			<documentation>
+				This enumeration lists all possible values for the
+				dmi:Status/@value attribute.
+      		</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="Created" />
+			<enumeration value="Scheduled" />
+			<enumeration value="Transferring" />
+			<enumeration value="Done" />
+			<enumeration value="Suspended" />
+			<enumeration value="Failed" />
+			<enumeration value="Failed:Clean" />
+			<enumeration value="Failed:Unclean" />
+			<enumeration value="Failed:Unknown" />
+		</restriction>
+	</simpleType>
+
+	<!--
+    dmi:State
+  -->
+	<complexType name="StateType">
+		<annotation>
+			<documentation>
+				The status describes the current configuration of the Data
+				Transfer Instance within its lifetime.
+      		</documentation>
+		</annotation>
+		<sequence>
+			<element name="Detail" type="minx:DetailType" minOccurs="0" />
+		</sequence>
+		<attribute name="value" type="minx:StatusValueType" />
+	</complexType>
+
+	<element name="State" type="minx:StateType" />
+
+	<element name="BytesTransferred" type="unsignedLong">
+		<annotation>
+			<documentation>
+				This element defines the number of bytes transferred at the
+				time of request for this element. No guarantee of accuracy is
+				given for the value; as it is - if supported - highly dependent
+				on the underlying data transfer protocol.
+      		</documentation>
+		</annotation>
+	</element>
 
 	<!--
 
-<dataTransferRequest>
-  <transfer>
-      <src DEPR/>
-      <sink DEPR/>
-      <transfer requirements>
-  </transfer>
-  <transfer>
-      <src DEPR/>
-      <sink DEPR/>
-      <transfer requirements>
-  </transfer>
-</dataTransferRequest>
+		<dataTransferRequest>
+			<transfer>
+				<src DEPR/>
+				<sink DEPR/>
+				<transferRequirements/>
+			</transfer>
+			<transfer>
+				<src DEPR/>
+				<sink DEPR/>
+				<transferRequirements/>
+			</transfer>
+		</dataTransferRequest>
 
-OR
+		OR
 
-<dataTransferRequest>
-  <transfer>
-      <jsdl srcURI/>
-      <jsdl targetURI/>
-      <transfer requirements>
-  </transfer>
-  <transfer>
-      <jsdl srcURI/>
-      <jsdl targetURI/>
-      <transfer requirements>
-  </transfer>
-</dataTransferRequest>
-
-	 -->
+		<dataTransferRequest>
+			<transfer>
+				<jsdlSrcURI/>
+				<jsdlTargetURI/>
+				<transferRequirements/>
+			</transfer>
+			<transfer>
+				<jsdlSrcURI/>
+				<jsdlTargetURI/>
+				<transferRequirements/>
+			</transfer>
+		</dataTransferRequest>
+	-->
 
 </schema>
