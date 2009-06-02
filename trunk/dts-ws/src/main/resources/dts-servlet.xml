@@ -47,10 +47,10 @@
 		<property name="classesToBeBound">
 			<list>
 				<value>
-					org.dataminx.schemas.dts._2009._05.dts.DataTransferRequest
+					org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest
 				</value>
 				<value>
-					org.dataminx.schemas.dts._2009._05.dts.DataTransferResponse
+					org.dataminx.schemas.dts._2009._05.dts.SubmitJobResponse
 				</value>
 			</list>
 		</property>

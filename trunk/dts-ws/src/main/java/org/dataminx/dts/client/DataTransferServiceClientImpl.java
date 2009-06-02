@@ -10,10 +10,20 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
 	private WebServiceTemplate webServiceTemplate;
 
 	public String submitJob(String jobName) throws IOException {
-		DataTransferRequest request = new DataTransferRequest();
-		request.setJobName(jobName);
-		DataTransferResponse response =
-			(DataTransferResponse)webServiceTemplate.marshalSendAndReceive(request);
+		JobDefinitionType jobDefinition = new JobDefinitionType();
+		JobDescriptionType jobDescription = new JobDescriptionType();
+		JobIdentificationType jobIdentification = new JobIdentificationType();
+		jobDescription.setJobIdentification(jobIdentification);
+		jobDefinition.setJobDescription(jobDescription);
+
+		SubmitJobRequest request = new SubmitJobRequest();
+		request.setJobDefinition(jobDefinition);
+
+		jobIdentification.setJobName(jobName);
+
+		SubmitJobResponse response =
+			(SubmitJobResponse)webServiceTemplate.marshalSendAndReceive(request);
+
 		return response.getJobId();
 	}
 
