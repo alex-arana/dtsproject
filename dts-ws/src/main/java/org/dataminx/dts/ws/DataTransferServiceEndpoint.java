@@ -25,15 +25,17 @@ public class DataTransferServiceEndpoint {
 		this.dataTransferService = dataTransferService;
 	}
 
-	@PayloadRoot(localPart= "DataTransferRequest", namespace="http://schemas.dataminx.org/dts/2009/05/dts")
-	public DataTransferResponse doit(DataTransferRequest request) {
+	@PayloadRoot(localPart= "submitJobRequest", namespace="http://schemas.dataminx.org/dts/2009/05/dts")
+	public SubmitJobResponse doit(SubmitJobRequest request) {
 		//DataTransferResponseType response = objectFactory.createDataTransferResponseType();
 
-		String jobName = request.getJobName();
-		logger.info("In Endpoint, job name is " + jobName);
-		String jobId = dataTransferService.submitJob(jobName);
-		logger.info("The answer is " + jobId);
-		DataTransferResponse response = new DataTransferResponse();
+		String jobName = request.getJobDefinition().getJobDescription().getJobIdentification().getJobName();
+		logger.info("In DataTransferServiceEndpoint, job name " + jobName + " has arrived.");
+
+		String jobId = dataTransferService.submitJob(request.getJobDefinition());
+		logger.info("In DataTransferServiceEndpoint, returned jobId is " + jobId);
+
+		SubmitJobResponse response = new SubmitJobResponse();
 		response.setJobId(jobId);
 		return response;
 	}
