@@ -1,145 +1,296 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema"
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 	targetNamespace="http://schemas.dataminx.org/dts/2009/05/dts"
 	xmlns:minx="http://schemas.dataminx.org/dts/2009/05/dts"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	elementFormDefault="qualified" version="1">
 
-	<simpleType name="CreationFlagEnumeration">
-		<restriction base="string">
-			<enumeration value="Overwrite" />
-			<enumeration value="Append" />
-			<enumeration value="DontOverwrite" />
-		</restriction>
-	</simpleType>
+	<!-- SIMPLE TYPES -->
+	<xsd:simpleType name="CreationFlagEnumeration">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="Overwrite" />
+			<xsd:enumeration value="Append" />
+			<xsd:enumeration value="DontOverwrite" />
+		</xsd:restriction>
+	</xsd:simpleType>
 
-	<complexType name="TransferRequirementsType">
-		<annotation>
-			<documentation>
+	<xsd:simpleType name="StatusValueEnumeration">
+		<xsd:annotation>
+			<xsd:documentation>
+				This enumeration lists all possible values for the
+				dmi:Status/@value attribute.
+      		</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="Created" />
+			<xsd:enumeration value="Scheduled" />
+			<xsd:enumeration value="Transferring" />
+			<xsd:enumeration value="Done" />
+			<xsd:enumeration value="Suspended" />
+			<xsd:enumeration value="Failed" />
+			<xsd:enumeration value="Failed:Clean" />
+			<xsd:enumeration value="Failed:Unclean" />
+			<xsd:enumeration value="Failed:Unknown" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<!-- COMPLEX TYPES -->
+	<xsd:complexType name="TransferRequirementsType">
+		<xsd:annotation>
+			<xsd:documentation>
 				A client may specify a number of constraints to the
 				data
 				transfer such as start and end time (e.g. when resource
 				reservations have been made).
-      		</documentation>
-		</annotation>
-		<sequence>
-			<element name="StartNotBefore" type="dateTime" minOccurs="0" />
-			<element name="EndNoLaterThan" type="dateTime" minOccurs="0"
+      		</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="StartNotBefore" type="xsd:dateTime" minOccurs="0" />
+			<xsd:element name="EndNoLaterThan" type="xsd:dateTime" minOccurs="0"
 				xsi:nillable="true" />
-			<element name="StayAliveTime" type="unsignedInt" minOccurs="0" />
-			<element name="MaxAttempts" type="unsignedInt" minOccurs="0" />
-			<element name="CreationFlag" type="minx:CreationFlagEnumeration"
+			<xsd:element name="StayAliveTime" type="xsd:unsignedInt" minOccurs="0" />
+			<xsd:element name="MaxAttempts" type="xsd:unsignedInt" minOccurs="0" />
+			<xsd:element ref="minx:CreationFlag"
 				minOccurs="1" />
-			<any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
-		</sequence>
-	</complexType>
+			<xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:anyAttribute namespace="##other" processContents="lax"/>
+	</xsd:complexType>
 
-	<complexType name="CredentialType">
-		<sequence>
-			<any minOccurs="0" />
-		</sequence>
-	</complexType>
+	<xsd:complexType name="CredentialType">
+		<xsd:sequence>
+			<xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:anyAttribute namespace="##other" processContents="lax"/>
+	</xsd:complexType>
 
-	<element name="URIProperties" abstract="true" />
+	<xsd:complexType name="URIPropertiesType">
+		<xsd:sequence>
+			<xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:anyAttribute namespace="##other" processContents="lax"/>
+	</xsd:complexType>
 
-	<element name="SrbURIProperties" substitutionGroup="minx:URIProperties">
-		<complexType>
-			<sequence>
-				<element name="McatZone" minOccurs="0">
-					<simpleType>
-						<restriction base="string" />
-					</simpleType>
-				</element>
-				<element name="MdasDomain" minOccurs="0">
-					<simpleType>
-						<restriction base="string" />
-					</simpleType>
-				</element>
-				<element name="HomeDirectory" minOccurs="0">
-					<simpleType>
-						<restriction base="string" />
-					</simpleType>
-				</element>
-				<element name="DefaultResource" minOccurs="0">
-					<simpleType>
-						<restriction base="string" />
-					</simpleType>
-				</element>
-				<element ref="minx:PortRange" minOccurs="0" />
-			</sequence>
-		</complexType>
-	</element>
+	<xsd:complexType name="PortRangeType">
+		<xsd:sequence>
+			<xsd:element name="portMin" type="xsd:int"></xsd:element>
+			<xsd:element name="portMax" type="xsd:int"></xsd:element>
+		</xsd:sequence>
+		<xsd:anyAttribute namespace="##other" processContents="lax"/>
+	</xsd:complexType>
 
-	<element name="GridFtpURIProperties" substitutionGroup="minx:URIProperties">
-		<complexType>
-			<sequence>
-				<element ref="minx:PortRange" minOccurs="0" />
-			</sequence>
-		</complexType>
-	</element>
-
-	<complexType name="PortRangeType">
-		<sequence>
-			<element name="portMin" type="int"></element>
-			<element name="portMax" type="int"></element>
-		</sequence>
-	</complexType>
-	<element name="PortRange" type="minx:PortRangeType"></element>
-
-	<complexType name="SourceTargetType">
-		<sequence>
-			<element name="URI" type="anyURI" minOccurs="0" />
-			<element name="Credential" type="minx:CredentialType"
-				minOccurs="0" />
-			<element ref="minx:URIProperties" minOccurs="0" />
-			<any namespace="##other" processContents="lax" minOccurs="0"
+	<xsd:complexType name="SourceTargetType">
+		<xsd:sequence>
+			<xsd:element name="URI" type="xsd:anyURI" minOccurs="0" />
+			<xsd:element ref="minx:Credential" minOccurs="0" />
+			<xsd:element ref="minx:URIProperties" minOccurs="0" />
+			<xsd:any namespace="##other" processContents="lax" minOccurs="0"
 				maxOccurs="unbounded" />
-		</sequence>
-		<anyAttribute namespace="##other" processContents="lax" />
-	</complexType>
+		</xsd:sequence>
+		<xsd:anyAttribute namespace="##other" processContents="lax" />
+	</xsd:complexType>
 
-
-	<complexType name="DataTransferType">
-		<sequence>
+	<xsd:complexType name="DataTransferType">
+		<xsd:sequence>
 			<!--
-				not needed <element name="FileName" type="string" minOccurs="0" />
+				not needed <xsd:element name="FileName" type="xsd:string" minOccurs="0" />
 			-->
-			<element name="Source" type="minx:SourceTargetType"
-				minOccurs="1" />
-			<element name="Target" type="minx:SourceTargetType"
-				minOccurs="1" />
-			<element name="TransferRequirements" type="minx:TransferRequirementsType"
-				minOccurs="1" />
-			<any minOccurs="0" />
-		</sequence>
-		<attribute name="name" type="string" use="optional" />
-		<anyAttribute namespace="##other" processContents="lax" />
-	</complexType>
-
-	<complexType name="JobIdentification_Type">
-		<sequence />
-	</complexType>
-
-	<simpleType name="DescriptionType">
-		<restriction base="string" />
-	</simpleType>
-
-<!-- COMMENT THIS BIT OUT FIRST TIL I GET THE 'TYPE' APPROACH WORKING WITH SPRING-WS AND JAXB COMBO
- 	<complexType name="DataTransferRequestType">
-		<sequence>
-			<element name="JobName" type="string" />
-			<element name="Description" type="minx:DescriptionType"
-				minOccurs="0" />
-			<element name="JobProject" type="string" maxOccurs="1"
-				minOccurs="0" />
-			<element name="DataTransfer" type="minx:DataTransferType"
+			<xsd:element ref="minx:Source" minOccurs="1" />
+			<xsd:element ref="minx:Target" minOccurs="1" />
+			<xsd:element ref="minx:TransferRequirements" minOccurs="1" />
+			<xsd:any namespace="##other" processContents="lax" minOccurs="0"
 				maxOccurs="unbounded" />
-		</sequence>
-	</complexType>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="optional" />
+		<xsd:anyAttribute namespace="##other" processContents="lax" />
+	</xsd:complexType>
 
+	<!-- taken from JSDL schema specification -->
+	<xsd:complexType name="JobDefinitionType">
+		<xsd:sequence>
+			<xsd:element ref="minx:JobDescription" minOccurs="1"/>
+			<xsd:any namespace="##other" processContents="lax" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:attribute name="id" type="xsd:ID" use="optional" />
+		<xsd:anyAttribute namespace="##other"
+			processContents="lax" />
+	</xsd:complexType>
+
+	<xsd:complexType name="JobDescriptionType">
+		<xsd:sequence>
+			<xsd:element ref="minx:JobIdentification" minOccurs="0" />
+			<xsd:element ref="minx:DataTransfer" minOccurs="0"
+				maxOccurs="unbounded" />
+			<xsd:any namespace="##other" processContents="lax" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:anyAttribute namespace="##other"
+			processContents="lax" />
+	</xsd:complexType>
+
+	<xsd:complexType name="JobIdentificationType">
+		<xsd:sequence>
+			<xsd:element name="JobName" type="xsd:string" minOccurs="0" />
+			<xsd:element name="Description" type="xsd:string" minOccurs="0" />
+			<xsd:element name="JobAnnotation" type="xsd:string" minOccurs="0"
+				maxOccurs="unbounded" />
+			<xsd:element name="JobProject" type="xsd:string" minOccurs="0"
+				maxOccurs="unbounded" />
+			<xsd:any namespace="##other" processContents="lax" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:anyAttribute namespace="##other" processContents="lax" />
+	</xsd:complexType>
+
+	<xsd:complexType name="StateDetailType">
+		<xsd:annotation>
+			<xsd:documentation>
+				The StateDetail is an extension element that an implementation
+				may use to provide proprietary information.
+      		</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:anyAttribute namespace="##other"
+			processContents="lax" />
+	</xsd:complexType>
+
+	<xsd:complexType name="StateType">
+		<xsd:annotation>
+			<xsd:documentation>
+				The status describes the current configuration of the Data
+				Transfer Instance within its lifetime.
+      		</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element ref="minx:Detail" minOccurs="0" />
+			<xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:attribute name="value" type="minx:StatusValueEnumeration" />
+		<xsd:anyAttribute namespace="##other"
+			processContents="lax" />
+	</xsd:complexType>
+
+
+	<xsd:element name="submitJobRequest">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="JobDefinition" type="minx:JobDefinitionType" minOccurs="1" maxOccurs="1"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="submitJobResponse">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="JobId" type="xsd:anyURI" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<!-- OTHER METHODS -->
+	<xsd:element name="suspendJobRequest">
+	</xsd:element>
+
+	<xsd:element name="suspendJobResponse">
+	</xsd:element>
+
+	<xsd:element name="resumeJobRequest">
+	</xsd:element>
+
+	<xsd:element name="resumeJobResponse">
+	</xsd:element>
+
+	<xsd:element name="cancelJobRequest">
+	</xsd:element>
+
+	<xsd:element name="cancelJobResponse">
+	</xsd:element>
+
+	<xsd:element name="getJobStatusRequest">
+	</xsd:element>
+
+	<xsd:element name="getJobStatusResponse">
+	</xsd:element>
+
+
+	<!-- ELEMENT DEFINITIONS... -->
+	<xsd:element name="CreationFlag" type="minx:CreationFlagEnumeration" />
+	<xsd:element name="StatusValue" type="minx:StatusValueEnumeration" />
+	<xsd:element name="TransferRequirements" type="minx:TransferRequirementsType" />
+	<xsd:element name="Credential" type="minx:CredentialType" />
+	<xsd:element name="URIProperties" type="minx:URIPropertiesType" />
+	<xsd:element name="PortRange" type="minx:PortRangeType" />
+	<xsd:element name="Source" type="minx:SourceTargetType" />
+	<xsd:element name="Target" type="minx:SourceTargetType" />
+	<xsd:element name="JobDefinition" type="minx:JobDefinitionType" />
+	<xsd:element name="JobDescription" type="minx:JobDescriptionType" />
+	<xsd:element name="JobIdentification" type="minx:JobIdentificationType" />
+	<xsd:element name="DataTransfer" type="minx:DataTransferType" />
+	<xsd:element name="Detail" type="minx:StateDetailType" />
+	<xsd:element name="State" type="minx:StateType" />
+<!--	<xsd:element name="submitJobResponse" type="minx:submitJobResponseType" />
+	<xsd:element name="submitJobRequest" type="minx:submitJobRequestType" /> -->
+
+	<xsd:element name="BytesTransferred" type="xsd:unsignedLong">
+		<xsd:annotation>
+			<xsd:documentation>
+				This element defines the number of bytes transferred at the
+				time of request for this element. No guarantee of accuracy is
+				given for the value; as it is - if supported - highly dependent
+				on the underlying data transfer protocol.
+      		</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+
+	<!-- TEMPORARILY COMMENT THIS BIT FIRST AND SEE IF WE CAN DO SUBSTITION USING
+	     THE EXTENSION APPROACH
+
+	<xsd:element name="URIProperties" abstract="true" />
+
+	<xsd:element name="SrbURIProperties" substitutionGroup="minx:URIProperties">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="McatZone" minOccurs="0">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string" />
+					</xsd:simpleType>
+				</xsd:element>
+				<xsd:element name="MdasDomain" minOccurs="0">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string" />
+					</xsd:simpleType>
+				</xsd:element>
+				<xsd:element name="HomeDirectory" minOccurs="0">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string" />
+					</xsd:simpleType>
+				</xsd:element>
+				<xsd:element name="DefaultResource" minOccurs="0">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string" />
+					</xsd:simpleType>
+				</xsd:element>
+				<xsd:element ref="minx:PortRange" minOccurs="0" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="GridFtpURIProperties" substitutionGroup="minx:URIProperties">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="minx:PortRange" minOccurs="0" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	-->
+
+<!--
 	<complexType name="DataTransferResponseType">
 		<sequence>
-			<element name="JobId" type="anyURI" />
+			<element name="JobId" type="xsd:anyURI" />
 		</sequence>
 	</complexType>
 
@@ -148,93 +299,34 @@
 	<element name="DataTransferResponse" type="minx:DataTransferResponseType" />
 -->
 
+<!-- IS PROBABLY NOT NEEDED ANYMORE DUE TO THE INTRODUCTION OF JSDL ELEMENTS
 	<element name="DataTransferRequest">
 		<complexType>
 			<sequence>
-				<element name="JobName" type="string" />
+				<element name="JobName" type="xsd:string" />
 				<element name="Description" type="minx:DescriptionType"
 					minOccurs="0" />
-				<element name="JobProject" type="string" maxOccurs="1"
+				<element name="JobProject" type="xsd:string" maxOccurs="1"
 					minOccurs="0" />
 				<element name="DataTransfer" type="minx:DataTransferType"
 					maxOccurs="unbounded" />
 			</sequence>
 		</complexType>
 	</element>
+-->
 
+
+
+<!--
 	<element name="DataTransferResponse">
 		<complexType>
 			<sequence>
-				<element name="JobId" type="anyURI" />
+				<element name="JobId" type="xsd:anyURI" />
 			</sequence>
 		</complexType>
 	</element>
+	-->
 
-	<complexType name="DetailType">
-		<annotation>
-			<documentation>
-				The StateDetail is an extension element that an implementation
-				may use to provide proprietary information.
-      		</documentation>
-		</annotation>
-		<sequence>
-			<any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
-		</sequence>
-	</complexType>
-
-	<element name="Detail" type="minx:DetailType" />
-
-	<!--
-    dmi:StatusValue
-  -->
-	<simpleType name="StatusValueType">
-		<annotation>
-			<documentation>
-				This enumeration lists all possible values for the
-				dmi:Status/@value attribute.
-      		</documentation>
-		</annotation>
-		<restriction base="string">
-			<enumeration value="Created" />
-			<enumeration value="Scheduled" />
-			<enumeration value="Transferring" />
-			<enumeration value="Done" />
-			<enumeration value="Suspended" />
-			<enumeration value="Failed" />
-			<enumeration value="Failed:Clean" />
-			<enumeration value="Failed:Unclean" />
-			<enumeration value="Failed:Unknown" />
-		</restriction>
-	</simpleType>
-
-	<!--
-    dmi:State
-  -->
-	<complexType name="StateType">
-		<annotation>
-			<documentation>
-				The status describes the current configuration of the Data
-				Transfer Instance within its lifetime.
-      		</documentation>
-		</annotation>
-		<sequence>
-			<element name="Detail" type="minx:DetailType" minOccurs="0" />
-		</sequence>
-		<attribute name="value" type="minx:StatusValueType" />
-	</complexType>
-
-	<element name="State" type="minx:StateType" />
-
-	<element name="BytesTransferred" type="unsignedLong">
-		<annotation>
-			<documentation>
-				This element defines the number of bytes transferred at the
-				time of request for this element. No guarantee of accuracy is
-				given for the value; as it is - if supported - highly dependent
-				on the underlying data transfer protocol.
-      		</documentation>
-		</annotation>
-	</element>
 
 	<!--
 
@@ -267,4 +359,4 @@
 		</dataTransferRequest>
 	-->
 
-</schema>
+</xsd:schema>
