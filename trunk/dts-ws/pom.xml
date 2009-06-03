@@ -52,6 +52,13 @@
 			<artifactId>spring-ws-core-tiger</artifactId>
 			<version>1.5.6</version>
 		</dependency>
+
+		<!-- client stuff... -->
+		<dependency>
+			<groupId>jdom</groupId>
+			<artifactId>jdom</artifactId>
+			<version>1.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
