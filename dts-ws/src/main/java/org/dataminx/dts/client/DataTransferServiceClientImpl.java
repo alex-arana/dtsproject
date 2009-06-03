@@ -60,6 +60,84 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
 		return jobIdElement.getText();
 	}
 
+	public void cancelJob(String jobId) {
+		Namespace minxNamespace = Namespace.getNamespace("minx", "http://schemas.dataminx.org/dts/2009/05/dts");
+		Element requestElement =
+		    new Element("cancelJobRequest", minxNamespace);
+		Document cancelJobRequestDoc = new Document(requestElement);
+		Element jobIdEl = new Element("JobId", minxNamespace);
+		jobIdEl.setText(jobId);
+		cancelJobRequestDoc.getRootElement().addContent(jobIdEl);
+
+		JDOMSource request = new JDOMSource(cancelJobRequestDoc);
+
+		// do the actual WS call here...
+		// we'll set response to null as we know cancelJob will not really
+		// return any response
+		webServiceTemplate.sendSourceAndReceiveToResult(request, null);
+	}
+
+	public void suspendJob(String jobId) {
+		Namespace minxNamespace = Namespace.getNamespace("minx", "http://schemas.dataminx.org/dts/2009/05/dts");
+		Element requestElement =
+		    new Element("suspendJobRequest", minxNamespace);
+		Document suspendJobRequestDoc = new Document(requestElement);
+		Element jobIdEl = new Element("JobId", minxNamespace);
+		jobIdEl.setText(jobId);
+		suspendJobRequestDoc.getRootElement().addContent(jobIdEl);
+
+		JDOMSource request = new JDOMSource(suspendJobRequestDoc);
+
+		// do the actual WS call here...
+		// we'll set response to null as we know suspendJob will not really
+		// return any response
+		webServiceTemplate.sendSourceAndReceiveToResult(request, null);
+	}
+
+	public void resumeJob(String jobId) {
+		Namespace minxNamespace = Namespace.getNamespace("minx", "http://schemas.dataminx.org/dts/2009/05/dts");
+		Element requestElement =
+		    new Element("resumeJobRequest", minxNamespace);
+		Document resumeJobRequestDoc = new Document(requestElement);
+		Element jobIdEl = new Element("JobId", minxNamespace);
+		jobIdEl.setText(jobId);
+		resumeJobRequestDoc.getRootElement().addContent(jobIdEl);
+
+		JDOMSource request = new JDOMSource(resumeJobRequestDoc);
+
+		// do the actual WS call here...
+		// we'll set response to null as we know resumeJob will not really
+		// return any response
+		webServiceTemplate.sendSourceAndReceiveToResult(request, null);
+	}
+
+	public String getJobStatus(String jobId) {
+		Namespace minxNamespace = Namespace.getNamespace("minx", "http://schemas.dataminx.org/dts/2009/05/dts");
+		Element requestElement =
+		    new Element("getJobStatusRequest", minxNamespace);
+		Document cancelJobRequestDoc = new Document(requestElement);
+		Element jobIdEl = new Element("JobId", minxNamespace);
+		jobIdEl.setText(jobId);
+		cancelJobRequestDoc.getRootElement().addContent(jobIdEl);
+
+		JDOMSource request = new JDOMSource(cancelJobRequestDoc);
+		JDOMResult response = new JDOMResult();
+
+		// do the actual WS call here...
+
+		webServiceTemplate.sendSourceAndReceiveToResult(request, response);
+
+		// and here's the response...
+		Document resultDocument = response.getDocument();
+
+		logger.debug(xmlOut.outputString(resultDocument));
+
+		Element responseElement = resultDocument.getRootElement();
+		Element stateElement = responseElement.getChild("State", minxNamespace);
+
+		return stateElement.getAttributeValue("value");
+	}
+
 	public void setWebServiceTemplate(WebServiceTemplate webServiceTemplate) {
 		this.webServiceTemplate = webServiceTemplate;
 	}
