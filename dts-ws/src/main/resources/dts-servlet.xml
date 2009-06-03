@@ -58,6 +58,8 @@
 		<!-- <property name="contextPath" value="org.dataminx.schemas.dts._2009._05.dts"/> -->
 	</bean>
 
+<!-- uncomment this if JAXB Marshalling will be used on the Client
+
 	<bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">
 		<property name="messageFactory">
 			<bean class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory" />
@@ -67,8 +69,23 @@
 		<property name="unmarshaller" ref="marshaller" />
 	</bean>
 
+
+-->
 	<bean id="dataTransferServiceClient" class="org.dataminx.dts.client.DataTransferServiceClientImpl">
 		<property name="webServiceTemplate" ref="webServiceTemplate" />
+	</bean>
+
+
+	<bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">
+		<property name="messageFactory">
+			<bean class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory" />
+		</property>
+		<property name="defaultUri" value="http://localhost:8080/dts/" />
+		<property name="messageSender" ref="messageSender" />
+	</bean>
+
+	<bean id="messageSender"
+		class="org.springframework.ws.transport.http.HttpUrlConnectionMessageSender">
 	</bean>
 
 
