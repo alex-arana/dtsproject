@@ -185,38 +185,64 @@
 	<xsd:element name="submitJobResponse">
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element name="JobId" type="xsd:anyURI" />
+				<xsd:element ref="minx:JobId" />
 			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
 
 	<!-- OTHER METHODS -->
 	<xsd:element name="suspendJobRequest">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="minx:JobId" />
+			</xsd:sequence>
+		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="suspendJobResponse">
 	</xsd:element>
 
 	<xsd:element name="resumeJobRequest">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="minx:JobId" />
+			</xsd:sequence>
+		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="resumeJobResponse">
 	</xsd:element>
 
 	<xsd:element name="cancelJobRequest">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="minx:JobId" />
+			</xsd:sequence>
+		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="cancelJobResponse">
 	</xsd:element>
 
 	<xsd:element name="getJobStatusRequest">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="minx:JobId" />
+			</xsd:sequence>
+		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="getJobStatusResponse">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="minx:State" />
+			</xsd:sequence>
+		</xsd:complexType>
 	</xsd:element>
 
 
 	<!-- ELEMENT DEFINITIONS... -->
+	<xsd:element name="JobId" type="xsd:anyURI" />
 	<xsd:element name="CreationFlag" type="minx:CreationFlagEnumeration" />
 	<xsd:element name="StatusValue" type="minx:StatusValueEnumeration" />
 	<xsd:element name="TransferRequirements" type="minx:TransferRequirementsType" />
