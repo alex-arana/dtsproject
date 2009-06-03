@@ -2,6 +2,7 @@ package org.dataminx.dts.client;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -9,6 +10,7 @@ import org.springframework.core.io.ClassPathResource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -25,7 +27,40 @@ public class App
 {
 	protected final Log logger = LogFactory.getLog(getClass());
 
-    public static void main(String[] args) {
+	public static void main(String[] args) {
+		//testCancelJob();
+		//testResumeJob();
+		//testSuspendJob();
+		testGetJobStatus();
+	}
+
+	public static void testCancelJob() {
+    	BeanFactory factory =
+    	    new XmlBeanFactory(new ClassPathResource("dts-servlet.xml"));
+    	DataTransferServiceClient client = (DataTransferServiceClient)factory.getBean("dataTransferServiceClient");
+	    client.cancelJob("DTSJob0001");
+	}
+	public static void testSuspendJob() {
+    	BeanFactory factory =
+    	    new XmlBeanFactory(new ClassPathResource("dts-servlet.xml"));
+    	DataTransferServiceClient client = (DataTransferServiceClient)factory.getBean("dataTransferServiceClient");
+	    client.suspendJob("DTSJob0002");
+	}
+	public static void testResumeJob() {
+    	BeanFactory factory =
+    	    new XmlBeanFactory(new ClassPathResource("dts-servlet.xml"));
+    	DataTransferServiceClient client = (DataTransferServiceClient)factory.getBean("dataTransferServiceClient");
+	    client.resumeJob("DTSJob0003");
+	}
+	public static void testGetJobStatus() {
+    	BeanFactory factory =
+    	    new XmlBeanFactory(new ClassPathResource("dts-servlet.xml"));
+    	DataTransferServiceClient client = (DataTransferServiceClient)factory.getBean("dataTransferServiceClient");
+    	App app = new App();
+    	app.logger.info(client.getJobStatus("DTSJob0004"));
+	}
+
+    public static void testSubmitJob() {
     	BeanFactory factory =
     	    new XmlBeanFactory(new ClassPathResource("dts-servlet.xml"));
     	DataTransferServiceClient client = (DataTransferServiceClient)factory.getBean("dataTransferServiceClient");

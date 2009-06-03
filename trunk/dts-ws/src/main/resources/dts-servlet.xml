@@ -20,8 +20,23 @@
 	</bean>
 
 	<!-- Register PayloadRootAnnotationMethodEndpointMapping -->
+
 	<bean
 		class="org.springframework.ws.server.endpoint.mapping.PayloadRootAnnotationMethodEndpointMapping" />
+
+
+	<!--
+	<bean id="payloadMapping"
+		class="org.springframework.ws.server.endpoint.mapping.PayloadRootQNameEndpointMapping">
+		<property name="endpointMap">
+			<map>
+				<entry
+					key="{http://schemas.dataminx.org/dts/2009/05/dts}submitJobRequest"
+					value-ref="dataTransferEndpoint" />
+			</map>
+		</property>
+	</bean>
+	-->
 
 	<!-- Register Endpoint -->
 	<bean id="dataTransferEndpoint" class="org.dataminx.dts.ws.DataTransferServiceEndpoint">
@@ -51,6 +66,21 @@
 				</value>
 				<value>
 					org.dataminx.schemas.dts._2009._05.dts.SubmitJobResponse
+				</value>
+ 			    <value>
+					org.dataminx.schemas.dts._2009._05.dts.CancelJobRequest
+				</value>
+				<value>
+					org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest
+				</value>
+				<value>
+					org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest
+				</value>
+				<value>
+					org.dataminx.schemas.dts._2009._05.dts.GetJobStatusRequest
+				</value>
+				<value>
+					org.dataminx.schemas.dts._2009._05.dts.GetJobStatusResponse
 				</value>
 			</list>
 		</property>
