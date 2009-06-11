@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="
+           http://maven.apache.org/POM/4.0.0
+           http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>dataminx</groupId>
+  <artifactId>minx-dts</artifactId>
+  <packaging>pom</packaging>
+  <name>MINX-DTS Parent Project</name>
+  <version>${minx-dts.version}</version>
+  <description>
+    <![CDATA[DataMINX Data Movement Services parent project. Defines dependencies and common configuration for the build process.]]>
+  </description>
+  <url>http://www.dataminx.org.au</url>
+  <organization>
+  	<name>DataMINX</name>
+  	<url>http://www.dataminx.org.au</url>
+  </organization>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <minx-dts.version>0.0.1-SNAPSHOT</minx-dts.version>
+    <checkstyle.version>5.0</checkstyle.version>
+    <log4j.version>1.2.15</log4j.version>
+    <commons-lang.version>2.3</commons-lang.version>
+    <commons-logging.version>1.1.1</commons-logging.version>
+    <spring-framework.version>2.5.6.SEC01</spring-framework.version>
+    <spring-test.version>2.5.6.SEC01</spring-test.version>
+    <spring-integration-core.version>1.0.1.RELEASE</spring-integration-core.version>
+    <spring-integration-jms.version>1.0.1.RELEASE</spring-integration-jms.version>
+    <spring-batch-core.version>2.0.1.RELEASE</spring-batch-core.version>
+    <spring-batch-integration.version>1.1.4.RELEASE</spring-batch-integration.version>
+    <jms.version>1.1</jms.version>
+    <commons-vfs.version>20050307052300</commons-vfs.version>
+    <junit.version>4.4</junit.version>
+    <testng.version>5.5</testng.version>
+    <activemq.version>5.2.0</activemq.version>
+    <jettison.version>1.1</jettison.version>
+    <xstream.version>1.3.1</xstream.version>
+    <oracle.driver.version>10.1.0.5.0</oracle.driver.version>
+  </properties>
+
+  <repositories>
+  	<repository>
+      <id>central</id>
+      <name>Maven Central Repository</name>
+      <url>http://mirrors.ibiblio.org/pub/mirrors/maven2/</url>
+  	</repository>
+    <repository>
+      <id>sun-repo-2</id>
+      <name>Sun Maven Repository</name>
+      <url>http://download.java.net/maven/2/</url>
+    </repository>
+    <repository>
+      <id>spring-source</id>
+      <name>SpringSource Maven Repository</name>
+      <url>http://repository.springsource.com/maven/bundles/release</url>
+    </repository>
+    <repository>
+      <id>jboss-repo</id>
+      <name>JBoss Maven Repository</name>
+      <url>http://repository.jboss.com/maven2/</url>
+    </repository>
+  </repositories>
+
+  <modules>
+    <module>build-tools</module>
+    <module>dts-workernode</module>
+  </modules>
+
+  <build>
+    <defaultGoal>package</defaultGoal>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>1.6</source>
+            <target>1.6</target>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-eclipse-plugin</artifactId>
+          <version>2.6</version>
+          <configuration>
+            <downloadSources>true</downloadSources>
+          </configuration>
+        </plugin>
+
+        <!--
+          Checkstyle is currently broken for 2 reasons:
+            - Classloader problem loading a custom resource (http://jira.codehaus.org/browse/MNG-2795)
+            - maven-checkstyle-plugin 2.2 does not support Checkstyle 5.x (http://jira.codehaus.org/browse/MCHECKSTYLE-105)
+              NOTE: There is a 2.3 version of the above in the Atlassian Maven repositories which does work..
+          TODO: revisit this in a couple of weeks time...
+        -->
+        <!--
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>2.3-atlassian-1</version>
+          <configuration>
+            <consoleOutput>true</consoleOutput>
+            <configLocation>checkstyle/checkstyle-checks.xml</configLocation>
+          </configuration>
+          <executions>
+            <execution>
+              <id>dataminx-checkstyle-checks</id>
+              <goals>
+                <goal>check</goal>
+              </goals>
+              <phase>compile</phase>
+            </execution>
+          </executions>
+          <dependencies>
+            <dependency>
+              <groupId>checkstyle</groupId>
+              <artifactId>checkstyle</artifactId>
+              <version>${checkstyle.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+        -->
+      </plugins>
+  </build>
+
+  <!-- See notes on Checktyle in the build/plugins section -->
+  <!--
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <configLocation>checkstyle/checkstyle-checks.xml</configLocation>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
+  -->
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Log4J -->
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>${log4j.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.sun.jmx</groupId>
+            <artifactId>jmxri</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.sun.jdmk</groupId>
+            <artifactId>jmxtools</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>javax.jms</groupId>
+            <artifactId>jms</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <!-- commons-lang -->
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>${commons-lang.version}</version>
+      </dependency>
+
+      <!-- commons-logging -->
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>${commons-logging.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>avalon-framework</groupId>
+            <artifactId>avalon-framework</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>logkit</groupId>
+            <artifactId>logkit</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <!-- Spring Framework -->
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring</artifactId>
+        <version>${spring-framework.version}</version>
+      </dependency>
+
+      <!-- Spring Test -->
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-test</artifactId>
+        <version>${spring-test.version}</version>
+      </dependency>
+
+      <!-- Spring Integration -->
+      <dependency>
+        <groupId>org.springframework.integration</groupId>
+        <artifactId>spring-integration-core</artifactId>
+        <version>${spring-integration-core.version}</version>
+      </dependency>
+
+      <!-- Spring Integration JMS -->
+      <dependency>
+        <groupId>org.springframework.integration</groupId>
+        <artifactId>spring-integration-jms</artifactId>
+        <version>${spring-integration-jms.version}</version>
+      </dependency>
+
+      <!-- Spring Batch -->
+      <dependency>
+        <groupId>org.springframework.batch</groupId>
+        <artifactId>org.springframework.batch.core</artifactId>
+        <version>${spring-batch-core.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.aspectj</groupId>
+            <artifactId>com.springsource.org.aspectj.runtime</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.aspectj</groupId>
+            <artifactId>com.springsource.org.aspectj.weaver</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.aopalliance</groupId>
+            <artifactId>com.springsource.org.aopalliance</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>com.springsource.org.apache.commons.logging</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>com.springsource.com.thoughtworks.xstream</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.jettison</groupId>
+            <artifactId>com.springsource.org.codehaus.jettison</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>com.springsource.org.apache.commons.lang</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <!-- Spring Batch Integration -->
+      <dependency>
+        <groupId>org.springframework.batch</groupId>
+        <artifactId>spring-batch-integration</artifactId>
+        <version>${spring-batch-integration.version}</version>
+        <exclusions>
+            <exclusion>
+                <groupId>javax.jms</groupId>
+                <artifactId>com.springsource.javax.jms</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework.integration</groupId>
+                <artifactId>org.springframework.integration</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework.integration</groupId>
+                <artifactId>org.springframework.integration.adapter</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-aop</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-jms</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-tx</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework.batch</groupId>
+                <artifactId>spring-batch-core</artifactId>
+            </exclusion>
+        </exclusions>
+      </dependency>
+
+      <!-- JMS -->
+      <dependency>
+        <groupId>javax.jms</groupId>
+        <artifactId>jms</artifactId>
+        <version>${jms.version}</version>
+      </dependency>
+
+      <!-- commons-vfs -->
+      <dependency>
+        <groupId>commons-vfs</groupId>
+        <artifactId>commons-vfs</artifactId>
+        <version>${commons-vfs.version}</version>
+      </dependency>
+
+      <!-- JUnit -->
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit.version}</version>
+      </dependency>
+
+      <!-- TestNG -->
+      <dependency>
+        <groupId>org.testng</groupId>
+        <artifactId>testng</artifactId>
+        <version>${testng.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <!-- ActiveMQ -->
+      <dependency>
+        <artifactId>activemq-all</artifactId>
+        <groupId>org.apache.activemq</groupId>
+        <version>${activemq.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <!-- Jettison -->
+      <dependency>
+        <groupId>org.codehaus.jettison</groupId>
+        <artifactId>jettison</artifactId>
+        <version>${jettison.version}</version>
+      </dependency>
+
+      <!-- XStream -->
+      <dependency>
+        <groupId>com.thoughtworks.xstream</groupId>
+        <artifactId>xstream</artifactId>
+        <version>${xstream.version}</version>
+      </dependency>
+
+      <!-- Oracle JDBC driver -->
+      <dependency>
+        <groupId>com.oracle</groupId>
+        <artifactId>ojdbc14</artifactId>
+        <version>${oracle.driver.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+</project>

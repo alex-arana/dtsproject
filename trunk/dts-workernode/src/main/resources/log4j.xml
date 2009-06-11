@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "http://jakarta.apache.org/log4j/dtd/log4j.dtd">
+
+<!-- ===================================== -->
+<!--          Log4j Configuration          -->
+<!-- ===================================== -->
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+  <!-- ============================== -->
+  <!--        Console Appender        -->
+  <!-- ============================== -->
+
+  <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+    <param name="Target" value="System.out"/>
+    <!--<param name="Threshold" value="INFO"/>-->
+
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%t] %C{1}: %m%n"/>
+    </layout>
+  </appender>
+
+  <!-- ============================== -->
+  <!--          DTS Log File          -->
+  <!-- ============================== -->
+
+  <!-- A time/date based rolling appender -->
+  <appender name="FILE" class="org.apache.log4j.RollingFileAppender">
+    <param name="File" value="minx-dts.log"/>
+    <param name="Append" value="false"/>
+    <param name="MaxFileSize" value="10MB"/>
+    <param name="MaxBackupIndex" value="0"/>
+
+    <layout class="org.apache.log4j.PatternLayout">
+      <!-- The default pattern: Date Priority [Thread] Logger Message\n -->
+      <param name="ConversionPattern" value="%d %-5p [%t] %C{1} - %m%n"/>
+    </layout>
+  </appender>
+
+
+  <!-- ================ -->
+  <!--    Thresholds    -->
+  <!-- ================ -->
+
+  <logger name="org.dataminx.dts">
+    <level value="DEBUG"/>
+  </logger>
+
+  <logger name="org.springframework" additivity="false">
+    <level value="INFO"/>
+  </logger>
+
+
+  <!-- ======================= -->
+  <!--  Setup the Root logger  -->
+  <!-- ======================= -->
+  <root>
+    <level value="INFO"/>
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </root>
+
+</log4j:configuration>
