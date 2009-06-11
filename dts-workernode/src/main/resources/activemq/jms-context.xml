@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+  <bean id="jmsConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+    <property name="targetConnectionFactory">
+      <bean class="org.apache.activemq.spring.ActiveMQConnectionFactory">
+        <!-- use with ActiveMQ running in its own process -->
+        <!--<property name="brokerURL" value="vm://localhost"/>-->
+        <property name="brokerURL" value="tcp://localhost:61616"/>
+      </bean>
+    </property>
+    <property name="sessionCacheSize" value="10"/>
+    <property name="cacheProducers" value="false"/>
+  </bean>
+
+  <bean id="jmsJobSubmissionQueue" class="org.apache.activemq.command.ActiveMQQueue">
+    <constructor-arg index="0" value="dts.job.submission.queue"/>
+  </bean>
+
+  <bean id="jmsJobEventQueue" class="org.apache.activemq.command.ActiveMQQueue">
+    <constructor-arg index="0" value="dts.job.event.queue"/>
+  </bean>
+
+  <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="defaultDestination" ref="jmsJobSubmissionQueue"/>
+  </bean>
+
+</beans>
