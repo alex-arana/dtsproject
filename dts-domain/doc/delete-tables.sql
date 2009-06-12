@@ -1,2 +1,2 @@
-delete table job;
-delete table job_status;
+drop table job;
+drop table job_status;
