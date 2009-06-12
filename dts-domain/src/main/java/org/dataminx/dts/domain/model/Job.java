@@ -35,9 +35,9 @@ public class Job {
 	private String workerNodeHost;
 	private String version;
 	private Integer filesTotal;
-	private Integer filesTransfered;
+	private Integer filesTransferred;
 	private Integer volumeTotal;
-	private Integer volumeTransfered;
+	private Integer volumeTransferred;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -69,7 +69,7 @@ public class Job {
 	}
 
 	@Enumerated(EnumType.ORDINAL)
-	@Column(name="job_status")
+	@Column(name="job_status_id")
 	public JobStatus getJobStatus() {
 		return jobStatus;
 	}
@@ -209,13 +209,13 @@ public class Job {
 		this.filesTotal = filesTotal;
 	}
 
-	@Column(name="files_transfered")
-	public Integer getFilesTransfered() {
-		return filesTransfered;
+	@Column(name="files_transferred")
+	public Integer getFilesTransferred() {
+		return filesTransferred;
 	}
 
-	public void setFilesTransfered(Integer filesTransfered) {
-		this.filesTransfered = filesTransfered;
+	public void setFilesTransferred(Integer filesTransferred) {
+		this.filesTransferred = filesTransferred;
 	}
 
 	@Column(name="volume_total")
@@ -227,13 +227,13 @@ public class Job {
 		this.volumeTotal = volumeTotal;
 	}
 
-	@Column(name="volume_transfered")
-	public Integer getVolumeTransfered() {
-		return volumeTransfered;
+	@Column(name="volume_transferred")
+	public Integer getVolumeTransferred() {
+		return volumeTransferred;
 	}
 
-	public void setVolumeTransfered(Integer volumeTransfered) {
-		this.volumeTransfered = volumeTransfered;
+	public void setVolumeTransferred(Integer volumeTransferred) {
+		this.volumeTransferred = volumeTransferred;
 	}
 
 	public String toString() {
