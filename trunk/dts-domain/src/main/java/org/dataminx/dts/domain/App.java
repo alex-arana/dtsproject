@@ -1,34 +1,39 @@
 package org.dataminx.dts.domain;
 
-import org.springframework.beans.factory.BeanFactory;
+import org.springframework.context.ApplicationContext;
+
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.*;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import org.dataminx.dts.domain.repo.JobDao;
 import org.dataminx.dts.domain.model.Job;
+import org.dataminx.dts.domain.model.JobStatus;
 
 /**
  * Hello world!
  *
  */
 public class App {
-	private BeanFactory factory;
+	private final ApplicationContext mContext;
 
-	public App(String beanConfigFilename) {
-		factory = new XmlBeanFactory(new ClassPathResource(beanConfigFilename));
+	public App(final String springClasspath) {
+		mContext = new ClassPathXmlApplicationContext(springClasspath);
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		App app = new App("applicationContext.xml");
 		app.createJobEntry();
 	}
 
 	public void createJobEntry() {
-		JobDao jobRepo = (JobDao) factory.getBean("jobRepository");
+		JobDao jobRepo = (JobDao) mContext.getBean("jobRepository");
 
 		Job job = new Job();
 		job.setJobName("hello");
 		job.setJobResourceKey("http://abcd");
+		job.setJobStatus(JobStatus.CREATED);
 
 		jobRepo.saveOrUpdate(job);
 	}
