@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="
            http://maven.apache.org/POM/4.0.0
            http://maven.apache.org/maven-v4_0_0.xsd">
 
@@ -34,6 +35,7 @@
     <spring-test.version>2.5.6.SEC01</spring-test.version>
     <spring-integration-core.version>1.0.2.SR1</spring-integration-core.version>
     <spring-integration-jms.version>1.0.2.SR1</spring-integration-jms.version>
+    <spring-integration-xml.version>1.0.2.SR1</spring-integration-xml.version>
     <spring-batch-core.version>2.0.1.RELEASE</spring-batch-core.version>
     <spring-batch-integration.version>1.1.4.RELEASE</spring-batch-integration.version>
     <spring-ws.version>1.5.6</spring-ws.version>
@@ -114,39 +116,55 @@
       </plugin>
 
       <!--
-        Checkstyle is currently broken for 2 reasons: - Classloader
-        problem loading a custom resource
-        (http://jira.codehaus.org/browse/MNG-2795) -
-        maven-checkstyle-plugin 2.2 does not support Checkstyle 5.x
-        (http://jira.codehaus.org/browse/MCHECKSTYLE-105) NOTE: There is
-        a 2.3 version of the above in the Atlassian Maven repositories
-        which does work.. TODO: revisit this in a couple of weeks
-        time...
+        Checkstyle is currently broken for 2 reasons:
+          - Classloader problem loading a custom resource (http://jira.codehaus.org/browse/MNG-2795)
+          - maven-checkstyle-plugin 2.2 does not support Checkstyle 5.x (http://jira.codehaus.org/browse/MCHECKSTYLE-105)
+            NOTE: There is a 2.3 version of the above in the Atlassian Maven repositories which does work..
+        TODO: revisit this in a couple of weeks time...
       -->
       <!--
-        <plugin> <groupId>org.apache.maven.plugins</groupId>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.3-atlassian-1</version> <configuration>
-        <consoleOutput>true</consoleOutput>
-        <configLocation>checkstyle/checkstyle-checks.xml</configLocation>
-        </configuration> <executions> <execution>
-        <id>dataminx-checkstyle-checks</id> <goals> <goal>check</goal>
-        </goals> <phase>compile</phase> </execution> </executions>
-        <dependencies> <dependency> <groupId>checkstyle</groupId>
-        <artifactId>checkstyle</artifactId>
-        <version>${checkstyle.version}</version> </dependency>
-        </dependencies> </plugin>
+        <version>2.3-atlassian-1</version>
+        <configuration>
+          <consoleOutput>true</consoleOutput>
+          <configLocation>checkstyle/checkstyle-checks.xml</configLocation>
+        </configuration>
+        <executions>
+          <execution>
+            <id>dataminx-checkstyle-checks</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>compile</phase>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>checkstyle</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>${checkstyle.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
       -->
     </plugins>
   </build>
 
   <!-- See notes on Checktyle in the build/plugins section -->
   <!--
-    <reporting> <plugins> <plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-checkstyle-plugin</artifactId> <configuration>
-    <configLocation>checkstyle/checkstyle-checks.xml</configLocation>
-    </configuration> </plugin> </plugins> </reporting>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <configLocation>checkstyle/checkstyle-checks.xml</configLocation>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
   -->
 
   <dependencyManagement>
@@ -253,6 +271,13 @@
         <groupId>org.springframework.integration</groupId>
         <artifactId>spring-integration-jms</artifactId>
         <version>${spring-integration-jms.version}</version>
+      </dependency>
+
+      <!-- Spring Integration XML -->
+      <dependency>
+        <groupId>org.springframework.integration</groupId>
+        <artifactId>spring-integration-xml</artifactId>
+        <version>${spring-integration-xml.version}</version>
       </dependency>
 
       <!-- Spring Batch -->
