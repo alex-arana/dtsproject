@@ -2,18 +2,25 @@ package org.dataminx.dts.ws;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.dataminx.dts.service.DataTransferService;
+import org.dataminx.schemas.dts._2009._05.dts.CancelJobRequest;
+import org.dataminx.schemas.dts._2009._05.dts.GetJobStatusRequest;
+import org.dataminx.schemas.dts._2009._05.dts.GetJobStatusResponse;
+import org.dataminx.schemas.dts._2009._05.dts.ObjectFactory;
+import org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest;
+import org.dataminx.schemas.dts._2009._05.dts.StateType;
+import org.dataminx.schemas.dts._2009._05.dts.StatusValueEnumeration;
+import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
+import org.dataminx.schemas.dts._2009._05.dts.SubmitJobResponse;
+import org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
-
-import org.dataminx.dts.service.*;
-import org.dataminx.schemas.dts._2009._05.dts.*;
 
 @Endpoint
 public class DataTransferServiceEndpoint {
 
 	private DataTransferService dataTransferService;
-	private ObjectFactory objectFactory = new ObjectFactory();
+	private final ObjectFactory objectFactory = new ObjectFactory();
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -64,9 +71,11 @@ public class DataTransferServiceEndpoint {
 	public GetJobStatusResponse doit(GetJobStatusRequest request) {
 		logger.debug("In DataTransferServiceEndpoint.doit(GetJobStatusRequest), getJobStatus of job: " + request.getJobId());
 
+		String status = dataTransferService.getJobStatus(request.getJobId());
+
 		GetJobStatusResponse response = new GetJobStatusResponse();
 		StateType state = new StateType();
-		state.setValue(StatusValueEnumeration.DONE);
+		state.setValue(StatusValueEnumeration.fromValue(status));
 		response.setState(state);
 		return response;
 	}
