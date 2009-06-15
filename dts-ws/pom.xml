@@ -19,9 +19,7 @@
     <dependency>
       <groupId>org.dataminx</groupId>
       <artifactId>dts-jaxb</artifactId>
-      <version>${minx-dts.version}</version>
     </dependency>
-
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>

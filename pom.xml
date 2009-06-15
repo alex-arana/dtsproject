@@ -90,8 +90,8 @@
   <modules>
     <module>build-tools</module>
     <module>dts-domain</module>
-    <module>dts-workernode</module>
     <module>dts-jaxb</module>
+    <module>dts-workernode</module>
     <module>dts-ws</module>
   </modules>
 
@@ -169,6 +169,18 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- inter-module dependencies -->
+      <dependency>
+        <artifactId>dts-build-tools</artifactId>
+        <groupId>${dataminx.group}</groupId>
+        <version>${minx-dts.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>dts-jaxb</artifactId>
+        <groupId>${dataminx.group}</groupId>
+        <version>${minx-dts.version}</version>
+      </dependency>
+
       <!-- SLF4J -->
       <dependency>
         <groupId>org.slf4j</groupId>
