@@ -53,7 +53,6 @@
     <oracle.driver.version>10.1.0.5.0</oracle.driver.version>
     <mysql-connector-java.version>5.1.6</mysql-connector-java.version>
     <jdom.version>1.1</jdom.version>
-
   </properties>
 
   <repositories>
@@ -89,6 +88,7 @@
 
   <modules>
     <module>build-tools</module>
+    <module>dts-common</module>
     <module>dts-domain</module>
     <module>dts-jaxb</module>
     <module>dts-workernode</module>
@@ -172,6 +172,11 @@
       <!-- inter-module dependencies -->
       <dependency>
         <artifactId>dts-build-tools</artifactId>
+        <groupId>${dataminx.group}</groupId>
+        <version>${minx-dts.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>dts-common</artifactId>
         <groupId>${dataminx.group}</groupId>
         <version>${minx-dts.version}</version>
       </dependency>
