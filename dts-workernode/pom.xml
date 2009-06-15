@@ -21,6 +21,10 @@
       <groupId>${dataminx.group}</groupId>
     </dependency>
     <dependency>
+      <artifactId>dts-common</artifactId>
+      <groupId>${dataminx.group}</groupId>
+    </dependency>
+    <dependency>
       <artifactId>dts-jaxb</artifactId>
       <groupId>${dataminx.group}</groupId>
     </dependency>

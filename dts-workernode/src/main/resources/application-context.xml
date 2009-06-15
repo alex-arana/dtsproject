@@ -15,7 +15,10 @@
 
   <!-- Initialise the logging subsystem -->
   <bean id="log4jConfigurator"
-        class="org.dataminx.dts.common.Log4jConfiguratorBean"/>
+        class="org.dataminx.dts.common.Log4jConfiguratorBean">
+    <property name="location" value="file:///${dataminx.dir}/log4j.xml"/>
+    <property name="refreshInterval" value="5000"/>
+  </bean>
 
   <bean id="taskExecutor"
         class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
@@ -63,9 +66,9 @@
 
   <bean id="placeholderProperties"
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    <property name="location" value="classpath:batch.properties"/>
+    <property name="location" value="file:///${dataminx.dir}/batch.properties"/>
     <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
-    <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    <property name="ignoreUnresolvablePlaceholders" value="false"/>
     <property name="order" value="1"/>
   </bean>
 

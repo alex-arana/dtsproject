@@ -55,21 +55,24 @@ public class Log4jConfiguratorBean implements InitializingBean {
      * {@inheritDoc}
      */
     public void afterPropertiesSet() throws Exception {
-        if (StringUtils.isBlank(mLocation)) {
-            final URL url;
-            final File file = new File(DEFAULT_LOG4J_CONFIGURATION_FILE);
+        final URL url;
+        if (StringUtils.isNotBlank(mLocation)) {
+            final File file = new File(mLocation);
             if (file.exists()) {
                 url = file.toURI().toURL();
             }
             else {
+                // default to the internal configuration file if not found
                 url = Loader.getResource(DEFAULT_LOG4J_CONFIGURATION_FILE);
             }
-
-            // check for log4j configuration override in relevant JVM property
-            final String log4jOverride = System.getProperty(DEFAULT_LOG4J_CONFIGURATION_KEY);
-            mLocation = log4jOverride == null ? url.toExternalForm() : log4jOverride;
+        }
+        else {
+            url = Loader.getResource(DEFAULT_LOG4J_CONFIGURATION_FILE);
         }
 
+        // check for log4j configuration override in relevant JVM property
+        final String log4jOverride = System.getProperty(DEFAULT_LOG4J_CONFIGURATION_KEY);
+        mLocation = log4jOverride == null ? url.toExternalForm() : log4jOverride;
         LogManager.resetConfiguration();
         if (mRefreshInterval == 0) {
             Log4jConfigurer.initLogging(mLocation);
