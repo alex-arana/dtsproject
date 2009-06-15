@@ -16,6 +16,10 @@ public enum JobStatus {
 		this.jobStatus = jobStatus;
 	}
 
+	public int getIntValue() {
+	    return jobStatus;
+	}
+
 	public String toString() {
 		switch (jobStatus) {
 		case 0:

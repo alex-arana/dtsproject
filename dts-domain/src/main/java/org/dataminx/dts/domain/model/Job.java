@@ -1,26 +1,38 @@
 package org.dataminx.dts.domain.model;
 
+import java.util.Date;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Column;
-import javax.persistence.Enumerated;
-import javax.persistence.EnumType;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import java.util.Date;
-
 @Entity
+@NamedQueries({
+    @NamedQuery(
+        name="Job.findJobByResourceKey",
+        query="SELECT j FROM Job j WHERE j.jobResourceKey = :jobResourceKey"),
+    @NamedQuery(
+        name="Job.findJobByUser",
+        query="SELECT j FROM Job j WHERE j.subjectName = :userDN"),
+    @NamedQuery(
+        name="Job.findJobByUserAndStatus",
+        query="SELECT j FROM Job j WHERE j.subjectName = :userDN AND j.status = :status")
+})
 @Table(name="job")
 public class Job {
 
 	private Integer jobId;
 	private String jobResourceKey;
 	private String jobName;
-	private JobStatus jobStatus;
+	private JobStatus status;
 	private String subjectName;
 	private String jobDescription;
 	private Date creationTime;
@@ -69,13 +81,13 @@ public class Job {
 	}
 
 	@Enumerated(EnumType.ORDINAL)
-	@Column(name="job_status_id")
-	public JobStatus getJobStatus() {
-		return jobStatus;
+	@Column(name="status_id")
+	public JobStatus getStatus() {
+		return status;
 	}
 
-	public void setJobStatus(JobStatus jobStatus) {
-		this.jobStatus = jobStatus;
+	public void setStatus(JobStatus status) {
+		this.status = status;
 	}
 
 	@Column(name="subject_name")
