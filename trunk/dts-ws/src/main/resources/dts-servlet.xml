@@ -98,25 +98,7 @@
 		<property name="marshaller" ref="marshaller" />
 		<property name="unmarshaller" ref="marshaller" />
 	</bean>
-
-
 -->
-	<bean id="dataTransferServiceClient" class="org.dataminx.dts.client.DataTransferServiceClientImpl">
-		<property name="webServiceTemplate" ref="webServiceTemplate" />
-	</bean>
-
-
-	<bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">
-		<property name="messageFactory">
-			<bean class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory" />
-		</property>
-		<property name="defaultUri" value="http://localhost:8080/dts/" />
-		<property name="messageSender" ref="messageSender" />
-	</bean>
-
-	<bean id="messageSender"
-		class="org.springframework.ws.transport.http.HttpUrlConnectionMessageSender">
-	</bean>
 
 
 </beans>
