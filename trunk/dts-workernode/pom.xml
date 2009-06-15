@@ -19,7 +19,10 @@
     <dependency>
       <artifactId>dts-build-tools</artifactId>
       <groupId>${dataminx.group}</groupId>
-      <version>${minx-dts.version}</version>
+    </dependency>
+    <dependency>
+      <artifactId>dts-jaxb</artifactId>
+      <groupId>${dataminx.group}</groupId>
     </dependency>
 
     <!-- SL4J -->

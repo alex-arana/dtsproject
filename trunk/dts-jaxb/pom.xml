@@ -29,6 +29,8 @@
   </dependencies>
 
   <build>
+    <!-- just to let Eclipse projects know this is also a source directory -->
+    <sourceDirectory>${project.build.directory}/generated-sources/xjc</sourceDirectory>
     <plugins>
       <plugin>
         <groupId>org.jvnet.jaxb2.maven2</groupId>
