@@ -2,7 +2,7 @@ CREATE TABLE job (
 	job_id					INT 			UNSIGNED NOT NULL AUTO_INCREMENT,
 	job_resource_key		VARCHAR(32)		NOT NULL,
 	job_name				VARCHAR(32) 	NOT NULL,
-	status_id               INT 			DEFAULT NULL,
+	status_id               INT 			NOT NULL,
 	subject_name			VARCHAR(104)	DEFAULT NULL,
 	job_description			VARCHAR(104) 	DEFAULT NULL,
 	creation_time			DATETIME 		DEFAULT NULL,
