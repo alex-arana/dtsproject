@@ -249,10 +249,31 @@ public class Job {
 	}
 
 	public String toString() {
-		return "JobName: " +
-				jobName + "\n" +
-				"JobResourceKey: " +
-				jobResourceKey + "\n";
+		return "JobName: " + jobName + "\n" +
+				"JobResourceKey: " + jobResourceKey + "\n" +
+				"JobStatusId: " + status + "\n" +
+				"JobSubjectName: " + subjectName +"\n";
+/*		  private Integer jobId;
+		    private String jobResourceKey;
+		    private String jobName;
+		    private JobStatus status;
+		    private String subjectName;
+		    private String jobDescription;
+		    private Date creationTime;
+		    private Date queuedTime;
+		    private Boolean successFlag;
+		    private Boolean finishedFlag;
+		    private Date activeTime;
+		    private Date workerTerminatedTime;
+		    private Date jobAllDoneTime;
+		    private String clientHostname;
+		    private String executionHost;
+		    private String workerNodeHost;
+		    private String version;
+		    private Integer filesTotal;
+		    private Integer filesTransferred;
+		    private Integer volumeTotal;
+		    private Integer volumeTransferred;*/
 	}
 
 
