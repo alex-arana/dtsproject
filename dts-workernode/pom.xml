@@ -42,6 +42,12 @@
       <artifactId>log4j</artifactId>
     </dependency>
 
+    <!-- commons-collections -->
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+    </dependency>
+
     <!-- commons-lang -->
     <dependency>
       <groupId>commons-lang</groupId>
@@ -76,6 +82,22 @@
     <dependency>
       <groupId>org.springframework.integration</groupId>
       <artifactId>spring-integration-jms</artifactId>
+    </dependency>
+
+    <!-- Spring Integration XML -->
+    <dependency>
+      <groupId>org.springframework.integration</groupId>
+      <artifactId>spring-integration-xml</artifactId>
+    </dependency>
+
+    <!-- Spring OXM -->
+    <dependency>
+      <groupId>org.springframework.ws</groupId>
+      <artifactId>spring-oxm</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.ws</groupId>
+      <artifactId>spring-oxm-tiger</artifactId>
     </dependency>
 
     <!-- Spring Batch -->

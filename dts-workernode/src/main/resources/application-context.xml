@@ -64,6 +64,12 @@
     <property name="dataSource" ref="dataSource"/>
   </bean>
 
+  <bean id="dtsFileSystemManager"
+        init-method="init"
+        class="org.dataminx.dts.vfs.DtsFileSystemManager">
+    <property name="configurationResource" value="vfs/providers.xml"/>
+  </bean>
+
   <bean id="placeholderProperties"
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="location" value="file:///${dataminx.dir}/batch.properties"/>

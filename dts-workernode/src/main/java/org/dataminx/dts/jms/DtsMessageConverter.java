@@ -16,16 +16,23 @@
  */
 package org.dataminx.dts.jms;
 
+import java.io.ByteArrayInputStream;
 import java.util.Properties;
+import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.ObjectMessage;
 import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.xml.transform.stream.StreamSource;
 import org.dataminx.dts.batch.DtsJob;
+import org.dataminx.dts.batch.DtsJobFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.converter.DefaultJobParametersConverter;
 import org.springframework.batch.integration.launch.JobLaunchRequest;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.stereotype.Component;
@@ -35,21 +42,74 @@ import org.springframework.stereotype.Component;
  *
  * @author Alex Arana
  */
-@Component("dtsMessageConverter")
-public class DtsMessageConverter implements MessageConverter, BeanFactoryAware {
-    /** A reference to the Spring bean factory. */
-    private BeanFactory mBeanFactory;
+@Component
+public class DtsMessageConverter implements MessageConverter {
+    /** Internal logger object. */
+    private static final Logger LOG = LoggerFactory.getLogger(DtsMessageConverter.class);
+
+    /**
+     * A reference to the DTS Job factory.
+     */
+    @Autowired
+    private DtsJobFactory mJobFactory;
+
+    /**
+     * Component used to transform input DTS Documents into Java objects.
+     */
+    @Qualifier("dtsJaxbUnmarshallingTransformer")
+    private DtsMessagePayloadTransformer mTransformer;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public Object fromMessage(Message message) throws JMSException, MessageConversionException {
-        final Object[] jobId = new Object[] {message.getJMSMessageID()};
-        final DtsJob dtsJob = (DtsJob) mBeanFactory.getBean("dtsFileTransferJob", jobId);
+        final String jobId = message.getJMSMessageID();
+        LOG.debug("A new JMS message has been received: " + jobId);
 
+        final Object payload = extractMessagePayload(message);
+        LOG.debug(String.format("Finished reading message payload of type: '%s'", payload.getClass().getName()));
+
+        // convert the payload into a DTS job definition
+        final Object dtsJobRequest = mTransformer.transformPayload(payload);
+        LOG.debug("transformed message payload: " + dtsJobRequest);
+
+        // invoke the job factory to create a new job instance
+        final DtsJob dtsJob = mJobFactory.createJob(dtsJobRequest);
+
+        // finally add any additional parameters and return the job request to the framework
         final Properties properties = new Properties();
         return new JobLaunchRequest(dtsJob, new DefaultJobParametersConverter().getJobParameters(properties));
+    }
+
+    /**
+     * Unmarshalls the given Message into an object.
+     *
+     * @param message      the message
+     * @return the unmarshalled object
+     * @throws JMSException if the ...
+     */
+    private Object extractMessagePayload(final Message message) throws JMSException {
+        final Object payload;
+        if (message instanceof TextMessage) {
+            final TextMessage textMessage = (TextMessage) message;
+            payload = textMessage.getText();
+        }
+        else if (message instanceof ObjectMessage) {
+            final ObjectMessage objectMessage = (ObjectMessage) message;
+            payload = objectMessage.getObject();
+        }
+        else if (message instanceof BytesMessage) {
+            final BytesMessage bytesMessage = (BytesMessage) message;
+            final byte[] bytes = new byte[(int) bytesMessage.getBodyLength()];
+            bytesMessage.readBytes(bytes);
+            ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+            payload = new StreamSource(bis);
+        }
+        else {
+            throw new MessageConversionException("Invalid message type...");
+        }
+        return payload;
     }
 
     /**
@@ -57,14 +117,10 @@ public class DtsMessageConverter implements MessageConverter, BeanFactoryAware {
      */
     @Override
     public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
-        return null;
+        throw new UnsupportedOperationException("Method toMessage() not implemented.");
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        mBeanFactory = beanFactory;
+    public void setTransformer(final DtsMessagePayloadTransformer transformer) {
+        mTransformer = transformer;
     }
 }
