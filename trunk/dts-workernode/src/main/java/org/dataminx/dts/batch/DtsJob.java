@@ -22,7 +22,6 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,12 +29,8 @@ import org.springframework.stereotype.Component;
  *
  * @author Alex Arana
  */
-@Component("dtsFileTransferJob")
-@Scope("prototype")
-public class DtsJob implements Job {
-    /** A unique identifier for this job instance. */
-    private final String mJobId;
-
+@Component
+public abstract class DtsJob implements Job {
     /** A reference to the application's file copying service. */
     @Autowired
     private FileCopyingService mFileCopyingService;
@@ -45,36 +40,22 @@ public class DtsJob implements Job {
     private JobNotificationService mJobNotificationService;
 
     /**
-     * Constructs a new instance of {@link DtsJob} using the supplied Job ID.
+     * {@inheritDoc}
+     */
+    public abstract void execute(final JobExecution execution);
+
+    /**
+     * Returns the ID that uniquely identifies this job.
      *
-     * @param jobId A unique job ID
+     * @return Job ID
      */
-    public DtsJob(final String jobId) {
-        mJobId = jobId;
-    }
+    public abstract String getJobId();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void execute(final JobExecution execution) {
-        //TODO break the job into steps
-        mJobNotificationService.notifyJobStatus(getJobId(), "STARTED");
-        mFileCopyingService.copyFiles();
-        mJobNotificationService.notifyJobStatus(getJobId(), "FINISHED");
-    }
-
-    public String getJobId() {
-        return mJobId;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getName() {
-        return getJobId();
-    }
+    public abstract String getName();
 
     /**
      * {@inheritDoc}
@@ -90,5 +71,13 @@ public class DtsJob implements Job {
     @Override
     public JobParametersIncrementer getJobParametersIncrementer() {
         return null;
+    }
+
+    public FileCopyingService getFileCopyingService() {
+        return mFileCopyingService;
+    }
+
+    public JobNotificationService getJobNotificationService() {
+        return mJobNotificationService;
     }
 }

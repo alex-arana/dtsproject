@@ -2,10 +2,13 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:beans="http://www.springframework.org/schema/beans"
     xmlns:jms="http://www.springframework.org/schema/integration/jms"
+    xmlns:si-xml="http://www.springframework.org/schema/integration/xml"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
            http://www.springframework.org/schema/integration
            http://www.springframework.org/schema/integration/spring-integration-1.0.xsd
+           http://www.springframework.org/schema/integration/xml
+           http://www.springframework.org/schema/integration/xml/spring-integration-xml-1.0.xsd
            http://www.springframework.org/schema/integration/jms
            http://www.springframework.org/schema/integration/jms/spring-integration-jms-1.0.xsd">
 
@@ -23,7 +26,7 @@
   <jms:message-driven-channel-adapter
       channel="dtsJobRequests"
       connection-factory="jmsConnectionFactory"
-      destination="jmsJobSubmissionQueue"
+      destination="jmsJobSubmitQueue"
       message-converter="dtsMessageConverter"
       />
 
@@ -42,6 +45,32 @@
     <beans:constructor-arg index="0" ref="dtsJobLauncher"/>
   </beans:bean>
 
-  <service-activator input-channel="dtsJobRequests" ref="dtsJobRequestHandler" method="launch"/>
+  <service-activator input-channel="dtsJobRequests"
+                     output-channel="dtsJobEvents"
+                     ref="dtsJobRequestHandler"
+                     method="launch"/>
+
+  <beans:bean id="dtsJaxbUnmarshaller"
+              class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+    <beans:property name="schema" value="/minx-dts.xsd"/>
+    <beans:property name="classesToBeBound">
+      <beans:list>
+        <beans:value>org.dataminx.schemas.dts._2009._05.dts.CancelJobRequest</beans:value>
+        <beans:value>org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest</beans:value>
+        <beans:value>org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest</beans:value>
+        <beans:value>org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest</beans:value>
+      </beans:list>
+    </beans:property>
+  </beans:bean>
+
+  <beans:bean id="dtsMessagePayloadTransformer"
+              class="org.dataminx.dts.jms.DtsMessagePayloadTransformer">
+    <beans:constructor-arg index="0" ref="dtsJaxbUnmarshaller"/>
+  </beans:bean>
+
+  <beans:bean id="dtsMessageConverter"
+              class="org.dataminx.dts.jms.DtsMessageConverter">
+    <beans:property name="transformer" ref="dtsMessagePayloadTransformer"/>
+  </beans:bean>
 
 </beans:beans>

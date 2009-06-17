@@ -29,6 +29,7 @@
     <slf4j.version>1.5.6</slf4j.version>
     <log4j.version>1.2.15</log4j.version>
     <jaxb-api.version>2.0</jaxb-api.version>
+    <commons-collections.version>3.2.1</commons-collections.version>
     <commons-lang.version>2.3</commons-lang.version>
     <commons-logging.version>1.1.1</commons-logging.version>
     <spring-framework.version>2.5.6.SEC01</spring-framework.version>
@@ -44,7 +45,7 @@
     <hibernate-entitymanager.version>3.4.0.GA</hibernate-entitymanager.version>
     <hibernate-annotations.version>3.4.0.GA</hibernate-annotations.version>
     <jms.version>1.1</jms.version>
-    <commons-vfs.version>20050307052300</commons-vfs.version>
+    <commons-vfs.version>1.0</commons-vfs.version>
     <junit.version>4.4</junit.version>
     <testng.version>5.5</testng.version>
     <activemq.version>5.2.0</activemq.version>
@@ -228,6 +229,13 @@
             <artifactId>mail</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+
+      <!-- commons-collections -->
+      <dependency>
+        <groupId>commons-collections</groupId>
+        <artifactId>commons-collections</artifactId>
+        <version>${commons-collections.version}</version>
       </dependency>
 
       <!-- commons-lang -->
@@ -494,6 +502,12 @@
         <groupId>commons-vfs</groupId>
         <artifactId>commons-vfs</artifactId>
         <version>${commons-vfs.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <!-- JUnit -->

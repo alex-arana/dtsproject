@@ -16,7 +16,7 @@
     <property name="cacheProducers" value="false"/>
   </bean>
 
-  <bean id="jmsJobSubmissionQueue" class="org.apache.activemq.command.ActiveMQQueue">
+  <bean id="jmsJobSubmitQueue" class="org.apache.activemq.command.ActiveMQQueue">
     <constructor-arg index="0" value="dts.job.submission.queue"/>
   </bean>
 
@@ -26,7 +26,7 @@
 
   <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
     <property name="connectionFactory" ref="jmsConnectionFactory"/>
-    <property name="defaultDestination" ref="jmsJobSubmissionQueue"/>
+    <property name="defaultDestination" ref="jmsJobEventQueue"/>
   </bean>
 
 </beans>

@@ -17,11 +17,11 @@
 package org.dataminx.dts.common;
 
 /**
- * Defines a common set of constants global to the application.
+ * Defines a common set of constants global to the DTS Worker Node application.
  *
  * @author Alex Arana
  */
-public final class DtsConstants {
+public final class DtsWorkerNodeConstants {
     /**
      * Name of the configuration property that points to the directory holding configuration artifacts for the
      * application.
@@ -45,4 +45,9 @@ public final class DtsConstants {
 
     /** Default JVM property used to override the log4j configuration source. */
     public static final String DEFAULT_LOG4J_CONFIGURATION_KEY = "log4j.configuration";
+
+    /**
+     * A job execution context key used to hold a DTS job request.
+     */
+    public static final String DTS_JOB_DEFINITION_KEY = "DTS_JOB_DEFINITION";
 }

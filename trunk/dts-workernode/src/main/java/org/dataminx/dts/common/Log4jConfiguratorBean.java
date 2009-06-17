@@ -16,8 +16,8 @@
  */
 package org.dataminx.dts.common;
 
-import static org.dataminx.dts.common.DtsConstants.DEFAULT_LOG4J_CONFIGURATION_FILE;
-import static org.dataminx.dts.common.DtsConstants.DEFAULT_LOG4J_CONFIGURATION_KEY;
+import static org.dataminx.dts.common.DtsWorkerNodeConstants.DEFAULT_LOG4J_CONFIGURATION_FILE;
+import static org.dataminx.dts.common.DtsWorkerNodeConstants.DEFAULT_LOG4J_CONFIGURATION_KEY;
 
 import java.io.File;
 import java.net.URL;

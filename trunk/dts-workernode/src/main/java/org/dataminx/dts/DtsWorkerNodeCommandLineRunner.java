@@ -16,8 +16,8 @@
  */
 package org.dataminx.dts;
 
-import static org.dataminx.dts.common.DtsConstants.DATAMINX_CONFIGURATION_KEY;
-import static org.dataminx.dts.common.DtsConstants.DEFAULT_DATAMINX_CONFIGURATION_DIR;
+import static org.dataminx.dts.common.DtsWorkerNodeConstants.DATAMINX_CONFIGURATION_KEY;
+import static org.dataminx.dts.common.DtsWorkerNodeConstants.DEFAULT_DATAMINX_CONFIGURATION_DIR;
 
 import java.io.File;
 import org.apache.commons.lang.ArrayUtils;
@@ -52,7 +52,7 @@ public class DtsWorkerNodeCommandLineRunner {
      * <p>
      * If the input string is either <code>null</code> or points to a non-existent directory, the application
      * will attempt to access the default configuration folder, represented by the symbolic constant:
-     * {@link org.dataminx.dts.common.DtsConstants#DEFAULT_DATAMINX_CONFIGURATION_DIR}.
+     * {@link org.dataminx.dts.common.DtsWorkerNodeConstants#DEFAULT_DATAMINX_CONFIGURATION_DIR}.
      *
      * @param configDir String holding the fully qualified path to the DataMINX configuration folder (or null).
      * @throws DtsException When an error occurs ...
