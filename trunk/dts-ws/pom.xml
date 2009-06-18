@@ -17,8 +17,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.dataminx</groupId>
-      <artifactId>dts-jaxb</artifactId>
+      <groupId>${dataminx.group}</groupId>
+      <artifactId>dts-jaxb</artifactId>      
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
