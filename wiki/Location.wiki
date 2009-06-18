@@ -1,0 +1,5 @@
+#summary Wiki
+
+This project wiki is hosted by ARCS as part of the DataMINX project.
+
+[http://wiki.arcs.org.au/bin/view/DataMINX/WebHome DataMINX]
