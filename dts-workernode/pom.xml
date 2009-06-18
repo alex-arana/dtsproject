@@ -179,5 +179,12 @@
       <artifactId>hsqldb</artifactId>
       <scope>runtime</scope>
     </dependency>
+
+    <!-- commons-httpclient -->
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+      <scope>runtime</scope>
+    </dependency>
   </dependencies>
 </project>

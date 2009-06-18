@@ -6,20 +6,21 @@
   <JobDefinition>
     <JobDescription>
       <JobIdentification>
-        <JobName>DTSJob0050</JobName>
+        <JobName>DTSJob0057</JobName>
         <Description>DTS Job Description</Description>
         <JobAnnotation>DTS Job Annotation</JobAnnotation>
         <JobProject>DataMINX File Upload</JobProject>
       </JobIdentification>
       <DataTransfer>
         <Source>
-          <URI>file:///D:/Temp/metadata.txt</URI>
+          <!--<URI>file:///D:/Temp/metadata.txt</URI>-->
+          <URI>http://wiki.arcs.org.au/pub/DataMINX/DataMINX/minnie_on_the_run.jpg</URI>
           <Credential/>
           <URIProperties/>
         </Source>
         <Target>
           <!--<URI>file:///L:/Shared/Alex/metadata.txt</URI>-->
-          <URI>file:///C:/Temp/metadata.txt</URI>
+          <URI>file:///C:/DataMINX-logo.jpg</URI>
           <Credential/>
           <URIProperties/>
         </Target>
