@@ -7,21 +7,19 @@
   <bean id="jmsConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
     <property name="targetConnectionFactory">
       <bean class="org.apache.activemq.spring.ActiveMQConnectionFactory">
-        <!-- use with ActiveMQ running in its own process -->
-        <!--<property name="brokerURL" value="vm://localhost"/>-->
-        <property name="brokerURL" value="tcp://localhost:61616"/>
+        <property name="brokerURL" value="${si.jms.brokerURL}"/>
       </bean>
     </property>
-    <property name="sessionCacheSize" value="10"/>
-    <property name="cacheProducers" value="false"/>
+    <property name="sessionCacheSize" value="${si.jms.sessionCacheSize}"/>
+    <property name="cacheProducers" value="${si.jms.cacheProducers}"/>
   </bean>
 
   <bean id="jmsJobSubmitQueue" class="org.apache.activemq.command.ActiveMQQueue">
-    <constructor-arg index="0" value="dts.job.submission.queue"/>
+    <constructor-arg index="0" value="${si.jms.jobSubmitQueueName}"/>
   </bean>
 
   <bean id="jmsJobEventQueue" class="org.apache.activemq.command.ActiveMQQueue">
-    <constructor-arg index="0" value="dts.job.event.queue"/>
+    <constructor-arg index="0" value="${si.jms.jobEventQueueName}"/>
   </bean>
 
   <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
