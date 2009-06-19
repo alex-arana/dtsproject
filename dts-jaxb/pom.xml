@@ -26,6 +26,17 @@
       <groupId>javax.xml.bind</groupId>
       <artifactId>jaxb-api</artifactId>
     </dependency>
+    
+    <!-- commons-lang -->
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
+        
+    <dependency>
+      <groupId>org.jvnet.jaxb2_commons</groupId>
+      <artifactId>runtime</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -41,6 +52,20 @@
               <goal>generate</goal>
             </goals>
             <configuration>
+            
+              <args>
+                <arg>-XtoString</arg>
+                <arg>-Xequals</arg>
+                <arg>-XhashCode</arg>
+              </args>
+              <plugins>
+                <plugin>
+                  <groupId>org.jvnet.jaxb2_commons</groupId>
+                  <artifactId>basic</artifactId>
+                  <version>${jaxb2-commons.version}</version>
+                </plugin>
+              </plugins>
+          
               <schemaIncludes>
                 <include>minx-dts.xsd</include>
               </schemaIncludes>
@@ -50,4 +75,8 @@
       </plugin>
     </plugins>
   </build>
+  <dependencyManagement>
+  	<dependencies>
+  	</dependencies>
+  </dependencyManagement>
 </project>
