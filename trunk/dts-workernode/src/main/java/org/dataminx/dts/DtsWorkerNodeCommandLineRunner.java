@@ -66,7 +66,7 @@ public class DtsWorkerNodeCommandLineRunner {
         }
 
         if (!mConfigDir.exists()) {
-            throw new DtsException(String.format("An error occurred lanching the DTS Worker Node."
+            throw new DtsException(String.format("An error occurred launching the DTS Worker Node."
                 + " Invalid DataMINX configuration folder: '%s'.  Check your configuration",
                 mConfigDir.getAbsolutePath()));
         }

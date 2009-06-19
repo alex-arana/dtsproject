@@ -20,33 +20,9 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
-        </executions>
-        <!--
         <configuration>
           <mainClass>org.dataminx.dts.DtsWorkerNodeCommandLineRunner</mainClass>
-          <systemProperties>
-            <systemProperty>
-              <key>dataminx.dir</key>
-              <value>${dataminx.dir}</value>
-            </systemProperty>
-          </systemProperties>
-        </configuration>
-        -->
-        <configuration>
-          <executable>java</executable>
           <classpathScope>runtime</classpathScope>
-          <arguments>
-            <argument>-Ddataminx.dir=${dataminx.dir}</argument>
-            <argument>-classpath</argument>
-            <classpath/>
-            <argument>org.dataminx.dts.DtsWorkerNodeCommandLineRunner</argument>
-          </arguments>
         </configuration>
       </plugin>
     </plugins>
