@@ -20,16 +20,19 @@ import static org.dataminx.dts.common.DtsWorkerNodeConstants.DEFAULT_LOG4J_CONFI
 import static org.dataminx.dts.common.DtsWorkerNodeConstants.DEFAULT_LOG4J_CONFIGURATION_KEY;
 
 import java.io.File;
-import java.net.URL;
+import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.apache.log4j.helpers.Loader;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Log4jConfigurer;
+import org.springframework.util.ResourceUtils;
 
 /**
  * A simple bean that initialises the Log4j logging subsystem. This class can then be configured
@@ -40,9 +43,9 @@ import org.springframework.util.Log4jConfigurer;
 @Scope("singleton")
 @Repository("log4jConfigurator")
 public class Log4jConfiguratorBean implements InitializingBean {
-    /** Holds the URI of the log4j configuration file. */
+    /** Holds the log4j configuration file resource. */
     @Qualifier
-    private String mLocation;
+    private Resource mConfiguration;
 
     /**
      * Delay between refresh checks, in milliseconds.
@@ -55,36 +58,41 @@ public class Log4jConfiguratorBean implements InitializingBean {
      * {@inheritDoc}
      */
     public void afterPropertiesSet() throws Exception {
-        final URL url;
-        if (StringUtils.isNotBlank(mLocation)) {
-            final File file = new File(mLocation);
-            if (file.exists()) {
-                url = file.toURI().toURL();
+        if (mConfiguration == null || !mConfiguration.exists()) {
+            mConfiguration = new ClassPathResource(DEFAULT_LOG4J_CONFIGURATION_FILE);
+        }
+
+        // allow the Log4J configuration resource to be overridden using the value of an
+        // application-specific Java system property. eg.:
+        //   java -Dlog4j.configuration=/etc/log4j.properties
+        final String log4jOverride = System.getProperty(DEFAULT_LOG4J_CONFIGURATION_KEY);
+        if (StringUtils.isNotBlank(log4jOverride)) {
+            mConfiguration = new UrlResource(ResourceUtils.getURL(log4jOverride));
+        }
+
+        LogManager.resetConfiguration();
+        try {
+            final File file = mConfiguration.getFile();
+            final String path = file.getAbsolutePath();
+            if (mRefreshInterval == 0) {
+                Log4jConfigurer.initLogging(path);
             }
             else {
-                // default to the internal configuration file if not found
-                url = Loader.getResource(DEFAULT_LOG4J_CONFIGURATION_FILE);
+                Log4jConfigurer.initLogging(path, mRefreshInterval);
             }
         }
-        else {
-            url = Loader.getResource(DEFAULT_LOG4J_CONFIGURATION_FILE);
+        catch (final IOException ioe) {
+            // the resource cannot be resolved as an absolute file path,
+            // thus refresh is not supported
+            final String url = mConfiguration.getURL().toExternalForm();
+            Log4jConfigurer.initLogging(url);
         }
 
-        // check for log4j configuration override in relevant JVM property
-        final String log4jOverride = System.getProperty(DEFAULT_LOG4J_CONFIGURATION_KEY);
-        mLocation = log4jOverride == null ? url.toExternalForm() : log4jOverride;
-        LogManager.resetConfiguration();
-        if (mRefreshInterval == 0) {
-            Log4jConfigurer.initLogging(mLocation);
-        }
-        else {
-            Log4jConfigurer.initLogging(mLocation, mRefreshInterval);
-        }
-        Logger.getLogger(getClass()).info(String.format("Configured logging from '%s'", mLocation));
+        Logger.getLogger(getClass()).info(String.format("Configured logging from %s", mConfiguration));
     }
 
-    public void setLocation(final String location) {
-        mLocation = location;
+    public void setConfiguration(final Resource configuration) {
+        mConfiguration = configuration;
     }
 
     public void setRefreshInterval(final long refreshInterval) {
