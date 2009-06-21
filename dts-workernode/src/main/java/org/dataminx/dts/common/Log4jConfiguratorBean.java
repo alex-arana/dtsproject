@@ -19,7 +19,6 @@ package org.dataminx.dts.common;
 import static org.dataminx.dts.common.DtsWorkerNodeConstants.DEFAULT_LOG4J_CONFIGURATION_FILE;
 import static org.dataminx.dts.common.DtsWorkerNodeConstants.DEFAULT_LOG4J_CONFIGURATION_KEY;
 
-import java.io.File;
 import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
@@ -31,6 +30,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 import org.springframework.util.Log4jConfigurer;
 import org.springframework.util.ResourceUtils;
 
@@ -71,24 +71,42 @@ public class Log4jConfiguratorBean implements InitializingBean {
         }
 
         LogManager.resetConfiguration();
-        try {
-            final File file = mConfiguration.getFile();
-            final String path = file.getAbsolutePath();
+        final String uri = mConfiguration.getURL().toExternalForm();
+        if (isFileResource(mConfiguration)) {
             if (mRefreshInterval == 0) {
-                Log4jConfigurer.initLogging(path);
+                Log4jConfigurer.initLogging(uri);
             }
             else {
-                Log4jConfigurer.initLogging(path, mRefreshInterval);
+                Log4jConfigurer.initLogging(uri, mRefreshInterval);
             }
         }
-        catch (final IOException ioe) {
+        else {
             // the resource cannot be resolved as an absolute file path,
             // thus refresh is not supported
-            final String url = mConfiguration.getURL().toExternalForm();
-            Log4jConfigurer.initLogging(url);
+            Log4jConfigurer.initLogging(uri);
         }
-
         Logger.getLogger(getClass()).info(String.format("Configured logging from %s", mConfiguration));
+    }
+
+    /**
+     * Returns logical <code>true</code> if the specified {@link Resource} points to a file in a locally
+     * available file system, <code>false</code> otherwise.
+     * <p>
+     * This is purely a convenience method to handle a potential exception being raised when detecting
+     * this condition.
+     *
+     * @param resource Object that points to an underlying resource such as a file or classpath resource
+     * @return true if the given Resource points to a File, false otherwise
+     */
+    private boolean isFileResource(final Resource resource) {
+        Assert.notNull(resource);
+        try {
+            resource.getFile();
+            return true;
+        }
+        catch (IOException ex) {
+            return false;
+        }
     }
 
     public void setConfiguration(final Resource configuration) {
