@@ -65,7 +65,7 @@ public class DtsMessageConverter implements MessageConverter {
     @Override
     public Object fromMessage(Message message) throws JMSException, MessageConversionException {
         final String jobId = message.getJMSMessageID();
-        LOG.debug("A new JMS message has been received: " + jobId);
+        LOG.info("A new JMS message has been received: " + jobId);
 
         final Object payload = extractMessagePayload(message);
         LOG.debug(String.format("Finished reading message payload of type: '%s'", payload.getClass().getName()));
@@ -76,6 +76,7 @@ public class DtsMessageConverter implements MessageConverter {
 
         // invoke the job factory to create a new job instance
         final DtsJob dtsJob = mJobFactory.createJob(dtsJobRequest);
+        LOG.info("Launching DTS Job: " + dtsJob);
 
         // finally add any additional parameters and return the job request to the framework
         final Properties properties = new Properties();
@@ -83,11 +84,11 @@ public class DtsMessageConverter implements MessageConverter {
     }
 
     /**
-     * Unmarshalls the given Message into an object.
+     * Extracts the given JMS Message payload and returns it as an object.
      *
-     * @param message      the message
-     * @return the unmarshalled object
-     * @throws JMSException if the ...
+     * @param message the incoming JMS message
+     * @return the message payload as an {@link Object}
+     * @throws JMSException if the incoming message is not of a supported message type
      */
     private Object extractMessagePayload(final Message message) throws JMSException {
         final Object payload;

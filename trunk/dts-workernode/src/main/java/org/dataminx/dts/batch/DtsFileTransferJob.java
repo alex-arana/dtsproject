@@ -17,16 +17,19 @@
 package org.dataminx.dts.batch;
 
 import org.dataminx.schemas.dts._2009._05.dts.DataTransferType;
+import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
 import org.dataminx.schemas.dts._2009._05.dts.JobDescriptionType;
+import org.dataminx.schemas.dts._2009._05.dts.JobIdentificationType;
 import org.dataminx.schemas.dts._2009._05.dts.SourceTargetType;
 import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
- * Processes a DTS Job.
+ * DTS Job that performs a file copy operation.
  *
  * @author Alex Arana
  */
@@ -51,7 +54,12 @@ public class DtsFileTransferJob extends DtsJob {
      */
     @Override
     public String getJobId() {
-        return mJobRequest.getJobDefinition().getJobDescription().getJobIdentification().getJobName();
+        String jobId = null;
+        final JobIdentificationType jobIdentification = getJobIdentification();
+        if (jobIdentification != null) {
+            jobId = jobIdentification.getJobName();
+        }
+        return jobId;
     }
 
     /**
@@ -63,12 +71,44 @@ public class DtsFileTransferJob extends DtsJob {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDescription() {
+        String description = null;
+        final JobIdentificationType jobIdentification = getJobIdentification();
+        if (jobIdentification != null) {
+            description = jobIdentification.getDescription();
+        }
+        return description;
+    }
+
+    /**
      * Returns the job description, containing all details about the underlying job.
      *
      * @return Job request details
      */
-    public JobDescriptionType getJobDescription() {
-        return mJobRequest.getJobDefinition().getJobDescription();
+    protected JobDescriptionType getJobDescription() {
+        JobDescriptionType result = null;
+        final JobDefinitionType jobDefinition = mJobRequest.getJobDefinition();
+        if (jobDefinition != null) {
+            result = jobDefinition.getJobDescription();
+        }
+        return result;
+    }
+
+    /**
+     * Returns the job identification, containing all details about the underlying job.
+     *
+     * @return Job identification details
+     */
+    protected JobIdentificationType getJobIdentification() {
+        JobIdentificationType result = null;
+        final JobDescriptionType jobDescription = getJobDescription();
+        if (jobDescription != null) {
+            result = jobDescription.getJobIdentification();
+        }
+        return result;
     }
 
     /**
@@ -90,5 +130,17 @@ public class DtsFileTransferJob extends DtsJob {
         }
 
         getJobNotificationService().notifyJobStatus(getJobId(), "FINISHED");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        final StringBuilder buffer = new StringBuilder();
+        buffer.append(ObjectUtils.identityToString(this));
+        buffer.append(" [jobId").append("='").append(getJobId()).append("' ");
+        buffer.append("jobDescription").append("='").append(getDescription()).append("']");
+        return buffer.toString();
     }
 }

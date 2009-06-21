@@ -6,8 +6,8 @@
   <JobDefinition>
     <JobDescription>
       <JobIdentification>
-        <JobName>DTSJob0057</JobName>
-        <Description>DTS Job Description</Description>
+        <JobName>DTSJob0059</JobName>
+        <Description>Copies the DataMINX Logo from a HTTP source to a local folder</Description>
         <JobAnnotation>DTS Job Annotation</JobAnnotation>
         <JobProject>DataMINX File Upload</JobProject>
       </JobIdentification>
