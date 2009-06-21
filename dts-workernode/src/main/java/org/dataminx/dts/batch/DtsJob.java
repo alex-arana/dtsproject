@@ -58,6 +58,12 @@ public abstract class DtsJob implements Job {
     public abstract String getName();
 
     /**
+     * Returns a human-readable description of this DTS Job.
+     * @return Job description as a {@link String}
+     */
+    public abstract String getDescription();
+
+    /**
      * {@inheritDoc}
      */
     @Override
