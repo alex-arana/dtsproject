@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : example.xml
+    Created on : 18 June 2009, 16:11
+    Author     : David Meredith
+    Description:
+       Defines multiple WrappedSourceSinkDEPR elements within a single
+       GetWrappedDataTransferInstanceRequestMessage. We would like to be able
+       to define this type data transfer request in order to transfer multiple
+       files/directories witin a single atomic unit.
+
+       For example, a WS could implement the GetWrappedDataTransferInstanceRequest 
+       operation which accepts a single document.
+
+       Rather than define a single source and sink:
+           GetDataTransferInstance( [source DEPR], [sink DEPR], [transfer requirements] );
+       Define:
+           GetDataTransferInstance( [GetWrappedDataTransferInstanceRequestMessage] );
+
+
+    Pseudo schema: 
+
+    <dmi-msg:GetWrappedDataTransferInstanceRequestMessage>
+        <dmi-msg:WrappedSourceSinkDEPRs>
+            <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
+            <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
+            <dmi-msg:TransferRequirements/>
+        </dmi-msg:WrappedSourceSinkDEPRs>
+        <dmi-msg:WrappedSourceSinkDEPRs>
+            <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
+            <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
+            <dmi-msg:TransferRequirements/>
+        </dmi-msg:WrappedSourceSinkDEPRs>
+        <dmi-msg:WrappedSourceSinkDEPRs>
+            <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
+            <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
+            <dmi-msg:TransferRequirements/>
+        </dmi-msg:WrappedSourceSinkDEPRs>
+        ...
+    </dmi-msg:GetWrappedDataTransferInstanceRequestMessage>
+-->
+
+<dmi-msg:GetWrappedDataTransferInstanceRequestMessage
+   xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:dmi='http://schemas.ogf.org/dmi/2008/05/dmi'
+   xmlns:dmi-msg='http://schemas.ogf.org/dmi/2008/06/dmi/rendering/plain'
+   xmlns:wsa='http://www.w3.org/2005/08/addressing'
+   xmlns:wsse='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd'
+   xsi:schemaLocation='http://schemas.ogf.org/dmi/2008/05/dmi dmi.xsd
+   http://schemas.ogf.org/dmi/2008/06/dmi/rendering/plain dmi-messagesProposals.xsd
+   http://www.w3.org/2005/08/addressing http://www.w3.org/2006/03/addressing/ws-addr.xsd
+   http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd'>
+
+    <!-- First Wrapped Data transfer -->
+    <dmi-msg:WrappedSourceSinkDEPR>
+        <!-- source -->
+        <dmi-msg:SourceDEPR>
+            <wsa:Address>
+                http://www.ogf.org/ogsa/2007/08/addressing/none
+            </wsa:Address>
+            <wsa:Metadata>
+                <dmi:DataLocations>
+                    <dmi:Data
+                    ProtocolUri="http://www.ogf.org/ogsa-dmi/2006/03/im/protocol/gridftp-v20"
+                    DataUrl="gridftp://ngs.rl.ac.uk/dave/data/source/dir">
+                        <dmi:Credentials>
+                            <wsse:UsernameToken>
+                                <wsse:Username>Bert</wsse:Username>
+                                <wsse:Password
+                                Type='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText'>
+                                       Ernie
+                                </wsse:Password>
+                            </wsse:UsernameToken>
+                        </dmi:Credentials>
+                    </dmi:Data>
+                </dmi:DataLocations>
+            </wsa:Metadata>
+        </dmi-msg:SourceDEPR>
+        <!-- target / sink -->
+        <dmi-msg:SinkDEPR>
+            <wsa:Address>
+                http://www.ogf.org/ogsa/2007/08/addressing/none
+            </wsa:Address>
+            <wsa:Metadata>
+                <dmi:DataLocations>
+                    <dmi:Data
+                    ProtocolUri="http://www.ogf.org/ogsa-dmi/2006/03/im/protocol/srb"
+                    DataUrl="srb://srb.ngs.ac.uk/dave/data/sink/dir">
+                        <dmi:Credentials>
+                            <wsse:UsernameToken>
+                                <wsse:Username>Bert</wsse:Username>
+                                <wsse:Password
+                                Type='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText'>
+                                       Ernie
+                                </wsse:Password>
+                            </wsse:UsernameToken>
+                        </dmi:Credentials>
+            <!--
+             we need an xsd:any extension point in the dmi:Data element
+             in order to define protocol specific requied settings,
+             e.g. our 'SrbProtocolProperties'.
+              <SrbProtocolProperties>
+                <McatZone>mymcatZone</McatZone>
+                <MdasDomain>my mdas domain </MdasDomain>
+                <HomeDirectory>/home/whatever</HomeDirectory>
+                <DefaultResource>srb1.ngs.ac.uk</DefaultResource>
+                <PortRange>
+                    <portMin>6400</portMin>
+                    <portMax>6500</portMax>
+                </PortRange>
+             </SrbProtocolProperties>
+             -->
+                    </dmi:Data>
+                </dmi:DataLocations>
+            </wsa:Metadata>
+        </dmi-msg:SinkDEPR>
+        <dmi-msg:TransferRequirements>
+            <!--<dmi:StartNotBefore></dmi:StartNotBefore>
+            <dmi:EndNoLaterThan>6</dmi:EndNoLaterThan>
+            <dmi:StayAliveTime>6</dmi:StayAliveTime>-->
+            <dmi:MaxAttempts>2</dmi:MaxAttempts>
+        </dmi-msg:TransferRequirements>
+    </dmi-msg:WrappedSourceSinkDEPR>
+
+    <!-- Second Wrapped Data transfer -->
+    <dmi-msg:WrappedSourceSinkDEPR>
+        <!-- source -->
+        <dmi-msg:SourceDEPR>
+            <wsa:Address>
+                http://www.ogf.org/ogsa/2007/08/addressing/none
+            </wsa:Address>
+            <wsa:Metadata>
+                <dmi:DataLocations>
+                    <dmi:Data
+                    ProtocolUri="http://www.ogf.org/ogsa-dmi/2006/03/im/protocol/gridftp-v20"
+                    DataUrl="gridftp://ngs.rl.ac.uk/dave/data/source/dir/file.txt">
+                        <dmi:Credentials>
+                            <wsse:UsernameToken>
+                                <wsse:Username>Bert</wsse:Username>
+                                <wsse:Password
+                                Type='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText'>
+                                       Ernie
+                                </wsse:Password>
+                            </wsse:UsernameToken>
+                        </dmi:Credentials>
+                    </dmi:Data>
+                </dmi:DataLocations>
+            </wsa:Metadata>
+        </dmi-msg:SourceDEPR>
+        <!-- target / sink -->
+        <dmi-msg:SinkDEPR>
+            <wsa:Address>
+                http://www.ogf.org/ogsa/2007/08/addressing/none
+            </wsa:Address>
+            <wsa:Metadata>
+                <dmi:DataLocations>
+                    <dmi:Data
+                    ProtocolUri="http://www.ogf.org/ogsa-dmi/2006/03/im/protocol/srb"
+                    DataUrl="srb://srb.ngs.ac.uk/dave/data/sink/dir/file.txt">
+                        <dmi:Credentials>
+                            <wsse:UsernameToken>
+                                <wsse:Username>Bert</wsse:Username>
+                                <wsse:Password
+                                Type='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText'>
+                                       Ernie
+                                </wsse:Password>
+                            </wsse:UsernameToken>
+                        </dmi:Credentials>
+            <!--
+             we need an xsd:any extension point in the dmi:Data element
+             in order to define protocol specific requied settings,
+             e.g. our 'SrbProtocolProperties'.
+              <SrbProtocolProperties>
+                <McatZone>mymcatZone</McatZone>
+                <MdasDomain>my mdas domain </MdasDomain>
+                <HomeDirectory>/home/whatever</HomeDirectory>
+                <DefaultResource>srb1.ngs.ac.uk</DefaultResource>
+                <PortRange>
+                    <portMin>6400</portMin>
+                    <portMax>6500</portMax>
+                </PortRange>
+             </SrbProtocolProperties>
+             -->
+                    </dmi:Data>
+                </dmi:DataLocations>
+            </wsa:Metadata>
+        </dmi-msg:SinkDEPR>
+        <dmi-msg:TransferRequirements>
+            <dmi:MaxAttempts>2</dmi:MaxAttempts>
+        </dmi-msg:TransferRequirements>
+    </dmi-msg:WrappedSourceSinkDEPR>
+
+    <!--
+    Define more WrappedSourceSinkDEPRs
+    as required for our ATOMIC unit which contains
+    multiple WrappedSourceSinkDEPRs.
+    -->
+    <!--
+    <dmi-msg:WrappedSourceSinkDEPR>
+        <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
+        <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
+        <dmi-msg:TransferRequirements>
+            <dmi:StartNotBefore></dmi:StartNotBefore>
+            <dmi:EndNoLaterThan></dmi:EndNoLaterThan>
+            <dmi:StayAliveTime></dmi:StayAliveTime>
+            <dmi:MaxAttempts></dmi:MaxAttempts>
+        </dmi-msg:TransferRequirements>
+    </dmi-msg:WrappedSourceSinkDEPR>
+    -->
+
+</dmi-msg:GetWrappedDataTransferInstanceRequestMessage>
