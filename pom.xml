@@ -56,7 +56,8 @@
     <mysql-connector-java.version>5.1.6</mysql-connector-java.version>
     <hsqldb.version>1.8.0.7</hsqldb.version>
     <jdom.version>1.1</jdom.version>
-    <jaxb2-commons.version>0.4.1</jaxb2-commons.version>
+    <jaxb2-commons.version>0.5.0</jaxb2-commons.version>
+    <maven-jaxb2-plugin.version>0.7.0</maven-jaxb2-plugin.version>
   </properties>
 
   <repositories>
@@ -212,7 +213,12 @@
       <!-- JAXB2 COMMONS -->
       <dependency>
         <groupId>org.jvnet.jaxb2_commons</groupId>
-        <artifactId>runtime</artifactId>
+        <artifactId>jaxb2-basics-runtime</artifactId>
+        <version>${jaxb2-commons.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jvnet.jaxb2_commons</groupId>
+        <artifactId>jaxb2-basics-tools</artifactId>
         <version>${jaxb2-commons.version}</version>
       </dependency>
 
