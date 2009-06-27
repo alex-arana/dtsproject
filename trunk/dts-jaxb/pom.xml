@@ -26,16 +26,27 @@
       <groupId>javax.xml.bind</groupId>
       <artifactId>jaxb-api</artifactId>
     </dependency>
-    
+
     <!-- commons-lang -->
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
-        
+
+    <!-- commons-logging -->
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+    </dependency>
+
+    <!-- jaxb2-commons -->
     <dependency>
       <groupId>org.jvnet.jaxb2_commons</groupId>
-      <artifactId>runtime</artifactId>
+      <artifactId>jaxb2-basics-runtime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jvnet.jaxb2_commons</groupId>
+      <artifactId>jaxb2-basics-tools</artifactId>
     </dependency>
   </dependencies>
 
@@ -46,13 +57,14 @@
       <plugin>
         <groupId>org.jvnet.jaxb2.maven2</groupId>
         <artifactId>maven-jaxb2-plugin</artifactId>
+        <version>${maven-jaxb2-plugin.version}</version>
         <executions>
           <execution>
             <goals>
               <goal>generate</goal>
             </goals>
             <configuration>
-            
+              <extension>true</extension>
               <args>
                 <arg>-XtoString</arg>
                 <arg>-Xequals</arg>
@@ -61,22 +73,24 @@
               <plugins>
                 <plugin>
                   <groupId>org.jvnet.jaxb2_commons</groupId>
-                  <artifactId>basic</artifactId>
+                  <artifactId>jaxb2-basics</artifactId>
                   <version>${jaxb2-commons.version}</version>
                 </plugin>
               </plugins>
-          
               <schemaIncludes>
                 <include>minx-dts.xsd</include>
               </schemaIncludes>
             </configuration>
           </execution>
         </executions>
+        <dependencies>
+          <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>${commons-logging.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
-  <dependencyManagement>
-  	<dependencies>
-  	</dependencies>
-  </dependencyManagement>
 </project>
