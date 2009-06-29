@@ -19,6 +19,19 @@
     <property name="configurationResource" value="vfs/providers.xml"/>
   </bean>
 
+  <bean id="dtsJaxbUnmarshaller"
+        class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+    <property name="schema" value="/minx-dts.xsd"/>
+    <property name="classesToBeBound">
+      <list>
+        <value>org.dataminx.schemas.dts._2009._05.dts.CancelJobRequest</value>
+        <value>org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest</value>
+        <value>org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest</value>
+        <value>org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest</value>
+      </list>
+    </property>
+  </bean>
+
   <bean id="applicationProperties"
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="locations">
