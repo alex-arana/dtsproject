@@ -74,7 +74,7 @@
       <plugin>
         <artifactId>maven-eclipse-plugin</artifactId>
         <configuration>
-          <wtpversion>1.0</wtpversion>
+          <wtpversion>2.0</wtpversion>
           <useProjectReferences>true</useProjectReferences>
           <additionalBuildcommands>
             <buildcommand>org.springframework.ide.eclipse.core.springbuilder</buildcommand>
