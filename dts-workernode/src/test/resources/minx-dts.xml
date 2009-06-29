@@ -6,21 +6,20 @@
   <JobDefinition>
     <JobDescription>
       <JobIdentification>
-        <JobName>DTSJob0059</JobName>
+        <JobName>DTS_JOB_ID</JobName>
         <Description>Copies the DataMINX Logo from a HTTP source to a local folder</Description>
         <JobAnnotation>DTS Job Annotation</JobAnnotation>
         <JobProject>DataMINX File Upload</JobProject>
       </JobIdentification>
       <DataTransfer>
         <Source>
-          <!--<URI>file:///D:/Temp/metadata.txt</URI>-->
           <URI>http://wiki.arcs.org.au/pub/DataMINX/DataMINX/minnie_on_the_run.jpg</URI>
+          <!--<URI>ftp://mirror.pacific.net.au/linux/ubuntu/dists/jaunty/Contents-i386.gz</URI>-->
           <Credential/>
           <URIProperties/>
         </Source>
         <Target>
-          <!--<URI>file:///L:/Shared/Alex/metadata.txt</URI>-->
-          <URI>file:///C:/DataMINX-logo.jpg</URI>
+          <URI>TARGET_URI</URI>
           <Credential/>
           <URIProperties/>
         </Target>

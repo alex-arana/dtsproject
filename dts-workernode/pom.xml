@@ -172,6 +172,20 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- JDOM -->
+    <dependency>
+      <groupId>jdom</groupId>
+      <artifactId>jdom</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Jaxen -->
+    <dependency>
+      <groupId>jaxen</groupId>
+      <artifactId>jaxen</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Oracle JDBC driver -->
     <dependency>
       <groupId>com.oracle</groupId>
