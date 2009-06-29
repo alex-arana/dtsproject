@@ -2,7 +2,7 @@
 <minx:JobDefinition xmlns:minx="http://schemas.dataminx.org/dts/2009/05/dts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.dataminx.org/dts/2009/05/dts minx-dts.xsd ">
   <minx:JobDescription>
     <minx:JobIdentification>
-      <minx:JobName>DTSJob0001</minx:JobName>
+      <minx:JobName>__test_this_dtsws_job__</minx:JobName>
       <minx:Description>DTS Job Description</minx:Description>
       <minx:JobAnnotation>DTS Job Annotation</minx:JobAnnotation>
       <minx:JobProject>VeRSI</minx:JobProject>
