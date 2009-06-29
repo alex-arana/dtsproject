@@ -10,6 +10,7 @@ import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSelector;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.Selectors;
+import org.dataminx.dts.common.util.StopwatchTimer;
 import org.dataminx.dts.vfs.DtsFileSystemManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +50,10 @@ public class FileCopyingServiceImpl implements FileCopyingService {
     public void copyFiles(String sourceURI, String targetURI) {
         LOG.info(String.format("Copying source '%s' to target '%s'...", sourceURI, targetURI));
         try {
+            final StopwatchTimer timer = new StopwatchTimer();
             copyFiles(mFileSystemManager.resolveFile(sourceURI), mFileSystemManager.resolveFile(targetURI));
-            LOG.info(String.format("Finished copying source '%s' to target '%s'.", sourceURI, targetURI));
+            LOG.info(String.format("Finished copying source '%s' to target '%s' in %s.",
+                sourceURI, targetURI, timer.getFormattedElapsedTime()));
         }
         catch (FileSystemException ex) {
             LOG.error("An error has occurred during a file copy operation: " + ex, ex);
