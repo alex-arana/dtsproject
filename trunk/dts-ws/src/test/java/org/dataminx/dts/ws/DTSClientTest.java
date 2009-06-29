@@ -13,9 +13,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.w3c.dom.Document;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class DTSClientTest.
+ * The DTSClient Unit Test.
+ *
+ * @author Gerson Galang
  */
 @ContextConfiguration(locations = { "/client-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
