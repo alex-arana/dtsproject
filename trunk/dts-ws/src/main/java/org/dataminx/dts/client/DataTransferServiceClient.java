@@ -1,14 +1,48 @@
 package org.dataminx.dts.client;
 
-import java.io.IOException;
-import org.dataminx.schemas.dts._2009._05.dts.*;
-
 import org.w3c.dom.Document;
 
+/**
+ * The Data Transfer Service WS Client.
+ *
+ * @author Gerson Galang
+ */
 public interface DataTransferServiceClient {
-	public abstract String submitJob(Document dtsJob) throws IOException;
-	public abstract void cancelJob(String jobId);
-	public abstract void suspendJob(String jobId);
-	public abstract void resumeJob(String jobId);
-	public abstract String getJobStatus(String jobId);
+
+    /**
+     * Submit the DTS Job.
+     *
+     * @param dtsJob the DTS Job definition
+     * @return the Universally Unique Identifier for the submitted job
+     */
+    String submitJob(Document dtsJob);
+
+    /**
+     * Cancel the job.
+     *
+     * @param jobId the Universally Unique Identifier (aka Global Unique Identifier) of the job to cancel
+     */
+    void cancelJob(String jobId);
+
+    /**
+     * Suspend the job.
+     *
+     * @param jobId the Universally Unique Identifier (aka Global Unique Identifier) of the job to suspend
+     */
+    void suspendJob(String jobId);
+
+    /**
+     * Resume the job.
+     *
+     * @param jobId the Universally Unique Identifier (aka Global Unique Identifier) of the job to resume
+     */
+    void resumeJob(String jobId);
+
+    /**
+     * Gets the job status.
+     *
+     * @param jobId the Universally Unique Identifier (aka Global Unique Identifier) of the job being queried about
+     * @return the job status
+     */
+    String getJobStatus(String jobId);
 }
