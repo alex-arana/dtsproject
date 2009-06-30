@@ -207,6 +207,13 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- C3P0 -->
+    <dependency>
+      <groupId>c3p0</groupId>
+      <artifactId>c3p0</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
     <!-- commons-httpclient -->
     <dependency>
       <groupId>commons-httpclient</groupId>

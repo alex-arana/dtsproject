@@ -10,14 +10,17 @@
   <!-- Enable Spring beans annotation support -->
   <context:annotation-config/>
 
-  <!-- Enable automatic classpath scanning -->
-  <context:component-scan base-package="org.dataminx.dts"/>
-
-  <bean id="dtsFileSystemManager"
-        init-method="init"
-        class="org.dataminx.dts.vfs.DtsFileSystemManager">
-    <property name="configurationResource" value="vfs/providers.xml"/>
-  </bean>
+  <!--
+    Enable automatic classpath scanning.
+    NOTE: exclude from scanning any types causing auto-wiring errors and which we
+    don't care to mock for the purposes of testing.
+  -->
+  <context:component-scan base-package="org.dataminx.dts">
+    <context:exclude-filter type="assignable" expression="org.dataminx.dts.batch.DtsJobFactoryImpl"/>
+    <context:exclude-filter type="assignable" expression="org.dataminx.dts.jms.DtsMessageConverter"/>
+    <context:exclude-filter type="assignable" expression="org.dataminx.dts.vfs.DtsFileSystemManager"/>
+    <context:exclude-filter type="assignable" expression="org.dataminx.dts.service.FileCopyingServiceImpl"/>
+  </context:component-scan>
 
   <bean id="dtsJaxbUnmarshaller"
         class="org.springframework.oxm.jaxb.Jaxb2Marshaller">

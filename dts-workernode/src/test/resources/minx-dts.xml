@@ -14,7 +14,23 @@
       <DataTransfer>
         <Source>
           <URI>http://wiki.arcs.org.au/pub/DataMINX/DataMINX/minnie_on_the_run.jpg</URI>
-          <!--<URI>ftp://mirror.pacific.net.au/linux/ubuntu/dists/jaunty/Contents-i386.gz</URI>-->
+          <Credential/>
+          <URIProperties/>
+        </Source>
+        <Target>
+          <URI>TARGET_URI</URI>
+          <Credential/>
+          <URIProperties/>
+        </Target>
+        <TransferRequirements>
+          <MaxAttempts>0</MaxAttempts>
+          <CreationFlag>Overwrite</CreationFlag>
+        </TransferRequirements>
+      </DataTransfer>
+      <DataTransfer>
+        <Source>
+          <!--<URI>http://wiki.arcs.org.au/pub/DataMINX/WebPreferences/favicon.ico</URI>-->
+          <URI>ftp://mirror.pacific.net.au/linux/ubuntu/dists/jaunty/Contents-i386.gz</URI>
           <Credential/>
           <URIProperties/>
         </Source>
