@@ -85,12 +85,12 @@ public class JobJpaDaoImpl implements JobDao {
     public void saveOrUpdate(Job job) {
         if (job.getJobId() == null) {
             // save
-            LOGGER.info("save(job)");
+            LOGGER.debug("save(job)");
             mEntityManager.persist(job);
         }
         else {
             // update
-            LOGGER.info("update(job)");
+            LOGGER.debug("update(job)");
             mEntityManager.merge(job);
         }
     }

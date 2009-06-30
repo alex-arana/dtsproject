@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.w3c.dom.Document;
 
 /**
- * The DTSClient Unit Test.
+ * A Unit Test for the standalone DTS WS module.
  *
  * @author Gerson Galang
  */
@@ -31,6 +31,7 @@ public class DTSClientTest {
 
     /**
      * Test submit job.
+     * @throws Exception the exception
      */
     @Test
     public void testSubmitJob() throws Exception {
