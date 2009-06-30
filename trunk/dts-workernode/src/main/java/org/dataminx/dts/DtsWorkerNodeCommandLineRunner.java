@@ -25,6 +25,7 @@ public class DtsWorkerNodeCommandLineRunner {
     /** Default Spring classpath definition. */
     public static final String[] DEFAULT_SPRING_CLASSPATH = {
         "/application-context.xml",
+        "/batch-context.xml",
         "/integration-context.xml",
         "/activemq/jms-context.xml"
     };

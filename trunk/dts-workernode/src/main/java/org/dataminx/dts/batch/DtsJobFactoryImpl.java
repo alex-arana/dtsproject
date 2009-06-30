@@ -12,15 +12,21 @@ import org.apache.commons.lang.StringUtils;
 import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 /**
- * This is the factory class for DTS jobs.
+ * This is the factory class for all Spring Batch jobs included with the DTS implementation.
+ * <p>
+ * All DTS Jobs designed to handle client requests are to be created via this class.  A list of all known
+ * jobs and their corresponding Spring components are maintained within its internal registry.  Add new
+ * ones as required.
  *
  * @author Alex Arana
  */
@@ -37,6 +43,10 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
     private static final Map<String, String> DTS_JOB_REGISTRY = MapUtils.putAll(new HashMap(), new String[][] {
         {SubmitJobRequest.class.getName(), "dtsFileTransferJob"}
     });
+
+    /** A reference to the Spring Batch Job repository. */
+    @Autowired
+    private JobRepository mJobRepository;
 
     /** A reference to the Spring bean factory. */
     private BeanFactory mBeanFactory;
@@ -67,6 +77,6 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
         }
 
         // create a new instance of the job using the spring bean factory
-        return (DtsJob) mBeanFactory.getBean(dtsJobName, new Object[] {criteria});
+        return (DtsJob) mBeanFactory.getBean(dtsJobName, new Object[] {criteria, mJobRepository});
     }
 }

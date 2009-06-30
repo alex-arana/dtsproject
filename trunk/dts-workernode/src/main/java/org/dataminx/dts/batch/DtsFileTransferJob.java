@@ -5,13 +5,23 @@
  */
 package org.dataminx.dts.batch;
 
-import org.dataminx.schemas.dts._2009._05.dts.DataTransferType;
+import static org.dataminx.dts.common.DtsWorkerNodeConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
+
 import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
 import org.dataminx.schemas.dts._2009._05.dts.JobDescriptionType;
 import org.dataminx.schemas.dts._2009._05.dts.JobIdentificationType;
-import org.dataminx.schemas.dts._2009._05.dts.SourceTargetType;
 import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInterruptedException;
+import org.springframework.batch.core.StartLimitExceededException;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.batch.item.ExecutionContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -28,14 +38,21 @@ public class DtsFileTransferJob extends DtsJob {
     /** Holds the information about the job request. */
     private final SubmitJobRequest mJobRequest;
 
+    /** The master step in this job. */
+    @Autowired
+    @Qualifier("partitioningStep")
+    private Step mPartitioningStep;
+
     /**
      * Constructs a new instance of <code>DtsSubmitJob</code> using the specified job request details.
      *
      * @param jobRequest Job request details
+     * @param jobRepository Job repository
      */
-    public DtsFileTransferJob(final SubmitJobRequest jobRequest) {
+    public DtsFileTransferJob(final SubmitJobRequest jobRequest, final JobRepository jobRepository) {
         Assert.notNull(jobRequest, "Cannot construct a DTS submit job without the required job details.");
         mJobRequest = jobRequest;
+        setJobRepository(jobRepository);
     }
 
     /**
@@ -104,18 +121,28 @@ public class DtsFileTransferJob extends DtsJob {
      * {@inheritDoc}
      */
     @Override
-    public void execute(final JobExecution execution) {
-        //TODO break the job into steps
+    public void doExecute(final JobExecution execution)
+        throws JobInterruptedException, JobRestartException, StartLimitExceededException {
+
+        //TODO determine exactly what job notifications we need to return and when
         getJobNotificationService().notifyJobStatus(getJobId(), "STARTED");
 
-        // transfer all files that are part of this request
-        for (final DataTransferType dataTransfer : getJobDescription().getDataTransfer()) {
-            final SourceTargetType source = dataTransfer.getSource();
-            final SourceTargetType target = dataTransfer.getTarget();
+        // first, store the DTS job request object in the job execution context
+        final ExecutionContext context = execution.getExecutionContext();
+        context.put(DTS_SUBMIT_JOB_REQUEST_KEY, mJobRequest);
 
-            //TODO pass the creation flags to the file copying service
-            //final CreationFlagEnumeration creationFlag = dataTransfer.getTransferRequirements().getCreationFlag();
-            getFileCopyingService().copyFiles(source.getURI(), target.getURI());
+        //TODO convert to application exceptions
+        final StepExecution stepExecution = handleStep(mPartitioningStep, execution);
+        if (stepExecution.getStatus() != BatchStatus.COMPLETED) {
+            // TODO: Terminate the job if a step fails
+            return;
+        }
+
+        // update the job status to have the same status as the master step
+        if (stepExecution != null) {
+            logger.debug("Upgrading JobExecution status: " + stepExecution);
+            execution.upgradeStatus(stepExecution.getStatus());
+            execution.setExitStatus(stepExecution.getExitStatus());
         }
 
         getJobNotificationService().notifyJobStatus(getJobId(), "FINISHED");

@@ -58,7 +58,9 @@
     <jdom.version>1.1</jdom.version>
     <jaxen.version>1.1.1</jaxen.version>
     <jaxb2-commons.version>0.5.0</jaxb2-commons.version>
-    <maven-jaxb2-plugin.version>0.7.0</maven-jaxb2-plugin.version>
+    <maven-jaxb2-plugin.version>0.7.1</maven-jaxb2-plugin.version>
+    <c3p0.version>0.9.1.2</c3p0.version>
+    <easymock.version>2.5.1</easymock.version>
   </properties>
 
   <repositories>
@@ -635,6 +637,20 @@
         <groupId>hsqldb</groupId>
         <artifactId>hsqldb</artifactId>
         <version>${hsqldb.version}</version>
+      </dependency>
+
+      <!-- C3P0 -->
+      <dependency>
+        <groupId>c3p0</groupId>
+        <artifactId>c3p0</artifactId>
+        <version>${c3p0.version}</version>
+      </dependency>
+
+      <!-- EasyMock -->
+      <dependency>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymock</artifactId>
+        <version>${easymock.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -5,11 +5,13 @@
  */
 package org.dataminx.dts.batch;
 
-import org.dataminx.dts.service.FileCopyingService;
 import org.dataminx.dts.service.JobNotificationService;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInterruptedException;
 import org.springframework.batch.core.JobParametersIncrementer;
+import org.springframework.batch.core.StartLimitExceededException;
+import org.springframework.batch.core.job.SimpleJob;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,11 +21,7 @@ import org.springframework.stereotype.Component;
  * @author Alex Arana
  */
 @Component
-public abstract class DtsJob implements Job {
-    /** A reference to the application's file copying service. */
-    @Autowired
-    private FileCopyingService mFileCopyingService;
-
+public abstract class DtsJob extends SimpleJob {
     /** A reference to the application's job notification service. */
     @Autowired
     private JobNotificationService mJobNotificationService;
@@ -31,7 +29,8 @@ public abstract class DtsJob implements Job {
     /**
      * {@inheritDoc}
      */
-    public abstract void execute(final JobExecution execution);
+    public abstract void doExecute(JobExecution execution)
+        throws JobInterruptedException, JobRestartException, StartLimitExceededException;
 
     /**
      * Returns the ID that uniquely identifies this job.
@@ -66,10 +65,6 @@ public abstract class DtsJob implements Job {
     @Override
     public JobParametersIncrementer getJobParametersIncrementer() {
         return null;
-    }
-
-    public FileCopyingService getFileCopyingService() {
-        return mFileCopyingService;
     }
 
     public JobNotificationService getJobNotificationService() {
