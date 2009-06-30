@@ -1,104 +1,115 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
-	<!-- Add automatic WSDL generation support -->
-	<bean id="dts"
-		class="org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition">
-		<property name="schema" ref="schema" />
-		<property name="portTypeName" value="DataTransferService" />
-		<property name="locationUri" value="http://localhost:8080/dts/" />
-		<!--
-			<property name="targetNamespace"
-			value="http://schemas.dataminx.org/dts/2009/05/dts" />
-		-->
-	</bean>
+    <!-- Add automatic WSDL generation support -->
+    <bean id="dts"
+        class="org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition">
+        <property name="schema" ref="schema" />
+        <property name="portTypeName" value="DataTransferService" />
+        <property name="locationUri" value="http://localhost:8080/dts/" />
+        <!--
+          <property name="targetNamespace"
+          value="http://schemas.dataminx.org/dts/2009/05/dts" />
+        -->
+    </bean>
+  
+    <bean id="schema" class="org.springframework.xml.xsd.SimpleXsdSchema">
+        <property name="xsd" value="classpath:/minx-dts.xsd" />
+    </bean>
 
-	<bean id="schema" class="org.springframework.xml.xsd.SimpleXsdSchema">
-		<property name="xsd" value="classpath:/minx-dts.xsd" />
-	</bean>
-
-	<!-- Register PayloadRootAnnotationMethodEndpointMapping -->
-
-	<bean
-		class="org.springframework.ws.server.endpoint.mapping.PayloadRootAnnotationMethodEndpointMapping" />
+    <!-- Register PayloadRootAnnotationMethodEndpointMapping -->
+    <bean
+        class="org.springframework.ws.server.endpoint.mapping.PayloadRootAnnotationMethodEndpointMapping" />
 
 
 	<!--
-	<bean id="payloadMapping"
-		class="org.springframework.ws.server.endpoint.mapping.PayloadRootQNameEndpointMapping">
-		<property name="endpointMap">
-			<map>
-				<entry
-					key="{http://schemas.dataminx.org/dts/2009/05/dts}submitJobRequest"
-					value-ref="dataTransferEndpoint" />
-			</map>
-		</property>
-	</bean>
+    <bean id="payloadMapping"
+          class="org.springframework.ws.server.endpoint.mapping.PayloadRootQNameEndpointMapping">
+        <property name="endpointMap">
+            <map>
+                <entry
+                  key="{http://schemas.dataminx.org/dts/2009/05/dts}submitJobRequest"
+                  value-ref="dataTransferEndpoint" />
+            </map>
+        </property>
+    </bean>
 	-->
 
-	<!-- Register Endpoint -->
-	<bean id="dataTransferEndpoint" class="org.dataminx.dts.ws.DataTransferServiceEndpoint">
-		<description>
-			This endpoint handles data transfer requests.
-		</description>
-		<property name="dataTransferService" ref="dataTransferService" />
-	</bean>
+    <!-- Register Endpoint -->
+    <bean id="dataTransferEndpoint" class="org.dataminx.dts.ws.DataTransferServiceEndpoint">
+        <description>This endpoint handles data transfer requests.</description>
+        <property name="dataTransferService" ref="dataTransferService" />
+    </bean>
+  
+    <bean id="dataTransferService" class="org.dataminx.dts.service.impl.DataTransferServiceImpl">
+        <description>This bean is our "business" service.</description>
+        <property name="jobRepository" ref="jobRepository" />
+    </bean>
+  
+    <!-- Configure XML Marshaller -->
+    <bean class="org.springframework.ws.server.endpoint.adapter.GenericMarshallingMethodEndpointAdapter">
+        <constructor-arg ref="marshaller" />
+    </bean>
+  
+    <bean id="marshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+        <property name="classesToBeBound">
+            <list>
+                <value>org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest</value>
+                <value>org.dataminx.schemas.dts._2009._05.dts.SubmitJobResponse</value>
+                <value>org.dataminx.schemas.dts._2009._05.dts.CancelJobRequest</value>
+                <value>org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest</value>
+                <value>org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest</value>
+                <value>org.dataminx.schemas.dts._2009._05.dts.GetJobStatusRequest</value>
+                <value>org.dataminx.schemas.dts._2009._05.dts.GetJobStatusResponse</value>
+            </list>
+        </property>
+        <property name="schema" value="classpath:minx-dts.xsd"/>
+        
+    
+        <!--
+          <property name="contextPath"
+          value="org.dataminx.schemas.dts._2009._05.dts"/>
+        -->
+    </bean>
 
-	<bean id="dataTransferService" class="org.dataminx.dts.service.impl.DataTransferServiceImpl">
-		<description>
-			This bean is our "business" service.
-		</description>
-	</bean>
+    <!-- Map existing exceptions that can be thrown on the Web S into WS Faults -->
+    <bean class="org.springframework.ws.soap.server.endpoint.SoapFaultAnnotationExceptionResolver">
+        <description>
+            This exception resolver maps exceptions with the @SoapFault annotation to SOAP Faults.
+        </description>
+        <property name="order" value="1"/>
+    </bean>
+        
+    <bean class="org.springframework.ws.soap.server.endpoint.SoapFaultMappingExceptionResolver">
+        <description>
+            This exception resolver maps other exceptions to SOAP Faults. Both UnmarshallingException and
+            ValidationFailureException are mapped to a SOAP Fault with a "Client" fault code.
+            All other exceptions are mapped to a "Server" error code, the default.
+        </description>
+        <property name="defaultFault" value="SERVER"/>
+        <property name="exceptionMappings">
+            <props>
+                <prop key="org.springframework.oxm.UnmarshallingFailureException">CLIENT,Invalid request</prop>
+                <prop key="org.springframework.oxm.ValidationFailureException">CLIENT,Invalid request</prop>
+            </props>
+        </property>
+        <property name="order" value="2"/>
+    </bean>
 
-	<!-- Configure XML Marshaller -->
-	<bean
-		class="org.springframework.ws.server.endpoint.adapter.GenericMarshallingMethodEndpointAdapter">
-		<constructor-arg ref="marshaller" />
-	</bean>
+    <!--
+    uncomment this if JAXB Marshalling will be used on the Client
+    <bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">
+        <property name="messageFactory">
+            <bean class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory" />
+        </property>
+        <property name="defaultUri" value="http://localhost:8080/dts/" />
+        <property name="marshaller" ref="marshaller" />
+        <property name="unmarshaller" ref="marshaller" />
+    </bean>
+    -->
 
-	<bean id="marshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
-		<property name="classesToBeBound">
-			<list>
-				<value>
-					org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest
-				</value>
-				<value>
-					org.dataminx.schemas.dts._2009._05.dts.SubmitJobResponse
-				</value>
- 			    <value>
-					org.dataminx.schemas.dts._2009._05.dts.CancelJobRequest
-				</value>
-				<value>
-					org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest
-				</value>
-				<value>
-					org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest
-				</value>
-				<value>
-					org.dataminx.schemas.dts._2009._05.dts.GetJobStatusRequest
-				</value>
-				<value>
-					org.dataminx.schemas.dts._2009._05.dts.GetJobStatusResponse
-				</value>
-			</list>
-		</property>
-
-		<!-- <property name="contextPath" value="org.dataminx.schemas.dts._2009._05.dts"/> -->
-	</bean>
-
-<!-- uncomment this if JAXB Marshalling will be used on the Client
-
-	<bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">
-		<property name="messageFactory">
-			<bean class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory" />
-		</property>
-		<property name="defaultUri" value="http://localhost:8080/dts/" />
-		<property name="marshaller" ref="marshaller" />
-		<property name="unmarshaller" ref="marshaller" />
-	</bean>
--->
 
 
 </beans>

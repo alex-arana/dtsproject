@@ -1,5 +1,6 @@
 package org.dataminx.dts.service;
 
+import org.dataminx.dts.domain.repo.JobDao;
 import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
 
 /**
@@ -8,6 +9,13 @@ import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
  * @author Gerson Galang
  */
 public interface DataTransferService {
+
+    /**
+     * The job repository to be used by the Data Transfer Service
+     *
+     * @param jobRepository the job repository
+     */
+    void setJobRepository(JobDao jobRepository);
 
     /**
      * Process the submitted job.

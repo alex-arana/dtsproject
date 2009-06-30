@@ -2,15 +2,23 @@ package org.dataminx.dts.service.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataminx.dts.domain.model.Job;
+import org.dataminx.dts.domain.model.JobStatus;
+import org.dataminx.dts.domain.repo.JobDao;
 import org.dataminx.dts.service.DataTransferService;
+import org.dataminx.dts.ws.DtsJobDefinitionException;
+import org.dataminx.schemas.dts._2009._05.dts.DataTransferType;
 import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
 import org.dataminx.schemas.dts._2009._05.dts.StatusValueEnumeration;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class DataTransferServiceImpl.
+ * The Data Transfer Service Implementation. This class interacts with the DTS domain layer and hands over
+ * the submitted jobs to the DTS Messaging System which then forwards them to the DTS Worker Nodes.
+ *
+ * @author Gerson Galang
  */
 public class DataTransferServiceImpl implements DataTransferService {
 
@@ -22,6 +30,16 @@ public class DataTransferServiceImpl implements DataTransferService {
 
     /** The test jobs. */
     private Map<String, TestJob> mDummyJobs;
+
+    /** The job repository for this DTS implementation. */
+    private JobDao mJobRepository;
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setJobRepository(JobDao jobRepository) {
+        mJobRepository = jobRepository;
+    }
 
     /**
      * {@inheritDoc}
@@ -49,7 +67,7 @@ public class DataTransferServiceImpl implements DataTransferService {
             // for convenience sake, there will be other 9 dummy jobs
             for (int i = 0; i < 9; i++) {
                 dummyJob = new TestJob();
-                dummyJob.setId(java.util.UUID.randomUUID().toString());
+                dummyJob.setId(UUID.randomUUID().toString());
                 dummyJob.setName("job_000" + i);
                 dummyJob.setStatus(StatusValueEnumeration.CREATED);
                 mDummyJobs.put(dummyJob.getId(), dummyJob);
@@ -60,10 +78,40 @@ public class DataTransferServiceImpl implements DataTransferService {
         // TODO: put the code that integrates this module to the domain layer
 
 
-        // TODO: make sure that the job definition is valid before the job
-        // gets added onto the DB
+        // TODO: move the XML document checking capability to a separate class
 
-        return null;
+        // we'll assume that once we get to this point, the job definition that the user
+        // submitted is valid or conforms to the schema
+
+        // now let's check for semantic issues..
+        // assume we require the following fields to be filled up in the job definition document
+        //   * jobname - can't be an empty string
+        //   * uri - can't be an empty string
+        if (jobName.trim().equals("")) {
+            throw new DtsJobDefinitionException("Invalid request. Empty job name.");
+        }
+        for (DataTransferType transfer : job.getJobDescription().getDataTransfer()) {
+            if (transfer.getSource().getURI().trim().equals("")) {
+                throw new DtsJobDefinitionException("Invalid request. Empty SourceURI.");
+            }
+            if (transfer.getTarget().getURI().trim().equals("")) {
+                throw new DtsJobDefinitionException("Invalid request. Empty TargetURI.");
+            }
+        }
+
+        // we now know that at this point, all the required fields from the job definition has
+        // been provided by the user. let's give the job a resource key and save it in the DB
+        Job newJob = new Job();
+        String newJobResourceKey = UUID.randomUUID().toString();
+        newJob.setName(jobName);
+        newJob.setResourceKey(newJobResourceKey);
+        newJob.setStatus(JobStatus.CREATED);
+        newJob.setSubjectName("NEW_USER");
+        mJobRepository.saveOrUpdate(newJob);
+
+        // TODO: now let's submit the job to JMS..
+
+        return newJobResourceKey;
     }
 
     /**
@@ -77,10 +125,14 @@ public class DataTransferServiceImpl implements DataTransferService {
             TestJob job = mDummyJobs.get(jobId);
             job.setStatus(StatusValueEnumeration.DONE);
         }
-        //else {
-            // TODO: do the real thing, send a cancel job message to the worker node
-            // wait for its response and then update the DB
-        //}
+        else {
+            // TODO: let's send a cancel message via JMS to the worker node
+
+            // after that, let's update the status of this job..
+            Job job = mJobRepository.findByResourceKey(jobId);
+            job.setStatus(JobStatus.DONE);
+            mJobRepository.saveOrUpdate(job);
+        }
     }
 
     /**
@@ -93,10 +145,14 @@ public class DataTransferServiceImpl implements DataTransferService {
             TestJob job = mDummyJobs.get(jobId);
             job.setStatus(StatusValueEnumeration.SUSPENDED);
         }
-        //else {
-            // TODO: do the real thing, send a suspend job message to the worker node
-            // wait for its response and then update the DB
-        //}
+        else {
+            // TODO: let's send a suspend message via JMS to the worker node
+
+            // after that, let's update the status of this job..
+            Job job = mJobRepository.findByResourceKey(jobId);
+            job.setStatus(JobStatus.SUSPENDED);
+            mJobRepository.saveOrUpdate(job);
+        }
     }
 
     /**
@@ -109,10 +165,14 @@ public class DataTransferServiceImpl implements DataTransferService {
             TestJob job = mDummyJobs.get(jobId);
             job.setStatus(StatusValueEnumeration.TRANSFERRING);
         }
-        //else {
-            // TODO: do the real thing, send a resume job message to the worker node
-            // wait for its response and then update the DB
-        //}
+        else {
+            // TODO: let's send the resume message via JMS to the worker node..
+
+            // after that, let's update the status of this job..
+            Job job = mJobRepository.findByResourceKey(jobId);
+            job.setStatus(JobStatus.TRANSFERRING);
+            mJobRepository.saveOrUpdate(job);
+        }
     }
 
     /**
@@ -127,8 +187,9 @@ public class DataTransferServiceImpl implements DataTransferService {
         // else...
         // TODO: need to get this info from the DB.. part of this code need to have the smarts
         // to figure out which status the job is on based on the timing details provided
-        // in the DB
-        return null;
+        // in the DB. if the smarts is not going to be put here, we need to have a way of having
+        // the status get updated every time a new job event gets triggered
+        return mJobRepository.findByResourceKey(jobId).getStatus().toString();
     }
 
     /**

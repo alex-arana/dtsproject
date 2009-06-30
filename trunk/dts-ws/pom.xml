@@ -18,8 +18,14 @@
   <dependencies>
     <dependency>
       <groupId>${dataminx.group}</groupId>
-      <artifactId>dts-jaxb</artifactId>      
+      <artifactId>dts-jaxb</artifactId>
     </dependency>
+    
+    <dependency>
+      <groupId>${dataminx.group}</groupId>
+      <artifactId>dts-domain</artifactId>
+    </dependency>
+    
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
