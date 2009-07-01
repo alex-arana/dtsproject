@@ -63,7 +63,7 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
      * {@inheritDoc}
      */
     @Override
-    public DtsJob createJob(Object criteria) {
+    public DtsJob createJob(final String jobId, final Object criteria) {
         // obtain the name of the DTS job that is going to handle this request
         Assert.notNull(criteria, "Criteria element cannot be null in call to DTS job factory.");
         final String dtsJobName = DTS_JOB_REGISTRY.get(criteria.getClass().getName());
@@ -77,6 +77,6 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
         }
 
         // create a new instance of the job using the spring bean factory
-        return (DtsJob) mBeanFactory.getBean(dtsJobName, new Object[] {criteria, mJobRepository});
+        return (DtsJob) mBeanFactory.getBean(dtsJobName, new Object[] {jobId, criteria, mJobRepository});
     }
 }

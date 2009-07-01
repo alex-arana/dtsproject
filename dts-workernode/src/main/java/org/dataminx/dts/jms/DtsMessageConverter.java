@@ -53,7 +53,7 @@ public class DtsMessageConverter implements MessageConverter {
      */
     @Override
     public Object fromMessage(Message message) throws JMSException, MessageConversionException {
-        final String jobId = message.getJMSMessageID();
+        final String jobId = message.getJMSCorrelationID();
         LOG.info("A new JMS message has been received: " + jobId);
 
         final Object payload = extractMessagePayload(message);
@@ -64,7 +64,7 @@ public class DtsMessageConverter implements MessageConverter {
         LOG.debug("transformed message payload: " + dtsJobRequest);
 
         // invoke the job factory to create a new job instance
-        final DtsJob dtsJob = mJobFactory.createJob(dtsJobRequest);
+        final DtsJob dtsJob = mJobFactory.createJob(jobId, dtsJobRequest);
         LOG.info("Launching DTS Job: " + dtsJob);
 
         // finally add any additional parameters and return the job request to the framework

@@ -71,7 +71,8 @@ public class TestProcessDtsJobMessage {
             "/minx:submitJobRequest/minx:JobDefinition/minx:JobDescription/minx:JobIdentification/minx:JobName");
         Element node = (Element) xpathEvaluator.selectSingleNode(dtsJob);
         Assert.notNull(node, "unable to select //JobName");
-        node.setText(generateNewJobId());
+        final String dtsJobId = generateNewJobId();
+        node.setText(dtsJobId);
 
         xpathEvaluator = createXPathInstance(
             "/minx:submitJobRequest/minx:JobDefinition/minx:JobDescription/minx:DataTransfer");
@@ -91,12 +92,13 @@ public class TestProcessDtsJobMessage {
         final Logger logger = LoggerFactory.getLogger(getClass());
         if (logger.isDebugEnabled()) {
             final XMLOutputter formatter = new XMLOutputter(Format.getPrettyFormat());
-            logger.debug("submitDtsJobAsDocument:" + LINE_SEPARATOR + formatter.outputString(dtsJob));
+            logger.debug(String.format("submitDtsJobAsDocument [id='%s']:%s%s",
+                dtsJobId, LINE_SEPARATOR, formatter.outputString(dtsJob)));
         }
 
         //logger.info(client.submitJob(dtsJob));
         final DOMOutputter outputter = new DOMOutputter();
-        mJmsQueueSender.doSend(outputter.output(dtsJob));
+        mJmsQueueSender.doSend(dtsJobId, outputter.output(dtsJob));
     }
 
     @Test
@@ -119,8 +121,9 @@ public class TestProcessDtsJobMessage {
         dataTransfer.setSource(source);
         dataTransfer.setTarget(target);
 
+        final String dtsJobId = generateNewJobId();
         final JobIdentificationType jobIdentification = factory.createJobIdentificationType();
-        jobIdentification.setJobName(generateNewJobId());
+        jobIdentification.setJobName(dtsJobId);
         jobIdentification.setDescription("Copies the DataMINX Logo from a HTTP source to a local folder");
 
         final JobDescriptionType jobDescription = factory.createJobDescriptionType();
@@ -139,8 +142,9 @@ public class TestProcessDtsJobMessage {
 
         final Logger logger = LoggerFactory.getLogger(getClass());
         final String dtsJobRequest = XmlUtils.documentToString(document);
-        logger.debug("submitDtsJobAsText:" + LINE_SEPARATOR + dtsJobRequest);
-        mJmsQueueSender.doSend(dtsJobRequest);
+        logger.debug(String.format("submitDtsJobAsText ['%s']:%s%s",
+            dtsJobId, LINE_SEPARATOR, dtsJobRequest));
+        mJmsQueueSender.doSend(dtsJobId, dtsJobRequest);
     }
 
     private XPath createXPathInstance(final String selector) throws JDOMException {

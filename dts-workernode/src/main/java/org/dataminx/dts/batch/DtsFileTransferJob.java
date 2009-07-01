@@ -46,26 +46,17 @@ public class DtsFileTransferJob extends DtsJob {
     /**
      * Constructs a new instance of <code>DtsSubmitJob</code> using the specified job request details.
      *
+     * @param jobId Unique job identifier
      * @param jobRequest Job request details
      * @param jobRepository Job repository
      */
-    public DtsFileTransferJob(final SubmitJobRequest jobRequest, final JobRepository jobRepository) {
+    public DtsFileTransferJob(final String jobId,
+        final SubmitJobRequest jobRequest, final JobRepository jobRepository) {
+
+        super(jobId);
         Assert.notNull(jobRequest, "Cannot construct a DTS submit job without the required job details.");
         mJobRequest = jobRequest;
         setJobRepository(jobRepository);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getJobId() {
-        String jobId = null;
-        final JobIdentificationType jobIdentification = getJobIdentification();
-        if (jobIdentification != null) {
-            jobId = jobIdentification.getJobName();
-        }
-        return jobId;
     }
 
     /**

@@ -5,11 +5,16 @@
  */
 package org.dataminx.dts.jms;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.Queue;
+import javax.jms.Session;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessageCreator;
+import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -35,10 +40,18 @@ public class JobSubmitQueueSender implements InitializingBean {
     /**
      * Sends a pre-configured message type to a remote destination.
      *
-     * @param msg Message to send
+     * @param jobId DTS Job ID
+     * @param message JMS message payload
      */
-    public void doSend(final Object msg) {
-        mJmsTemplate.convertAndSend(mQueue, msg);
+    public void doSend(final String jobId, final Object message) {
+        mJmsTemplate.send(mQueue, new MessageCreator() {
+            public Message createMessage(Session session) throws JMSException {
+                final MessageConverter messageConverter = mJmsTemplate.getMessageConverter();
+                final Message jmsMessage = messageConverter.toMessage(message, session);
+                jmsMessage.setJMSCorrelationID(jobId);
+                return jmsMessage;
+            }
+        });
     }
 
     /**
