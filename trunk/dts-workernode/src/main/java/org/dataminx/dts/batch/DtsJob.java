@@ -22,9 +22,23 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public abstract class DtsJob extends SimpleJob {
+    /** The unique DTS job identifier. */
+    private final String mJobId;
+
     /** A reference to the application's job notification service. */
     @Autowired
     private JobNotificationService mJobNotificationService;
+
+    /**
+     * Constructs a new instance of {@link DtsJob} using the specified job identifier.
+     * <p>
+     * The input job ID <em>must</em> be unique across the entire job repository.
+     *
+     * @param jobId Unique identifier for this job.
+     */
+    public DtsJob(final String jobId) {
+        mJobId = jobId;
+    }
 
     /**
      * {@inheritDoc}
@@ -37,7 +51,9 @@ public abstract class DtsJob extends SimpleJob {
      *
      * @return Job ID
      */
-    public abstract String getJobId();
+    public String getJobId() {
+        return mJobId;
+    }
 
     /**
      * {@inheritDoc}

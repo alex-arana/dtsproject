@@ -28,6 +28,7 @@
       connection-factory="jmsConnectionFactory"
       destination="jmsJobSubmitQueue"
       message-converter="dtsMessageConverter"
+      transaction-manager="jmsTransactionManager"
       />
 
   <!--

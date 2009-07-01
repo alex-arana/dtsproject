@@ -14,6 +14,11 @@
     <property name="cacheProducers" value="${si.jms.cacheProducers}"/>
   </bean>
 
+  <bean id="jmsTransactionManager"
+        class="org.springframework.jms.connection.JmsTransactionManager">
+    <property name="connectionFactory" ref="jmsConnectionFactory" />
+  </bean>
+
   <bean id="jmsJobSubmitQueue" class="org.apache.activemq.command.ActiveMQQueue">
     <constructor-arg index="0" value="${si.jms.jobSubmitQueueName}"/>
   </bean>
@@ -26,5 +31,4 @@
     <property name="connectionFactory" ref="jmsConnectionFactory"/>
     <property name="defaultDestination" ref="jmsJobEventQueue"/>
   </bean>
-
 </beans>
