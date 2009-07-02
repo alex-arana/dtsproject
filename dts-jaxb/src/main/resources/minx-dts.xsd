@@ -43,6 +43,8 @@
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
+            <xsd:element name="Status" type="minx:StatusValueEnumeration"
+                minOccurs="0" maxOccurs="1" />
             <xsd:element name="WorkerNodeHost" type="xsd:string"
                 minOccurs="0" maxOccurs="1" />
             <xsd:element name="SuccessFlag" type="xsd:boolean"
@@ -116,7 +118,7 @@
 
     <xsd:complexType name="SourceTargetType">
         <xsd:sequence>
-            <xsd:element name="URI" type="xsd:anyURI" minOccurs="0" />
+            <xsd:element name="URI" type="xsd:anyURI" minOccurs="1" />
             <xsd:element ref="minx:Credential" minOccurs="0" />
             <xsd:element ref="minx:URIProperties" minOccurs="0" />
             <xsd:any namespace="##other" processContents="lax"
