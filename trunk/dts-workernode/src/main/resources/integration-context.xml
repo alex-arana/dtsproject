@@ -60,6 +60,7 @@
         <beans:value>org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest</beans:value>
         <beans:value>org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest</beans:value>
         <beans:value>org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest</beans:value>
+        <beans:value>org.dataminx.schemas.dts._2009._05.dts.JobEventUpdateRequest</beans:value>
       </beans:list>
     </beans:property>
   </beans:bean>
@@ -67,11 +68,6 @@
   <beans:bean id="dtsMessagePayloadTransformer"
               class="org.dataminx.dts.jms.DtsMessagePayloadTransformer">
     <beans:constructor-arg index="0" ref="dtsJaxbUnmarshaller"/>
-  </beans:bean>
-
-  <beans:bean id="dtsMessageConverter"
-              class="org.dataminx.dts.jms.DtsMessageConverter">
-    <beans:property name="transformer" ref="dtsMessagePayloadTransformer"/>
   </beans:bean>
 
 </beans:beans>

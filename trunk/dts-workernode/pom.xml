@@ -41,6 +41,10 @@
       <artifactId>dts-jaxb</artifactId>
       <groupId>${dataminx.group}</groupId>
     </dependency>
+    <dependency>
+      <artifactId>dts-domain</artifactId>
+      <groupId>${dataminx.group}</groupId>
+    </dependency>
 
     <!-- SL4J -->
     <dependency>

@@ -7,6 +7,7 @@ package org.dataminx.dts.batch;
 
 import static org.dataminx.dts.common.DtsWorkerNodeConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
 
+import org.dataminx.dts.domain.model.JobStatus;
 import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
 import org.dataminx.schemas.dts._2009._05.dts.JobDescriptionType;
 import org.dataminx.schemas.dts._2009._05.dts.JobIdentificationType;
@@ -115,8 +116,11 @@ public class DtsFileTransferJob extends DtsJob {
     public void doExecute(final JobExecution execution)
         throws JobInterruptedException, JobRestartException, StartLimitExceededException {
 
+        // first set the job start time
+        registerStartTime();
+
         //TODO determine exactly what job notifications we need to return and when
-        getJobNotificationService().notifyJobStatus(getJobId(), "STARTED");
+        getJobNotificationService().notifyJobStatus(this, JobStatus.TRANSFERRING);
 
         // first, store the DTS job request object in the job execution context
         final ExecutionContext context = execution.getExecutionContext();
@@ -136,7 +140,9 @@ public class DtsFileTransferJob extends DtsJob {
             execution.setExitStatus(stepExecution.getExitStatus());
         }
 
-        getJobNotificationService().notifyJobStatus(getJobId(), "FINISHED");
+        // TODO move this somewhere it always gets called
+        registerCompletedTime();
+        getJobNotificationService().notifyJobStatus(this, JobStatus.DONE);
     }
 
     /**
