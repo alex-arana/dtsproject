@@ -8,42 +8,47 @@ package org.dataminx.dts.domain.model;
 public enum JobStatus {
 
     /** Created. */
-    CREATED(0),
+    CREATED(0, "Created"),
 
     /** Scheduled. */
-    SCHEDULED(1),
+    SCHEDULED(1, "Scheduled"),
 
     /** Transferring. */
-    TRANSFERRING(2),
+    TRANSFERRING(2, "Transferring"),
 
     /** Done. */
-    DONE(3),
+    DONE(3, "Done"),
 
     /** Suspended. */
-    SUSPENDED(4),
+    SUSPENDED(4, "Suspended"),
 
     /** Failed. */
-    FAILED(5),
+    FAILED(5, "Failed"),
 
     /** Failed cleanly. */
-    FAILED_CLEAN(6),
+    FAILED_CLEAN(6, "Failed:Clean"),
 
     /** Failed but did not get to do a proper cleanup. */
-    FAILED_UNCLEAN(7),
+    FAILED_UNCLEAN(7, "Failed:Unclean"),
 
     /** Failed with unknown reason for failure. */
-    FAILED_UNKNOWN(8);
+    FAILED_UNKNOWN(8, "Failed:Unknown");
 
-    /** The job status. */
-    private int mkJobStatus;
+    /** The job status int representation. */
+    private int mJobStatusInt;
+
+    /** The job status String representation. */
+    private String mJobStatusString;
 
     /**
      * Instantiates a new job status.
      *
-     * @param jobStatus the job status
+     * @param jobStatusInt the integer representation of the job status
+     * @param jobStatusStr the string representation of the job status
      */
-    JobStatus(int jobStatus) {
-        mkJobStatus = jobStatus;
+    JobStatus(int jobStatusInt, String jobStatusStr) {
+        mJobStatusInt = jobStatusInt;
+        mJobStatusString = jobStatusStr;
     }
 
     /**
@@ -52,29 +57,18 @@ public enum JobStatus {
      * @return the int value of the JobStatus
      */
     public int getIntValue() {
-        return mkJobStatus;
+        return mJobStatusInt;
     }
 
     /**
-     * {@inheritDoc}
+     * Gets the string value representation of the JobStatus as specified in the
+     * MINX XSD schema. Note that this is not the same as the String returned by
+     * Enum's toString method.
+     *
+     * @return the string value representation of the JobStatus as specified in the
+     * MINX XSD schema
      */
-    @Override
-    public String toString() {
-        String currentName = name().toString();
-        StringBuffer nameWithCorrectCase = new StringBuffer();
-        int underscoreIndex = currentName.indexOf("_");
-
-        // workaround so checkstyle doesn't complain with magic number comparisons
-        nameWithCorrectCase.append(currentName.substring(0, 1).toUpperCase());
-
-        if (underscoreIndex > 0) {
-            // we definitely have a subtype of the Failed status
-            nameWithCorrectCase.append(currentName.substring(1, underscoreIndex).toLowerCase());
-            nameWithCorrectCase.append(":");
-            nameWithCorrectCase.append(currentName.substring(underscoreIndex + 1, underscoreIndex + 2).toUpperCase());
-
-        }
-        nameWithCorrectCase.append(currentName.substring(underscoreIndex + 2).toLowerCase());
-        return nameWithCorrectCase.toString();
+    public String getStringValue() {
+        return mJobStatusString;
     }
 }
