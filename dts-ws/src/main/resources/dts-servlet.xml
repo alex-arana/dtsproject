@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
+    <!-- Enable Spring beans annotation support -->
+    <context:annotation-config/>
+    
     <!-- Add automatic WSDL generation support -->
     <bean id="dts"
         class="org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition">
@@ -43,10 +50,13 @@
         <property name="dataTransferService" ref="dataTransferService" />
     </bean>
   
-    <bean id="dataTransferService" class="org.dataminx.dts.service.impl.DataTransferServiceImpl">
+    <bean id="dataTransferService" class="org.dataminx.dts.service.DataTransferServiceImpl">
         <description>This bean is our "business" service.</description>
-        <property name="jobRepository" ref="jobRepository" />
+        <!-- <property name="jobRepository" ref="jobRepository" /> -->
     </bean>
+    
+    <!-- Message Sender -->
+    <bean id="messageSender" class="org.dataminx.dts.jms.JobSubmitQueueSender" />
   
     <!-- Configure XML Marshaller -->
     <bean class="org.springframework.ws.server.endpoint.adapter.GenericMarshallingMethodEndpointAdapter">
@@ -66,13 +76,8 @@
             </list>
         </property>
         <property name="schema" value="classpath:minx-dts.xsd"/>
-        
-    
-        <!--
-          <property name="contextPath"
-          value="org.dataminx.schemas.dts._2009._05.dts"/>
-        -->
     </bean>
+    
 
     <!-- Map existing exceptions that can be thrown on the Web S into WS Faults -->
     <bean class="org.springframework.ws.soap.server.endpoint.SoapFaultAnnotationExceptionResolver">
@@ -97,18 +102,6 @@
         </property>
         <property name="order" value="2"/>
     </bean>
-
-    <!--
-    uncomment this if JAXB Marshalling will be used on the Client
-    <bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">
-        <property name="messageFactory">
-            <bean class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory" />
-        </property>
-        <property name="defaultUri" value="http://localhost:8080/dts/" />
-        <property name="marshaller" ref="marshaller" />
-        <property name="unmarshaller" ref="marshaller" />
-    </bean>
-    -->
 
 
 

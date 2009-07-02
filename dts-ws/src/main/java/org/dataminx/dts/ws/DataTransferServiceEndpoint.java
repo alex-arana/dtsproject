@@ -58,7 +58,8 @@ public class DataTransferServiceEndpoint {
         LOGGER.debug("In DataTransferServiceEndpoint.doit(SubmitJobRequest), job name " + jobName
             + " has arrived.");
 
-        String jobId = mDataTransferService.submitJob(request.getJobDefinition());
+        //String jobId = mDataTransferService.submitJob(request.getJobDefinition());
+        String jobId = mDataTransferService.submitJob(request);
         LOGGER.debug("In DataTransferServiceEndpoint.doit(SubmitJobRequest), returned jobId is "
             + jobId);
 
