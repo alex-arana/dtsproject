@@ -16,8 +16,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * The JobJpaDaoImpl Unit Test.
+ *
+ * @author Gerson Galang
  */
-@ContextConfiguration(locations = { "/applicationContext.xml" })
+@ContextConfiguration(locations = { "/domain-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class JobJpaDaoImplTest {
 
