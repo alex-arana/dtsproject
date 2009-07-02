@@ -67,6 +67,19 @@
       <groupId>org.springframework.ws</groupId>
       <artifactId>spring-ws-core-tiger</artifactId>
     </dependency>
+    
+    <!-- JMS -->
+    <dependency>
+      <groupId>javax.jms</groupId>
+      <artifactId>jms</artifactId>
+    </dependency>
+    
+    <!-- ActiveMQ -->
+    <dependency>
+      <artifactId>activemq-all</artifactId>
+      <groupId>org.apache.activemq</groupId>
+      <scope>runtime</scope>
+    </dependency>
 
     <!-- client stuff... -->
     <dependency>

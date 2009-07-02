@@ -1,7 +1,10 @@
 package org.dataminx.dts.service;
 
-import org.dataminx.dts.domain.repo.JobDao;
+import org.dataminx.schemas.dts._2009._05.dts.CancelJobRequest;
 import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
+import org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest;
+import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
+import org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest;
 
 /**
  * This specifies the operations supported by the Data Transfer Service WS.
@@ -9,13 +12,6 @@ import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
  * @author Gerson Galang
  */
 public interface DataTransferService {
-
-    /**
-     * The job repository to be used by the Data Transfer Service
-     *
-     * @param jobRepository the job repository
-     */
-    void setJobRepository(JobDao jobRepository);
 
     /**
      * Process the submitted job.
@@ -53,5 +49,14 @@ public interface DataTransferService {
      * @return the job status
      */
     String getJobStatus(String jobId);
+
+    // *** TEMP METHODS UNTIL I TALK TO ALEX ON WHAT TO DO WITH THE MESSAGE FORMAT ISSUE
+    String submitJob(SubmitJobRequest submitJobRequest);
+    void cancelJob(CancelJobRequest cancelJobRequest);
+    void suspendJob(SuspendJobRequest suspendJobRequest);
+    void resumeJob(ResumeJobRequest resumeJobRequest);
+    // no need to overload getJobStatus with the signature below as we don't need to query the WN
+    // for the status of the job
+    //String getJobStatus(GetJobStatusRequest getJobStatusRequest);
 
 }

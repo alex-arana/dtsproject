@@ -10,7 +10,7 @@
 		</servlet-class>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>classpath:/dts-servlet.xml classpath:/domain-context.xml</param-value>
+			<param-value>classpath:/dts-servlet.xml classpath:/domain-context.xml classpath:/jms-context.xml</param-value>
 		</init-param>
 
 	</servlet>
