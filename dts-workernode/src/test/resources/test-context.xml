@@ -16,8 +16,6 @@
     don't care to mock for the purposes of testing.
   -->
   <context:component-scan base-package="org.dataminx.dts">
-    <context:exclude-filter type="assignable" expression="org.dataminx.dts.batch.DtsJobFactoryImpl"/>
-    <context:exclude-filter type="assignable" expression="org.dataminx.dts.jms.DtsMessageConverter"/>
     <context:exclude-filter type="assignable" expression="org.dataminx.dts.vfs.DtsFileSystemManager"/>
     <context:exclude-filter type="assignable" expression="org.dataminx.dts.service.FileCopyingServiceImpl"/>
   </context:component-scan>
@@ -33,6 +31,11 @@
         <value>org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest</value>
       </list>
     </property>
+  </bean>
+
+  <bean id="dtsMessagePayloadTransformer"
+              class="org.dataminx.dts.jms.DtsMessagePayloadTransformer">
+    <constructor-arg index="0" ref="dtsJaxbUnmarshaller"/>
   </bean>
 
   <bean id="applicationProperties"

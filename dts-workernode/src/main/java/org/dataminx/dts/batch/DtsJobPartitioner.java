@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
-import org.dataminx.dts.common.InputDataUtils;
+import org.dataminx.dts.common.util.InputDataUtils;
 import org.dataminx.schemas.dts._2009._05.dts.DataTransferType;
 import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class DtsJobPartitioner implements Partitioner {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, ExecutionContext> partition(int gridSize) {
+    public Map<String, ExecutionContext> partition(final int gridSize) {
         Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
         final List<DataTransferType> dataTransfers = InputDataUtils.getDataTransfers(mSubmitJobRequest);
         if (CollectionUtils.isEmpty(dataTransfers)) {
@@ -59,7 +59,7 @@ public class DtsJobPartitioner implements Partitioner {
         int i = 0;
         final Map<String, ExecutionContext> map = new HashMap<String, ExecutionContext>(gridSize);
         for (final DataTransferType dataTransfer : dataTransfers) {
-            ExecutionContext context = new ExecutionContext();
+            final ExecutionContext context = new ExecutionContext();
             context.put(DTS_DATA_TRANSFER_STEP_KEY, dataTransfer);
             map.put(String.format("%s:%03d", DTS_DATA_TRANSFER_STEP_KEY, i), context);
             i++;

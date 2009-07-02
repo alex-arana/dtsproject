@@ -5,6 +5,7 @@
  */
 package org.dataminx.dts.batch;
 
+import org.dataminx.dts.service.DtsWorkerNodeInformationService;
 import org.dataminx.dts.service.JobNotificationService;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInterruptedException;
@@ -24,6 +25,16 @@ import org.springframework.stereotype.Component;
 public abstract class DtsJob extends SimpleJob {
     /** The unique DTS job identifier. */
     private final String mJobId;
+
+    /** The time in milliseconds when the job started executing. */
+    private long mStartTime;
+
+    /** The time in milliseconds when the job completed executing. */
+    private long mCompletedTime;
+
+    /** A reference to the application's environment information service. */
+    @Autowired
+    private DtsWorkerNodeInformationService mDtsWorkerNodeInformationService;
 
     /** A reference to the application's job notification service. */
     @Autowired
@@ -45,6 +56,33 @@ public abstract class DtsJob extends SimpleJob {
      */
     public abstract void doExecute(JobExecution execution)
         throws JobInterruptedException, JobRestartException, StartLimitExceededException;
+
+    /**
+     * Returns the time when this job started executing.
+     *
+     * @return job's execution start time in milliseconds
+     */
+    public long getStartTime() {
+        return mStartTime;
+    }
+
+    /**
+     * Convenience method that sets the job start time using the DTS WorkerNode's current time.
+     */
+    public void registerStartTime() {
+        mStartTime = mDtsWorkerNodeInformationService.getCurrentTime().getTime();
+    }
+
+    public long getCompletedTime() {
+        return mCompletedTime;
+    }
+
+    /**
+     * Convenience method that sets the job completed time using the DTS WorkerNode's current time.
+     */
+    public void registerCompletedTime() {
+        mCompletedTime = mDtsWorkerNodeInformationService.getCurrentTime().getTime();
+    }
 
     /**
      * Returns the ID that uniquely identifies this job.
@@ -81,6 +119,10 @@ public abstract class DtsJob extends SimpleJob {
     @Override
     public JobParametersIncrementer getJobParametersIncrementer() {
         return null;
+    }
+
+    public DtsWorkerNodeInformationService getDtsWorkerNodeInformationService() {
+        return mDtsWorkerNodeInformationService;
     }
 
     public JobNotificationService getJobNotificationService() {

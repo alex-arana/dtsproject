@@ -3,7 +3,7 @@
  *
  * License: To Be Announced
  */
-package org.dataminx.dts.common;
+package org.dataminx.dts.common.util;
 
 import java.util.List;
 import org.dataminx.schemas.dts._2009._05.dts.DataTransferType;
