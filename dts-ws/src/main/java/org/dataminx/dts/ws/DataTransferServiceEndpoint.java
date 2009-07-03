@@ -13,6 +13,7 @@ import org.dataminx.schemas.dts._2009._05.dts.StatusValueEnumeration;
 import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
 import org.dataminx.schemas.dts._2009._05.dts.SubmitJobResponse;
 import org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 
@@ -29,19 +30,11 @@ public class DataTransferServiceEndpoint {
     private static final Log LOGGER = LogFactory.getLog(DataTransferServiceEndpoint.class);
 
     /** The data transfer service. */
+    @Autowired
     private DataTransferService mDataTransferService;
 
     /** The object factory. */
     private final ObjectFactory mObjectFactory = new ObjectFactory();
-
-    /**
-     * Sets the DataTransferService for this endpoint.
-     *
-     * @param dataTransferService the data transfer service
-     */
-    public void setDataTransferService(DataTransferService dataTransferService) {
-        mDataTransferService = dataTransferService;
-    }
 
     /**
      * Handles the submit job request.
@@ -51,19 +44,11 @@ public class DataTransferServiceEndpoint {
      */
     @PayloadRoot(localPart = "submitJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/05/dts")
     public SubmitJobResponse doit(SubmitJobRequest request) {
-        //DataTransferResponseType response = objectFactory.createDataTransferResponseType();
-
-        String jobName =
-            request.getJobDefinition().getJobDescription().getJobIdentification().getJobName();
-        LOGGER.debug("In DataTransferServiceEndpoint.doit(SubmitJobRequest), job name " + jobName
-            + " has arrived.");
-
-        //String jobId = mDataTransferService.submitJob(request.getJobDefinition());
         String jobId = mDataTransferService.submitJob(request);
         LOGGER.debug("In DataTransferServiceEndpoint.doit(SubmitJobRequest), returned jobId is "
             + jobId);
 
-        SubmitJobResponse response = new SubmitJobResponse();
+        SubmitJobResponse response = mObjectFactory.createSubmitJobResponse();
         response.setJobId(jobId);
         return response;
     }
@@ -75,10 +60,7 @@ public class DataTransferServiceEndpoint {
      */
     @PayloadRoot(localPart = "cancelJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/05/dts")
     public void doit(CancelJobRequest request) {
-        LOGGER.debug("In DataTransferServiceEndpoint.doit(CancelJobRequest), cancel jobid: "
-            + request.getJobId());
-
-        mDataTransferService.cancelJob(request.getJobId());
+        mDataTransferService.cancelJob(request);
     }
 
     /**
@@ -88,10 +70,7 @@ public class DataTransferServiceEndpoint {
      */
     @PayloadRoot(localPart = "suspendJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/05/dts")
     public void doit(SuspendJobRequest request) {
-        LOGGER.debug("In DataTransferServiceEndpoint.doit(SuspendJobRequest), suspend jobid: "
-            + request.getJobId());
-
-        mDataTransferService.suspendJob(request.getJobId());
+        mDataTransferService.suspendJob(request);
     }
 
     /**
@@ -101,10 +80,7 @@ public class DataTransferServiceEndpoint {
      */
     @PayloadRoot(localPart = "resumeJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/05/dts")
     public void doit(ResumeJobRequest request) {
-        LOGGER.debug("In DataTransferServiceEndpoint.doit(ResumeJobRequest), resume jobid: "
-            + request.getJobId());
-
-        mDataTransferService.resumeJob(request.getJobId());
+        mDataTransferService.resumeJob(request);
     }
 
     /**
@@ -115,13 +91,10 @@ public class DataTransferServiceEndpoint {
      */
     @PayloadRoot(localPart = "getJobStatusRequest", namespace = "http://schemas.dataminx.org/dts/2009/05/dts")
     public GetJobStatusResponse doit(GetJobStatusRequest request) {
-        LOGGER.debug("In DataTransferServiceEndpoint.doit(GetJobStatusRequest), getJobStatus of job: "
-                + request.getJobId());
-
-        String status = mDataTransferService.getJobStatus(request.getJobId());
+        String status = mDataTransferService.getJobStatus(request);
 
         GetJobStatusResponse response = mObjectFactory.createGetJobStatusResponse();
-        StateType state = new StateType();
+        StateType state = mObjectFactory.createStateType();
         state.setValue(StatusValueEnumeration.fromValue(status));
         response.setState(state);
         return response;

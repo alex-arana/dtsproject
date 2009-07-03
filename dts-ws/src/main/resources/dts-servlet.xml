@@ -47,16 +47,17 @@
     <!-- Register Endpoint -->
     <bean id="dataTransferEndpoint" class="org.dataminx.dts.ws.DataTransferServiceEndpoint">
         <description>This endpoint handles data transfer requests.</description>
-        <property name="dataTransferService" ref="dataTransferService" />
     </bean>
   
     <bean id="dataTransferService" class="org.dataminx.dts.service.DataTransferServiceImpl">
         <description>This bean is our "business" service.</description>
-        <!-- <property name="jobRepository" ref="jobRepository" /> -->
     </bean>
     
     <!-- Message Sender -->
     <bean id="messageSender" class="org.dataminx.dts.jms.JobSubmitQueueSender" />
+    
+    <!-- Job Content Validator -->
+    <bean id="jobContentValidator" class="org.dataminx.dts.common.util.JobContentValidator" />
   
     <!-- Configure XML Marshaller -->
     <bean class="org.springframework.ws.server.endpoint.adapter.GenericMarshallingMethodEndpointAdapter">

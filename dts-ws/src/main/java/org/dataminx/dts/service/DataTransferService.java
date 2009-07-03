@@ -1,62 +1,62 @@
 package org.dataminx.dts.service;
 
 import org.dataminx.schemas.dts._2009._05.dts.CancelJobRequest;
-import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
+import org.dataminx.schemas.dts._2009._05.dts.GetJobStatusRequest;
 import org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest;
 import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
 import org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest;
 
 /**
- * This specifies the operations supported by the Data Transfer Service WS.
+ * This specifies the operations supported by the Data Transfer Service WS. The reason why the
+ * methods take in the Request objects is because they are needed by the Worker Node and there's no
+ * easy way of getting the Request objects from their child elements.
  *
  * @author Gerson Galang
  */
 public interface DataTransferService {
 
     /**
-     * Process the submitted job.
+     * Process the submit job request.
      *
-     * @param job the job definition
+     * @param submitJobRequest the submit job request
      * @return the Universally Unique Identifier (aka Global Unique Identifier) for the submitted job
      */
-    String submitJob(JobDefinitionType job);
+    String submitJob(SubmitJobRequest submitJobRequest);
+
 
     /**
-     * Cancel the job.
+     * Process the cancel job request.
      *
-     * @param jobId the Universally Unique Identifier (aka Global Unique Identifier) of the job to cancel
+     * @param cancelJobRequest the cancel job request
      */
-    void cancelJob(String jobId);
+    void cancelJob(CancelJobRequest cancelJobRequest);
+
 
     /**
-     * Suspend the job.
+     * Process the suspend job request.
      *
-     * @param jobId the Universally Unique Identifier (aka Global Unique Identifier) of the job to suspend
+     * @param suspendJobRequest the suspend job request
      */
-    void suspendJob(String jobId);
+    void suspendJob(SuspendJobRequest suspendJobRequest);
+
 
     /**
-     * Resume the job.
+     * Process the resume job request.
      *
-     * @param jobId the Universally Unique Identifier (aka Global Unique Identifier) of the job to resume
+     * @param resumeJobRequest the resume job request
      */
-    void resumeJob(String jobId);
+    void resumeJob(ResumeJobRequest resumeJobRequest);
+
 
     /**
-     * Gets the job status.
+     * Process the get job status request. The GetJobStatusRequest object doesn't get passed down to
+     * the Worker Node. The only reason why this method has been defined this way is so it uses the same
+     * standard as the rest of the methods provided by the web service.
      *
-     * @param jobId the Universally Unique Identifier (aka Global Unique Identifier) of the job being queried about
+     * @param getJobStatusRequest the get job status request
      * @return the job status
      */
-    String getJobStatus(String jobId);
+    String getJobStatus(GetJobStatusRequest getJobStatusRequest);
 
-    // *** TEMP METHODS UNTIL I TALK TO ALEX ON WHAT TO DO WITH THE MESSAGE FORMAT ISSUE
-    String submitJob(SubmitJobRequest submitJobRequest);
-    void cancelJob(CancelJobRequest cancelJobRequest);
-    void suspendJob(SuspendJobRequest suspendJobRequest);
-    void resumeJob(ResumeJobRequest resumeJobRequest);
-    // no need to overload getJobStatus with the signature below as we don't need to query the WN
-    // for the status of the job
-    //String getJobStatus(GetJobStatusRequest getJobStatusRequest);
 
 }
