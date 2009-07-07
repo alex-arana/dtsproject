@@ -79,7 +79,7 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         Document document = (Document) result.getNode();
 
         // now submit the job to the DTS WN
-        //mMessageSender.doSend(newJobResourceKey, document);
+        mMessageSender.doSend(newJobResourceKey, document);
 
         return newJobResourceKey;
     }

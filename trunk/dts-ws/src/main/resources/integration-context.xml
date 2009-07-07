@@ -1,0 +1,51 @@
+<beans:beans xmlns="http://www.springframework.org/schema/integration"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:jms="http://www.springframework.org/schema/integration/jms"
+    xmlns:si-xml="http://www.springframework.org/schema/integration/xml"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/integration
+           http://www.springframework.org/schema/integration/spring-integration-1.0.xsd
+           http://www.springframework.org/schema/integration/xml
+           http://www.springframework.org/schema/integration/xml/spring-integration-xml-1.0.xsd
+           http://www.springframework.org/schema/integration/jms
+           http://www.springframework.org/schema/integration/jms/spring-integration-jms-1.0.xsd">
+
+  <annotation-config/>
+
+  <!-- Defines a point-to-point channel for receiving DTS job event updates. -->
+  <channel id="dtsJobEvents"/>
+
+  <!--
+    Defines an inbound JMS channel adapter for the DTS job event queue.
+    The inbound adapter means we are receiving from JMS and placing an instance of
+    org.springframework.integration.core.Message on the configured channel.
+  -->
+  <jms:message-driven-channel-adapter
+      channel="dtsJobEvents"
+      connection-factory="jmsConnectionFactory"
+      destination="jmsJobEventQueue"
+      message-converter="dtsWSMessageConverter"
+      transaction-manager="jmsTransactionManager"
+      />
+
+  <beans:bean id="dtsWSMessageConverter"
+              class="org.dataminx.dts.jms.DtsWSMessageConverter">
+  </beans:bean>
+
+  <beans:bean id="dtsJobEventUpdateHandler"
+              class="org.dataminx.dts.jms.DtsJobEventUpdateHandler">
+  </beans:bean>
+
+  <!-- The DTS Job Event Updates Endpoint -->
+  <service-activator input-channel="dtsJobEvents"
+                     ref="dtsJobEventUpdateHandler"
+                     method="updateJob"/>
+
+  <beans:bean id="dtsWSMessagePayloadTransformer"
+              class="org.dataminx.dts.jms.DtsWSMessagePayloadTransformer">
+    <beans:constructor-arg index="0" ref="marshaller"/>
+  </beans:bean>
+
+</beans:beans>
