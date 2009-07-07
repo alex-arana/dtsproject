@@ -77,6 +77,12 @@
       <artifactId>commons-logging</artifactId>
     </dependency>
 
+    <!-- commons-net -->
+    <dependency>
+      <groupId>commons-net</groupId>
+      <artifactId>commons-net</artifactId>
+    </dependency>
+
     <!-- Spring Framework -->
     <dependency>
       <groupId>org.springframework</groupId>
@@ -155,6 +161,13 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Java Secure Channel JSCh -->
+    <dependency>
+      <groupId>com.jcraft</groupId>
+      <artifactId>jsch</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
     <!-- ActiveMQ -->
     <dependency>
       <artifactId>activemq-all</artifactId>
@@ -174,20 +187,6 @@
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
       <scope>runtime</scope>
-    </dependency>
-
-    <!-- JDOM -->
-    <dependency>
-      <groupId>jdom</groupId>
-      <artifactId>jdom</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- Jaxen -->
-    <dependency>
-      <groupId>jaxen</groupId>
-      <artifactId>jaxen</artifactId>
-      <scope>test</scope>
     </dependency>
 
     <!-- Oracle JDBC driver -->
