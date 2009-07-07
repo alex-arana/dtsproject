@@ -12,6 +12,7 @@ import java.io.File;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
+import org.dataminx.dts.service.DtsWorkerNodeInformationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -94,7 +95,10 @@ public class DtsWorkerNodeCommandLineRunner {
         // since our messaging container beans are lifecycle aware the application
         // will immediately start processing
         context.start();
-        LOG.info("DTS Worker Node has started.");
+
+        final DtsWorkerNodeInformationService service =
+            (DtsWorkerNodeInformationService) context.getBean("dtsWorkerNodeInformationService");
+        LOG.info(String.format("DTS Worker Node has started: %s", service.getInstanceId()));
     }
 
     /**
