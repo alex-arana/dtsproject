@@ -28,11 +28,7 @@ public class DtsFileSystemManager extends StandardFileSystemManager implements I
     private Resource mConfigurationResource;
 
     /** Default set of options for most file systems. */
-    private final FileSystemOptions mDefaultFileSystemOptions = new FileSystemOptions();
-
-    public void setConfigurationResource(Resource resource) {
-        mConfigurationResource = resource;
-    }
+    private FileSystemOptions mFileSystemOptions = new DtsFileSystemOptions();
 
     /**
      * Locates a file by URI using the default FileSystemOptions for file-system creation.
@@ -42,11 +38,23 @@ public class DtsFileSystemManager extends StandardFileSystemManager implements I
      */
     public FileObject resolveFile(final String uri) {
         try {
-            return resolveFile(uri, mDefaultFileSystemOptions);
+            return resolveFile(uri, mFileSystemOptions);
         }
-        catch (FileSystemException ex) {
+        catch (final FileSystemException ex) {
             throw new DtsException(ex);
         }
+    }
+
+    public void setConfigurationResource(final Resource resource) {
+        mConfigurationResource = resource;
+    }
+
+    public FileSystemOptions getFileSystemOptions() {
+        return mFileSystemOptions;
+    }
+
+    public void setFileSystemOptions(final FileSystemOptions fileSystemOptions) {
+        mFileSystemOptions = fileSystemOptions;
     }
 
     /**
