@@ -74,6 +74,7 @@
                 <value>org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest</value>
                 <value>org.dataminx.schemas.dts._2009._05.dts.GetJobStatusRequest</value>
                 <value>org.dataminx.schemas.dts._2009._05.dts.GetJobStatusResponse</value>
+                <value>org.dataminx.schemas.dts._2009._05.dts.JobEventUpdateRequest</value>
             </list>
         </property>
         <property name="schema" value="classpath:minx-dts.xsd"/>

@@ -10,12 +10,12 @@
     <DataTransfer>
       <Source>
         <!--<URI>http://wiki.arcs.org.au/pub/DataMINX/WebPreferences/favicon.ico</URI>-->
-        <URI>ftp://mirror.pacific.net.au/linux/ubuntu/dists/jaunty/Contents-i386.gz</URI>
+        <URI>ftp://dm11.intersect.org.au/pub/DataMINX/minx-dts/dts-ws/target/dts-ws-0.0.1-SNAPSHOT.war</URI>
         <Credential/>
         <URIProperties/>
       </Source>
       <Target>
-        <URI>file:///tmp/Contents-i386.gz</URI>
+        <URI>file:///tmp/dts-ws-0.0.1-SNAPSHOT-upload.war</URI>
         <Credential/>
         <URIProperties/>
       </Target>

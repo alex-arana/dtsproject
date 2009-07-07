@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.jms.support.converter.MessageConverter;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 /**
@@ -26,7 +25,6 @@ import org.springframework.util.Assert;
  *
  * @author Alex Arana
  */
-@Component
 public class JobSubmitQueueSender implements InitializingBean {
     /** Remote {@link Queue} definition. */
     @Autowired
