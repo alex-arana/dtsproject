@@ -1,5 +1,8 @@
 package org.dataminx.dts.service;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.UUID;
 import javax.xml.transform.dom.DOMResult;
 import org.apache.commons.logging.Log;
@@ -71,6 +74,13 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         newJob.setResourceKey(newJobResourceKey);
         newJob.setStatus(JobStatus.CREATED);
         newJob.setSubjectName("NEW_USER");
+        newJob.setCreationTime(new Date());
+        try {
+            newJob.setExecutionHost(InetAddress.getLocalHost().getCanonicalHostName());
+        }
+        catch (UnknownHostException ex) {
+            // TODO: Auto-generated catch block
+        }
         mJobRepository.saveOrUpdate(newJob);
 
         // Get the message payload ready for consumption by the JMS layer

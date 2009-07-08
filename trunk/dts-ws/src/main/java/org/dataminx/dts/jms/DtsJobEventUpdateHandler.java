@@ -1,5 +1,6 @@
 package org.dataminx.dts.jms;
 
+import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.domain.model.Job;
@@ -56,6 +57,13 @@ public class DtsJobEventUpdateHandler {
                 job.setFinishedFlag(updatedJobDetail.isFinishedFlag());
                 job.setWorkerTerminatedTime(updatedJobDetail.getWorkerTerminatedTime().toGregorianCalendar().getTime());
                 job.setStatus(JobStatus.DONE);
+
+                // also set the WS specific fields..
+                job.setJobAllDoneTime(new Date());
+
+                // TODO: need to think of how to handle error messages from WN to the success flag
+                // can be set
+
                 break;
             default:
                 break;
