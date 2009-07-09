@@ -44,25 +44,25 @@
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="Status" type="minx:StatusValueEnumeration"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
             <xsd:element name="WorkerNodeHost" type="xsd:string"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
             <xsd:element name="SuccessFlag" type="xsd:boolean"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
             <xsd:element name="FinishedFlag" type="xsd:boolean"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
             <xsd:element name="ActiveTime" type="xsd:dateTime"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
             <xsd:element name="WorkerTerminatedTime" type="xsd:dateTime"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
             <xsd:element name="FilesTotal" type="xsd:integer"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
             <xsd:element name="FilesTransferred" type="xsd:integer"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
             <xsd:element name="VolumeTotal" type="xsd:integer"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
             <xsd:element name="VolumeTransferred" type="xsd:integer"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
         </xsd:sequence>
     </xsd:complexType>
 
@@ -75,15 +75,15 @@
         </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="WorkerNodeHost" type="xsd:string"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
             <xsd:element name="ClassExceptionName" type="xsd:string"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
             <xsd:element name="TimeOfOccurrence" type="xsd:dateTime"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
             <xsd:element name="ErrorMessage" type="xsd:string"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
             <xsd:element name="StackTrace" type="xsd:string"
-                minOccurs="0" maxOccurs="1" />
+                minOccurs="0" />
         </xsd:sequence>
     </xsd:complexType>
     
@@ -91,8 +91,7 @@
     <xsd:complexType name="TransferRequirementsType">
         <xsd:annotation>
             <xsd:documentation>
-              A client may specify a number of constraints to the
-              data
+              A client may specify a number of constraints to the data
               transfer such as start and end time (e.g. when resource
               reservations have been made).
             </xsd:documentation>
@@ -106,7 +105,34 @@
                 minOccurs="0" />
             <xsd:element name="MaxAttempts" type="xsd:unsignedInt"
                 minOccurs="0" />
-            <xsd:element ref="minx:CreationFlag" minOccurs="1" />
+            <xsd:element ref="minx:CreationFlag" />
+            <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+        <xsd:anyAttribute namespace="##other"
+            processContents="lax" />
+    </xsd:complexType>
+    
+    <!-- 
+    <MyProxyCredential>
+        <MyProxyUsername>gerson</MyProxyUsername>
+        <MyProxyPassword>pa55word</MyProxyPassword>
+        <MyProxyServer>myproxy.ngs.ac.uk</MyProxyServer>
+        <MyProxyPort>7512</ MyProxyPort>
+    </MyProxyCredential> 
+    -->
+    
+    <xsd:complexType name="MyProxyTokenType">
+        <xsd:annotation>
+            <xsd:documentation>
+                Information that needs to be provided to get a user's credential
+                from MyProxy
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="MyProxyUsername" type="xsd:string"/>
+            <xsd:element name="MyProxyPassword" type="xsd:string"/>
+            <xsd:element name="MyProxyServer" type="xsd:string"/>
+            <xsd:element name="MyProxyPort" type="xsd:string" default="7512"/>
             <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
         <xsd:anyAttribute namespace="##other"
@@ -114,9 +140,10 @@
     </xsd:complexType>
 
     <xsd:complexType name="CredentialType">
-        <xsd:sequence>
+        <xsd:choice>
+            <xsd:element ref="minx:MyProxyToken" />
             <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
-        </xsd:sequence>
+        </xsd:choice>
         <xsd:anyAttribute namespace="##other"
             processContents="lax" />
     </xsd:complexType>
@@ -140,7 +167,7 @@
 
     <xsd:complexType name="SourceTargetType">
         <xsd:sequence>
-            <xsd:element name="URI" type="xsd:anyURI" minOccurs="1" />
+            <xsd:element name="URI" type="xsd:anyURI" />
             <xsd:element ref="minx:Credential" minOccurs="0" />
             <xsd:element ref="minx:URIProperties" minOccurs="0" />
             <xsd:any namespace="##other" processContents="lax"
@@ -156,10 +183,9 @@
               not needed <xsd:element name="FileName" type="xsd:string"
               minOccurs="0" />
             -->
-            <xsd:element ref="minx:Source" minOccurs="1" />
-            <xsd:element ref="minx:Target" minOccurs="1" />
-            <xsd:element ref="minx:TransferRequirements"
-                minOccurs="1" />
+            <xsd:element ref="minx:Source" />
+            <xsd:element ref="minx:Target" />
+            <xsd:element ref="minx:TransferRequirements" />
             <xsd:any namespace="##other" processContents="lax"
                 minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
@@ -171,7 +197,7 @@
     <!-- taken from JSDL schema specification -->
     <xsd:complexType name="JobDefinitionType">
         <xsd:sequence>
-            <xsd:element ref="minx:JobDescription" minOccurs="1" />
+            <xsd:element ref="minx:JobDescription" />
             <xsd:any namespace="##other" processContents="lax"
                 minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
@@ -243,8 +269,7 @@
     <xsd:element name="submitJobRequest">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element name="JobDefinition" type="minx:JobDefinitionType"
-                    minOccurs="1" maxOccurs="1" />
+                <xsd:element name="JobDefinition" type="minx:JobDefinitionType" />
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
@@ -341,6 +366,7 @@
     <xsd:element name="CreationFlag" type="minx:CreationFlagEnumeration" />
     <xsd:element name="StatusValue" type="minx:StatusValueEnumeration" />
     <xsd:element name="TransferRequirements" type="minx:TransferRequirementsType" />
+    <xsd:element name="MyProxyToken" type="minx:MyProxyTokenType" />
     <xsd:element name="Credential" type="minx:CredentialType" />
     <xsd:element name="URIProperties" type="minx:URIPropertiesType" />
     <xsd:element name="PortRange" type="minx:PortRangeType" />
