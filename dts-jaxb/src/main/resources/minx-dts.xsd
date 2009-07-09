@@ -66,6 +66,28 @@
         </xsd:sequence>
     </xsd:complexType>
 
+    <xsd:complexType name="JobErrorEventDetailType">
+        <xsd:annotation>
+            <xsd:documentation>
+              The job error event detail holds error details when an exception gets thrown
+              by the worker node due to some issues with running the job
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="WorkerNodeHost" type="xsd:string"
+                minOccurs="0" maxOccurs="1" />
+            <xsd:element name="ClassExceptionName" type="xsd:string"
+                minOccurs="0" maxOccurs="1" />
+            <xsd:element name="TimeOfOccurrence" type="xsd:dateTime"
+                minOccurs="0" maxOccurs="1" />
+            <xsd:element name="ErrorMessage" type="xsd:string"
+                minOccurs="0" maxOccurs="1" />
+            <xsd:element name="StackTrace" type="xsd:string"
+                minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+    
+
     <xsd:complexType name="TransferRequirementsType">
         <xsd:annotation>
             <xsd:documentation>
@@ -243,7 +265,8 @@
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
-
+    
+    <!-- Not used -->
     <xsd:element name="suspendJobResponse">
     </xsd:element>
   
@@ -254,7 +277,8 @@
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
-
+    
+    <!-- Not used -->
     <xsd:element name="resumeJobResponse">
     </xsd:element>
 
@@ -266,6 +290,7 @@
         </xsd:complexType>
     </xsd:element>
 
+    <!-- Not used -->
     <xsd:element name="cancelJobResponse">
         <!-- A holder for a cancelJob response if we decide to have one later on -->
     </xsd:element>
@@ -296,8 +321,18 @@
         </xsd:complexType>
     </xsd:element>
     
+    <!-- Not used -->
     <xsd:element name="jobEventUpdateResponse">
         <!-- A holder for a JobEventUpdate response if we decide to have one later on -->
+    </xsd:element>
+    
+    <xsd:element name="fireUpJobErrorEvent">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="minx:JobId" />
+                <xsd:element ref="minx:JobErrorEventDetail" />
+            </xsd:sequence>
+        </xsd:complexType>
     </xsd:element>
 
 
@@ -318,6 +353,7 @@
     <xsd:element name="Detail" type="minx:StateDetailType" />
     <xsd:element name="State" type="minx:StateType" />
     <xsd:element name="JobEventDetail" type="minx:JobEventDetailType" />
+    <xsd:element name="JobErrorEventDetail" type="minx:JobErrorEventDetailType" />
 <!--    <xsd:element name="submitJobResponse" type="minx:submitJobResponseType" />
     <xsd:element name="submitJobRequest" type="minx:submitJobRequestType" /> -->
 
