@@ -6,11 +6,15 @@
 package org.dataminx.dts.batch;
 
 import org.dataminx.dts.service.FileCopyingService;
+import org.dataminx.dts.service.JobNotificationService;
 import org.dataminx.schemas.dts._2009._05.dts.DataTransferType;
 import org.dataminx.schemas.dts._2009._05.dts.SourceTargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.scope.context.StepContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -27,13 +31,17 @@ import org.springframework.util.Assert;
  *
  * @author Alex Arana
  */
-public class FileCopyTask implements Tasklet {
+public class FileCopyTask implements Tasklet, StepExecutionListener {
     /** A reference to the internal logger object. */
     private static final Logger LOG = LoggerFactory.getLogger(FileCopyTask.class);
 
     /** A reference to the application's file copying service. */
     @Autowired
     private FileCopyingService mFileCopyingService;
+
+    /** A reference to the application's job notification service. */
+    @Autowired
+    private JobNotificationService mJobNotificationService;
 
     /** A reference to the input data transfer data structure. */
     private DataTransferType mDataTransfer;
@@ -42,7 +50,7 @@ public class FileCopyTask implements Tasklet {
      * {@inheritDoc}
      */
     @Override
-    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+    public RepeatStatus execute(final StepContribution contribution, final ChunkContext chunkContext) throws Exception {
         final StepContext stepContext = chunkContext.getStepContext();
         LOG.info("Executing file copy step: " + stepContext.getStepName());
 
@@ -63,5 +71,37 @@ public class FileCopyTask implements Tasklet {
 
     public void setDataTransfer(final DataTransferType dataTransfer) {
         mDataTransfer = dataTransfer;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void beforeStep(final StepExecution stepExecution) {
+        // perform any preliminary steps here
+    }
+
+    /**
+     * Extracts the ID of this Step's parent DTS Job from the specifiec Step execution context.
+     *
+     * @param stepExecution A reference to this Step's execution context
+     * @return The parent DTS Job identifier
+     */
+    private String extractDtsJobId(final StepExecution stepExecution) {
+        Assert.state(stepExecution != null);
+        return stepExecution.getJobExecution().getJobInstance().getJobName();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ExitStatus afterStep(final StepExecution stepExecution) {
+        final ExitStatus exitStatus = stepExecution.getExitStatus();
+        if (exitStatus.compareTo(ExitStatus.FAILED) == 0) {
+            final String dtsJobId = extractDtsJobId(stepExecution);
+            mJobNotificationService.notifyStepFailures(dtsJobId, stepExecution);
+        }
+        return exitStatus;
     }
 }
