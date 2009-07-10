@@ -30,6 +30,7 @@
     <log4j.version>1.2.15</log4j.version>
     <jaxb-api.version>2.0</jaxb-api.version>
     <commons-collections.version>3.2.1</commons-collections.version>
+    <commons-configuration.version>1.6</commons-configuration.version>
     <commons-lang.version>2.3</commons-lang.version>
     <commons-logging.version>1.1.1</commons-logging.version>
     <commons-net.version>2.0</commons-net.version>
@@ -268,6 +269,13 @@
         <groupId>commons-collections</groupId>
         <artifactId>commons-collections</artifactId>
         <version>${commons-collections.version}</version>
+      </dependency>
+      
+      <!-- commons-configuration -->
+      <dependency>
+        <groupId>commons-configuration</groupId>
+        <artifactId>commons-configuration</artifactId>
+        <version>${commons-configuration.version}</version>
       </dependency>
 
       <!-- commons-lang -->
