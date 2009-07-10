@@ -52,6 +52,11 @@
         class="org.dataminx.dts.vfs.DtsFileSystemManager">
     <property name="configurationResource" value="vfs/providers.xml"/>
   </bean>
+  
+  <bean id="dtsConfigManager"
+        class="org.dataminx.dts.common.DtsConfigManager">
+    <property name="dtsConfigLocation" value="file:///${dataminx.dir}/dts.properties" />
+  </bean>
 
   <bean id="applicationProperties"
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">

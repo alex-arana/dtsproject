@@ -9,9 +9,18 @@ import org.apache.commons.vfs.Capability;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSelector;
 import org.apache.commons.vfs.FileSystemException;
+import org.apache.commons.vfs.FileSystemOptions;
 import org.apache.commons.vfs.Selectors;
+import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
+import org.dataminx.dts.common.DtsConfigManager;
 import org.dataminx.dts.common.util.StopwatchTimer;
 import org.dataminx.dts.vfs.DtsFileSystemManager;
+import org.dataminx.schemas.dts._2009._05.dts.CredentialType;
+import org.dataminx.schemas.dts._2009._05.dts.MyProxyTokenType;
+import org.dataminx.schemas.dts._2009._05.dts.SourceTargetType;
+import org.globus.myproxy.MyProxy;
+import org.globus.myproxy.MyProxyException;
+import org.ietf.jgss.GSSCredential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +32,7 @@ import org.springframework.util.Assert;
  * Default implementation of {@link FileCopyingService}.
  *
  * @author Alex Arana
+ * @author Gerson Galang
  */
 @Service("fileCopyingService")
 @Scope("singleton")
@@ -43,6 +53,10 @@ public class FileCopyingServiceImpl implements FileCopyingService {
     @Autowired
     private DtsFileSystemManager mFileSystemManager;
 
+    /** A reference to the DTS Configuration manager. */
+    @Autowired
+    private DtsConfigManager mDtsConfigManager;
+
     /**
      * {@inheritDoc}
      */
@@ -54,6 +68,30 @@ public class FileCopyingServiceImpl implements FileCopyingService {
             copyFiles(mFileSystemManager.resolveFile(sourceURI), mFileSystemManager.resolveFile(targetURI));
             LOG.info(String.format("Finished copying source '%s' to target '%s' in %s.",
                 sourceURI, targetURI, timer.getFormattedElapsedTime()));
+        }
+        catch (FileSystemException ex) {
+            LOG.error("An error has occurred during a file copy operation: " + ex, ex);
+            throw new DtsFileCopyOperationException(ex);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void copyFiles(SourceTargetType source, SourceTargetType target) {
+        LOG.info(String.format("Copying source '%s' to target '%s'...", source.getURI(), target.getURI()));
+        try {
+            final StopwatchTimer timer = new StopwatchTimer();
+
+            // create the FileSystemOptions based on Source and Target
+            FileSystemOptions sourceOption = createFileSystemOptions(source);
+            FileSystemOptions targetOption = createFileSystemOptions(target);
+
+            copyFiles(mFileSystemManager.resolveFile(source.getURI(), sourceOption),
+                mFileSystemManager.resolveFile(target.getURI(), targetOption));
+
+            LOG.info(String.format("Finished copying source '%s' to target '%s' in %s.",
+                source.getURI(), target.getURI(), timer.getFormattedElapsedTime()));
         }
         catch (FileSystemException ex) {
             LOG.error("An error has occurred during a file copy operation: " + ex, ex);
@@ -81,5 +119,53 @@ public class FileCopyingServiceImpl implements FileCopyingService {
             final long lastModTime = sourceFile.getContent().getLastModifiedTime();
             destinationFile.getContent().setLastModifiedTime(lastModTime);
         }
+    }
+
+    /**
+     * Create the FileSystemOptions based on the provided source or target
+     *
+     * @param sourceOrTarget the source or target
+     * @return the FileSystemOptions for the given source or target
+     */
+    private FileSystemOptions createFileSystemOptions(SourceTargetType sourceOrTarget) {
+        FileSystemOptions options = new FileSystemOptions();
+        CredentialType credentialType = sourceOrTarget.getCredential();
+        if (credentialType != null) {
+
+            // at the moment we're only supporting MyProxy credentials
+            if (credentialType.getMyProxyToken() != null) {
+                MyProxyTokenType myProxyDetails = credentialType.getMyProxyToken();
+
+                MyProxy myproxy = new MyProxy(myProxyDetails.getMyProxyServer(),
+                    myProxyDetails.getMyProxyPort());
+
+                GSSCredential credential = null;
+                try {
+                    credential = myproxy.get(myProxyDetails.getMyProxyUsername(),
+                        myProxyDetails.getMyProxyPassword(),
+                        mDtsConfigManager.getDtsConfig().getInt(
+                        mDtsConfigManager.DEFAULT_MYPROXY_CREDENTIAL_LIFETIME_KEY));
+                    GridFtpFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
+
+                    //TODO set the credential for all the other Grid file systems we want
+                    //     to support in the future
+                    //SRBFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
+
+                } catch (MyProxyException e) {
+                    LOG.error(String.format("Could not get delegated proxy from server '%s:%s'\n%s",
+                        myProxyDetails.getMyProxyServer(),
+                        myProxyDetails.getMyProxyPort(),
+                        e.getMessage()));
+                    throw new DtsFileSystemAuthenticationException(e.getMessage());
+                }
+            }
+
+            //TODO support other types of credentials
+        }
+
+        // TODO set the other URI related options here like the min/max port numbers
+        //      for GridFTP if provided
+
+        return options;
     }
 }

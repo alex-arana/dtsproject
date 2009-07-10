@@ -5,8 +5,8 @@
  */
 package org.dataminx.dts;
 
-import static org.dataminx.dts.common.DtsWorkerNodeConstants.DATAMINX_CONFIGURATION_KEY;
-import static org.dataminx.dts.common.DtsWorkerNodeConstants.DEFAULT_DATAMINX_CONFIGURATION_DIR;
+import static org.dataminx.dts.common.DtsConstants.DATAMINX_CONFIGURATION_KEY;
+import static org.dataminx.dts.common.DtsConstants.DEFAULT_DATAMINX_CONFIGURATION_DIR;
 
 import java.io.File;
 import org.apache.commons.lang.ArrayUtils;

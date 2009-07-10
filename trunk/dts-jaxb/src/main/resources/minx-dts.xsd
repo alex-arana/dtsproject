@@ -138,7 +138,7 @@
             <xsd:element name="MyProxyUsername" type="xsd:string" />
             <xsd:element name="MyProxyPassword" type="xsd:string" />
             <xsd:element name="MyProxyServer" type="xsd:string" />
-            <xsd:element name="MyProxyPort" type="xsd:string" default="7512" />
+            <xsd:element name="MyProxyPort" type="xsd:int" default="7512" />
             <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
         <xsd:anyAttribute namespace="##other"
