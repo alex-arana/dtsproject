@@ -171,25 +171,58 @@
         </xsd:choice>
         <xsd:anyAttribute namespace="##other"
             processContents="lax" />
-    </xsd:complexType>
+    </xsd:complexType>    
 
-    <xsd:complexType name="URIPropertiesType">
+    <xsd:complexType name="GridFtpURIPropertiesType">
         <xsd:sequence>
+            <xsd:element name="PortRange" type="minx:PortRangeType" minOccurs="0" />
             <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
         <xsd:anyAttribute namespace="##other"
             processContents="lax" />
     </xsd:complexType>
-
+    
     <xsd:complexType name="PortRangeType">
         <xsd:sequence>
-            <xsd:element name="portMin" type="xsd:int"></xsd:element>
-            <xsd:element name="portMax" type="xsd:int"></xsd:element>
+            <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
+        <xsd:attribute name="RangeMin" type="xsd:int" use="required" />
+        <xsd:attribute name="RangeMax" type="xsd:int" use="required" />
         <xsd:anyAttribute namespace="##other"
             processContents="lax" />
     </xsd:complexType>
-
+    
+    <!-- 
+    <xsd:element name="SrbURIProperties" substitutionGroup="tns:URIProperties">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="McatZone" minOccurs="0">
+                    <xsd:simpleType>
+                        <xsd:restriction base="xsd:string" />
+                    </xsd:simpleType>
+                </xsd:element>
+                <xsd:element name="MdasDomain" minOccurs="0">
+                    <xsd:simpleType>
+                        <xsd:restriction base="xsd:string" />
+                    </xsd:simpleType>
+                </xsd:element>
+                <xsd:element name="HomeDirectory" minOccurs="0">
+                    <xsd:simpleType>
+                        <xsd:restriction base="xsd:string" />
+                    </xsd:simpleType>
+                </xsd:element>
+                <xsd:element name="DefaultResource" minOccurs="0">
+                    <xsd:simpleType>
+                        <xsd:restriction base="xsd:string" />
+                    </xsd:simpleType>
+                </xsd:element>
+                <xsd:element ref="tns:PortRange" minOccurs="0" />
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+    -->
+    
+    
     <xsd:complexType name="SourceTargetType">
         <xsd:sequence>
             <xsd:element name="URI" type="xsd:anyURI" />
@@ -394,8 +427,11 @@
     <xsd:element name="MyProxyToken" type="minx:MyProxyTokenType" />
     <xsd:element name="OtherCredentialToken" type="minx:OtherCredentialTokenType" />
     <xsd:element name="Credential" type="minx:CredentialType" />
-    <xsd:element name="URIProperties" type="minx:URIPropertiesType" />
+    
+    <xsd:element name="URIProperties" abstract="true" />
+    <xsd:element name="GridFtpURIProperties" type="minx:GridFtpURIPropertiesType" substitutionGroup="minx:URIProperties" />
     <xsd:element name="PortRange" type="minx:PortRangeType" />
+    
     <xsd:element name="Source" type="minx:SourceTargetType" />
     <xsd:element name="Target" type="minx:SourceTargetType" />
     <xsd:element name="JobDefinition" type="minx:JobDefinitionType" />
@@ -490,8 +526,6 @@
         </complexType>
     </element>
 -->
-
-
 
 <!--
     <element name="DataTransferResponse">
