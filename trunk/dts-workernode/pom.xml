@@ -142,10 +142,19 @@
     </dependency>
 
     <!-- commons-vfs -->
+    <!-- 
     <dependency>
       <groupId>commons-vfs</groupId>
       <artifactId>commons-vfs</artifactId>
     </dependency>
+     -->
+    
+    <!-- commons-vfs-grid -->
+    <dependency>
+      <groupId>commons-vfs-grid</groupId>
+      <artifactId>commons-vfs-grid</artifactId>
+    </dependency>
+    
 
     <!-- JUnit -->
     <dependency>
@@ -222,6 +231,12 @@
       <groupId>commons-httpclient</groupId>
       <artifactId>commons-httpclient</artifactId>
       <scope>runtime</scope>
+    </dependency>
+    
+    <!-- Proxy Light -->
+    <dependency>
+        <groupId>au.org.arcs.auth</groupId>
+        <artifactId>simpleProxyLib</artifactId>
     </dependency>
   </dependencies>
 </project>

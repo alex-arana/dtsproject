@@ -47,7 +47,8 @@
     <hibernate-annotations.version>3.4.0.GA</hibernate-annotations.version>
     <jms.version>1.1</jms.version>
     <jsch.version>0.1.41</jsch.version>
-    <commons-vfs.version>1.0</commons-vfs.version>
+    <!-- <commons-vfs.version>1.0</commons-vfs.version> -->
+    <commons-vfs-grid.version>1.4.3-SNAPSHOT</commons-vfs-grid.version>
     <commons-httpclient.version>3.1</commons-httpclient.version>
     <junit.version>4.4</junit.version>
     <testng.version>5.5</testng.version>
@@ -63,6 +64,7 @@
     <maven-jaxb2-plugin.version>0.7.1</maven-jaxb2-plugin.version>
     <c3p0.version>0.9.1.2</c3p0.version>
     <easymock.version>2.5.1</easymock.version>
+    <simpleProxyLib.version>0.4-SNAPSHOT</simpleProxyLib.version>
   </properties>
 
   <repositories>
@@ -85,6 +87,10 @@
       <id>jboss-repo</id>
       <name>JBoss Maven Repository</name>
       <url>http://repository.jboss.com/maven2/</url>
+    </repository>
+    <repository>
+      <id>vpac-repo</id>
+      <url>http://hudson.vpac.org/maven_repository</url>
     </repository>
   </repositories>
 
@@ -555,10 +561,25 @@
       </dependency>
 
       <!-- commons-vfs -->
+      <!--
       <dependency>
         <groupId>commons-vfs</groupId>
         <artifactId>commons-vfs</artifactId>
         <version>${commons-vfs.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      -->
+      
+      <!-- commons-vfs-grid -->
+      <dependency>
+        <groupId>commons-vfs-grid</groupId>
+        <artifactId>commons-vfs-grid</artifactId>
+        <version>${commons-vfs-grid.version}</version>
         <exclusions>
           <exclusion>
             <groupId>commons-logging</groupId>
@@ -668,7 +689,16 @@
         <artifactId>easymock</artifactId>
         <version>${easymock.version}</version>
       </dependency>
-    </dependencies>
+      
+      <!-- Proxy Light -->
+      <dependency>
+        <groupId>au.org.arcs.auth</groupId>
+        <artifactId>simpleProxyLib</artifactId>
+        <version>${simpleProxyLib.version}</version>
+      </dependency>
+      
+    </dependencies>   
+
   </dependencyManagement>
 
 </project>
