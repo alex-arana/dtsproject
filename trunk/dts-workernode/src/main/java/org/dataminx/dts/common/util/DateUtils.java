@@ -5,6 +5,7 @@
  */
 package org.dataminx.dts.common.util;
 
+import java.util.Date;
 import java.util.GregorianCalendar;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -17,6 +18,17 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * @author Alex Arana
  */
 public final class DateUtils {
+
+    /**
+     * Converts a given time as an instance of {@link java.util.Date} into a {@link XMLGregorianCalendar}
+     * object.
+     *
+     * @param date A given time as an instance of <code>java.util.Date</code>
+     * @return A new instance of <code>XMLGregorianCalendar</code> representing the input time
+     */
+    public static XMLGregorianCalendar toXmlGregorianCalendar(final Date date) {
+        return toXmlGregorianCalendar(date.getTime());
+    }
 
     /**
      * Converts a given time in milliseconds into a {@link XMLGregorianCalendar} object.

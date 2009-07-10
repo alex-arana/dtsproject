@@ -29,6 +29,8 @@
         <value>org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest</value>
         <value>org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest</value>
         <value>org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest</value>
+        <value>org.dataminx.schemas.dts._2009._05.dts.JobEventUpdateRequest</value>
+        <value>org.dataminx.schemas.dts._2009._05.dts.FireUpJobErrorEvent</value>
       </list>
     </property>
   </bean>

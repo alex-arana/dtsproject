@@ -7,6 +7,7 @@ package org.dataminx.dts.service;
 
 import org.dataminx.dts.batch.DtsJob;
 import org.dataminx.dts.domain.model.JobStatus;
+import org.springframework.batch.core.StepExecution;
 
 /**
  * Notification service used by DTS Worker Node jobs to:
@@ -36,6 +37,14 @@ public interface JobNotificationService {
      * @param error the cause of the DTS job error containing additional information
      */
     void notifyJobError(DtsJob dtsJob, String message, Throwable error);
+
+    /**
+     * Posts an error message event on the JMS Job Event queue concerning a DTS Job step.
+     *
+     * @param dtsJobId Unique identifier of the step's parent DTS Job
+     * @param stepExecution the execution context of the DTS Job step in error
+     */
+    void notifyStepFailures(String dtsJobId, StepExecution stepExecution);
 
     /**
      * Posts a status message on the Job Event queue concerning a currently active DTS operation.

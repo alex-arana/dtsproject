@@ -39,8 +39,7 @@
   </bean>
 
   <batch:step id="taskOrientedStep">
-    <batch:tasklet ref="fileCopyTask">
-    </batch:tasklet>
+    <batch:tasklet ref="fileCopyTask"/>
   </batch:step>
 
   <bean id="partitioningStep"
