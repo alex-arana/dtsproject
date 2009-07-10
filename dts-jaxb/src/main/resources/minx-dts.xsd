@@ -2,8 +2,15 @@
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     targetNamespace="http://schemas.dataminx.org/dts/2009/05/dts"
     xmlns:minx="http://schemas.dataminx.org/dts/2009/05/dts"
+    xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     elementFormDefault="qualified" version="1">
+    
+    <!-- Import the Schemas which have been specified outside of the MINX project -->
+    <xsd:import namespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+        schemaLocation="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" />
+        
+    
 
 	<!-- SIMPLE TYPES -->
     <xsd:simpleType name="CreationFlagEnumeration">
@@ -86,7 +93,6 @@
                 minOccurs="0" />
         </xsd:sequence>
     </xsd:complexType>
-    
 
     <xsd:complexType name="TransferRequirementsType">
         <xsd:annotation>
@@ -129,10 +135,28 @@
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
-            <xsd:element name="MyProxyUsername" type="xsd:string"/>
-            <xsd:element name="MyProxyPassword" type="xsd:string"/>
-            <xsd:element name="MyProxyServer" type="xsd:string"/>
-            <xsd:element name="MyProxyPort" type="xsd:string" default="7512"/>
+            <xsd:element name="MyProxyUsername" type="xsd:string" />
+            <xsd:element name="MyProxyPassword" type="xsd:string" />
+            <xsd:element name="MyProxyServer" type="xsd:string" />
+            <xsd:element name="MyProxyPort" type="xsd:string" default="7512" />
+            <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+        <xsd:anyAttribute namespace="##other"
+            processContents="lax" />
+    </xsd:complexType>
+    
+    <xsd:complexType name="OtherCredentialTokenType">
+        <xsd:annotation>
+            <xsd:documentation>
+                A wrapper for credential tokens that are not specified in the
+                Credential element. This is also a workaround so we don't get this
+                error message
+                
+                cos-nonambig: wsse:UsernameToken and WC During validation against this 
+                schema, ambiguity would be created for those two particles.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
             <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
         <xsd:anyAttribute namespace="##other"
@@ -141,8 +165,9 @@
 
     <xsd:complexType name="CredentialType">
         <xsd:choice>
+            <xsd:element ref="wsse:UsernameToken" />
             <xsd:element ref="minx:MyProxyToken" />
-            <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element ref="minx:OtherCredentialToken" />
         </xsd:choice>
         <xsd:anyAttribute namespace="##other"
             processContents="lax" />
@@ -367,6 +392,7 @@
     <xsd:element name="StatusValue" type="minx:StatusValueEnumeration" />
     <xsd:element name="TransferRequirements" type="minx:TransferRequirementsType" />
     <xsd:element name="MyProxyToken" type="minx:MyProxyTokenType" />
+    <xsd:element name="OtherCredentialToken" type="minx:OtherCredentialTokenType" />
     <xsd:element name="Credential" type="minx:CredentialType" />
     <xsd:element name="URIProperties" type="minx:URIPropertiesType" />
     <xsd:element name="PortRange" type="minx:PortRangeType" />
