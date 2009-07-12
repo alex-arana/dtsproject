@@ -105,9 +105,10 @@ public class JobNotificationServiceImpl implements JobNotificationService {
                 errorDetails.setStackTrace(ExceptionUtils.getFullStackTrace(failure));
             }
 
-            final FireUpJobErrorEvent jobErrorEvent = mJaxbObjectFactory.createFireUpJobErrorEvent();
-            jobErrorEvent.setJobId(jobId);
-            jobErrorEvent.setJobErrorEventDetail(errorDetails);
+            final FireUpJobErrorEvent stepFailureEvent = mJaxbObjectFactory.createFireUpJobErrorEvent();
+            stepFailureEvent.setJobId(jobId);
+            stepFailureEvent.setJobErrorEventDetail(errorDetails);
+            mJobEventQueueSender.doSend(jobId, stepFailureEvent);
         }
     }
 
