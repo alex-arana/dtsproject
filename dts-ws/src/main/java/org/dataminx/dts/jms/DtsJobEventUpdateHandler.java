@@ -13,7 +13,7 @@ import org.springframework.integration.core.Message;
 
 
 /**
- * The Handler for all the Job Event Update messages coming from the Worker Node
+ * The Handler for all the Job Event Update messages coming from the Worker Node.
  *
  * @author Gerson Galang
  *
@@ -28,7 +28,7 @@ public class DtsJobEventUpdateHandler {
     private JobDao mJobRepository;
 
     /**
-     * Updates the job entity based on the details provided by the worker node
+     * Updates the job entity based on the details provided by the worker node.
      *
      * @param message the jobEventUpdateRequest message
      */
