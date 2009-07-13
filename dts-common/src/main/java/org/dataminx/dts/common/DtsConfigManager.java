@@ -23,15 +23,11 @@ public class DtsConfigManager {
      * Sets the dts config location.
      *
      * @param dtsConfigLocation the new dts config location
+     * @throws ConfigurationException if an error occurs while initialising the configuration from the
+     *         specified location
      */
-    public void setDtsConfigLocation(String dtsConfigLocation) {
-        try {
-            mDtsConfig = new PropertiesConfiguration(dtsConfigLocation);
-        }
-        catch (ConfigurationException ex) {
-            // TODO Auto-generated catch block
-            ex.printStackTrace();
-        }
+    public void setDtsConfigLocation(String dtsConfigLocation) throws ConfigurationException {
+        mDtsConfig = new PropertiesConfiguration(dtsConfigLocation);
     }
 
     /**
@@ -42,5 +38,4 @@ public class DtsConfigManager {
     public Configuration getDtsConfig() {
         return mDtsConfig;
     }
-
 }
