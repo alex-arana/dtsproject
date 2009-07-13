@@ -134,9 +134,10 @@ public class FileCopyingServiceImpl implements FileCopyingService {
      *
      * @param sourceOrTarget the source or target
      * @return the FileSystemOptions for the given source or target
+     * @throws FileSystemException when an error occurs during a VFS file copy operation.
      */
     private FileSystemOptions createFileSystemOptions(SourceTargetType sourceOrTarget)
-            throws FileSystemException {
+        throws FileSystemException {
         FileSystemOptions options = new FileSystemOptions();
 
         //TODO decide if we need to put this one whole method in DtsFileSystemOptions.
@@ -188,8 +189,8 @@ public class FileCopyingServiceImpl implements FileCopyingService {
                 for (Object element : usernameTokenDetails.getAny()) {
                     // just in case there are other elements within a UsernameToken, ignore them
                     // unless it's a PasswordString
-                    if (((Element)element).getLocalName().equals("PasswordString")) {
-                        password = ((Element)element).getTextContent();
+                    if (((Element) element).getLocalName().equals("PasswordString")) {
+                        password = ((Element) element).getTextContent();
                     }
                 }
                 LOG.debug(String.format("using username '%s' and password '%s'.", username, password));
