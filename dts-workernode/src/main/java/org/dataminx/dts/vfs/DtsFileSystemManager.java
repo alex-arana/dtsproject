@@ -10,6 +10,8 @@ import static org.dataminx.dts.common.DtsConstants.DEFAULT_MYPROXY_CREDENTIAL_LI
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemOptions;
+import org.apache.commons.vfs.auth.StaticUserAuthenticator;
+import org.apache.commons.vfs.impl.DefaultFileSystemConfigBuilder;
 import org.apache.commons.vfs.impl.StandardFileSystemManager;
 import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
 import org.dataminx.dts.DtsException;
@@ -21,6 +23,7 @@ import org.dataminx.schemas.dts._2009._05.dts.SourceTargetType;
 import org.globus.myproxy.MyProxy;
 import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSCredential;
+import org.oasis_open.docs.wss._2004._01.oasis_200401_wss_wssecurity_secext_1_0.UsernameTokenType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -29,6 +32,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.w3c.dom.Element;
 
 /**
  * DTS File System Manager implementation.
@@ -88,8 +92,9 @@ public class DtsFileSystemManager extends StandardFileSystemManager implements I
      *
      * @param sourceOrTarget the source or target entity
      * @return the set of file system options for the given source or target entity
+     * @throws FileSystemException when an error occurs during a VFS file copy operation.
      */
-    public FileSystemOptions createFileSystemOptions(final SourceTargetType sourceOrTarget) {
+    public FileSystemOptions createFileSystemOptions(final SourceTargetType sourceOrTarget) throws FileSystemException {
         final FileSystemOptions options = new DtsFileSystemOptions();
         final CredentialType credentialType = sourceOrTarget.getCredential();
         if (credentialType != null) {
@@ -118,6 +123,22 @@ public class DtsFileSystemManager extends StandardFileSystemManager implements I
                         ex.getMessage()));
                     throw new DtsFileSystemAuthenticationException(ex.getMessage());
                 }
+            }
+
+            else if (credentialType.getUsernameToken() != null) {
+                UsernameTokenType usernameTokenDetails = credentialType.getUsernameToken();
+                String username = usernameTokenDetails.getUsername().getValue();
+                String password = "";
+                for (Object element : usernameTokenDetails.getAny()) {
+                    // just in case there are other elements within a UsernameToken, ignore them
+                    // unless it's a PasswordString
+                    if (((Element) element).getLocalName().equals("PasswordString")) {
+                        password = ((Element) element).getTextContent();
+                    }
+                }
+                LOG.debug(String.format("using username '%s' and password '%s'.", username, password));
+                StaticUserAuthenticator auth = new StaticUserAuthenticator(null, username, password);
+                DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(options, auth);
             }
 
             //TODO support other types of credentials
