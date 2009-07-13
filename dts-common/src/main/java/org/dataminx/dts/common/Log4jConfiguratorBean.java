@@ -8,8 +8,8 @@ package org.dataminx.dts.common;
 import static org.dataminx.dts.common.DtsConstants.DEFAULT_LOG4J_CONFIGURATION_FILE;
 import static org.dataminx.dts.common.DtsConstants.DEFAULT_LOG4J_CONFIGURATION_KEY;
 
-import org.apache.commons.lang.StringUtils;
 import java.io.IOException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
