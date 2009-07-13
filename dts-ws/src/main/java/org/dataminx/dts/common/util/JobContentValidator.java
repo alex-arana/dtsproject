@@ -36,6 +36,10 @@ public class JobContentValidator {
                 errorMessages.append("  Empty TargetURI.\n");
             }
         }
+
+        // TODO: check for PasswordString existence if UsernameToken is provided
+
+
         if (errorMessages.length() > 0) {
             throw new DtsJobDefinitionException("Invalid request.\n" + errorMessages);
         }
