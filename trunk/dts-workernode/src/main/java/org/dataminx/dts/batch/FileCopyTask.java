@@ -64,7 +64,11 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
         //TODO consider breaking up the job here, by working out all files that need to be transferred as
         //     part of the DataTransferType input and keep returning RepeatStatus.CONTINUABLE to the
         //     framework until all files have been transferred.  Currently, invoking VFS to do an atomic transfer..
-        mFileCopyingService.copyFiles(source.getURI(), target.getURI());
+
+        //TODO decide if we should go with this approach later on...
+        // Gerson commented this bit to test the changes he made to make GridFTP transfer work
+        //mFileCopyingService.copyFiles(source.getURI(), target.getURI());
+        mFileCopyingService.copyFiles(source, target);
 
         return RepeatStatus.FINISHED;
     }
