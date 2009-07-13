@@ -21,6 +21,8 @@ public class DtsJobDefinitionException extends RuntimeException {
 
     /**
      * Constructs an instance of {@link DtsJobDefinitionException} given the specified message.
+     *
+     * @param msg the exception message
      */
     public DtsJobDefinitionException(String msg) {
         super(msg);
@@ -28,6 +30,9 @@ public class DtsJobDefinitionException extends RuntimeException {
 
     /**
      * Constructs an instance of {@link DtsJobDefinitionException} given the specified message and cause.
+     *
+     * @param msg the exception message
+     * @param cause the error or exception that cause this exception to be thrown
      */
     public DtsJobDefinitionException(String msg, Throwable cause) {
         super(msg, cause);
@@ -35,6 +40,8 @@ public class DtsJobDefinitionException extends RuntimeException {
 
     /**
      * Constructs an instance of {@link DtsJobDefinitionException} given the cause.
+     *
+     * @param cause the error or exception that cause this exception to be thrown
      */
     public DtsJobDefinitionException(Throwable cause) {
         super(cause);

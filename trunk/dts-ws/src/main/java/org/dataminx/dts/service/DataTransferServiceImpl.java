@@ -42,9 +42,11 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     @Autowired
     private JobDao mJobRepository;
 
+    /** The jaxb2 marshaller. */
     @Autowired
     private Jaxb2Marshaller mMarshaller;
 
+    /** The Job definition validator. */
     @Autowired
     private JobContentValidator mJobValidator;
 
@@ -80,6 +82,7 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         }
         catch (UnknownHostException ex) {
             // TODO: Auto-generated catch block
+            LOGGER.error(ex.getMessage());
         }
         mJobRepository.saveOrUpdate(newJob);
 

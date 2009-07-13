@@ -26,12 +26,12 @@
       channel="dtsJobEvents"
       connection-factory="jmsConnectionFactory"
       destination="jmsJobEventQueue"
-      message-converter="dtsWSMessageConverter"
+      message-converter="dtsWsMessageConverter"
       transaction-manager="jmsTransactionManager"
       />
 
-  <beans:bean id="dtsWSMessageConverter"
-              class="org.dataminx.dts.jms.DtsWSMessageConverter">
+  <beans:bean id="dtsWsMessageConverter"
+              class="org.dataminx.dts.jms.DtsWsMessageConverter">
   </beans:bean>
 
   <beans:bean id="dtsJobEventUpdateHandler"
@@ -43,8 +43,8 @@
                      ref="dtsJobEventUpdateHandler"
                      method="updateJob"/>
 
-  <beans:bean id="dtsWSMessagePayloadTransformer"
-              class="org.dataminx.dts.jms.DtsWSMessagePayloadTransformer">
+  <beans:bean id="dtsWsMessagePayloadTransformer"
+              class="org.dataminx.dts.jms.DtsWsMessagePayloadTransformer">
     <beans:constructor-arg index="0" ref="marshaller"/>
   </beans:bean>
 

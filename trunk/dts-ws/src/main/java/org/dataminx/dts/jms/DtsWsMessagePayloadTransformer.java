@@ -15,10 +15,11 @@ import org.springframework.oxm.Unmarshaller;
  * Deserialises an incoming Message payload into an object graph using a JAXB-2 unmarshaller.
  *
  * @author Alex Arana
+ * @author Gerson Galang
  */
-public class DtsWSMessagePayloadTransformer extends XmlPayloadUnmarshallingTransformer {
+public class DtsWsMessagePayloadTransformer extends XmlPayloadUnmarshallingTransformer {
     /** Internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(DtsWSMessagePayloadTransformer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DtsWsMessagePayloadTransformer.class);
 
     /**
      * Constructs a new instance of <code>DtsMessageTransformer</code> using the specified unmarshaller
@@ -27,7 +28,7 @@ public class DtsWSMessagePayloadTransformer extends XmlPayloadUnmarshallingTrans
      * @param unmarshaller Unmarshaller used to deserialise the given {@link javax.xml.transform.Source}
      *        into an object graph.
      */
-    public DtsWSMessagePayloadTransformer(final Unmarshaller unmarshaller) {
+    public DtsWsMessagePayloadTransformer(final Unmarshaller unmarshaller) {
         super(unmarshaller);
     }
 

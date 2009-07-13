@@ -29,11 +29,12 @@ import org.springframework.stereotype.Component;
  * </ul>
  *
  * @author Alex Arana
+ * @author Gerson Galang
  */
-@Component("dtsWSMessageConverter")
-public class DtsWSMessageConverter extends SimpleMessageConverter {
+@Component("dtsWsMessageConverter")
+public class DtsWsMessageConverter extends SimpleMessageConverter {
     /** Internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(DtsWSMessageConverter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DtsWsMessageConverter.class);
 
 
     /** Component used to marshall Java object graphs into XML. */
@@ -44,8 +45,8 @@ public class DtsWSMessageConverter extends SimpleMessageConverter {
      * Component used to transform input DTS Documents into Java objects.
      */
     @Autowired
-    @Qualifier("dtsWSMessagePayloadTransformer")
-    private DtsWSMessagePayloadTransformer mTransformer;
+    @Qualifier("dtsWsMessagePayloadTransformer")
+    private DtsWsMessagePayloadTransformer mTransformer;
 
     /**
      * {@inheritDoc}
@@ -95,7 +96,7 @@ public class DtsWSMessageConverter extends SimpleMessageConverter {
         return payload;
     }
 
-    public void setTransformer(final DtsWSMessagePayloadTransformer transformer) {
+    public void setTransformer(final DtsWsMessagePayloadTransformer transformer) {
         mTransformer = transformer;
     }
 }
