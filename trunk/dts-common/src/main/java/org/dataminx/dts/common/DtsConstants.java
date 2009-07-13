@@ -4,7 +4,7 @@
 package org.dataminx.dts.common;
 
 /**
- * Defines all the constants for the DTS application
+ * Defines all the constants for the DTS application.
  *
  * @author Alex Arana
  */
