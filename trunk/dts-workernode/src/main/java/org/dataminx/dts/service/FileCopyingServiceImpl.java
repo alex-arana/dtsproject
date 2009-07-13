@@ -5,6 +5,8 @@
  */
 package org.dataminx.dts.service;
 
+import static org.dataminx.dts.common.DtsConfigManager.DEFAULT_MYPROXY_CREDENTIAL_LIFETIME_KEY;
+
 import org.apache.commons.vfs.Capability;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSelector;
@@ -122,7 +124,7 @@ public class FileCopyingServiceImpl implements FileCopyingService {
     }
 
     /**
-     * Create the FileSystemOptions based on the provided source or target
+     * Create the FileSystemOptions based on the provided source or target.
      *
      * @param sourceOrTarget the source or target
      * @return the FileSystemOptions for the given source or target
@@ -143,15 +145,15 @@ public class FileCopyingServiceImpl implements FileCopyingService {
                 try {
                     credential = myproxy.get(myProxyDetails.getMyProxyUsername(),
                         myProxyDetails.getMyProxyPassword(),
-                        mDtsConfigManager.getDtsConfig().getInt(
-                        mDtsConfigManager.DEFAULT_MYPROXY_CREDENTIAL_LIFETIME_KEY));
+                        mDtsConfigManager.getDtsConfig().getInt(DEFAULT_MYPROXY_CREDENTIAL_LIFETIME_KEY));
                     GridFtpFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
 
                     //TODO set the credential for all the other Grid file systems we want
                     //     to support in the future
                     //SRBFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
 
-                } catch (MyProxyException e) {
+                }
+                catch (MyProxyException e) {
                     LOG.error(String.format("Could not get delegated proxy from server '%s:%s'\n%s",
                         myProxyDetails.getMyProxyServer(),
                         myProxyDetails.getMyProxyPort(),
