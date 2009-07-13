@@ -34,5 +34,9 @@ public class DtsConstants {
     /** Default JVM property used to override the log4j configuration source. */
     public static final String DEFAULT_LOG4J_CONFIGURATION_KEY = "log4j.configuration";
 
-
+    /**
+     * Name of the configuration property that holds the value of the default default lifetime of a proxy
+     * credential.
+     */
+    public static final String DEFAULT_MYPROXY_CREDENTIAL_LIFETIME_KEY = "default.myproxy.lifetime";
 }
