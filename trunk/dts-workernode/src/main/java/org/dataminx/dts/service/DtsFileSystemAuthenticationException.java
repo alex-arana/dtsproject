@@ -26,7 +26,8 @@ public class DtsFileSystemAuthenticationException extends DtsException {
     }
 
     /**
-     * Constructs an instance of {@link DtsFileSystemAuthenticationException} with the specified detail message and cause.
+     * Constructs an instance of {@link DtsFileSystemAuthenticationException} with the specified detail message
+     * and cause.
      *
      * @param message the detail message.
      * @param cause the cause.
