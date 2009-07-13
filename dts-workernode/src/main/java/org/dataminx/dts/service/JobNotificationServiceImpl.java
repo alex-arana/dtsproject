@@ -94,7 +94,7 @@ public class JobNotificationServiceImpl implements JobNotificationService {
             final JobErrorEventDetailType errorDetails = mJaxbObjectFactory.createJobErrorEventDetailType();
             errorDetails.setWorkerNodeHost(mdtsWorkerNodeInformationService.getInstanceId());
             errorDetails.setTimeOfOccurrence(toXmlGregorianCalendar(stepExecution.getStartTime()));
-            errorDetails.setErrorMessage(String.format("An error has occurred during the execution"
+            errorDetails.setErrorMessage(String.format("An error has occurred during the execution of"
                 + " DTS Job step '%s': %s", stepExecution.getStepName(), exitStatus.getExitDescription()));
 
             final List<Throwable> failures = stepExecution.getFailureExceptions();
