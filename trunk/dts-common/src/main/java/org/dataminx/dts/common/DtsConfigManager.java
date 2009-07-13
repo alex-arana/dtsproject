@@ -13,9 +13,6 @@ import org.springframework.context.annotation.Scope;
 @Scope("singleton")
 public class DtsConfigManager {
 
-    /** The Constant DEFAULT_MYPROXY_CREDENTIAL_LIFETIME_KEY. */
-    public static final String DEFAULT_MYPROXY_CREDENTIAL_LIFETIME_KEY = "default.myproxy.lifetime";
-
     /** The DTS config. */
     private Configuration mDtsConfig;
 
@@ -26,7 +23,7 @@ public class DtsConfigManager {
      * @throws ConfigurationException if an error occurs while initialising the configuration from the
      *         specified location
      */
-    public void setDtsConfigLocation(String dtsConfigLocation) throws ConfigurationException {
+    public void setDtsConfigLocation(final String dtsConfigLocation) throws ConfigurationException {
         mDtsConfig = new PropertiesConfiguration(dtsConfigLocation);
     }
 

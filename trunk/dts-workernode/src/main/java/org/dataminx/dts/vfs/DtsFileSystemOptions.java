@@ -24,7 +24,7 @@ public class DtsFileSystemOptions extends FileSystemOptions {
     /**
      * Default constructor for instances of {@link DtsFileSystemOptions}.
      */
-    DtsFileSystemOptions() {
+    public DtsFileSystemOptions() {
         initialiseDefaults();
     }
 

@@ -5,12 +5,26 @@
  */
 package org.dataminx.dts.vfs;
 
+import static org.dataminx.dts.common.DtsConstants.DEFAULT_MYPROXY_CREDENTIAL_LIFETIME_KEY;
+
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemOptions;
 import org.apache.commons.vfs.impl.StandardFileSystemManager;
+import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
 import org.dataminx.dts.DtsException;
+import org.dataminx.dts.common.DtsConfigManager;
+import org.dataminx.dts.service.DtsFileSystemAuthenticationException;
+import org.dataminx.schemas.dts._2009._05.dts.CredentialType;
+import org.dataminx.schemas.dts._2009._05.dts.MyProxyTokenType;
+import org.dataminx.schemas.dts._2009._05.dts.SourceTargetType;
+import org.globus.myproxy.MyProxy;
+import org.globus.myproxy.MyProxyException;
+import org.ietf.jgss.GSSCredential;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -24,11 +38,18 @@ import org.springframework.util.Assert;
 @Component
 @Scope("singleton")
 public class DtsFileSystemManager extends StandardFileSystemManager implements InitializingBean {
+    /** Internal logger object. */
+    private static final Logger LOG = LoggerFactory.getLogger(DtsFileSystemManager.class);
+
     /** Configuration URL. */
     private Resource mConfigurationResource;
 
+    /** A reference to the DTS Configuration manager. */
+    @Autowired
+    private DtsConfigManager mDtsConfigManager;
+
     /** Default set of options for most file systems. */
-    private FileSystemOptions mFileSystemOptions = new DtsFileSystemOptions();
+    private FileSystemOptions mDefaultFileSystemOptions = new DtsFileSystemOptions();
 
     /**
      * Locates a file by URI using the default FileSystemOptions for file-system creation.
@@ -38,23 +59,86 @@ public class DtsFileSystemManager extends StandardFileSystemManager implements I
      */
     public FileObject resolveFile(final String uri) {
         try {
-            return resolveFile(uri, mFileSystemOptions);
+            return super.resolveFile(uri, mDefaultFileSystemOptions);
         }
         catch (final FileSystemException ex) {
             throw new DtsException(ex);
         }
     }
 
+    /**
+     * Locates a file by URI using the default FileSystemOptions for file-system creation.
+     *
+     * @param sourceOrTarget JAXB entity containing details about a file transfer source/destination
+     * @return A new file object instance
+     */
+    public FileObject resolveFile(final SourceTargetType sourceOrTarget) {
+        Assert.notNull(sourceOrTarget);
+        try {
+            return resolveFile(sourceOrTarget.getURI(), createFileSystemOptions(sourceOrTarget));
+        }
+        catch (final FileSystemException ex) {
+            throw new DtsException(ex);
+        }
+    }
+
+    /**
+     * Create a new set of file system options, as an instance of {@link FileSystemOptions}, based on the provided
+     * source or target entity.
+     *
+     * @param sourceOrTarget the source or target entity
+     * @return the set of file system options for the given source or target entity
+     */
+    public FileSystemOptions createFileSystemOptions(final SourceTargetType sourceOrTarget) {
+        final FileSystemOptions options = new DtsFileSystemOptions();
+        final CredentialType credentialType = sourceOrTarget.getCredential();
+        if (credentialType != null) {
+            // at the moment we're only supporting MyProxy credentials
+            if (credentialType.getMyProxyToken() != null) {
+                final MyProxyTokenType myProxyDetails = credentialType.getMyProxyToken();
+                final MyProxy myproxy = new MyProxy(
+                    myProxyDetails.getMyProxyServer(), myProxyDetails.getMyProxyPort());
+
+                GSSCredential credential = null;
+                try {
+                    credential = myproxy.get(myProxyDetails.getMyProxyUsername(),
+                        myProxyDetails.getMyProxyPassword(),
+                        //TODO replace with property injection?
+                        mDtsConfigManager.getDtsConfig().getInt(DEFAULT_MYPROXY_CREDENTIAL_LIFETIME_KEY, 0));
+                    GridFtpFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
+
+                    //TODO set the credential for all the other Grid file systems we want
+                    //     to support in the future
+                    //SRBFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
+                }
+                catch (final MyProxyException ex) {
+                    LOG.error(String.format("Could not get delegated proxy from server '%s:%s'\n%s",
+                        myProxyDetails.getMyProxyServer(),
+                        myProxyDetails.getMyProxyPort(),
+                        ex.getMessage()));
+                    throw new DtsFileSystemAuthenticationException(ex.getMessage());
+                }
+            }
+
+            //TODO support other types of credentials
+        }
+
+        // TODO set the other URI related options here like the min/max port numbers
+        //      for GridFTP if provided
+
+        return options;
+    }
+
     public void setConfigurationResource(final Resource resource) {
         mConfigurationResource = resource;
     }
 
-    public FileSystemOptions getFileSystemOptions() {
-        return mFileSystemOptions;
+    public FileSystemOptions getDefaultFileSystemOptions() {
+        return mDefaultFileSystemOptions;
     }
 
-    public void setFileSystemOptions(final FileSystemOptions fileSystemOptions) {
-        mFileSystemOptions = fileSystemOptions;
+    public void setDefaultFileSystemOptions(final FileSystemOptions fileSystemOptions) {
+        mDefaultFileSystemOptions = fileSystemOptions;
     }
 
     /**
