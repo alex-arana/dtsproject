@@ -6,6 +6,8 @@ import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.domain.model.Job;
 import org.dataminx.dts.domain.model.JobStatus;
 import org.dataminx.dts.domain.repo.JobDao;
+import org.dataminx.schemas.dts._2009._05.dts.FireUpJobErrorEvent;
+import org.dataminx.schemas.dts._2009._05.dts.FireUpStepFailureEvent;
 import org.dataminx.schemas.dts._2009._05.dts.JobEventDetailType;
 import org.dataminx.schemas.dts._2009._05.dts.JobEventUpdateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,44 +32,62 @@ public class DtsJobEventUpdateHandler {
     /**
      * Updates the job entity based on the details provided by the worker node.
      *
-     * @param message the jobEventUpdateRequest message
+     * @param message the event update message
      */
-    public void updateJob(Message<JobEventUpdateRequest> message) {
-        JobEventUpdateRequest request = message.getPayload();
+    public void handleEvent(Message<?> message) {
+        Object payload = message.getPayload();
 
-        // TODO: probably need to look at making the resourcekey to WN job ID mapping clear (same names?)
-        // later on
+        if (payload instanceof JobEventUpdateRequest) {
+            JobEventUpdateRequest request = (JobEventUpdateRequest) payload;
 
-        // TODO: need to sync this with whatever is supported by the WN
+            // TODO: probably need to look at making the resourcekey to WN job ID mapping clear (same names?)
+            // later on
 
-        // get the details of the job entry to be updated
-        String updatedJobResourceKey = request.getJobId();
-        JobEventDetailType updatedJobDetail = request.getJobEventDetail();
+            // TODO: need to sync this with whatever is supported by the WN
 
-        // job to update
-        Job job = mJobRepository.findByResourceKey(updatedJobResourceKey);
+            // get the details of the job entry to be updated
+            String updatedJobResourceKey = request.getJobId();
+            JobEventDetailType updatedJobDetail = request.getJobEventDetail();
 
-        switch(updatedJobDetail.getStatus()) {
-            case TRANSFERRING:
-                job.setWorkerNodeHost(updatedJobDetail.getWorkerNodeHost());
-                job.setActiveTime(updatedJobDetail.getActiveTime().toGregorianCalendar().getTime());
-                job.setStatus(JobStatus.TRANSFERRING);
-                break;
-            case DONE:
-                job.setFinishedFlag(updatedJobDetail.isFinishedFlag());
-                job.setWorkerTerminatedTime(updatedJobDetail.getWorkerTerminatedTime().toGregorianCalendar().getTime());
-                job.setStatus(JobStatus.DONE);
+            // job to update
+            Job job = mJobRepository.findByResourceKey(updatedJobResourceKey);
 
-                // also set the WS specific fields..
-                job.setJobAllDoneTime(new Date());
+            switch(updatedJobDetail.getStatus()) {
+                case TRANSFERRING:
+                    job.setWorkerNodeHost(updatedJobDetail.getWorkerNodeHost());
+                    job.setActiveTime(updatedJobDetail.getActiveTime().toGregorianCalendar().getTime());
+                    job.setStatus(JobStatus.TRANSFERRING);
+                    break;
+                case DONE:
+                    job.setFinishedFlag(updatedJobDetail.isFinishedFlag());
+                    job.setWorkerTerminatedTime(
+                        updatedJobDetail.getWorkerTerminatedTime().toGregorianCalendar().getTime());
+                    job.setStatus(JobStatus.DONE);
 
-                // TODO: need to think of how to handle error messages from WN to the success flag
-                // can be set
+                    // also set the WS specific fields..
+                    job.setJobAllDoneTime(new Date());
 
-                break;
-            default:
-                break;
+                    // TODO: need to think of how to handle error messages from WN to the success flag
+                    // can be set
+
+                    break;
+                default:
+                    break;
+            }
+            mJobRepository.saveOrUpdate(job);
         }
-        mJobRepository.saveOrUpdate(job);
+        else if (payload instanceof FireUpJobErrorEvent) {
+            LOGGER.info("DtsJobEventUpdateHandler received a FireUpJobErrorEvent.");
+
+            // TODO: handle the job error event here
+        }
+        else if (payload instanceof FireUpStepFailureEvent) {
+            LOGGER.info("DtsJobEventUpdateHandler received a FireUpStepFailureEvent.");
+
+            // TODO: handle the step failure event
+        }
+        else {
+            LOGGER.info("DtsJobEventUpdateHandler received an unknown update event from a WN.");
+        }
     }
 }
