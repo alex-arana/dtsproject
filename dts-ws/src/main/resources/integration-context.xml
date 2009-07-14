@@ -41,7 +41,7 @@
   <!-- The DTS Job Event Updates Endpoint -->
   <service-activator input-channel="dtsJobEvents"
                      ref="dtsJobEventUpdateHandler"
-                     method="updateJob"/>
+                     method="handleEvent"/>
 
   <beans:bean id="dtsWsMessagePayloadTransformer"
               class="org.dataminx.dts.jms.DtsWsMessagePayloadTransformer">
