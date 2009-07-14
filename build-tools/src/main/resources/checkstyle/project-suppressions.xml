@@ -25,6 +25,8 @@
   <suppress checks="IllegalThrows" files="[/\\]test[/\\]"/>
   <suppress checks="IllegalInstantiation" files="[/\\]test[/\\]"/>
   <suppress checks="ParameterNumberCheck" files="[/\\]test[/\\]"/>
+  <!-- don't check generated code, this to work on Unix (/) and Windows (\) -->
+  <suppress checks="." files="org[/\\]dataminx[/\\]schemas[/\\]dts[/\\]_2009[/\\]_05[/\\]dts[/\\]"/>
   <!-- End of test code suppressions -->
 
 </suppressions>
