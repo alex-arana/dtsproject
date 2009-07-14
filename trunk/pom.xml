@@ -26,6 +26,7 @@
     <dataminx.group>org.dataminx</dataminx.group>
     <minx-dts.version>0.0.1-SNAPSHOT</minx-dts.version>
     <checkstyle.version>5.0</checkstyle.version>
+    <checkstyle_config_dir>${basedir}/../build-tools/src/main/resources/checkstyle</checkstyle_config_dir>
     <slf4j.version>1.5.6</slf4j.version>
     <log4j.version>1.2.15</log4j.version>
     <jaxb-api.version>2.0</jaxb-api.version>
@@ -102,6 +103,12 @@
       <name>Sun Maven Repository</name>
       <url>http://download.java.net/maven/2</url>
     </pluginRepository>
+    <!-- latest maven-checkstyle-plugin repo -->
+    <pluginRepository>
+      <id>atlassian</id>
+      <name>Atlassian Repository</name>
+      <url>http://maven.atlassian.com/repository/public/</url>
+    </pluginRepository>
   </pluginRepositories>
 
   <modules>
@@ -171,19 +178,25 @@
   </build>
 
   <!-- See notes on Checktyle in the build/plugins section -->
-  <!--
   <reporting>
     <plugins>
+      <!-- plugin to XRef to sources -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+      </plugin>
+      <!-- checkstyle report -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.3-atlassian-1</version>
         <configuration>
-          <configLocation>checkstyle/checkstyle-checks.xml</configLocation>
+          <configLocation>${checkstyle_config_dir}/checkstyle-checks.xml</configLocation>
+          <propertyExpansion>checkstyle_config_dir=${checkstyle_config_dir}</propertyExpansion>
         </configuration>
       </plugin>
     </plugins>
   </reporting>
-  -->
 
   <dependencyManagement>
     <dependencies>

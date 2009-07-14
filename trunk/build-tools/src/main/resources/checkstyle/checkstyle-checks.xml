@@ -5,12 +5,12 @@
 
 <module name="Checker">
 
-  <!-- Project header -->
-  <module name="Header">
+  <!-- Project header, check disabled C.Aya Jun/09 -->
+  <!-- module name="Header">
     <property name="headerFile"
               value="${checkstyle_config_dir}/java.header"/>
     <property name="fileExtensions" value="java"/>
-  </module>
+  </module -->
 
   <!-- SuppressionFilter: suppressions should be reviewed periodically -->
   <module name="SuppressionFilter">
