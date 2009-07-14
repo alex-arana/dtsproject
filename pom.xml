@@ -66,6 +66,7 @@
     <c3p0.version>0.9.1.2</c3p0.version>
     <easymock.version>2.5.1</easymock.version>
     <simpleProxyLib.version>0.4-SNAPSHOT</simpleProxyLib.version>
+    <dbunit.version>2.4.5</dbunit.version>
   </properties>
 
   <repositories>
@@ -703,6 +704,13 @@
         <groupId>au.org.arcs.auth</groupId>
         <artifactId>simpleProxyLib</artifactId>
         <version>${simpleProxyLib.version}</version>
+      </dependency>
+      
+      <!-- DbUnit for DB testing -->
+      <dependency>
+        <groupId>org.dbunit</groupId>
+        <artifactId>dbunit</artifactId>
+        <version>${dbunit.version}</version>
       </dependency>
       
     </dependencies>   
