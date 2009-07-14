@@ -12,7 +12,6 @@ import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
 import org.dataminx.schemas.dts._2009._05.dts.JobDescriptionType;
 import org.dataminx.schemas.dts._2009._05.dts.JobIdentificationType;
 import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInterruptedException;
 import org.springframework.batch.core.StartLimitExceededException;
@@ -128,16 +127,17 @@ public class DtsFileTransferJob extends DtsJob {
 
         //TODO convert to application exceptions
         final StepExecution stepExecution = handleStep(mPartitioningStep, execution);
-        if (stepExecution.getStatus() != BatchStatus.COMPLETED) {
-            // TODO: Terminate the job if a step fails
-            return;
-        }
 
         // update the job status to have the same status as the master step
         if (stepExecution != null) {
             logger.debug("Upgrading JobExecution status: " + stepExecution);
             execution.upgradeStatus(stepExecution.getStatus());
             execution.setExitStatus(stepExecution.getExitStatus());
+        }
+
+        if (stepExecution.getStatus().isUnsuccessful()) {
+            getJobNotificationService().notifyJobError(getJobId(), execution);
+            return;
         }
 
         // TODO move this somewhere it always gets called

@@ -31,6 +31,7 @@
         <value>org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest</value>
         <value>org.dataminx.schemas.dts._2009._05.dts.JobEventUpdateRequest</value>
         <value>org.dataminx.schemas.dts._2009._05.dts.FireUpJobErrorEvent</value>
+        <value>org.dataminx.schemas.dts._2009._05.dts.FireUpStepFailureEvent</value>
       </list>
     </property>
   </bean>
