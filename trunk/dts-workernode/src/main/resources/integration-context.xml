@@ -17,6 +17,7 @@
   <!-- Defines a point-to-point channel for receiving DTS job requests. -->
   <channel id="dtsJobRequests"/>
   <channel id="dtsJobEvents"/>
+  <channel id="dtsJobExecutions"/>
 
   <!--
     Defines an inbound JMS channel adapter for the DTS job submission queue.
@@ -47,9 +48,10 @@
   </beans:bean>
 
   <service-activator input-channel="dtsJobRequests"
-                     output-channel="dtsJobEvents"
-                     ref="dtsJobRequestHandler"
-                     method="launch"/>
+                     output-channel="dtsJobExecutions"
+                     ref="dtsJobRequestHandler"/>
+
+  <logging-channel-adapter channel="dtsJobExecutions"/>
 
   <beans:bean id="dtsJaxbUnmarshaller"
               class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
@@ -62,6 +64,7 @@
         <beans:value>org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest</beans:value>
         <beans:value>org.dataminx.schemas.dts._2009._05.dts.JobEventUpdateRequest</beans:value>
         <beans:value>org.dataminx.schemas.dts._2009._05.dts.FireUpJobErrorEvent</beans:value>
+        <beans:value>org.dataminx.schemas.dts._2009._05.dts.FireUpStepFailureEvent</beans:value>
       </beans:list>
     </beans:property>
   </beans:bean>
