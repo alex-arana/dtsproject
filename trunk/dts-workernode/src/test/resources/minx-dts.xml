@@ -25,7 +25,7 @@
                   <MyProxyPort>7512</MyProxyPort>
               </MyProxyToken>
           </Credential>
-          
+
         </Source>
         <Target>
           <!--<URI>gsiftp://ng2.vpac.org/tmp/Contents-i386.gz</URI>
@@ -37,7 +37,7 @@
                   <MyProxyPort>7512</MyProxyPort>
               </MyProxyToken>
           </Credential>-->
-          <URI>ftp://dm11.intersect.org.au/pub/lcg.conf</URI>
+          <URI>ftp://dm11.intersect.org.au/upload/lcg.conf</URI>
           <Credential>
             <wsse:UsernameToken>
               <wsse:Username>gerson</wsse:Username>
