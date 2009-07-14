@@ -14,6 +14,7 @@ import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
 import org.dataminx.dts.batch.DtsJob;
@@ -30,6 +31,7 @@ import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.xml.transform.StringResult;
 
 /**
  * This class is a dual-purpose messaging converter:
@@ -44,6 +46,9 @@ import org.springframework.util.Assert;
 public class DtsMessageConverter extends SimpleMessageConverter {
     /** Internal logger object. */
     private static final Logger LOG = LoggerFactory.getLogger(DtsMessageConverter.class);
+
+    /** Default format of outgoing messages. */
+    private OutputFormat mOutputFormat = OutputFormat.XML_TEXT;
 
     /**
      * A reference to the DTS Job factory.
@@ -102,8 +107,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         }
 
         // convert the input JAXB2 entity to an object we can send back as the payload of a JMS message
-        // TODO should we send a TextMessage instead? would DTS-WS handle it?
-        final DOMResult result = new DOMResult();
+        final Result result = createOutputResult();
         try {
             mMarshaller.marshal(object, result);
         }
@@ -121,7 +125,32 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         }
 
         // use the base class implementation of this method to convert from the output XML to a JMS Message
-        return super.toMessage(result.getNode(), session);
+        return super.toMessage(extractResultOutput(result), session);
+    }
+
+    /**
+     * Returns a suitable instance of {@link Result} that can be used to hold a transformation result tree.
+     *
+     * @return a new instance of Result that matches the currently set output format
+     */
+    private Result createOutputResult() {
+        return mOutputFormat == OutputFormat.DOM_OBJECT ? new DOMResult() : new StringResult();
+    }
+
+    /**
+     * Extract the transformation output held in the specified {@link Result} object depending on its
+     * type.
+     *
+     * @param result an instance of Result that matches the currently set output format
+     * @return the transformation output held in the specified <code>Result</code>
+     */
+    private Object extractResultOutput(final Result result) {
+        switch (mOutputFormat) {
+            case DOM_OBJECT:
+                return ((DOMResult) result).getNode();
+            default:
+                return result.toString();
+        }
     }
 
     /**
@@ -154,7 +183,27 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         return payload;
     }
 
+    public void setOutputFormat(final OutputFormat outputFormat) {
+        mOutputFormat = outputFormat;
+    }
+
     public void setTransformer(final DtsMessagePayloadTransformer transformer) {
         mTransformer = transformer;
+    }
+
+    /**
+     * Enumerated type that represents the various kinds of output that this class can convert outgoing
+     * messages to.
+     */
+    public enum OutputFormat {
+        /**
+         * Send outgoing messages as Object messages containing a DOM document.
+         */
+        DOM_OBJECT,
+
+        /**
+         * Send outgoing messages as Text messages containing an XML document.
+         */
+        XML_TEXT
     }
 }
