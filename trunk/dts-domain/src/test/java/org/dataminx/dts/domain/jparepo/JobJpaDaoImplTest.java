@@ -50,7 +50,7 @@ public class JobJpaDaoImplTest extends AbstractTransactionalDataSourceSpringCont
 
     @Override
     protected String[] getConfigLocations() {
-        return new String[] {"domain-context.xml"};
+        return new String[] {"testdomain-context.xml"};
     }
 
     @Override
