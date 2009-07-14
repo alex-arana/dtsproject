@@ -90,7 +90,7 @@
             <xsd:element name="ErrorMessage" type="xsd:string"
                 minOccurs="0" />
             <xsd:element name="FailureTrace" type="xsd:string"
-                minOccurs="0" maxOccurs="unbounded"/>
+                minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
 
@@ -417,6 +417,16 @@
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
+    
+    <xsd:element name="fireUpStepFailureEvent">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="minx:JobId" />
+                <xsd:element ref="minx:JobErrorEventDetail" />
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+    
 
 
     <!-- ELEMENT DEFINITIONS... -->
