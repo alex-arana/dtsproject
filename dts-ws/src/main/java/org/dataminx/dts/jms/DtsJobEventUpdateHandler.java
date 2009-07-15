@@ -67,7 +67,7 @@ public class DtsJobEventUpdateHandler {
                     // also set the WS specific fields..
                     job.setJobAllDoneTime(new Date());
 
-                    // TODO: need to think of how to handle error messages from WN to the success flag
+                    // TODO: need to think of how to handle error messages from WN so the success flag
                     // can be set
 
                     break;
@@ -87,7 +87,9 @@ public class DtsJobEventUpdateHandler {
             // TODO: handle the step failure event
         }
         else {
-            LOGGER.info("DtsJobEventUpdateHandler received an unknown update event from a WN.");
+            LOGGER.error("DtsJobEventUpdateHandler received an unknown update event from a WN.");
+
+            // TODO: provide an implementation
         }
     }
 }
