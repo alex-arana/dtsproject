@@ -28,9 +28,6 @@ import org.springframework.test.AbstractTransactionalDataSourceSpringContextTest
  */
 public class JobJpaDaoImplTest extends AbstractTransactionalDataSourceSpringContextTests {
 
-    // TODO: enable the tests again when a script has been written to automatically
-    // create the DB schema
-
     /** The logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(JobJpaDaoImplTest.class);
 
