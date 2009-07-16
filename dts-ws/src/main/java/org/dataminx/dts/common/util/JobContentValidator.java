@@ -1,5 +1,6 @@
 package org.dataminx.dts.common.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.dataminx.dts.ws.DtsJobDefinitionException;
 import org.dataminx.schemas.dts._2009._05.dts.DataTransferType;
 import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
@@ -25,7 +26,7 @@ public class JobContentValidator {
     public void validate(JobDefinitionType job) throws DtsJobDefinitionException {
         StringBuffer errorMessages = new StringBuffer();
 
-        if (job.getJobDescription().getJobIdentification().getJobName().trim().equals("")) {
+        if (StringUtils.isBlank(job.getJobDescription().getJobIdentification().getJobName())) {
             errorMessages.append("  Empty job name.\n");
         }
         // TODO: think of a cleaner way of returning back an error message for a number of
@@ -34,10 +35,10 @@ public class JobContentValidator {
             SourceTargetType source = transfer.getSource();
             SourceTargetType target = transfer.getTarget();
 
-            if (source.getURI().trim().equals("")) {
+            if (StringUtils.isBlank(source.getURI())) {
                 errorMessages.append("  Empty SourceURI.\n");
             }
-            if (target.getURI().trim().equals("")) {
+            if (StringUtils.isBlank(target.getURI())) {
                 errorMessages.append("  Empty TargetURI.\n");
             }
             passwordExistsInUsernameToken(source, errorMessages);
