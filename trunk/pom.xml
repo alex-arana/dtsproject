@@ -14,10 +14,10 @@
   <description>
     <![CDATA[DataMINX Data Movement Services parent project. Defines dependencies and common configuration for the build process.]]>
   </description>
-  <url>http://www.dataminx.org.au</url>
+  <url>http://www.dataminx.org</url>
   <organization>
     <name>DataMINX</name>
-    <url>http://www.dataminx.org.au</url>
+    <url>http://www.dataminx.org</url>
   </organization>
 
   <properties>
@@ -25,6 +25,7 @@
 
     <dataminx.group>org.dataminx</dataminx.group>
     <minx-dts.version>0.0.1-SNAPSHOT</minx-dts.version>
+    <dts-ws.context.root>dts</dts-ws.context.root>
     <checkstyle.version>5.0</checkstyle.version>
     <checkstyle_config_dir>${basedir}/../build-tools/src/main/resources/checkstyle</checkstyle_config_dir>
     <slf4j.version>1.5.6</slf4j.version>
@@ -68,6 +69,7 @@
     <easymock.version>2.5.1</easymock.version>
     <simpleProxyLib.version>0.4-SNAPSHOT</simpleProxyLib.version>
     <dbunit.version>2.4.5</dbunit.version>
+    <jetty.version>6.1H.14.1</jetty.version>
   </properties>
 
   <repositories>
@@ -724,6 +726,19 @@
         <groupId>org.dbunit</groupId>
         <artifactId>dbunit</artifactId>
         <version>${dbunit.version}</version>
+      </dependency>
+      
+      <!-- Jetty -->
+      <dependency>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty-java5-threadpool</artifactId>
+        <version>${jetty.version}</version>
       </dependency>
       
     </dependencies>   
