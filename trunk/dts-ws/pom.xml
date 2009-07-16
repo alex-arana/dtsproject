@@ -104,6 +104,17 @@
       <artifactId>spring-integration-xml</artifactId>
     </dependency>
     
+    <!-- Jetty -->
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-java5-threadpool</artifactId>
+    </dependency> 
+    
 
     <!-- client stuff... -->
     <dependency>
@@ -133,10 +144,25 @@
         <filtering>true</filtering>
       </testResource>
     </testResources>
-    
-    
       
     <plugins>
+      <!-- Force maven to use the intended context root to be the name of the WAR file -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>2.0</version>
+        <configuration>
+          <warName>${dts-ws.context.root}</warName>
+        </configuration>
+      </plugin>
+      
+      <!-- 
+        Allows us to enable this project as a WTP Eclipse project. There is currently no
+        other way of specifying context-root from within maven. You'll always have to go 
+        to Project's Properties -> Web Project Settings and manually specifying the context 
+        root to "/whatever-you-like". This is only needed if you want to use Tomcat server 
+        running inside Eclipse.
+       -->
       <plugin>
         <artifactId>maven-eclipse-plugin</artifactId>
         <configuration>
@@ -148,6 +174,16 @@
           <additionalProjectnatures>
             <projectnature>org.springframework.ide.eclipse.core.springnature</projectnature>
           </additionalProjectnatures>
+        </configuration>
+      </plugin>
+      
+      <!-- Jetty-Embedded DTS Web Service instance  -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>org.dataminx.dts.main.JettyEmbeddedDtsWebService</mainClass>
+          <classpathScope>runtime</classpathScope>
         </configuration>
       </plugin>
     </plugins>

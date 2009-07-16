@@ -15,7 +15,7 @@
         class="org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition">
         <property name="schema" ref="schema" />
         <property name="portTypeName" value="DataTransferService" />
-        <property name="locationUri" value="http://localhost:8080/dts/" />
+        <property name="locationUri" value="http://${ws.host}:${ws.port}/${ws.context.path}/" />
         <!--
           <property name="targetNamespace"
           value="http://schemas.dataminx.org/dts/2009/05/dts" />
@@ -105,6 +105,20 @@
             </props>
         </property>
         <property name="order" value="2"/>
+    </bean>
+    
+    <bean id="wsApplicationProperties"
+        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+      <property name="locations">
+        <list>
+          <value>classpath:/jms.properties</value>
+          <value>classpath:/ws.properties</value>
+          <value>classpath:/database.properties</value>
+        </list>
+      </property>
+      <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+      <property name="ignoreUnresolvablePlaceholders" value="false"/>
+      <property name="order" value="1"/>
     </bean>
 
 

@@ -1,4 +1,4 @@
-package org.dataminx.dts.ws;
+package org.dataminx.dts.client.util;
 
 import java.io.File;
 import javax.xml.parsers.DocumentBuilder;
