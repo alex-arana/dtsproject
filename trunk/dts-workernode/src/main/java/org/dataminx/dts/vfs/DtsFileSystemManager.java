@@ -136,7 +136,6 @@ public class DtsFileSystemManager extends StandardFileSystemManager implements I
                         password = ((Element) element).getTextContent();
                     }
                 }
-                LOG.debug(String.format("using username '%s' and password '%s'.", username, password));
                 StaticUserAuthenticator auth = new StaticUserAuthenticator(null, username, password);
                 DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(options, auth);
             }
