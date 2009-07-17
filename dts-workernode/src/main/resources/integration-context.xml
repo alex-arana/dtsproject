@@ -3,6 +3,7 @@
     xmlns:beans="http://www.springframework.org/schema/beans"
     xmlns:jms="http://www.springframework.org/schema/integration/jms"
     xmlns:si-xml="http://www.springframework.org/schema/integration/xml"
+    xmlns:util="http://www.springframework.org/schema/util"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
            http://www.springframework.org/schema/integration
@@ -10,7 +11,9 @@
            http://www.springframework.org/schema/integration/xml
            http://www.springframework.org/schema/integration/xml/spring-integration-xml-1.0.xsd
            http://www.springframework.org/schema/integration/jms
-           http://www.springframework.org/schema/integration/jms/spring-integration-jms-1.0.xsd">
+           http://www.springframework.org/schema/integration/jms/spring-integration-jms-1.0.xsd
+           http://www.springframework.org/schema/util
+           http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
   <annotation-config/>
 
@@ -66,6 +69,14 @@
         <beans:value>org.dataminx.schemas.dts._2009._05.dts.FireUpJobErrorEvent</beans:value>
         <beans:value>org.dataminx.schemas.dts._2009._05.dts.FireUpStepFailureEvent</beans:value>
       </beans:list>
+    </beans:property>
+    <beans:property name="marshallerProperties">
+      <beans:map>
+        <beans:entry>
+          <beans:key><util:constant static-field="javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT"/></beans:key>
+          <beans:value type="java.lang.Boolean">true</beans:value>
+        </beans:entry>
+      </beans:map>
     </beans:property>
   </beans:bean>
 
