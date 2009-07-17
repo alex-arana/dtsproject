@@ -50,7 +50,7 @@ public class TestProcessDtsJobMessage {
 
     @Test
     public void submitDtsJobAsDocument() throws Exception {
-        final File file = new ClassPathResource("minx-dts.xml").getFile();
+        final File file = new ClassPathResource("/org/dataminx/dts/util/minx-dts.xml").getFile();
         final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         docFactory.setNamespaceAware(true);
         final DocumentBuilder builder = docFactory.newDocumentBuilder();
