@@ -5,8 +5,6 @@
  */
 package org.dataminx.dts.vfs;
 
-import static org.dataminx.dts.common.DtsConstants.DEFAULT_MYPROXY_CREDENTIAL_LIFETIME_KEY;
-
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemOptions;
@@ -15,7 +13,6 @@ import org.apache.commons.vfs.impl.DefaultFileSystemConfigBuilder;
 import org.apache.commons.vfs.impl.StandardFileSystemManager;
 import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
 import org.dataminx.dts.DtsException;
-import org.dataminx.dts.common.DtsConfigManager;
 import org.dataminx.dts.service.DtsFileSystemAuthenticationException;
 import org.dataminx.schemas.dts._2009._05.dts.CredentialType;
 import org.dataminx.schemas.dts._2009._05.dts.MyProxyTokenType;
@@ -27,7 +24,6 @@ import org.oasis_open.docs.wss._2004._01.oasis_200401_wss_wssecurity_secext_1_0.
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -48,9 +44,12 @@ public class DtsFileSystemManager extends StandardFileSystemManager implements I
     /** Configuration URL. */
     private Resource mConfigurationResource;
 
-    /** A reference to the DTS Configuration manager. */
-    @Autowired
-    private DtsConfigManager mDtsConfigManager;
+    /**
+     * Specifies the lifetime of the MyProxy credentials managed by this class.  If this setting is not
+     * specifically configured, it will hold a default value of <code>0</code> which means use the maximum
+     * possible lifetime for the credential.
+     */
+    private int mMyProxyCredentialLifetime;
 
     /** Default set of options for most file systems. */
     private FileSystemOptions mDefaultFileSystemOptions = new DtsFileSystemOptions();
@@ -107,9 +106,7 @@ public class DtsFileSystemManager extends StandardFileSystemManager implements I
                 GSSCredential credential = null;
                 try {
                     credential = myproxy.get(myProxyDetails.getMyProxyUsername(),
-                        myProxyDetails.getMyProxyPassword(),
-                        //TODO replace with property injection?
-                        mDtsConfigManager.getDtsConfig().getInt(DEFAULT_MYPROXY_CREDENTIAL_LIFETIME_KEY, 0));
+                        myProxyDetails.getMyProxyPassword(), mMyProxyCredentialLifetime);
                     GridFtpFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
 
                     //TODO set the credential for all the other Grid file systems we want
@@ -126,17 +123,17 @@ public class DtsFileSystemManager extends StandardFileSystemManager implements I
             }
 
             else if (credentialType.getUsernameToken() != null) {
-                UsernameTokenType usernameTokenDetails = credentialType.getUsernameToken();
-                String username = usernameTokenDetails.getUsername().getValue();
+                final UsernameTokenType usernameTokenDetails = credentialType.getUsernameToken();
+                final String username = usernameTokenDetails.getUsername().getValue();
                 String password = "";
-                for (Object element : usernameTokenDetails.getAny()) {
+                for (final Object element : usernameTokenDetails.getAny()) {
                     // just in case there are other elements within a UsernameToken, ignore them
                     // unless it's a PasswordString
                     if (((Element) element).getLocalName().equals("PasswordString")) {
                         password = ((Element) element).getTextContent();
                     }
                 }
-                StaticUserAuthenticator auth = new StaticUserAuthenticator(null, username, password);
+                final StaticUserAuthenticator auth = new StaticUserAuthenticator(null, username, password);
                 DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(options, auth);
             }
 
@@ -151,6 +148,14 @@ public class DtsFileSystemManager extends StandardFileSystemManager implements I
 
     public void setConfigurationResource(final Resource resource) {
         mConfigurationResource = resource;
+    }
+
+    public int getMyProxyCredentialLifetime() {
+        return mMyProxyCredentialLifetime;
+    }
+
+    public void setMyProxyCredentialLifetime(final int myProxyCredentialLifetime) {
+        mMyProxyCredentialLifetime = myProxyCredentialLifetime;
     }
 
     public FileSystemOptions getDefaultFileSystemOptions() {
