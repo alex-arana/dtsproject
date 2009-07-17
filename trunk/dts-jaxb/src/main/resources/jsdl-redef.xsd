@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://schemas.ggf.org/jsdl/2005/11/jsdl" 
+  xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl"
+  targetNamespace="http://schemas.ggf.org/jsdl/2005/11/jsdl"
+  elementFormDefault="qualified">
+  <xsd:redefine schemaLocation="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+  
+    <xsd:complexType name="SourceTarget_Type">
+      <xsd:complexContent>
+        <xsd:restriction base="SourceTarget_Type">
+          <xsd:sequence>
+            <xsd:element ref="URI" minOccurs="0"/>
+          </xsd:sequence>
+        </xsd:restriction>
+      </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="JobDescription_Type">
+      <xsd:complexContent>
+        <xsd:restriction base="JobDescription_Type">
+          <xsd:sequence>
+            <xsd:element ref="jsdl:JobIdentification" minOccurs="0"/>
+            <xsd:element ref="jsdl:Application" minOccurs="0"/>
+            <xsd:element ref="jsdl:Resources" minOccurs="0"/>
+            <xsd:element ref="jsdl:DataStaging" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        </xsd:restriction>
+      </xsd:complexContent>
+    </xsd:complexType>
+    
+  </xsd:redefine>
+</xsd:schema>
