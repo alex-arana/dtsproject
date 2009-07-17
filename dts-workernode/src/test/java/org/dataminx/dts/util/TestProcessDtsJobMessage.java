@@ -39,7 +39,7 @@ import org.w3c.dom.Document;
  *
  * @author Alex Arana
  */
-@ContextConfiguration(locations = { "/test-context.xml", "/activemq/jms-context.xml" })
+@ContextConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
 public class TestProcessDtsJobMessage {
     @Autowired
@@ -100,8 +100,7 @@ public class TestProcessDtsJobMessage {
 
         final Logger logger = LoggerFactory.getLogger(getClass());
         final String dtsJobRequest = XmlUtils.documentToString(document);
-        logger.debug(String.format("submitDtsJobAsText ['%s']:%s%s",
-            dtsJobId, LINE_SEPARATOR, dtsJobRequest));
+        logger.debug(String.format("submitDtsJobAsText ['%s']:%s%s", dtsJobId, LINE_SEPARATOR, dtsJobRequest));
         mJmsQueueSender.doSend(dtsJobId, dtsJobRequest);
     }
 
