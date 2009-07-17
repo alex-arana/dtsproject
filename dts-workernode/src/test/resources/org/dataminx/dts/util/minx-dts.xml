@@ -14,8 +14,9 @@
       </JobIdentification>
       <DataTransfer>
         <Source>
-          <!--<URI>http://wiki.arcs.org.au/pub/DataMINX/WebPreferences/favicon.ico</URI>-->
+          <URI>http://wiki.arcs.org.au/pub/DataMINX/WebPreferences/favicon.ico</URI>
           <!--<URI>ftp://mirror.pacific.net.au/linux/ubuntu/dists/jaunty/Contents-i386.gz</URI>-->
+          <!--
           <URI>gsiftp://ng2.vpac.org/tmp/lcg-info-generic-vpac-brecca.conf</URI>
           <Credential>
               <MyProxyToken>
@@ -25,7 +26,7 @@
                   <MyProxyPort>7512</MyProxyPort>
               </MyProxyToken>
           </Credential>
-          
+          -->
         </Source>
         <Target>
           <!--<URI>gsiftp://ng2.vpac.org/tmp/Contents-i386.gz</URI>
@@ -37,6 +38,7 @@
                   <MyProxyPort>7512</MyProxyPort>
               </MyProxyToken>
           </Credential>-->
+          <!--
           <URI>ftp://dm11.intersect.org.au/pub/lcg.conf</URI>
           <Credential>
             <wsse:UsernameToken>
@@ -44,6 +46,8 @@
               <wsse:PasswordString>pa55word</wsse:PasswordString>
             </wsse:UsernameToken>
           </Credential>
+          -->
+          <URI>tmp://DataMINX/favicon.ico</URI>
         </Target>
         <TransferRequirements>
           <MaxAttempts>0</MaxAttempts>

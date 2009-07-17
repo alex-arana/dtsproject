@@ -21,7 +21,7 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <configuration>
-          <mainClass>org.dataminx.dts.DtsWorkerNodeCommandLineRunner</mainClass>
+          <mainClass>org.dataminx.dts.wn.DtsWorkerNodeCommandLineRunner</mainClass>
           <classpathScope>runtime</classpathScope>
         </configuration>
       </plugin>

@@ -1,0 +1,88 @@
+<beans:beans xmlns="http://www.springframework.org/schema/integration"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:jms="http://www.springframework.org/schema/integration/jms"
+    xmlns:si-xml="http://www.springframework.org/schema/integration/xml"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/integration
+           http://www.springframework.org/schema/integration/spring-integration-1.0.xsd
+           http://www.springframework.org/schema/integration/xml
+           http://www.springframework.org/schema/integration/xml/spring-integration-xml-1.0.xsd
+           http://www.springframework.org/schema/integration/jms
+           http://www.springframework.org/schema/integration/jms/spring-integration-jms-1.0.xsd
+           http://www.springframework.org/schema/util
+           http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+  <annotation-config/>
+
+  <!-- Defines a point-to-point channel for receiving DTS job requests. -->
+  <channel id="dtsJobRequests"/>
+  <channel id="dtsJobEvents"/>
+  <channel id="dtsJobExecutions"/>
+
+  <!--
+    Defines an inbound JMS channel adapter for the DTS job submission queue.
+    The inbound adapter means we are receiving from JMS and placing an instance of
+    org.springframework.integration.core.Message on the configured channel.
+  -->
+  <jms:message-driven-channel-adapter
+      channel="dtsJobRequests"
+      connection-factory="jmsConnectionFactory"
+      destination="jmsJobSubmitQueue"
+      message-converter="dtsMessageConverter"
+      transaction-manager="jmsTransactionManager"
+      />
+
+  <!--
+    Defines an outbound JMS channel adapter for DTS job events and progress
+    notifications.
+  -->
+  <jms:outbound-channel-adapter
+      channel="dtsJobEvents"
+      connection-factory="jmsConnectionFactory"
+      destination="jmsJobEventQueue"
+      />
+
+  <beans:bean id="dtsJobRequestHandler"
+              class="org.springframework.batch.integration.launch.JobLaunchingMessageHandler">
+    <beans:constructor-arg index="0" ref="dtsJobLauncher"/>
+  </beans:bean>
+
+  <service-activator input-channel="dtsJobRequests"
+                     output-channel="dtsJobExecutions"
+                     ref="dtsJobRequestHandler"/>
+
+  <logging-channel-adapter channel="dtsJobExecutions"/>
+
+  <beans:bean id="dtsJaxbUnmarshaller"
+              class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+    <beans:property name="schema" value="/minx-dts.xsd"/>
+    <beans:property name="classesToBeBound">
+      <beans:list>
+        <beans:value>org.dataminx.schemas.dts._2009._05.dts.CancelJobRequest</beans:value>
+        <beans:value>org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest</beans:value>
+        <beans:value>org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest</beans:value>
+        <beans:value>org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest</beans:value>
+        <beans:value>org.dataminx.schemas.dts._2009._05.dts.JobEventUpdateRequest</beans:value>
+        <beans:value>org.dataminx.schemas.dts._2009._05.dts.FireUpJobErrorEvent</beans:value>
+        <beans:value>org.dataminx.schemas.dts._2009._05.dts.FireUpStepFailureEvent</beans:value>
+      </beans:list>
+    </beans:property>
+    <beans:property name="marshallerProperties">
+      <beans:map>
+        <beans:entry>
+          <beans:key><util:constant static-field="javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT"/></beans:key>
+          <beans:value type="java.lang.Boolean">true</beans:value>
+        </beans:entry>
+      </beans:map>
+    </beans:property>
+  </beans:bean>
+
+  <beans:bean id="dtsMessagePayloadTransformer"
+              class="org.dataminx.dts.wn.jms.DtsMessagePayloadTransformer">
+    <beans:constructor-arg index="0" ref="dtsJaxbUnmarshaller"/>
+  </beans:bean>
+
+</beans:beans>

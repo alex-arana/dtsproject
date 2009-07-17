@@ -16,8 +16,8 @@
     don't care to mock for the purposes of testing.
   -->
   <context:component-scan base-package="org.dataminx.dts">
-    <context:exclude-filter type="assignable" expression="org.dataminx.dts.vfs.DtsFileSystemManager"/>
-    <context:exclude-filter type="assignable" expression="org.dataminx.dts.service.FileCopyingServiceImpl"/>
+    <context:exclude-filter type="assignable" expression="org.dataminx.dts.wn.vfs.DtsFileSystemManager"/>
+    <context:exclude-filter type="assignable" expression="org.dataminx.dts.wn.service.FileCopyingServiceImpl"/>
   </context:component-scan>
 
   <bean id="dtsJaxbUnmarshaller"
@@ -37,7 +37,7 @@
   </bean>
 
   <bean id="dtsMessagePayloadTransformer"
-              class="org.dataminx.dts.jms.DtsMessagePayloadTransformer">
+              class="org.dataminx.dts.wn.jms.DtsMessagePayloadTransformer">
     <constructor-arg index="0" ref="dtsJaxbUnmarshaller"/>
   </bean>
 

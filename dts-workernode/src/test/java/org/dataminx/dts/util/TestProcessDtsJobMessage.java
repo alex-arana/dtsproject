@@ -14,7 +14,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.dom.DOMResult;
 import org.dataminx.dts.common.XmlUtils;
-import org.dataminx.dts.jms.JobSubmitQueueSender;
+import org.dataminx.dts.wn.jms.JobSubmitQueueSender;
 import org.dataminx.schemas.dts._2009._05.dts.CreationFlagEnumeration;
 import org.dataminx.schemas.dts._2009._05.dts.DataTransferType;
 import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
