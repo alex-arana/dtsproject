@@ -6,6 +6,7 @@
 package org.dataminx.dts.util;
 
 import static org.apache.commons.lang.SystemUtils.LINE_SEPARATOR;
+import static org.dataminx.dts.common.XmlUtils.documentToString;
 
 import java.io.File;
 import java.util.UUID;
@@ -50,11 +51,13 @@ public class TestProcessDtsJobMessage {
 
     @Test
     public void submitDtsJobAsDocument() throws Exception {
-        final File file = new ClassPathResource("/org/dataminx/dts/util/minx-dts.xml").getFile();
+        final File file = new ClassPathResource("minx-dts.xml", getClass()).getFile();
         final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         docFactory.setNamespaceAware(true);
         final DocumentBuilder builder = docFactory.newDocumentBuilder();
         final Document dtsJob = builder.parse(file);
+        final Logger logger = LoggerFactory.getLogger(getClass());
+        logger.debug(String.format("submitDtsJobAsDocument:\n%s", documentToString(dtsJob)));
 
         //logger.info(client.submitJob(dtsJob));
         mJmsQueueSender.doSend(generateNewJobId(), dtsJob);
