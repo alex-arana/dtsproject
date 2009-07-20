@@ -19,6 +19,7 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
 import org.dataminx.dts.wn.batch.DtsJob;
 import org.dataminx.dts.wn.batch.DtsJobFactory;
+import org.dataminx.dts.wn.common.util.ByteArrayResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.converter.DefaultJobParametersConverter;
@@ -48,7 +49,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
     private static final Logger LOG = LoggerFactory.getLogger(DtsMessageConverter.class);
 
     /** Default format of outgoing messages. */
-    private OutputFormat mOutputFormat = OutputFormat.XML_TEXT;
+    private OutputFormat mOutputFormat = OutputFormat.DOM_OBJECT;
 
     /**
      * A reference to the DTS Job factory.
@@ -134,7 +135,14 @@ public class DtsMessageConverter extends SimpleMessageConverter {
      * @return a new instance of Result that matches the currently set output format
      */
     private Result createOutputResult() {
-        return mOutputFormat == OutputFormat.DOM_OBJECT ? new DOMResult() : new StringResult();
+        switch (mOutputFormat) {
+            case BYTE_ARRAY:
+                return new ByteArrayResult();
+            case DOM_OBJECT:
+                return new DOMResult();
+            default:
+                return new StringResult();
+        }
     }
 
     /**
@@ -146,6 +154,8 @@ public class DtsMessageConverter extends SimpleMessageConverter {
      */
     private Object extractResultOutput(final Result result) {
         switch (mOutputFormat) {
+            case BYTE_ARRAY:
+                return ((ByteArrayResult) result).toBytes();
             case DOM_OBJECT:
                 return ((DOMResult) result).getNode();
             default:
@@ -192,10 +202,15 @@ public class DtsMessageConverter extends SimpleMessageConverter {
     }
 
     /**
-     * Enumerated type that represents the various kinds of output that this class can convert outgoing
-     * messages to.
+     * Enumerated type that represents the various kinds of output that this class can use when creating
+     * outgoing messages.
      */
     public enum OutputFormat {
+        /**
+         * Send outgoing messages as an array of bytes containing an XML document.
+         */
+        BYTE_ARRAY,
+
         /**
          * Send outgoing messages as Object messages containing a DOM document.
          */

@@ -3,7 +3,7 @@
  *
  * License: To Be Announced
  */
-package org.dataminx.dts.util;
+package org.dataminx.dts.wn.util;
 
 import static org.apache.commons.lang.SystemUtils.LINE_SEPARATOR;
 import static org.dataminx.dts.common.XmlUtils.documentToString;
