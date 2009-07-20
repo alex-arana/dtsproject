@@ -14,6 +14,8 @@ import javax.xml.transform.stream.StreamResult;
  * <p>
  * The resulting stream can be retrieved as a byte array via the {@link ByteArrayResult#toBytes()}
  * method.
+ *
+ * @author Alex Arana
  */
 public class ByteArrayResult extends StreamResult {
     /** The underlying output stream managed by this class. */
