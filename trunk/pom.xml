@@ -70,6 +70,9 @@
     <simpleProxyLib.version>0.4-SNAPSHOT</simpleProxyLib.version>
     <dbunit.version>2.4.5</dbunit.version>
     <jetty.version>6.1H.14.1</jetty.version>
+    <xmlbeans.version>2.3.0</xmlbeans.version>
+    <xmlbeans-maven-plugin.version>xmlbeans-maven-plugin</xmlbeans-maven-plugin.version>
+    <stax-api.version>1.0.1</stax-api.version>
   </properties>
 
   <repositories>
@@ -120,6 +123,7 @@
     <module>dts-jaxb</module>
     <module>dts-workernode</module>
     <module>dts-ws</module>
+    <module>dts-schema</module>
   </modules>
 
   <build>
@@ -740,6 +744,20 @@
         <artifactId>jetty-java5-threadpool</artifactId>
         <version>${jetty.version}</version>
       </dependency>
+      
+      <!-- XMLBeans -->
+      <dependency>
+	      <groupId>org.apache.xmlbeans</groupId>
+	      <artifactId>xmlbeans</artifactId>
+	      <version>${xmlbeans.version}</version>
+	    </dependency>
+	    
+	    <!-- Stax-api -->
+	    <dependency>
+	      <groupId>stax</groupId>
+	      <artifactId>stax-api</artifactId>
+	      <version>${stax-api.version}</version>
+	    </dependency>
       
     </dependencies>   
 
