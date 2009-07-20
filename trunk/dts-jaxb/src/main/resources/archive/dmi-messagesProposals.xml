@@ -48,7 +48,7 @@
    xmlns:wsa='http://www.w3.org/2005/08/addressing'
    xmlns:wsse='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd'
    xsi:schemaLocation='http://schemas.ogf.org/dmi/2008/05/dmi ../dmi.xsd
-   http://schemas.ogf.org/dmi/2008/06/dmi/rendering/plain archive/dmi-messagesProposals.xsd
+   http://schemas.ogf.org/dmi/2008/06/dmi/rendering/plain dmi-messagesProposals.xsd
    http://www.w3.org/2005/08/addressing http://www.w3.org/2006/03/addressing/ws-addr.xsd
    http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd'>
 
