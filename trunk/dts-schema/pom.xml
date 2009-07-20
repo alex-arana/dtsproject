@@ -14,7 +14,7 @@
 
   <name>MINX-DTS Schema</name>
   <artifactId>dts-schema</artifactId>
-  
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -38,7 +38,7 @@
       <groupId>org.apache.xmlbeans</groupId>
       <artifactId>xmlbeans</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>stax</groupId>
       <artifactId>stax-api</artifactId>
@@ -64,7 +64,7 @@
         <configuration>
            <schemaDirectory>src/main/resources</schemaDirectory>
            <sourceGenerationDirectory>${project.build.directory}/generated-sources/xmlbeans</sourceGenerationDirectory>
-           <download>true</download>           
+           <download>true</download>
         </configuration>
       </plugin>
     </plugins>
