@@ -3,7 +3,7 @@
  *
  * License: To Be Announced
  */
-package org.dataminx.dts.batch;
+package org.dataminx.dts.wn.batch;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;

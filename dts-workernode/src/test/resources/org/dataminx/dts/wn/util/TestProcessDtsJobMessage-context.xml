@@ -4,6 +4,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-    <import resource="classpath:/org/dataminx/dts/test-context.xml"/>
-    <import resource="classpath:/activemq/jms-context.xml"/>
+    <import resource="classpath:/org/dataminx/dts/wn/test-context.xml"/>
+    <import resource="classpath:/org/dataminx/dts/wn/activemq/jms-context.xml"/>
 </beans>
