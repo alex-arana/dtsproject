@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<minx:DataTransferRequest xmlns:minx="http://schemas.dataminx.org/dts/2009/05/dts"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://schemas.dataminx.org/dts/2009/05/dts MINX-DataTransferRequest.xsd ">
+
+	<minx:JobName>my post data collection file transfer job </minx:JobName>
+	<minx:Description>move from my home to lab Ozzy SRS </minx:Description>
+	<minx:JobProject>my minx project </minx:JobProject>
+	<minx:DataTransfer name="transfer_1">
+		<minx:Source>
+			<minx:URI>srb://srb1.ngs.ac.uk/home/dave/dir</minx:URI>
+			<minx:Credential />
+			<minx:SrbURIProperties>
+				<minx:HomeDirectory>/home/whatever</minx:HomeDirectory>
+				<minx:DefaultResource>srb1.ngs.ac.uk</minx:DefaultResource>
+				<minx:PortRange>
+					<minx:portMin>6400</minx:portMin>
+					<minx:portMax>6500</minx:portMax>
+				</minx:PortRange>
+			</minx:SrbURIProperties>
+		</minx:Source>
+		<minx:Target>
+			<minx:URI>ftp://ftp1.ngs.ac.uk/home/dave/stage</minx:URI>
+			<minx:Credential />
+		</minx:Target>
+		<minx:TransferRequirements>
+			<minx:CreationFlag>Overwrite</minx:CreationFlag>
+		</minx:TransferRequirements>
+	</minx:DataTransfer>
+
+	<minx:DataTransfer name="transfer_2">
+		<minx:Source>
+			<minx:URI>srb://srb1.ngs.ac.uk/home/dave/dir</minx:URI>
+			<minx:Credential />
+		</minx:Source>
+		<minx:Target>
+			<minx:URI>gsiftp://ftp1.ngs.ac.uk/home/dave/stage</minx:URI>
+			<minx:Credential />
+			<minx:GridFtpURIProperties>
+				<minx:PortRange>
+					<minx:portMin>6400</minx:portMin>
+					<minx:portMax>6500</minx:portMax>
+				</minx:PortRange>
+			</minx:GridFtpURIProperties>
+		</minx:Target>
+		<minx:TransferRequirements>
+			<minx:CreationFlag>Append</minx:CreationFlag>
+		</minx:TransferRequirements>
+	</minx:DataTransfer>
+</minx:DataTransferRequest>

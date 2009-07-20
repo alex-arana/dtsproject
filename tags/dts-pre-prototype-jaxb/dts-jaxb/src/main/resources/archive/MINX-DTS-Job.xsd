@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://dataMinx.xml.org/schema/2008/dataMinx"
+	xmlns:tns="http://dataMinx.xml.org/schema/2008/dataMinx"
+	elementFormDefault="qualified" version="1">
+	<xsd:simpleType name="Description_Type">
+		<xsd:restriction base="xsd:string" />
+	</xsd:simpleType>
+	<xsd:complexType name="DataTransfer_Type">
+		<xsd:sequence>
+			<xsd:element ref="tns:FileName" minOccurs="0" />
+			<xsd:element ref="tns:CreationFlag" minOccurs="1" />
+			<xsd:element ref="tns:Source" />
+			<xsd:element ref="tns:Target" />
+			<xsd:any minOccurs="0" />
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:NCName" use="optional" />
+		<xsd:anyAttribute namespace="##other"
+			processContents="lax" />
+	</xsd:complexType>
+	<xsd:complexType name="SourceTarget_Type">
+		<xsd:sequence>
+			<xsd:element ref="tns:URI" minOccurs="0" />
+			<xsd:element ref="tns:Credential" minOccurs="0" />
+			<xsd:element ref="tns:URIProperties" minOccurs="0" />
+			<xsd:any namespace="##other" processContents="lax" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:anyAttribute namespace="##other"
+			processContents="lax" />
+	</xsd:complexType>
+	<xsd:complexType name="JobIdentification_Type">
+		<xsd:sequence />
+	</xsd:complexType>
+	<xsd:complexType name="DataTransferJob_Type">
+		<xsd:sequence>
+			<xsd:element ref="tns:JobName" />
+			<xsd:element ref="tns:Description" minOccurs="0" />
+			<xsd:element ref="tns:JobProject" maxOccurs="unbounded"
+				minOccurs="0" />
+			<xsd:element ref="tns:DataTransfer" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:simpleType name="CreationFlagEnumeration">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="overwrite" />
+			<xsd:enumeration value="append" />
+			<xsd:enumeration value="dontOverwrite" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:element name="URI" type="xsd:anyURI">
+	</xsd:element>
+	<xsd:element name="Source" type="tns:SourceTarget_Type">
+	</xsd:element>
+	<xsd:element name="Target" type="tns:SourceTarget_Type">
+	</xsd:element>
+	<xsd:element name="FileName" type="xsd:string">
+	</xsd:element>
+	<xsd:element name="CreationFlag" type="tns:CreationFlagEnumeration">
+	</xsd:element>
+	<xsd:element name="JobProject" type="xsd:string" />
+	<xsd:element name="JobName" type="xsd:string" />
+	<xsd:element name="DataTransferJob" type="tns:DataTransferJob_Type"></xsd:element>
+	<xsd:element name="DataTransfer" type="tns:DataTransfer_Type"></xsd:element>
+	<xsd:element name="Description" type="tns:Description_Type"></xsd:element>
+	<xsd:complexType name="Credential_Type">
+		<xsd:sequence>
+			<xsd:any minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:element name="Credential" type="tns:Credential_Type"></xsd:element>
+	<xsd:element name="URIProperties" abstract="true" />
+	<xsd:element name="SrbURIProperties" substitutionGroup="tns:URIProperties">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="McatZone" minOccurs="0">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string" />
+					</xsd:simpleType>
+				</xsd:element>
+				<xsd:element name="MdasDomain" minOccurs="0">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string" />
+					</xsd:simpleType>
+				</xsd:element>
+				<xsd:element name="HomeDirectory" minOccurs="0">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string" />
+					</xsd:simpleType>
+				</xsd:element>
+				<xsd:element name="DefaultResource" minOccurs="0">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string" />
+					</xsd:simpleType>
+				</xsd:element>
+				<xsd:element ref="tns:PortRange" minOccurs="0" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="GridFtpURIProperties" substitutionGroup="tns:URIProperties">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="tns:PortRange" minOccurs="0" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:complexType name="PortRange_Type">
+		<xsd:sequence>
+			<xsd:element name="portMin" type="xsd:int"></xsd:element>
+			<xsd:element name="portMax" type="xsd:int"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:element name="PortRange" type="tns:PortRange_Type"></xsd:element>
+</xsd:schema>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<submitJobRequest xmlns="http://schemas.dataminx.org/dts/2009/05/dts"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+    xsi:noNamespaceSchemaLocation="minx-dts.xsd">
+
+  <JobDefinition>
+    <JobDescription>
+      <JobIdentification>
+        <JobName>DTS_JOB_ID</JobName>
+        <Description>Copies the DataMINX Logo from a HTTP source to a local folder</Description>
+        <JobAnnotation>DTS Job Annotation</JobAnnotation>
+        <JobProject>DataMINX File Upload</JobProject>
+      </JobIdentification>
+      <DataTransfer>
+        <Source>
+          <URI>http://wiki.arcs.org.au/pub/DataMINX/WebPreferences/favicon.ico</URI>
+          <!--<URI>ftp://mirror.pacific.net.au/linux/ubuntu/dists/jaunty/Contents-i386.gz</URI>-->
+          <!--
+          <URI>gsiftp://ng2.vpac.org/tmp/lcg-info-generic-vpac-brecca.conf</URI>
+          <Credential>
+              <MyProxyToken>
+                  <MyProxyUsername>gerson</MyProxyUsername>
+                  <MyProxyPassword>pa55word</MyProxyPassword>
+                  <MyProxyServer>myproxy2.arcs.org.au</MyProxyServer>
+                  <MyProxyPort>7512</MyProxyPort>
+              </MyProxyToken>
+          </Credential>
+          -->
+        </Source>
+        <Target>
+          <!--<URI>gsiftp://ng2.vpac.org/tmp/Contents-i386.gz</URI>
+          <Credential>
+              <MyProxyToken>
+                  <MyProxyUsername>gerson</MyProxyUsername>
+                  <MyProxyPassword>pa55word</MyProxyPassword>
+                  <MyProxyServer>myproxy2.arcs.org.au</MyProxyServer>
+                  <MyProxyPort>7512</MyProxyPort>
+              </MyProxyToken>
+          </Credential>-->
+          <!--
+          <URI>ftp://dm11.intersect.org.au/pub/lcg.conf</URI>
+          <Credential>
+            <wsse:UsernameToken>
+              <wsse:Username>gerson</wsse:Username>
+              <wsse:PasswordString>pa55word</wsse:PasswordString>
+            </wsse:UsernameToken>
+          </Credential>
+          -->
+          <URI>tmp://DataMINX/favicon.ico</URI>
+        </Target>
+        <TransferRequirements>
+          <MaxAttempts>0</MaxAttempts>
+          <CreationFlag>Overwrite</CreationFlag>
+        </TransferRequirements>
+      </DataTransfer>
+    </JobDescription>
+  </JobDefinition>
+</submitJobRequest>
