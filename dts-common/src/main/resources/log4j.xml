@@ -19,23 +19,6 @@
     </layout>
   </appender>
 
-  <!-- ============================== -->
-  <!--          DTS Log File          -->
-  <!-- ============================== -->
-
-  <!-- A time/date based rolling appender -->
-  <appender name="FILE" class="org.apache.log4j.RollingFileAppender">
-    <param name="File" value="minx-dts.log"/>
-    <param name="Append" value="false"/>
-    <param name="MaxFileSize" value="10MB"/>
-    <param name="MaxBackupIndex" value="0"/>
-
-    <layout class="org.apache.log4j.PatternLayout">
-      <!-- The default pattern: Date Priority [Thread] Logger Message\n -->
-      <param name="ConversionPattern" value="%d %-5p [%t] %C{1} - %m%n"/>
-    </layout>
-  </appender>
-
 
   <!-- ================ -->
   <!--    Thresholds    -->
@@ -56,7 +39,6 @@
   <root>
     <level value="INFO"/>
     <appender-ref ref="CONSOLE"/>
-    <appender-ref ref="FILE"/>
   </root>
 
 </log4j:configuration>
