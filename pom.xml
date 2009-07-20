@@ -71,7 +71,7 @@
     <dbunit.version>2.4.5</dbunit.version>
     <jetty.version>6.1H.14.1</jetty.version>
     <xmlbeans.version>2.3.0</xmlbeans.version>
-    <xmlbeans-maven-plugin.version>xmlbeans-maven-plugin</xmlbeans-maven-plugin.version>
+    <xmlbeans-maven-plugin.version>2.3.2</xmlbeans-maven-plugin.version>
     <stax-api.version>1.0.1</stax-api.version>
   </properties>
 
