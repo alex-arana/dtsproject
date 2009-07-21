@@ -144,41 +144,6 @@
           <downloadSources>true</downloadSources>
         </configuration>
       </plugin>
-
-      <!--
-        Checkstyle is currently broken for 2 reasons:
-          - Classloader problem loading a custom resource (http://jira.codehaus.org/browse/MNG-2795)
-          - maven-checkstyle-plugin 2.2 does not support Checkstyle 5.x (http://jira.codehaus.org/browse/MCHECKSTYLE-105)
-            NOTE: There is a 2.3 version of the above in the Atlassian Maven repositories which does work..
-        TODO: revisit this in a couple of weeks time...
-      -->
-      <!--
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.3-atlassian-1</version>
-        <configuration>
-          <consoleOutput>true</consoleOutput>
-          <configLocation>checkstyle/checkstyle-checks.xml</configLocation>
-        </configuration>
-        <executions>
-          <execution>
-            <id>dataminx-checkstyle-checks</id>
-            <goals>
-              <goal>check</goal>
-            </goals>
-            <phase>compile</phase>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>checkstyle</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>${checkstyle.version}</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-      -->
     </plugins>
   </build>
 
@@ -746,17 +711,17 @@
 
       <!-- XMLBeans -->
       <dependency>
-	      <groupId>org.apache.xmlbeans</groupId>
-	      <artifactId>xmlbeans</artifactId>
-	      <version>${xmlbeans.version}</version>
-	    </dependency>
+          <groupId>org.apache.xmlbeans</groupId>
+          <artifactId>xmlbeans</artifactId>
+          <version>${xmlbeans.version}</version>
+        </dependency>
 
-	    <!-- Stax-api -->
-	    <dependency>
-	      <groupId>stax</groupId>
-	      <artifactId>stax-api</artifactId>
-	      <version>${stax-api.version}</version>
-	    </dependency>
+        <!-- Stax-api -->
+        <dependency>
+          <groupId>stax</groupId>
+          <artifactId>stax-api</artifactId>
+          <version>${stax-api.version}</version>
+        </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
