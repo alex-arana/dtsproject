@@ -12,27 +12,26 @@ import java.io.File;
 import java.util.UUID;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.dom.DOMResult;
-import org.dataminx.dts.common.XmlUtils;
 import org.dataminx.dts.wn.jms.JobSubmitQueueSender;
-import org.dataminx.schemas.dts._2009._05.dts.CreationFlagEnumeration;
-import org.dataminx.schemas.dts._2009._05.dts.DataTransferType;
-import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
-import org.dataminx.schemas.dts._2009._05.dts.JobDescriptionType;
-import org.dataminx.schemas.dts._2009._05.dts.JobIdentificationType;
-import org.dataminx.schemas.dts._2009._05.dts.ObjectFactory;
-import org.dataminx.schemas.dts._2009._05.dts.SourceTargetType;
-import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
-import org.dataminx.schemas.dts._2009._05.dts.TransferRequirementsType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxSourceTargetType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxTransferRequirementsType;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.CreationFlagEnumeration;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.oxm.AbstractMarshaller;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.xml.transform.StringResult;
 import org.w3c.dom.Document;
 
 /**
@@ -47,7 +46,7 @@ public class TestProcessDtsJobMessage {
     private JobSubmitQueueSender mJmsQueueSender;
 
     @Autowired
-    private Jaxb2Marshaller mMarshaller;
+    private AbstractMarshaller mMarshaller;
 
     @Test
     public void submitDtsJobAsDocument() throws Exception {
@@ -65,44 +64,38 @@ public class TestProcessDtsJobMessage {
 
     @Test
     public void submitDtsJobAsText() throws Exception {
-        final ObjectFactory factory = new ObjectFactory();
+        final SubmitJobRequestDocument root = SubmitJobRequestDocument.Factory.newInstance();
+        final SubmitJobRequest submitJobRequest = root.addNewSubmitJobRequest();
+        final JobDefinitionType jobDefinition = submitJobRequest.addNewJobDefinition();
 
-        final SourceTargetType source = factory.createSourceTargetType();
+        final MinxJobDescriptionType jobDescription = MinxJobDescriptionType.Factory.newInstance();
+        final DataTransferType dataTransfer = jobDescription.addNewDataTransfer();
+        final MinxSourceTargetType source = MinxSourceTargetType.Factory.newInstance();
         source.setURI("http://wiki.arcs.org.au/pub/DataMINX/DataMINX/minnie_on_the_run.jpg");
-
-        final SourceTargetType target = factory.createSourceTargetType();
+        final MinxSourceTargetType target = MinxSourceTargetType.Factory.newInstance();
         target.setURI(generateTemporaryFilename("DataMINX_Logo2.jpg"));
 
-        final TransferRequirementsType transferRequirements = factory.createTransferRequirementsType();
+        final MinxTransferRequirementsType transferRequirements = MinxTransferRequirementsType.Factory.newInstance();
         transferRequirements.setMaxAttempts(0L);
         transferRequirements.setCreationFlag(CreationFlagEnumeration.OVERWRITE);
 
-        final DataTransferType dataTransfer = factory.createDataTransferType();
         dataTransfer.setTransferRequirements(transferRequirements);
         dataTransfer.setSource(source);
         dataTransfer.setTarget(target);
 
+        final JobIdentificationType jobIdentification = jobDescription.addNewJobIdentification();
         final String dtsJobId = generateNewJobId();
-        final JobIdentificationType jobIdentification = factory.createJobIdentificationType();
         jobIdentification.setJobName(dtsJobId);
         jobIdentification.setDescription("Copies the DataMINX Logo from a HTTP source to a local folder");
-
-        final JobDescriptionType jobDescription = factory.createJobDescriptionType();
         jobDescription.setJobIdentification(jobIdentification);
-        jobDescription.getDataTransfer().add(dataTransfer);
-
-        final JobDefinitionType jobDefinition = factory.createJobDefinitionType();
+        jobDescription.setDataTransferArray(new DataTransferType[] {dataTransfer});
         jobDefinition.setJobDescription(jobDescription);
 
-        final SubmitJobRequest submitJobRequest = factory.createSubmitJobRequest();
-        submitJobRequest.setJobDefinition(jobDefinition);
-
-        final DOMResult result = new DOMResult();
-        mMarshaller.marshal(submitJobRequest, result);
-        final Document document = (Document) result.getNode();
+        final StringResult result = new StringResult();
+        mMarshaller.marshal(root, result);
 
         final Logger logger = LoggerFactory.getLogger(getClass());
-        final String dtsJobRequest = XmlUtils.documentToString(document);
+        final String dtsJobRequest = result.toString();
         logger.debug(String.format("submitDtsJobAsText ['%s']:%s%s", dtsJobId, LINE_SEPARATOR, dtsJobRequest));
         mJmsQueueSender.doSend(dtsJobId, dtsJobRequest);
     }

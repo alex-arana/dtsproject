@@ -21,4 +21,8 @@ public final class DtsWorkerNodeConstants {
      * A step execution context key used to hold a data staging element.
      */
     public static final String DTS_DATA_TRANSFER_STEP_KEY = "DATA_TRANSFER_STEP";
+
+    /** Holds the namespace URI of the WS-Security namespace. */
+    public static final String WS_SECURITY_NAMESPACE_URI =
+        "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
 }

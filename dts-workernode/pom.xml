@@ -38,11 +38,11 @@
       <groupId>${dataminx.group}</groupId>
     </dependency>
     <dependency>
-      <artifactId>dts-jaxb</artifactId>
+      <artifactId>dts-domain</artifactId>
       <groupId>${dataminx.group}</groupId>
     </dependency>
     <dependency>
-      <artifactId>dts-domain</artifactId>
+      <artifactId>dts-schema</artifactId>
       <groupId>${dataminx.group}</groupId>
     </dependency>
 
@@ -142,19 +142,23 @@
     </dependency>
 
     <!-- commons-vfs -->
-    <!-- 
+    <!--
     <dependency>
       <groupId>commons-vfs</groupId>
       <artifactId>commons-vfs</artifactId>
     </dependency>
      -->
-    
+
     <!-- commons-vfs-grid -->
     <dependency>
       <groupId>commons-vfs-grid</groupId>
       <artifactId>commons-vfs-grid</artifactId>
     </dependency>
-    
+
+    <dependency>
+      <groupId>org.apache.xmlbeans</groupId>
+      <artifactId>xmlbeans</artifactId>
+    </dependency>
 
     <!-- JUnit -->
     <dependency>
@@ -232,7 +236,7 @@
       <artifactId>commons-httpclient</artifactId>
       <scope>runtime</scope>
     </dependency>
-    
+
     <!-- Proxy Light -->
     <dependency>
         <groupId>au.org.arcs.auth</groupId>

@@ -56,33 +56,20 @@
 
   <logging-channel-adapter channel="dtsJobExecutions"/>
 
-  <beans:bean id="dtsJaxbUnmarshaller"
-              class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
-    <beans:property name="schema" value="/minx-dts.xsd"/>
-    <beans:property name="classesToBeBound">
-      <beans:list>
-        <beans:value>org.dataminx.schemas.dts._2009._05.dts.CancelJobRequest</beans:value>
-        <beans:value>org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest</beans:value>
-        <beans:value>org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest</beans:value>
-        <beans:value>org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest</beans:value>
-        <beans:value>org.dataminx.schemas.dts._2009._05.dts.JobEventUpdateRequest</beans:value>
-        <beans:value>org.dataminx.schemas.dts._2009._05.dts.FireUpJobErrorEvent</beans:value>
-        <beans:value>org.dataminx.schemas.dts._2009._05.dts.FireUpStepFailureEvent</beans:value>
-      </beans:list>
-    </beans:property>
-    <beans:property name="marshallerProperties">
-      <beans:map>
-        <beans:entry>
-          <beans:key><util:constant static-field="javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT"/></beans:key>
-          <beans:value type="java.lang.Boolean">true</beans:value>
-        </beans:entry>
-      </beans:map>
+  <beans:bean id="dtsMarshaller"
+              class="org.springframework.oxm.xmlbeans.XmlBeansMarshaller">
+    <beans:property name="validating" value="true"/>
+    <beans:property name="xmlOptions">
+      <beans:bean class="org.apache.xmlbeans.XmlOptionsBean">
+        <beans:property name="savePrettyPrint" value="true"/>
+        <beans:property name="saveNamespacesFirst" value="true"/>
+      </beans:bean>
     </beans:property>
   </beans:bean>
 
   <beans:bean id="dtsMessagePayloadTransformer"
               class="org.dataminx.dts.wn.jms.DtsMessagePayloadTransformer">
-    <beans:constructor-arg index="0" ref="dtsJaxbUnmarshaller"/>
+    <beans:constructor-arg index="0" ref="dtsMarshaller"/>
   </beans:bean>
 
 </beans:beans>

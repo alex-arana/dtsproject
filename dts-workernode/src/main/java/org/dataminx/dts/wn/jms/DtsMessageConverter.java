@@ -38,7 +38,7 @@ import org.springframework.xml.transform.StringResult;
  * This class is a dual-purpose messaging converter:
  * <ul>
  *   <li>Converts an incoming JMS message into a DTS Job definition.
- *   <li>Converts a supported JAXB2 entity into an outgoing JMS message.
+ *   <li>Converts a supported schema entity into an outgoing JMS message.
  * </ul>
  *
  * @author Alex Arana
@@ -48,8 +48,11 @@ public class DtsMessageConverter extends SimpleMessageConverter {
     /** Internal logger object. */
     private static final Logger LOG = LoggerFactory.getLogger(DtsMessageConverter.class);
 
-    /** Default format of outgoing messages. */
-    private OutputFormat mOutputFormat = OutputFormat.DOM_OBJECT;
+    /**
+     * Default format of outgoing messages.
+     * TODO: Fix DOM_OBJECT output format type. Currently broken with XmlBeans implementation of schema bindings.
+     */
+    private OutputFormat mOutputFormat = OutputFormat.XML_TEXT;
 
     /**
      * A reference to the DTS Job factory.
@@ -59,7 +62,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
 
     /** Component used to marshall Java object graphs into XML. */
     @Autowired
-    @Qualifier("dtsJaxbUnmarshaller")
+    @Qualifier("dtsMarshaller")
     private Marshaller mMarshaller;
 
     /**
@@ -107,7 +110,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
                 "Unable to convert object of type '%s' to a valid DTS Job update JMS message.", objectClass.getName()));
         }
 
-        // convert the input JAXB2 entity to an object we can send back as the payload of a JMS message
+        // convert the input schema entity to an object we can send back as the payload of a JMS message
         final Result result = createOutputResult();
         try {
             mMarshaller.marshal(object, result);

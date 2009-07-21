@@ -20,25 +20,20 @@
     <context:exclude-filter type="assignable" expression="org.dataminx.dts.wn.service.FileCopyingServiceImpl"/>
   </context:component-scan>
 
-  <bean id="dtsJaxbUnmarshaller"
-        class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
-    <property name="schema" value="/minx-dts.xsd"/>
-    <property name="classesToBeBound">
-      <list>
-        <value>org.dataminx.schemas.dts._2009._05.dts.CancelJobRequest</value>
-        <value>org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest</value>
-        <value>org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest</value>
-        <value>org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest</value>
-        <value>org.dataminx.schemas.dts._2009._05.dts.JobEventUpdateRequest</value>
-        <value>org.dataminx.schemas.dts._2009._05.dts.FireUpJobErrorEvent</value>
-        <value>org.dataminx.schemas.dts._2009._05.dts.FireUpStepFailureEvent</value>
-      </list>
+  <bean id="dtsMarshaller"
+              class="org.springframework.oxm.xmlbeans.XmlBeansMarshaller">
+    <property name="validating" value="true"/>
+    <property name="xmlOptions">
+      <bean class="org.apache.xmlbeans.XmlOptionsBean">
+        <property name="savePrettyPrint" value="true"/>
+        <property name="saveNamespacesFirst" value="true"/>
+      </bean>
     </property>
   </bean>
 
   <bean id="dtsMessagePayloadTransformer"
               class="org.dataminx.dts.wn.jms.DtsMessagePayloadTransformer">
-    <constructor-arg index="0" ref="dtsJaxbUnmarshaller"/>
+    <constructor-arg index="0" ref="dtsMarshaller"/>
   </bean>
 
   <bean id="applicationProperties"

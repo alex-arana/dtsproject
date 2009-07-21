@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.repository.JobRepository;
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * This is the factory class for all Spring Batch jobs included with the DTS implementation.
@@ -41,7 +42,7 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
      */
     @SuppressWarnings("unchecked")
     private static final Map<String, String> DTS_JOB_REGISTRY = MapUtils.putAll(new HashMap(), new String[][] {
-        {SubmitJobRequest.class.getName(), "dtsFileTransferJob"}
+        {SubmitJobRequestDocument.class.getName(), "dtsFileTransferJob"}
     });
 
     /** A reference to the Spring Batch Job repository. */
@@ -55,8 +56,25 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
      * {@inheritDoc}
      */
     @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+    public void setBeanFactory(final BeanFactory beanFactory) throws BeansException {
         mBeanFactory = beanFactory;
+    }
+
+    /**
+     * Returns the DTS Job name corresponding to the given request object instance.
+     *
+     * @param instance DTS Job input request object
+     * @return A fully-qualified class name of the corresponding DTS Job to handle the input request or
+     *         <code>null</code> if one has not yet been defined.
+     */
+    private String lookupJobName(final Object instance) {
+        for (final Class<?> definition : ClassUtils.getAllInterfaces(instance)) {
+            final String key = definition.getName();
+            if (DTS_JOB_REGISTRY.containsKey(key)) {
+                return DTS_JOB_REGISTRY.get(key);
+            }
+        }
+        return null;
     }
 
     /**
@@ -66,7 +84,7 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
     public DtsJob createJob(final String jobId, final Object criteria) {
         // obtain the name of the DTS job that is going to handle this request
         Assert.notNull(criteria, "Criteria element cannot be null in call to DTS job factory.");
-        final String dtsJobName = DTS_JOB_REGISTRY.get(criteria.getClass().getName());
+        final String dtsJobName = lookupJobName(criteria);
 
         // if we don't have a job capable of handling this type of request raise an exception
         if (StringUtils.isEmpty(dtsJobName)) {
