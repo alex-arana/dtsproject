@@ -5,6 +5,7 @@
  */
 package org.dataminx.dts.wn.common.util;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -49,5 +50,32 @@ public final class DateUtils {
             throw new DateConversionException(String.format(
                 "Unable to convert date '%s' to an XMLGregorianCalendar object", date), ex);
         }
+    }
+
+    /**
+     * Converts an instance of {@link java.util.Date} object to {@link java.util.Calendar}.
+     *
+     * @param date date object to convert.
+     * @return Converted <code>Calendar</code> object.
+     */
+    public static Calendar toCalendar(final Date date) {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar;
+    }
+
+    /**
+     * Creates an instance of {@link java.util.Calendar} from the given time in milliseconds.
+     * <p>
+     * The input milliseconds value represents the specified number of milliseconds since the standard base
+     * time known as "the epoch", namely January 1, 1970, 00:00:00 GMT.
+     *
+     * @param millis A given time corresponding to the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     * @return Converted <code>Calendar</code> object.
+     */
+    public static Calendar toCalendar(final long millis) {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(millis);
+        return calendar;
     }
 }

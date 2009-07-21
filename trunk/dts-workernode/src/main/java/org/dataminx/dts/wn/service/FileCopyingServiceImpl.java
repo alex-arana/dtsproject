@@ -12,7 +12,7 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.Selectors;
 import org.dataminx.dts.wn.common.util.StopwatchTimer;
 import org.dataminx.dts.wn.vfs.DtsFileSystemManager;
-import org.dataminx.schemas.dts._2009._05.dts.SourceTargetType;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

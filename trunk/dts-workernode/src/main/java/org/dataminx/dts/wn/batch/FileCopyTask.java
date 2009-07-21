@@ -7,9 +7,8 @@ package org.dataminx.dts.wn.batch;
 
 import org.dataminx.dts.wn.service.FileCopyingService;
 import org.dataminx.dts.wn.service.JobNotificationService;
-
-import org.dataminx.schemas.dts._2009._05.dts.DataTransferType;
-import org.dataminx.schemas.dts._2009._05.dts.SourceTargetType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;

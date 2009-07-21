@@ -5,7 +5,7 @@
  */
 package org.dataminx.dts.wn.service;
 
-import org.dataminx.schemas.dts._2009._05.dts.SourceTargetType;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 
 /**
  * Describes the File Copying service behaviour.

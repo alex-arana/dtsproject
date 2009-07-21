@@ -11,9 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
-import org.dataminx.dts.wn.common.util.InputDataUtils;
-import org.dataminx.schemas.dts._2009._05.dts.DataTransferType;
-import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
+import org.dataminx.dts.wn.common.util.SchemaUtils;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.partition.support.Partitioner;
@@ -45,7 +45,7 @@ public class DtsJobPartitioner implements Partitioner {
     @Override
     public Map<String, ExecutionContext> partition(final int gridSize) {
         Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
-        final List<DataTransferType> dataTransfers = InputDataUtils.getDataTransfers(mSubmitJobRequest);
+        final List<DataTransferType> dataTransfers = SchemaUtils.getDataTransfers(mSubmitJobRequest);
         if (CollectionUtils.isEmpty(dataTransfers)) {
             LOG.warn("DTS job request is incomplete as it does not contain any data transfer elements.");
             throw new DtsJobExecutionException("DTS job request contains no data transfer elements.");

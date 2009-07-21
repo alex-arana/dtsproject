@@ -5,20 +5,21 @@
  */
 package org.dataminx.dts.wn.service;
 
-import static org.dataminx.dts.wn.common.util.DateUtils.toXmlGregorianCalendar;
+import static org.dataminx.dts.wn.common.util.DateUtils.toCalendar;
 
-import java.util.List;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.dataminx.dts.domain.model.JobStatus;
 import org.dataminx.dts.wn.batch.DtsJob;
 import org.dataminx.dts.wn.jms.JobEventQueueSender;
-import org.dataminx.schemas.dts._2009._05.dts.FireUpJobErrorEvent;
-import org.dataminx.schemas.dts._2009._05.dts.FireUpStepFailureEvent;
-import org.dataminx.schemas.dts._2009._05.dts.JobErrorEventDetailType;
-import org.dataminx.schemas.dts._2009._05.dts.JobEventDetailType;
-import org.dataminx.schemas.dts._2009._05.dts.JobEventUpdateRequest;
-import org.dataminx.schemas.dts._2009._05.dts.ObjectFactory;
-import org.dataminx.schemas.dts._2009._05.dts.StatusValueEnumeration;
+import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument;
+import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument.FireUpJobErrorEvent;
+import org.dataminx.schemas.dts.x2009.x07.jms.FireUpStepFailureEventDocument;
+import org.dataminx.schemas.dts.x2009.x07.jms.FireUpStepFailureEventDocument.FireUpStepFailureEvent;
+import org.dataminx.schemas.dts.x2009.x07.jms.JobErrorEventDetailType;
+import org.dataminx.schemas.dts.x2009.x07.jms.JobEventDetailType;
+import org.dataminx.schemas.dts.x2009.x07.jms.JobEventUpdateRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.jms.JobEventUpdateRequestDocument.JobEventUpdateRequest;
+import org.ogf.schemas.dmi.x2008.x05.dmi.StatusValueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
@@ -39,9 +40,6 @@ import org.springframework.util.Assert;
 public class JobNotificationServiceImpl implements JobNotificationService {
     /** Internal logger object. */
     private static final Logger LOG = LoggerFactory.getLogger(JobNotificationServiceImpl.class);
-
-    /** A reference to the JAXB2 object factory helper. */
-    private final ObjectFactory mJaxbObjectFactory = new ObjectFactory();
 
     /** A reference to the DTS Worker Node information service. */
     @Autowired
@@ -65,22 +63,22 @@ public class JobNotificationServiceImpl implements JobNotificationService {
         if (jobExecution.getStatus().isUnsuccessful()) {
             // convert to the relevant JAXB2 entity (FireUpJobErrorEvent)
             final ExitStatus exitStatus = jobExecution.getExitStatus();
-            final JobErrorEventDetailType errorDetails = mJaxbObjectFactory.createJobErrorEventDetailType();
+
+            final FireUpJobErrorEventDocument document = FireUpJobErrorEventDocument.Factory.newInstance();
+            final FireUpJobErrorEvent jobErrorEvent = document.addNewFireUpJobErrorEvent();
+            final JobErrorEventDetailType errorDetails = jobErrorEvent.addNewJobErrorEventDetail();
+            jobErrorEvent.setJobResourceKey(jobId);
             errorDetails.setWorkerNodeHost(mdtsWorkerNodeInformationService.getInstanceId());
-            errorDetails.setTimeOfOccurrence(toXmlGregorianCalendar(mdtsWorkerNodeInformationService.getCurrentTime()));
+            errorDetails.setTimeOfOccurrence(toCalendar(mdtsWorkerNodeInformationService.getCurrentTime()));
             errorDetails.setErrorMessage(exitStatus.getExitDescription());
 
             // add all failure stack traces to the outgoing message
-            final List<String> failures = errorDetails.getFailureTrace();
             for (final Throwable failure : jobExecution.getAllFailureExceptions()) {
                 errorDetails.setClassExceptionName(failure.getClass().getName());
-                failures.add(ExceptionUtils.getFullStackTrace(failure));
+                errorDetails.addFailureTrace(ExceptionUtils.getFullStackTrace(failure));
             }
 
-            final FireUpJobErrorEvent jobErrorEvent = mJaxbObjectFactory.createFireUpJobErrorEvent();
-            jobErrorEvent.setJobId(jobId);
-            jobErrorEvent.setJobErrorEventDetail(errorDetails);
-            mJobEventQueueSender.doSend(jobId, jobErrorEvent);
+            mJobEventQueueSender.doSend(jobId, document);
         }
     }
 
@@ -92,24 +90,22 @@ public class JobNotificationServiceImpl implements JobNotificationService {
         Assert.notNull(jobId);
         Assert.notNull(stepExecution);
         if (stepExecution.getStatus().isUnsuccessful()) {
-            // convert to the relevant JAXB2 entity (FireUpJobErrorEvent)
+            // convert to the relevant schema entity (FireUpStepFailureEvent)
             final ExitStatus exitStatus = stepExecution.getExitStatus();
-            final JobErrorEventDetailType errorDetails = mJaxbObjectFactory.createJobErrorEventDetailType();
+            final FireUpStepFailureEventDocument document = FireUpStepFailureEventDocument.Factory.newInstance();
+            final FireUpStepFailureEvent stepFailureEvent = document.addNewFireUpStepFailureEvent();
+            final JobErrorEventDetailType errorDetails = stepFailureEvent.addNewJobErrorEventDetail();
+            stepFailureEvent.setJobResourceKey(jobId);
             errorDetails.setWorkerNodeHost(mdtsWorkerNodeInformationService.getInstanceId());
-            errorDetails.setTimeOfOccurrence(toXmlGregorianCalendar(stepExecution.getStartTime()));
+            errorDetails.setTimeOfOccurrence(toCalendar(stepExecution.getStartTime()));
             errorDetails.setErrorMessage(String.format("An error has occurred during the execution of"
                 + " DTS Job step '%s': %s", stepExecution.getStepName(), exitStatus.getExitDescription()));
 
-            final List<String> failures = errorDetails.getFailureTrace();
             for (final Throwable failure : stepExecution.getFailureExceptions()) {
                 errorDetails.setClassExceptionName(failure.getClass().getName());
-                failures.add(ExceptionUtils.getFullStackTrace(failure));
+                errorDetails.addFailureTrace(ExceptionUtils.getFullStackTrace(failure));
             }
 
-            //TODO need to create a different type of schema entity to transmit Step failures...
-            final FireUpStepFailureEvent stepFailureEvent = mJaxbObjectFactory.createFireUpStepFailureEvent();
-            stepFailureEvent.setJobId(jobId);
-            stepFailureEvent.setJobErrorEventDetail(errorDetails);
             mJobEventQueueSender.doSend(jobId, stepFailureEvent);
         }
     }
@@ -132,19 +128,21 @@ public class JobNotificationServiceImpl implements JobNotificationService {
         final String jobId = dtsJob.getJobId();
         LOG.info(String.format("DTS Job '%s' status notification: %s", jobId, jobStatus));
 
-        // convert to the relevant JAXB2 entity (JobEventUpdateRequest?)
-        final JobEventDetailType jobEventDetail = mJaxbObjectFactory.createJobEventDetailType();
+        // convert to the relevant schema entity
+        final JobEventUpdateRequestDocument document = JobEventUpdateRequestDocument.Factory.newInstance();
+        final JobEventUpdateRequest jobEventUpdate = document.addNewJobEventUpdateRequest();
+        final JobEventDetailType jobEventDetail = jobEventUpdate.addNewJobEventDetail();
+        jobEventUpdate.setJobResourceKey(jobId);
         jobEventDetail.setWorkerNodeHost(mdtsWorkerNodeInformationService.getInstanceId());
-        jobEventDetail.setActiveTime(toXmlGregorianCalendar(dtsJob.getStartTime()));
-
+        jobEventDetail.setActiveTime(toCalendar(dtsJob.getStartTime()));
         switch (jobStatus) {
             case TRANSFERRING:
-                jobEventDetail.setStatus(StatusValueEnumeration.TRANSFERRING);
+                jobEventDetail.setStatus(StatusValueType.TRANSFERRING);
                 break;
             case DONE:
                 jobEventDetail.setFinishedFlag(true);
-                jobEventDetail.setWorkerTerminatedTime(toXmlGregorianCalendar(dtsJob.getCompletedTime()));
-                jobEventDetail.setStatus(StatusValueEnumeration.DONE);
+                jobEventDetail.setWorkerTerminatedTime(toCalendar(dtsJob.getCompletedTime()));
+                jobEventDetail.setStatus(StatusValueType.DONE);
                 //TODO use the job's ExitStatus flag
                 //jobEventDetail.setSuccessFlag(dtsJob.getXXX());
                 break;
@@ -152,9 +150,6 @@ public class JobNotificationServiceImpl implements JobNotificationService {
                 break;
         }
 
-        final JobEventUpdateRequest jobEventUpdate = mJaxbObjectFactory.createJobEventUpdateRequest();
-        jobEventUpdate.setJobId(jobId);
-        jobEventUpdate.setJobEventDetail(jobEventDetail);
-        mJobEventQueueSender.doSend(jobId, jobEventUpdate);
+        mJobEventQueueSender.doSend(jobId, document);
     }
 }

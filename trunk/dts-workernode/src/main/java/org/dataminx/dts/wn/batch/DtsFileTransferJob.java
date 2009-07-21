@@ -5,13 +5,15 @@
  */
 package org.dataminx.dts.wn.batch;
 
+
 import static org.dataminx.dts.wn.common.DtsWorkerNodeConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
 
 import org.dataminx.dts.domain.model.JobStatus;
-import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
-import org.dataminx.schemas.dts._2009._05.dts.JobDescriptionType;
-import org.dataminx.schemas.dts._2009._05.dts.JobIdentificationType;
-import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInterruptedException;
 import org.springframework.batch.core.StartLimitExceededException;
@@ -51,11 +53,11 @@ public class DtsFileTransferJob extends DtsJob {
      * @param jobRepository Job repository
      */
     public DtsFileTransferJob(final String jobId,
-        final SubmitJobRequest jobRequest, final JobRepository jobRepository) {
+        final SubmitJobRequestDocument jobRequest, final JobRepository jobRepository) {
 
         super(jobId);
         Assert.notNull(jobRequest, "Cannot construct a DTS submit job without the required job details.");
-        mJobRequest = jobRequest;
+        mJobRequest = jobRequest.getSubmitJobRequest();
         setJobRepository(jobRepository);
     }
 
