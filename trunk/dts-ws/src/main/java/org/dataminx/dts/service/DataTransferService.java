@@ -1,10 +1,10 @@
 package org.dataminx.dts.service;
 
-import org.dataminx.schemas.dts._2009._05.dts.CancelJobRequest;
-import org.dataminx.schemas.dts._2009._05.dts.GetJobStatusRequest;
-import org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest;
-import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
-import org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest;
+import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.SuspendJobRequestDocument;
 
 /**
  * This specifies the operations supported by the Data Transfer Service WS. The reason why the
@@ -21,7 +21,7 @@ public interface DataTransferService {
      * @param submitJobRequest the submit job request
      * @return the Universally Unique Identifier (aka Global Unique Identifier) for the submitted job
      */
-    String submitJob(SubmitJobRequest submitJobRequest);
+    String submitJob(SubmitJobRequestDocument submitJobRequest);
 
 
     /**
@@ -29,7 +29,7 @@ public interface DataTransferService {
      *
      * @param cancelJobRequest the cancel job request
      */
-    void cancelJob(CancelJobRequest cancelJobRequest);
+    void cancelJob(CancelJobRequestDocument cancelJobRequest);
 
 
     /**
@@ -37,7 +37,7 @@ public interface DataTransferService {
      *
      * @param suspendJobRequest the suspend job request
      */
-    void suspendJob(SuspendJobRequest suspendJobRequest);
+    void suspendJob(SuspendJobRequestDocument suspendJobRequest);
 
 
     /**
@@ -45,7 +45,7 @@ public interface DataTransferService {
      *
      * @param resumeJobRequest the resume job request
      */
-    void resumeJob(ResumeJobRequest resumeJobRequest);
+    void resumeJob(ResumeJobRequestDocument resumeJobRequest);
 
 
     /**
@@ -56,7 +56,7 @@ public interface DataTransferService {
      * @param getJobStatusRequest the get job status request
      * @return the job status
      */
-    String getJobStatus(GetJobStatusRequest getJobStatusRequest);
+    String getJobStatus(GetJobStatusRequestDocument getJobStatusRequest);
 
 
 }

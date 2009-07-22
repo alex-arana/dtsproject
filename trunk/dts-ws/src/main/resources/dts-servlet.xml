@@ -9,11 +9,11 @@
 
     <!-- Enable Spring beans annotation support -->
     <context:annotation-config/>
-    
+
     <!-- Add automatic WSDL generation support -->
     <bean id="dts"
         class="org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition">
-        <property name="schema" ref="schema" />
+        <property name="schemaCollection" ref="schemaCollection" />
         <property name="portTypeName" value="DataTransferService" />
         <property name="locationUri" value="http://${ws.host}:${ws.port}/${ws.context.path}/" />
         <!--
@@ -21,10 +21,28 @@
           value="http://schemas.dataminx.org/dts/2009/05/dts" />
         -->
     </bean>
-  
+
+    <!--
     <bean id="schema" class="org.springframework.xml.xsd.SimpleXsdSchema">
-        <property name="xsd" value="classpath:/minx-dts.xsd" />
+        <property name="xsd" value="classpath:/minx-jsdl.xsd" />
     </bean>
+    -->
+
+    <bean id="schemaCollection"
+	    class="org.springframework.xml.xsd.commons.CommonsXsdSchemaCollection">
+	    <property name="xsds">
+	      <list>
+	        <value>classpath:dmi.xsd</value>
+	        <value>classpath:dmi-redef.xsd</value>
+	        <value>classpath:jsdl-redef.xsd</value>
+	        <value>classpath:minx-jsdl.xsd</value>
+	        <value>classpath:minx-jms-messages.xsd</value>
+          <value>classpath:minx-dts-messages.xsd</value>
+
+	      </list>
+	    </property>
+	    <property name="inline" value="true" />
+	  </bean>
 
     <!-- Register PayloadRootAnnotationMethodEndpointMapping -->
     <bean
@@ -48,22 +66,33 @@
     <bean id="dataTransferEndpoint" class="org.dataminx.dts.ws.DataTransferServiceEndpoint">
         <description>This endpoint handles data transfer requests.</description>
     </bean>
-  
+
     <bean id="dataTransferService" class="org.dataminx.dts.service.DataTransferServiceImpl">
         <description>This bean is our "business" service.</description>
     </bean>
-    
+
     <!-- Message Sender -->
     <bean id="messageSender" class="org.dataminx.dts.jms.JobSubmitQueueSender" />
-    
+
     <!-- Job Content Validator -->
     <bean id="jobContentValidator" class="org.dataminx.dts.common.util.JobContentValidator" />
-  
+
     <!-- Configure XML Marshaller -->
     <bean class="org.springframework.ws.server.endpoint.adapter.GenericMarshallingMethodEndpointAdapter">
         <constructor-arg ref="marshaller" />
     </bean>
-  
+
+    <bean id="marshaller" class="org.springframework.oxm.xmlbeans.XmlBeansMarshaller">
+	    <property name="validating" value="true"/>
+	    <property name="xmlOptions">
+	      <bean class="org.apache.xmlbeans.XmlOptionsBean">
+	        <property name="savePrettyPrint" value="true"/>
+	        <property name="saveNamespacesFirst" value="true"/>
+	      </bean>
+	    </property>
+    </bean>
+
+    <!--
     <bean id="marshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
         <property name="classesToBeBound">
             <list>
@@ -76,12 +105,12 @@
                 <value>org.dataminx.schemas.dts._2009._05.dts.GetJobStatusResponse</value>
                 <value>org.dataminx.schemas.dts._2009._05.dts.JobEventUpdateRequest</value>
                 <value>org.dataminx.schemas.dts._2009._05.dts.FireUpJobErrorEvent</value>
-                <value>org.dataminx.schemas.dts._2009._05.dts.FireUpStepFailureEvent</value>                
+                <value>org.dataminx.schemas.dts._2009._05.dts.FireUpStepFailureEvent</value>
             </list>
         </property>
         <property name="schema" value="classpath:minx-dts.xsd"/>
     </bean>
-    
+    -->
 
     <!-- Map existing exceptions that can be thrown on the Web S into WS Faults -->
     <bean class="org.springframework.ws.soap.server.endpoint.SoapFaultAnnotationExceptionResolver">
@@ -90,7 +119,7 @@
         </description>
         <property name="order" value="1"/>
     </bean>
-        
+
     <bean class="org.springframework.ws.soap.server.endpoint.SoapFaultMappingExceptionResolver">
         <description>
             This exception resolver maps other exceptions to SOAP Faults. Both UnmarshallingException and
@@ -100,13 +129,13 @@
         <property name="defaultFault" value="SERVER"/>
         <property name="exceptionMappings">
             <props>
-                <prop key="org.springframework.oxm.UnmarshallingFailureException">CLIENT,Invalid request</prop>
-                <prop key="org.springframework.oxm.ValidationFailureException">CLIENT,Invalid request</prop>
+                <prop key="org.springframework.oxm.UnmarshallingFailureException">CLIENT,Invalid request3</prop>
+                <prop key="org.springframework.oxm.ValidationFailureException">CLIENT,Invalid request4</prop>
             </props>
         </property>
         <property name="order" value="2"/>
     </bean>
-    
+
     <bean id="wsApplicationProperties"
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
       <property name="locations">

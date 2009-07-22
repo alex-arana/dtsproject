@@ -20,17 +20,17 @@
       <groupId>${dataminx.group}</groupId>
       <artifactId>dts-common</artifactId>
     </dependency>
-  
+
     <dependency>
       <groupId>${dataminx.group}</groupId>
-      <artifactId>dts-jaxb</artifactId>
+      <artifactId>dts-schema</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>${dataminx.group}</groupId>
       <artifactId>dts-domain</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
@@ -72,20 +72,20 @@
       <groupId>org.springframework.ws</groupId>
       <artifactId>spring-ws-core-tiger</artifactId>
     </dependency>
-    
+
     <!-- JMS -->
     <dependency>
       <groupId>javax.jms</groupId>
       <artifactId>jms</artifactId>
     </dependency>
-    
+
     <!-- ActiveMQ -->
     <dependency>
       <artifactId>activemq-all</artifactId>
       <groupId>org.apache.activemq</groupId>
       <scope>runtime</scope>
     </dependency>
-    
+
     <!-- Spring Integration -->
     <dependency>
       <groupId>org.springframework.integration</groupId>
@@ -103,29 +103,35 @@
       <groupId>org.springframework.integration</groupId>
       <artifactId>spring-integration-xml</artifactId>
     </dependency>
-    
+
     <!-- Jetty -->
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-java5-threadpool</artifactId>
-    </dependency> 
-    
+    </dependency>
+
 
     <!-- client stuff... -->
     <dependency>
       <groupId>jdom</groupId>
       <artifactId>jdom</artifactId>
     </dependency>
+
+    <dependency>
+	    <groupId>org.apache.ws.commons.schema</groupId>
+	    <artifactId>XmlSchema</artifactId>
+	    <version>1.4.5</version>
+		</dependency>
   </dependencies>
 
   <build>
-    <!-- 
-      Enable resource filters as a workaround to the issue of accidentally uploading Credential 
+    <!--
+      Enable resource filters as a workaround to the issue of accidentally uploading Credential
       details on the test files. Using filters is also a good way to avoid overwriting another
       developers desktop specific settings (ie Windows or Unix format used for 'file://')
     -->
@@ -144,7 +150,7 @@
         <filtering>true</filtering>
       </testResource>
     </testResources>
-      
+
     <plugins>
       <!-- Force maven to use the intended context root to be the name of the WAR file -->
       <plugin>
@@ -155,12 +161,12 @@
           <warName>${dts-ws.context.root}</warName>
         </configuration>
       </plugin>
-      
-      <!-- 
+
+      <!--
         Allows us to enable this project as a WTP Eclipse project. There is currently no
-        other way of specifying context-root from within maven. You'll always have to go 
-        to Project's Properties -> Web Project Settings and manually specifying the context 
-        root to "/whatever-you-like". This is only needed if you want to use Tomcat server 
+        other way of specifying context-root from within maven. You'll always have to go
+        to Project's Properties -> Web Project Settings and manually specifying the context
+        root to "/whatever-you-like". This is only needed if you want to use Tomcat server
         running inside Eclipse.
        -->
       <plugin>
@@ -176,7 +182,7 @@
           </additionalProjectnatures>
         </configuration>
       </plugin>
-      
+
       <!-- Jetty-Embedded DTS Web Service instance  -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

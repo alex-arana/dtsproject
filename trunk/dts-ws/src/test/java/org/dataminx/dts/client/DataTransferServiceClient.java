@@ -20,29 +20,29 @@ public interface DataTransferServiceClient {
     /**
      * Cancel the job.
      *
-     * @param jobId the Universally Unique Identifier (aka Global Unique Identifier) of the job to cancel
+     * @param jobResourceKey the Universally Unique Identifier (aka Global Unique Identifier) of the job to cancel
      */
-    void cancelJob(String jobId);
+    void cancelJob(String jobResourceKey);
 
     /**
      * Suspend the job.
      *
-     * @param jobId the Universally Unique Identifier (aka Global Unique Identifier) of the job to suspend
+     * @param jobResourceKey the Universally Unique Identifier (aka Global Unique Identifier) of the job to suspend
      */
-    void suspendJob(String jobId);
+    void suspendJob(String jobResourceKey);
 
     /**
      * Resume the job.
      *
-     * @param jobId the Universally Unique Identifier (aka Global Unique Identifier) of the job to resume
+     * @param jobResourceKey the Universally Unique Identifier (aka Global Unique Identifier) of the job to resume
      */
-    void resumeJob(String jobId);
+    void resumeJob(String jobResourceKey);
 
     /**
      * Gets the job status.
      *
-     * @param jobId the Universally Unique Identifier (aka Global Unique Identifier) of the job being queried about
+     * @param jobResourceKey the Universally Unique Identifier (aka Global Unique Identifier) of the job being queried about
      * @return the job status
      */
-    String getJobStatus(String jobId);
+    String getJobStatus(String jobResourceKey);
 }
