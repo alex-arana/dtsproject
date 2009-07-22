@@ -53,8 +53,8 @@ public class DtsWsMessageConverter extends SimpleMessageConverter {
      */
     @Override
     public Object fromMessage(final Message message) throws JMSException, MessageConversionException {
-        final String jobId = message.getJMSCorrelationID();
-        LOG.info("A new JMS message has been received: " + jobId);
+        final String jobResourceKey = message.getJMSCorrelationID();
+        LOG.info("A new JMS message has been received: " + jobResourceKey);
 
         final Object payload = extractMessagePayload(message);
         LOG.debug(String.format("Finished reading message payload of type: '%s'", payload.getClass().getName()));

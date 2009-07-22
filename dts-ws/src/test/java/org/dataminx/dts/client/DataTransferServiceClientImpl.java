@@ -27,6 +27,18 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
     /** The XML outputter/printer. */
     private final XMLOutputter mXmlOut;
 
+    private static final Namespace MINX_DTS_MESSAGES_NS =
+        Namespace.getNamespace("mjsdl-msg", "http://schemas.dataminx.org/dts/2009/07/messages");
+
+    private static final Namespace MINX_JSDL_NS =
+        Namespace.getNamespace("mjsdl", "http://schemas.dataminx.org/dts/2009/07/jsdl");
+
+    private static final Namespace JSDL_NS =
+        Namespace.getNamespace("jsdl", "http://schemas.ggf.org/jsdl/2005/11/jsdl");
+
+    private static final Namespace DMI_NS =
+        Namespace.getNamespace("dmi", "http://schemas.ogf.org/dmi/2008/05/dmi");
+
     /**
      * Instantiates a new data transfer service client impl.
      */
@@ -38,15 +50,13 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
      * {@inheritDoc}
      */
     public String submitJob(org.w3c.dom.Document dtsJob) {
-        Namespace minxNamespace =
-            Namespace.getNamespace("minx", "http://schemas.dataminx.org/dts/2009/05/dts");
-        Element requestElement = new Element("submitJobRequest", minxNamespace);
+        Element requestElement = new Element("submitJobRequest", MINX_DTS_MESSAGES_NS);
         Document submitJobRequestDoc = new Document(requestElement);
 
         DOMBuilder domBuilder = new DOMBuilder();
         Element dtsJobElement = domBuilder.build(dtsJob.getDocumentElement());
 
-        Element jobDefEl = new Element("JobDefinition", minxNamespace);
+        Element jobDefEl = new Element("JobDefinition", MINX_DTS_MESSAGES_NS);
 
         // get the detached (non-live) contents of the DTS JobDefinition document
         // and attach them to the newly created JobDefition element of the
@@ -66,22 +76,20 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
         LOGGER.debug(mXmlOut.outputString(resultDocument));
 
         Element responseElement = resultDocument.getRootElement();
-        Element jobIdElement = responseElement.getChild("JobId", minxNamespace);
+        Element jobResourceKeyElement = responseElement.getChild("JobResourceKey", MINX_JSDL_NS);
 
-        return jobIdElement.getText();
+        return jobResourceKeyElement.getText();
     }
 
     /**
      * {@inheritDoc}
      */
-    public void cancelJob(String jobId) {
-        Namespace minxNamespace =
-            Namespace.getNamespace("minx", "http://schemas.dataminx.org/dts/2009/05/dts");
-        Element requestElement = new Element("cancelJobRequest", minxNamespace);
+    public void cancelJob(String jobResourceKey) {
+        Element requestElement = new Element("cancelJobRequest", MINX_DTS_MESSAGES_NS);
         Document cancelJobRequestDoc = new Document(requestElement);
-        Element jobIdEl = new Element("JobId", minxNamespace);
-        jobIdEl.setText(jobId);
-        cancelJobRequestDoc.getRootElement().addContent(jobIdEl);
+        Element jobResourceKeyEl = new Element("JobResourceKey", MINX_JSDL_NS);
+        jobResourceKeyEl.setText(jobResourceKey);
+        cancelJobRequestDoc.getRootElement().addContent(jobResourceKeyEl);
 
         JDOMSource request = new JDOMSource(cancelJobRequestDoc);
 
@@ -94,14 +102,13 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
     /**
      * {@inheritDoc}
      */
-    public void suspendJob(String jobId) {
-        Namespace minxNamespace =
-            Namespace.getNamespace("minx", "http://schemas.dataminx.org/dts/2009/05/dts");
-        Element requestElement = new Element("suspendJobRequest", minxNamespace);
+    public void suspendJob(String jobResourceKey) {
+
+        Element requestElement = new Element("suspendJobRequest", MINX_DTS_MESSAGES_NS);
         Document suspendJobRequestDoc = new Document(requestElement);
-        Element jobIdEl = new Element("JobId", minxNamespace);
-        jobIdEl.setText(jobId);
-        suspendJobRequestDoc.getRootElement().addContent(jobIdEl);
+        Element jobResourceKeyEl = new Element("JobResourceKey", MINX_JSDL_NS);
+        jobResourceKeyEl.setText(jobResourceKey);
+        suspendJobRequestDoc.getRootElement().addContent(jobResourceKeyEl);
 
         JDOMSource request = new JDOMSource(suspendJobRequestDoc);
 
@@ -114,14 +121,12 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
     /**
      * {@inheritDoc}
      */
-    public void resumeJob(String jobId) {
-        Namespace minxNamespace =
-            Namespace.getNamespace("minx", "http://schemas.dataminx.org/dts/2009/05/dts");
-        Element requestElement = new Element("resumeJobRequest", minxNamespace);
+    public void resumeJob(String jobResourceKey) {
+        Element requestElement = new Element("resumeJobRequest", MINX_DTS_MESSAGES_NS);
         Document resumeJobRequestDoc = new Document(requestElement);
-        Element jobIdEl = new Element("JobId", minxNamespace);
-        jobIdEl.setText(jobId);
-        resumeJobRequestDoc.getRootElement().addContent(jobIdEl);
+        Element jobResourceKeyEl = new Element("JobResourceKey", MINX_JSDL_NS);
+        jobResourceKeyEl.setText(jobResourceKey);
+        resumeJobRequestDoc.getRootElement().addContent(jobResourceKeyEl);
 
         JDOMSource request = new JDOMSource(resumeJobRequestDoc);
 
@@ -134,14 +139,12 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
     /**
      * {@inheritDoc}
      */
-    public String getJobStatus(String jobId) {
-        Namespace minxNamespace =
-            Namespace.getNamespace("minx", "http://schemas.dataminx.org/dts/2009/05/dts");
-        Element requestElement = new Element("getJobStatusRequest", minxNamespace);
+    public String getJobStatus(String jobResourceKey) {
+        Element requestElement = new Element("getJobStatusRequest", MINX_DTS_MESSAGES_NS);
         Document cancelJobRequestDoc = new Document(requestElement);
-        Element jobIdEl = new Element("JobId", minxNamespace);
-        jobIdEl.setText(jobId);
-        cancelJobRequestDoc.getRootElement().addContent(jobIdEl);
+        Element jobResourceKeyEl = new Element("JobResourceKey", MINX_JSDL_NS);
+        jobResourceKeyEl.setText(jobResourceKey);
+        cancelJobRequestDoc.getRootElement().addContent(jobResourceKeyEl);
 
         JDOMSource request = new JDOMSource(cancelJobRequestDoc);
         JDOMResult response = new JDOMResult();
@@ -155,7 +158,7 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
         LOGGER.debug(mXmlOut.outputString(resultDocument));
 
         Element responseElement = resultDocument.getRootElement();
-        Element stateElement = responseElement.getChild("State", minxNamespace);
+        Element stateElement = responseElement.getChild("State", DMI_NS);
 
         return stateElement.getAttributeValue("value");
     }

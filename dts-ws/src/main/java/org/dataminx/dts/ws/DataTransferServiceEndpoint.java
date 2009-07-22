@@ -3,16 +3,14 @@ package org.dataminx.dts.ws;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.service.DataTransferService;
-import org.dataminx.schemas.dts._2009._05.dts.CancelJobRequest;
-import org.dataminx.schemas.dts._2009._05.dts.GetJobStatusRequest;
-import org.dataminx.schemas.dts._2009._05.dts.GetJobStatusResponse;
-import org.dataminx.schemas.dts._2009._05.dts.ObjectFactory;
-import org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest;
-import org.dataminx.schemas.dts._2009._05.dts.StateType;
-import org.dataminx.schemas.dts._2009._05.dts.StatusValueEnumeration;
-import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
-import org.dataminx.schemas.dts._2009._05.dts.SubmitJobResponse;
-import org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest;
+import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusResponseDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobResponseDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.SuspendJobRequestDocument;
+import org.ogf.schemas.dmi.x2008.x05.dmi.StatusValueType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
@@ -33,23 +31,20 @@ public class DataTransferServiceEndpoint {
     @Autowired
     private DataTransferService mDataTransferService;
 
-    /** The object factory. */
-    private final ObjectFactory mObjectFactory = new ObjectFactory();
-
     /**
      * Handles the submit job request.
      *
      * @param request the submit job request
      * @return the response to the submit job call
      */
-    @PayloadRoot(localPart = "submitJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/05/dts")
-    public SubmitJobResponse doit(SubmitJobRequest request) {
-        String jobId = mDataTransferService.submitJob(request);
-        LOGGER.debug("In DataTransferServiceEndpoint.doit(SubmitJobRequest), returned jobId is "
-            + jobId);
+    @PayloadRoot(localPart = "submitJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/07/messages")
+    public SubmitJobResponseDocument doit(SubmitJobRequestDocument request) {
+        String jobResourceKey = mDataTransferService.submitJob(request);
+        LOGGER.debug("In DataTransferServiceEndpoint.doit(SubmitJobRequest), returned jobResourceKey is "
+            + jobResourceKey);
 
-        SubmitJobResponse response = mObjectFactory.createSubmitJobResponse();
-        response.setJobId(jobId);
+        SubmitJobResponseDocument response = SubmitJobResponseDocument.Factory.newInstance();
+        response.addNewSubmitJobResponse().setJobResourceKey(jobResourceKey);
         return response;
     }
 
@@ -58,8 +53,8 @@ public class DataTransferServiceEndpoint {
      *
      * @param request the cancel job request
      */
-    @PayloadRoot(localPart = "cancelJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/05/dts")
-    public void doit(CancelJobRequest request) {
+    @PayloadRoot(localPart = "cancelJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/07/messages")
+    public void doit(CancelJobRequestDocument request) {
         mDataTransferService.cancelJob(request);
     }
 
@@ -68,8 +63,8 @@ public class DataTransferServiceEndpoint {
      *
      * @param request the suspend job request
      */
-    @PayloadRoot(localPart = "suspendJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/05/dts")
-    public void doit(SuspendJobRequest request) {
+    @PayloadRoot(localPart = "suspendJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/07/messages")
+    public void doit(SuspendJobRequestDocument request) {
         mDataTransferService.suspendJob(request);
     }
 
@@ -78,8 +73,8 @@ public class DataTransferServiceEndpoint {
      *
      * @param request the resume job request
      */
-    @PayloadRoot(localPart = "resumeJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/05/dts")
-    public void doit(ResumeJobRequest request) {
+    @PayloadRoot(localPart = "resumeJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/07/messages")
+    public void doit(ResumeJobRequestDocument request) {
         mDataTransferService.resumeJob(request);
     }
 
@@ -90,13 +85,11 @@ public class DataTransferServiceEndpoint {
      * @return the response to the get job status call
      */
     @PayloadRoot(localPart = "getJobStatusRequest", namespace = "http://schemas.dataminx.org/dts/2009/05/dts")
-    public GetJobStatusResponse doit(GetJobStatusRequest request) {
+    public GetJobStatusResponseDocument doit(GetJobStatusRequestDocument request) {
         String status = mDataTransferService.getJobStatus(request);
 
-        GetJobStatusResponse response = mObjectFactory.createGetJobStatusResponse();
-        StateType state = mObjectFactory.createStateType();
-        state.setValue(StatusValueEnumeration.fromValue(status));
-        response.setState(state);
+        GetJobStatusResponseDocument response = GetJobStatusResponseDocument.Factory.newInstance();
+        response.getGetJobStatusResponse().getState().setValue(StatusValueType.Enum.forString(status));
         return response;
     }
 

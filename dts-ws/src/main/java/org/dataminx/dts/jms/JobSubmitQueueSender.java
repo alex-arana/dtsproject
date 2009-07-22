@@ -38,15 +38,15 @@ public class JobSubmitQueueSender implements InitializingBean {
     /**
      * Sends a pre-configured message type to a remote destination.
      *
-     * @param jobId DTS Job ID
+     * @param jobResourceKey the DTS Job ID
      * @param message JMS message payload
      */
-    public void doSend(final String jobId, final Object message) {
+    public void doSend(final String jobResourceKey, final Object message) {
         mJmsTemplate.send(mQueue, new MessageCreator() {
             public Message createMessage(Session session) throws JMSException {
                 final MessageConverter messageConverter = mJmsTemplate.getMessageConverter();
                 final Message jmsMessage = messageConverter.toMessage(message, session);
-                jmsMessage.setJMSCorrelationID(jobId);
+                jmsMessage.setJMSCorrelationID(jobResourceKey);
                 return jmsMessage;
             }
         });

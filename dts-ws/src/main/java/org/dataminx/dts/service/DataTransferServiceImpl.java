@@ -1,27 +1,37 @@
 package org.dataminx.dts.service;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.UUID;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataminx.dts.common.XmlUtils;
 import org.dataminx.dts.common.util.JobContentValidator;
 import org.dataminx.dts.domain.model.Job;
 import org.dataminx.dts.domain.model.JobStatus;
 import org.dataminx.dts.domain.repo.JobDao;
 import org.dataminx.dts.jms.JobSubmitQueueSender;
-import org.dataminx.schemas.dts._2009._05.dts.CancelJobRequest;
-import org.dataminx.schemas.dts._2009._05.dts.GetJobStatusRequest;
-import org.dataminx.schemas.dts._2009._05.dts.ResumeJobRequest;
-import org.dataminx.schemas.dts._2009._05.dts.SubmitJobRequest;
-import org.dataminx.schemas.dts._2009._05.dts.SuspendJobRequest;
+import org.dataminx.dts.ws.DtsJobDefinitionException;
+import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.SuspendJobRequestDocument;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.oxm.xmlbeans.XmlBeansMarshaller;
 import org.springframework.util.Assert;
+import org.springframework.xml.transform.StringResult;
 import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 /**
  * The Data Transfer Service Implementation. This class interacts with the DTS domain layer and hands over
@@ -42,9 +52,9 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     @Autowired
     private JobDao mJobRepository;
 
-    /** The jaxb2 marshaller. */
+    /** The xmlbeans marshaller. */
     @Autowired
-    private Jaxb2Marshaller mMarshaller;
+    private XmlBeansMarshaller mMarshaller;
 
     /** The Job definition validator. */
     @Autowired
@@ -53,8 +63,8 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     /**
      * {@inheritDoc}
      */
-    public String submitJob(SubmitJobRequest submitJobRequest) {
-        String jobName = submitJobRequest.getJobDefinition().getJobDescription().getJobIdentification().getJobName();
+    public String submitJob(SubmitJobRequestDocument submitJobRequest) {
+        String jobName = submitJobRequest.getSubmitJobRequest().getJobDefinition().getJobDescription().getJobIdentification().getJobName();
         LOGGER.debug("In DataTransferServiceImpl.submitJob, running job " + jobName + "... ");
 
         // we'll assume that once we get to this point, the job definition that the user
@@ -66,7 +76,7 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         // assume we require the following fields to be filled up in the job definition document
         //   * jobname - can't be an empty string
         //   * uri - can't be an empty string
-        mJobValidator.validate(submitJobRequest.getJobDefinition());
+        mJobValidator.validate(submitJobRequest.getSubmitJobRequest().getJobDefinition());
 
         // we now know that at this point, all the required fields from the job definition has
         // been provided by the user. let's give the job a resource key and save it in the DB
@@ -87,12 +97,24 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         mJobRepository.saveOrUpdate(newJob);
 
         // Get the message payload ready for consumption by the JMS layer
-        DOMResult result = new DOMResult();
-        mMarshaller.marshal(submitJobRequest, result);
-        Document document = (Document) result.getNode();
 
-        // now submit the job to the DTS WN
-        mMessageSender.doSend(newJobResourceKey, document);
+        // After the switch to XMLBeans, the Result object has always been a StreamResult instead
+        // of a DomResult. So we'll just hand a StringResult object as a parameter to marshal()
+        Result result = new StringResult();
+
+        // TODO: consider rework on this try-catch block
+        try {
+        	mMarshaller.marshal(submitJobRequest, result);
+        } catch (IOException e) {
+        	 throw new DtsJobDefinitionException(e.fillInStackTrace());
+        }
+
+        LOGGER.debug(result.toString());
+        // TODO: speak with Alex on why passing a w3c.dom.Document object fails.
+        //Document document = XmlUtils.stringToDocument(result.toString());
+        //mMessageSender.doSend(newJobResourceKey, document);
+
+        mMessageSender.doSend(newJobResourceKey, result.toString());
 
         return newJobResourceKey;
     }
@@ -100,15 +122,15 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     /**
      * {@inheritDoc}
      */
-    public void cancelJob(CancelJobRequest cancelJobRequest) {
-        String jobId = cancelJobRequest.getJobId();
+    public void cancelJob(CancelJobRequestDocument cancelJobRequest) {
+        String jobResourceKey = cancelJobRequest.getCancelJobRequest().getJobResourceKey();
 
-        LOGGER.debug("In DataTransferServiceImpl.cancelJob, cancelling job " + jobId + "... ");
+        LOGGER.debug("In DataTransferServiceImpl.cancelJob, cancelling job " + jobResourceKey + "... ");
 
         // TODO: let's send a cancel message via JMS to the worker node
 
         // after that, let's update the status of this job..
-        Job job = mJobRepository.findByResourceKey(jobId);
+        Job job = mJobRepository.findByResourceKey(jobResourceKey);
         job.setStatus(JobStatus.DONE);
         mJobRepository.saveOrUpdate(job);
 
@@ -117,13 +139,13 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     /**
      * {@inheritDoc}
      */
-    public void suspendJob(SuspendJobRequest suspendJobRequest) {
-        String jobId = suspendJobRequest.getJobId();
+    public void suspendJob(SuspendJobRequestDocument suspendJobRequest) {
+        String jobResourceKey = suspendJobRequest.getSuspendJobRequest().getJobResourceKey();
 
-        LOGGER.debug("In DataTransferServiceImpl.suspendJob, suspending job " + jobId + "... ");
+        LOGGER.debug("In DataTransferServiceImpl.suspendJob, suspending job " + jobResourceKey + "... ");
 
         // after that, let's update the status of this job..
-        Job job = mJobRepository.findByResourceKey(jobId);
+        Job job = mJobRepository.findByResourceKey(jobResourceKey);
         job.setStatus(JobStatus.SUSPENDED);
         mJobRepository.saveOrUpdate(job);
 
@@ -133,13 +155,13 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     /**
      * {@inheritDoc}
      */
-    public void resumeJob(ResumeJobRequest resumeJobRequest) {
-        String jobId = resumeJobRequest.getJobId();
+    public void resumeJob(ResumeJobRequestDocument resumeJobRequest) {
+        String jobResourceKey = resumeJobRequest.getResumeJobRequest().getJobResourceKey();
 
-        LOGGER.debug("In DataTransferServiceImpl.resumeJob, resuming job " + jobId + "... ");
+        LOGGER.debug("In DataTransferServiceImpl.resumeJob, resuming job " + jobResourceKey + "... ");
 
         // after that, let's update the status of this job..
-        Job job = mJobRepository.findByResourceKey(jobId);
+        Job job = mJobRepository.findByResourceKey(jobResourceKey);
         job.setStatus(JobStatus.TRANSFERRING);
         mJobRepository.saveOrUpdate(job);
 
@@ -149,15 +171,15 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     /**
      * {@inheritDoc}
      */
-    public String getJobStatus(GetJobStatusRequest getJobStatusRequest) {
-        String jobId = getJobStatusRequest.getJobId();
-        LOGGER.debug("In DataTransferServiceImpl.cancelJob, getting job status for " + jobId  + "... ");
+    public String getJobStatus(GetJobStatusRequestDocument getJobStatusRequest) {
+        String jobResourceKey = getJobStatusRequest.getGetJobStatusRequest().getJobResourceKey();
+        LOGGER.debug("In DataTransferServiceImpl.cancelJob, getting job status for " + jobResourceKey  + "... ");
 
         // TODO: need to get this info from the DB.. part of this code need to have the smarts
         // to figure out which status the job is on based on the timing details provided
         // in the DB. if the smarts is not going to be put here, we need to have a way of having
         // the status get updated every time a new job event gets triggered
-        return mJobRepository.findByResourceKey(jobId).getStatus().getStringValue();
+        return mJobRepository.findByResourceKey(jobResourceKey).getStatus().getStringValue();
     }
 
     /**

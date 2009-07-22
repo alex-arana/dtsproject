@@ -1,10 +1,15 @@
 package org.dataminx.dts.common.util;
 
+import javax.xml.namespace.QName;
+
+import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxSourceTargetType;
 import org.apache.commons.lang.StringUtils;
+import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.ws.DtsJobDefinitionException;
-import org.dataminx.schemas.dts._2009._05.dts.DataTransferType;
-import org.dataminx.schemas.dts._2009._05.dts.JobDefinitionType;
-import org.dataminx.schemas.dts._2009._05.dts.SourceTargetType;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 import org.w3c.dom.Element;
 
 /**
@@ -16,6 +21,13 @@ import org.w3c.dom.Element;
  * @author Gerson Galang
  */
 public class JobContentValidator {
+
+	// TODO: try and make this into a proper Validator..
+	// http://static.springframework.org/spring/docs/2.5.x/reference/validation.html#validator
+
+	private static final QName PASSWORD_STRING_QNAME =
+		new QName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd",
+			"PasswordString");
 
     /**
      * Checks for the validity of the contents of the Job Definition document.
@@ -31,9 +43,20 @@ public class JobContentValidator {
         }
         // TODO: think of a cleaner way of returning back an error message for a number of
         // missing source/target URIs
-        for (DataTransferType transfer : job.getJobDescription().getDataTransfer()) {
-            SourceTargetType source = transfer.getSource();
-            SourceTargetType target = transfer.getTarget();
+
+        // make sure that MinxJobDescriptionType is used instead of just plain JobDescriptionType
+        DataTransferType[] transfers;
+        try {
+        	transfers = ((MinxJobDescriptionType) job.getJobDescription()).getDataTransferArray();
+        } catch (ClassCastException e) {
+        	errorMessages.append("  Plain JobDescriptionType is not supported.");
+        	throw new DtsJobDefinitionException("Invalid request1.\n" + errorMessages);
+        }
+
+        for (int i=0; i < transfers.length; i++) {
+
+            MinxSourceTargetType source = transfers[i].getSource();
+            MinxSourceTargetType target = transfers[i].getTarget();
 
             if (StringUtils.isBlank(source.getURI())) {
                 errorMessages.append("  Empty SourceURI.\n");
@@ -46,7 +69,7 @@ public class JobContentValidator {
         }
 
         if (errorMessages.length() > 0) {
-            throw new DtsJobDefinitionException("Invalid request.\n" + errorMessages);
+            throw new DtsJobDefinitionException("Invalid request2.\n" + errorMessages);
         }
     }
 
@@ -56,21 +79,21 @@ public class JobContentValidator {
      * @param sourceOrTarget the source or target element
      * @param errorMessages the error messages buffer
      */
-    private void passwordExistsInUsernameToken(SourceTargetType sourceOrTarget, StringBuffer errorMessages) {
+    private void passwordExistsInUsernameToken(MinxSourceTargetType sourceOrTarget, StringBuffer errorMessages) {
         if (sourceOrTarget.getCredential() != null) {
             // check if credential provided is UsernameToken type
             if (sourceOrTarget.getCredential().getUsernameToken() != null) {
                 // make sure password is also provided as it's only considered as the wsse schema doesn't
                 // really force everyone to have a PasswordString inside the UsernameToken element
-                boolean passwordFound = false;
-                for (Object element : sourceOrTarget.getCredential().getUsernameToken().getAny()) {
-                    // just in case there are other elements within a UsernameToken, ignore them
-                    // unless it's a PasswordString
-                    if (((Element) element).getLocalName().equals("PasswordString")) {
-                        passwordFound = true;
-                    }
+                XmlObject[] passwordString = sourceOrTarget.getCredential()
+                	.getUsernameToken().selectChildren(PASSWORD_STRING_QNAME);
+
+                if (passwordString.length > 0) {
+                	// we'll assume first that there will always only be one PasswordString element
+                	passwordString[0].xmlText();
+
                 }
-                if (!passwordFound) {
+                else {
                     errorMessages.append("  PasswordString is missing.\n");
                 }
             }

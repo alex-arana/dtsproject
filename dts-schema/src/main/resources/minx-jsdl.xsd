@@ -7,7 +7,7 @@
     xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     elementFormDefault="qualified" version="1">
-    
+
     <!-- Import the Schemas which have been specified outside of the MINX project -->
     <xsd:import namespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
                 schemaLocation="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" />
@@ -15,9 +15,9 @@
                 schemaLocation="jsdl-redef.xsd" />
     <xsd:import namespace="http://schemas.ogf.org/dmi/2008/05/dmi"
                 schemaLocation="dmi-redef.xsd" />
-                
+
     <!-- Extension to the JSDL and OGSA-DMI Specifications follows -->
-    
+
     <!-- It's probably better to have CreationFlag grouped with TransferRequirements -->
     <xsd:complexType name="MinxTransferRequirementsType">
         <xsd:complexContent>
@@ -29,7 +29,7 @@
         </xsd:complexContent>
     </xsd:complexType>
     <xsd:element name="TransferRequirements" type="mjsdl:MinxTransferRequirementsType" />
-        
+
     <xsd:complexType name="MyProxyTokenType">
         <xsd:annotation>
             <xsd:documentation>
@@ -48,15 +48,15 @@
             processContents="lax" />
     </xsd:complexType>
     <xsd:element name="MyProxyToken" type="mjsdl:MyProxyTokenType" />
-    
+
     <xsd:complexType name="OtherCredentialTokenType">
         <xsd:annotation>
             <xsd:documentation>
                 A wrapper for credential tokens that are not specified in the
                 Credential element. This is also a workaround so we don't get this
                 error message
-                
-                cos-nonambig: wsse:UsernameToken and WC During validation against this 
+
+                cos-nonambig: wsse:UsernameToken and WC During validation against this
                 schema, ambiguity would be created for those two particles.
             </xsd:documentation>
         </xsd:annotation>
@@ -88,7 +88,7 @@
             processContents="lax" />
     </xsd:complexType>
     <xsd:element name="GridFtpURIProperties" type="mjsdl:GridFtpURIPropertiesType" substitutionGroup="mjsdl:URIProperties" />
-        
+
     <xsd:complexType name="PortRangeType">
         <xsd:sequence>
             <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
@@ -99,8 +99,8 @@
             processContents="lax" />
     </xsd:complexType>
     <xsd:element name="PortRange" type="mjsdl:PortRangeType" />
-    
-    <!-- 
+
+    <!--
     <xsd:element name="SrbURIProperties" substitutionGroup="tns:URIProperties">
         <xsd:complexType>
             <xsd:sequence>
@@ -129,11 +129,11 @@
         </xsd:complexType>
     </xsd:element>
     -->
-    
-    <!-- 
+
+    <!--
         Now lets extend JSDL's SourceTarget_Type to temporarily make our lives easy in terms
         of implementing the DTS WebService and WorkerNode modules. Let's have Credential and
-        URIProperties specified in our own SourceTargetType for now and not rely on the 
+        URIProperties specified in our own SourceTargetType for now and not rely on the
         JSDL's SourceTarget_Type xsdany element.
         .
     -->
@@ -149,8 +149,8 @@
     </xsd:complexType>
     <xsd:element name="Source" type="mjsdl:MinxSourceTargetType" />
     <xsd:element name="Target" type="mjsdl:MinxSourceTargetType" />
-    
-    <!-- 
+
+    <!--
         Specify our own DataTransferType as JSDL's DataStaging_Type's original purpose is only
         for staging in/out files that the compute job need/output and not defining a transfer-only
         type of job
@@ -159,7 +159,7 @@
         <xsd:sequence>
             <xsd:element ref="mjsdl:Source" />
             <xsd:element ref="mjsdl:Target" />
-            <xsd:element ref="mjsdl:TransferRequirements" />
+            <xsd:element ref="mjsdl:TransferRequirements" minOccurs="0" />
             <xsd:any namespace="##other" processContents="lax"
                 minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
@@ -173,8 +173,8 @@
     </xsd:complexType>
     <xsd:element name="DataTransfer" type="mjsdl:DataTransferType" />
 
-    <!-- 
-        Need to extend JSDL's JobDescription_Type again since we're forcing our own 
+    <!--
+        Need to extend JSDL's JobDescription_Type again since we're forcing our own
         JobDescriptionType to hold our custom DataTransferType
     -->
     <xsd:complexType name="MinxJobDescriptionType">
@@ -188,8 +188,8 @@
         </xsd:complexContent>
     </xsd:complexType>
     <xsd:element name="JobDescription" type="mjsdl:MinxJobDescriptionType" />
-    
-    
+
+
     <!-- Lone elements -->
     <xsd:element name="JobResourceKey" type="xsd:anyURI" />
     <xsd:element name="URIProperties" abstract="true" />

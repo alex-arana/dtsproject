@@ -6,10 +6,12 @@ import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.domain.model.Job;
 import org.dataminx.dts.domain.model.JobStatus;
 import org.dataminx.dts.domain.repo.JobDao;
-import org.dataminx.schemas.dts._2009._05.dts.FireUpJobErrorEvent;
-import org.dataminx.schemas.dts._2009._05.dts.FireUpStepFailureEvent;
-import org.dataminx.schemas.dts._2009._05.dts.JobEventDetailType;
-import org.dataminx.schemas.dts._2009._05.dts.JobEventUpdateRequest;
+import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument;
+import org.dataminx.schemas.dts.x2009.x07.jms.FireUpStepFailureEventDocument;
+import org.dataminx.schemas.dts.x2009.x07.jms.JobEventDetailType;
+import org.dataminx.schemas.dts.x2009.x07.jms.JobEventUpdateRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.jms.JobEventUpdateRequestDocument.JobEventUpdateRequest;
+import org.ogf.schemas.dmi.x2008.x05.dmi.StatusValueType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.core.Message;
 
@@ -37,8 +39,8 @@ public class DtsJobEventUpdateHandler {
     public void handleEvent(Message<?> message) {
         Object payload = message.getPayload();
 
-        if (payload instanceof JobEventUpdateRequest) {
-            JobEventUpdateRequest request = (JobEventUpdateRequest) payload;
+        if (payload instanceof JobEventUpdateRequestDocument) {
+            JobEventUpdateRequest request = ((JobEventUpdateRequestDocument) payload).getJobEventUpdateRequest();
 
             // TODO: probably need to look at making the resourcekey to WN job ID mapping clear (same names?)
             // later on
@@ -46,22 +48,22 @@ public class DtsJobEventUpdateHandler {
             // TODO: need to sync this with whatever is supported by the WN
 
             // get the details of the job entry to be updated
-            String updatedJobResourceKey = request.getJobId();
+            String updatedJobResourceKey = request.getJobResourceKey();
             JobEventDetailType updatedJobDetail = request.getJobEventDetail();
 
             // job to update
             Job job = mJobRepository.findByResourceKey(updatedJobResourceKey);
 
-            switch(updatedJobDetail.getStatus()) {
-                case TRANSFERRING:
+            switch(updatedJobDetail.getStatus().intValue()) {
+                case StatusValueType.INT_TRANSFERRING:
                     job.setWorkerNodeHost(updatedJobDetail.getWorkerNodeHost());
-                    job.setActiveTime(updatedJobDetail.getActiveTime().toGregorianCalendar().getTime());
+                    job.setActiveTime(updatedJobDetail.getActiveTime().getTime());
                     job.setStatus(JobStatus.TRANSFERRING);
                     break;
-                case DONE:
-                    job.setFinishedFlag(updatedJobDetail.isFinishedFlag());
+                case StatusValueType.INT_DONE:
+                    job.setFinishedFlag(updatedJobDetail.getFinishedFlag());
                     job.setWorkerTerminatedTime(
-                        updatedJobDetail.getWorkerTerminatedTime().toGregorianCalendar().getTime());
+                        updatedJobDetail.getWorkerTerminatedTime().getTime());
                     job.setStatus(JobStatus.DONE);
 
                     // also set the WS specific fields..
@@ -76,12 +78,12 @@ public class DtsJobEventUpdateHandler {
             }
             mJobRepository.saveOrUpdate(job);
         }
-        else if (payload instanceof FireUpJobErrorEvent) {
+        else if (payload instanceof FireUpJobErrorEventDocument) {
             LOGGER.info("DtsJobEventUpdateHandler received a FireUpJobErrorEvent.");
 
             // TODO: handle the job error event here
         }
-        else if (payload instanceof FireUpStepFailureEvent) {
+        else if (payload instanceof FireUpStepFailureEventDocument) {
             LOGGER.info("DtsJobEventUpdateHandler received a FireUpStepFailureEvent.");
 
             // TODO: handle the step failure event
