@@ -8,7 +8,6 @@ package org.dataminx.dts.common;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,10 +21,9 @@ import org.dataminx.dts.DtsException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 /**
- * A utility class that deals with XML conversions
+ * A utility class that deals with XML conversions.
  *
  * @author Alex Arana
  * @author Gerson Galang
@@ -86,22 +84,22 @@ public final class XmlUtils {
             throw new NullPointerException("xmlString is null in call to stringToDocument()");
         }
         try {
-	    	DocumentBuilderFactory factory =  DocumentBuilderFactory.newInstance();
-	        DocumentBuilder builder = factory.newDocumentBuilder();
-	        Document document = builder.parse(new InputSource(new StringReader(xmlString)));
-	        return document;
+            DocumentBuilderFactory factory =  DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new InputSource(new StringReader(xmlString)));
+            return document;
         }
         catch (final SAXException ex) {
-        	throw new DtsException(
+            throw new DtsException(
                     "A transformation error occurred converting the XML string to a Document: " + ex, ex);
         }
         catch (final ParserConfigurationException ex) {
-        	throw new DtsException(
+            throw new DtsException(
                     "A transformation error occurred converting the XML string to a Document: " + ex, ex);
         }
         catch (final IOException ex) {
-        	throw new DtsException(
-        			"A transformation error occurred converting the XML string to a Document: " + ex, ex);
+            throw new DtsException(
+                    "A transformation error occurred converting the XML string to a Document: " + ex, ex);
         }
     }
 }
