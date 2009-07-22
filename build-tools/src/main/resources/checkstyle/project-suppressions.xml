@@ -25,9 +25,15 @@
   <suppress checks="IllegalThrows" files="[/\\]test[/\\]"/>
   <suppress checks="IllegalInstantiation" files="[/\\]test[/\\]"/>
   <suppress checks="ParameterNumberCheck" files="[/\\]test[/\\]"/>
+
   <!-- don't check generated code, this to work on Unix (/) and Windows (\) -->
-  <suppress checks="." files="org[/\\]dataminx[/\\]schemas[/\\]dts[/\\]_2009[/\\]_05[/\\]dts[/\\]"/>
+  <suppress checks="." files="org[/\\]dataminx[/\\]schemas[/\\]dts[/\\]"/>
+  <suppress checks="." files="org[/\\]ggf[/\\]schemas[/\\]jsdl[/\\]x2005[/\\]x11[/\\]jsdl[/\\]"/>
+  <suppress checks="." files="org[/\\]oasisOpen[/\\]docs[/\\]wss[/\\]x2004[/\\]x01[/\\]oasis200401WssWssecuritySecext10[/\\]"/>
+  <suppress checks="." files="org[/\\]oasisOpen[/\\]docs[/\\]wss[/\\]x2004[/\\]x01[/\\]oasis200401WssWssecurityUtility10[/\\]"/>
+  <suppress checks="." files="org[/\\]ogf[/\\]schemas[/\\]dmi[/\\]x2008[/\\]x05[/\\]dmi[/\\]"/>
+  <suppress checks="." files="org[/\\]w3[/\\]x2000[/\\]x09[/\\]xmldsig[/\\]"/>
+  <suppress checks="." files="org[/\\]w3[/\\]x2005[/\\]x08[/\\]addressing[/\\]"/>
   <!-- End of test code suppressions -->
 
 </suppressions>
-

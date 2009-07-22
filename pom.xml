@@ -145,6 +145,20 @@
         </configuration>
       </plugin>
     </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>2.3-atlassian-1</version>
+          <configuration>
+            <configLocation>${checkstyle_config_dir}/checkstyle-checks.xml</configLocation>
+            <propertyExpansion>checkstyle_config_dir=${checkstyle_config_dir}</propertyExpansion>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <!-- See notes on Checktyle in the build/plugins section -->
@@ -159,11 +173,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.3-atlassian-1</version>
-        <configuration>
-          <configLocation>${checkstyle_config_dir}/checkstyle-checks.xml</configLocation>
-          <propertyExpansion>checkstyle_config_dir=${checkstyle_config_dir}</propertyExpansion>
-        </configuration>
       </plugin>
     </plugins>
   </reporting>
@@ -711,17 +720,17 @@
 
       <!-- XMLBeans -->
       <dependency>
-          <groupId>org.apache.xmlbeans</groupId>
-          <artifactId>xmlbeans</artifactId>
-          <version>${xmlbeans.version}</version>
-        </dependency>
+        <groupId>org.apache.xmlbeans</groupId>
+        <artifactId>xmlbeans</artifactId>
+        <version>${xmlbeans.version}</version>
+      </dependency>
 
-        <!-- Stax-api -->
-        <dependency>
-          <groupId>stax</groupId>
-          <artifactId>stax-api</artifactId>
-          <version>${stax-api.version}</version>
-        </dependency>
+      <!-- Stax-api -->
+      <dependency>
+        <groupId>stax</groupId>
+        <artifactId>stax-api</artifactId>
+        <version>${stax-api.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
