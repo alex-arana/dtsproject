@@ -1,19 +1,13 @@
 package org.dataminx.dts.service;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.UUID;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Result;
-import javax.xml.transform.dom.DOMResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataminx.dts.common.XmlUtils;
 import org.dataminx.dts.common.util.JobContentValidator;
 import org.dataminx.dts.domain.model.Job;
 import org.dataminx.dts.domain.model.JobStatus;
@@ -30,8 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.oxm.xmlbeans.XmlBeansMarshaller;
 import org.springframework.util.Assert;
 import org.springframework.xml.transform.StringResult;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
 /**
  * The Data Transfer Service Implementation. This class interacts with the DTS domain layer and hands over

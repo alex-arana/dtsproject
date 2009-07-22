@@ -5,6 +5,8 @@
  */
 package org.dataminx.dts.wn.jms;
 
+import static org.dataminx.dts.common.XmlUtils.newDocument;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Properties;
@@ -50,7 +52,6 @@ public class DtsMessageConverter extends SimpleMessageConverter {
 
     /**
      * Default format of outgoing messages.
-     * TODO: Fix DOM_OBJECT output format type. Currently broken with XmlBeans implementation of schema bindings.
      */
     private OutputFormat mOutputFormat = OutputFormat.XML_TEXT;
 
@@ -142,7 +143,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
             case BYTE_ARRAY:
                 return new ByteArrayResult();
             case DOM_OBJECT:
-                return new DOMResult();
+                return new DOMResult(newDocument());
             default:
                 return new StringResult();
         }
