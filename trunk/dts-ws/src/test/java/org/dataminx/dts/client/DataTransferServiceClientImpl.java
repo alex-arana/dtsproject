@@ -21,12 +21,6 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
     /** The logger. */
     private static final Log LOGGER = LogFactory.getLog(DataTransferServiceClientImpl.class);
 
-    /** The Spring-WS web service template. */
-    private WebServiceTemplate mWebServiceTemplate;
-
-    /** The XML outputter/printer. */
-    private final XMLOutputter mXmlOut;
-
     private static final Namespace MINX_DTS_MESSAGES_NS =
         Namespace.getNamespace("mjsdl-msg", "http://schemas.dataminx.org/dts/2009/07/messages");
 
@@ -38,6 +32,12 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
 
     private static final Namespace DMI_NS =
         Namespace.getNamespace("dmi", "http://schemas.ogf.org/dmi/2008/05/dmi");
+
+    /** The Spring-WS web service template. */
+    private WebServiceTemplate mWebServiceTemplate;
+
+    /** The XML outputter/printer. */
+    private final XMLOutputter mXmlOut;
 
     /**
      * Instantiates a new data transfer service client impl.
