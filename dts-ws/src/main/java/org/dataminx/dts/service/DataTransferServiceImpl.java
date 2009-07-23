@@ -5,7 +5,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.UUID;
+
 import javax.xml.transform.Result;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.common.util.JobContentValidator;
@@ -56,7 +58,8 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
      * {@inheritDoc}
      */
     public String submitJob(SubmitJobRequestDocument submitJobRequest) {
-        String jobName = submitJobRequest.getSubmitJobRequest().getJobDefinition().getJobDescription().getJobIdentification().getJobName();
+        String jobName = submitJobRequest.getSubmitJobRequest()
+            .getJobDefinition().getJobDescription().getJobIdentification().getJobName();
         LOGGER.debug("In DataTransferServiceImpl.submitJob, running job " + jobName + "... ");
 
         // we'll assume that once we get to this point, the job definition that the user
@@ -96,16 +99,13 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
 
         // TODO: consider rework on this try-catch block
         try {
-        	mMarshaller.marshal(submitJobRequest, result);
-        } catch (IOException e) {
-        	 throw new DtsJobDefinitionException(e.fillInStackTrace());
+            mMarshaller.marshal(submitJobRequest, result);
+        }
+        catch (IOException e) {
+            throw new DtsJobDefinitionException(e.fillInStackTrace());
         }
 
         LOGGER.debug(result.toString());
-        // TODO: speak with Alex on why passing a w3c.dom.Document object fails.
-        //Document document = XmlUtils.stringToDocument(result.toString());
-        //mMessageSender.doSend(newJobResourceKey, document);
-
         mMessageSender.doSend(newJobResourceKey, result.toString());
 
         return newJobResourceKey;

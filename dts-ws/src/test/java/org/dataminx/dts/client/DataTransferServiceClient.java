@@ -41,7 +41,8 @@ public interface DataTransferServiceClient {
     /**
      * Gets the job status.
      *
-     * @param jobResourceKey the Universally Unique Identifier (aka Global Unique Identifier) of the job being queried about
+     * @param jobResourceKey the Universally Unique Identifier (aka Global Unique Identifier) of the job being
+     * queried about
      * @return the job status
      */
     String getJobStatus(String jobResourceKey);

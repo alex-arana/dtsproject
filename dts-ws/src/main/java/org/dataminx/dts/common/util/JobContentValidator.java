@@ -2,15 +2,13 @@ package org.dataminx.dts.common.util;
 
 import javax.xml.namespace.QName;
 
-import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxSourceTargetType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.ws.DtsJobDefinitionException;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxSourceTargetType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
-import org.w3c.dom.Element;
 
 /**
  * A validator of the contents of the Job definition document. Having a valid XML document
@@ -22,12 +20,12 @@ import org.w3c.dom.Element;
  */
 public class JobContentValidator {
 
-	// TODO: try and make this into a proper Validator..
-	// http://static.springframework.org/spring/docs/2.5.x/reference/validation.html#validator
+    // TODO: try and make this into a proper Validator..
+    // http://static.springframework.org/spring/docs/2.5.x/reference/validation.html#validator
 
-	private static final QName PASSWORD_STRING_QNAME =
-		new QName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd",
-			"PasswordString");
+    /** The PasswordString's QName. */
+    private static final QName PASSWORD_STRING_QNAME = new QName(
+            "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "PasswordString");
 
     /**
      * Checks for the validity of the contents of the Job Definition document.
@@ -47,13 +45,14 @@ public class JobContentValidator {
         // make sure that MinxJobDescriptionType is used instead of just plain JobDescriptionType
         DataTransferType[] transfers;
         try {
-        	transfers = ((MinxJobDescriptionType) job.getJobDescription()).getDataTransferArray();
-        } catch (ClassCastException e) {
-        	errorMessages.append("  Plain JobDescriptionType is not supported.");
-        	throw new DtsJobDefinitionException("Invalid request1.\n" + errorMessages);
+            transfers = ((MinxJobDescriptionType) job.getJobDescription()).getDataTransferArray();
+        }
+        catch (ClassCastException e) {
+            errorMessages.append("  Plain JobDescriptionType is not supported.");
+            throw new DtsJobDefinitionException("Invalid request1.\n" + errorMessages);
         }
 
-        for (int i=0; i < transfers.length; i++) {
+        for (int i = 0; i < transfers.length; i++) {
 
             MinxSourceTargetType source = transfers[i].getSource();
             MinxSourceTargetType target = transfers[i].getTarget();
@@ -86,12 +85,11 @@ public class JobContentValidator {
                 // make sure password is also provided as it's only considered as the wsse schema doesn't
                 // really force everyone to have a PasswordString inside the UsernameToken element
                 XmlObject[] passwordString = sourceOrTarget.getCredential()
-                	.getUsernameToken().selectChildren(PASSWORD_STRING_QNAME);
+                    .getUsernameToken().selectChildren(PASSWORD_STRING_QNAME);
 
                 if (passwordString.length > 0) {
-                	// we'll assume first that there will always only be one PasswordString element
-                	passwordString[0].xmlText();
-
+                    // we'll assume first that there will always only be one PasswordString element
+                    passwordString[0].xmlText();
                 }
                 else {
                     errorMessages.append("  PasswordString is missing.\n");
