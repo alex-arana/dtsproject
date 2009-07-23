@@ -5,7 +5,7 @@
  */
 package org.dataminx.dts.wn.jms;
 
-import static org.dataminx.dts.common.XmlUtils.newDocument;
+import static org.dataminx.dts.common.xml.XmlUtils.newDocument;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

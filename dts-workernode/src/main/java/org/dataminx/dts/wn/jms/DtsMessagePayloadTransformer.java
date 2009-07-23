@@ -5,11 +5,13 @@
  */
 package org.dataminx.dts.wn.jms;
 
+import org.apache.xmlbeans.XmlObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.annotation.Transformer;
 import org.springframework.integration.xml.transformer.XmlPayloadUnmarshallingTransformer;
 import org.springframework.oxm.Unmarshaller;
+import org.springframework.util.ClassUtils;
 
 /**
  * Deserialises an incoming Message payload into an object graph using a schema unmarshaller.
@@ -38,6 +40,9 @@ public class DtsMessagePayloadTransformer extends XmlPayloadUnmarshallingTransfo
     @Transformer
     public Object transformPayload(final Object payload) {
         LOG.info("transforming incoming message payload: " + payload);
+        if (ClassUtils.isAssignableValue(XmlObject.class, payload)) {
+            return payload;
+        }
         return super.transformPayload(payload);
     }
 }
