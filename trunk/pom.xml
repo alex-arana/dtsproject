@@ -73,6 +73,12 @@
     <xmlbeans.version>2.4.0</xmlbeans.version>
     <xmlbeans-maven-plugin.version>2.3.2</xmlbeans-maven-plugin.version>
     <stax-api.version>1.0.1</stax-api.version>
+    <unitils.version>2.3</unitils.version>
+    <objenesis.version>1.1</objenesis.version>
+    <cglib.version>2.2</cglib.version>
+    <asm-tree.version>3.1</asm-tree.version>
+    <asm-analysis.version>3.1</asm-analysis.version>
+    <commons-io.version>1.4</commons-io.version>
   </properties>
 
   <repositories>
@@ -269,6 +275,13 @@
         <groupId>commons-configuration</groupId>
         <artifactId>commons-configuration</artifactId>
         <version>${commons-configuration.version}</version>
+      </dependency>
+
+      <!-- commons-io -->
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>${commons-io.version}</version>
       </dependency>
 
       <!-- commons-lang -->
@@ -730,6 +743,33 @@
         <groupId>stax</groupId>
         <artifactId>stax-api</artifactId>
         <version>${stax-api.version}</version>
+      </dependency>
+
+      <!-- Unitils -->
+      <dependency>
+        <groupId>org.unitils</groupId>
+        <artifactId>unitils</artifactId>
+        <version>${unitils.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.objenesis</groupId>
+        <artifactId>objenesis</artifactId>
+        <version>${objenesis.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>cglib</groupId>
+        <artifactId>cglib</artifactId>
+        <version>${cglib.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>asm</groupId>
+        <artifactId>asm-tree</artifactId>
+        <version>${asm-tree.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>asm</groupId>
+        <artifactId>asm-analysis</artifactId>
+        <version>${asm-analysis.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

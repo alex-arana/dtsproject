@@ -6,7 +6,7 @@
 package org.dataminx.dts.wn.util;
 
 import static org.apache.commons.lang.SystemUtils.LINE_SEPARATOR;
-import static org.dataminx.dts.common.XmlUtils.documentToString;
+import static org.dataminx.dts.common.xml.XmlUtils.documentToString;
 
 import java.io.File;
 import java.util.UUID;
@@ -28,10 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.oxm.AbstractMarshaller;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.xml.transform.StringResult;
 import org.w3c.dom.Document;
 
 /**
@@ -44,9 +42,6 @@ import org.w3c.dom.Document;
 public class TestProcessDtsJobMessage {
     @Autowired
     private JobSubmitQueueSender mJmsQueueSender;
-
-    @Autowired
-    private AbstractMarshaller mMarshaller;
 
     @Test
     public void submitDtsJobAsDocument() throws Exception {
@@ -91,13 +86,13 @@ public class TestProcessDtsJobMessage {
         jobDescription.setDataTransferArray(new DataTransferType[] {dataTransfer});
         jobDefinition.setJobDescription(jobDescription);
 
-        final StringResult result = new StringResult();
-        mMarshaller.marshal(root, result);
-
         final Logger logger = LoggerFactory.getLogger(getClass());
-        final String dtsJobRequest = result.toString();
-        logger.debug(String.format("submitDtsJobAsText ['%s']:%s%s", dtsJobId, LINE_SEPARATOR, dtsJobRequest));
-        mJmsQueueSender.doSend(dtsJobId, dtsJobRequest);
+        if (logger.isDebugEnabled()) {
+            final String dtsJobRequest = root.xmlText();
+            logger.debug(String.format("submitDtsJobAsText ['%s']:%s%s", dtsJobId, LINE_SEPARATOR, dtsJobRequest));
+        }
+
+        mJmsQueueSender.doSend(dtsJobId, root.getDomNode());
     }
 
     private String generateTemporaryFilename(final String filename) {
