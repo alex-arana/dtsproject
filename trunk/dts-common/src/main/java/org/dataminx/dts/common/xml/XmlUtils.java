@@ -3,7 +3,7 @@
  *
  * License: To Be Announced
  */
-package org.dataminx.dts.common;
+package org.dataminx.dts.common.xml;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,8 +25,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.collections.MapUtils;
 import org.dataminx.dts.DtsException;
-import org.dataminx.dts.common.xml.DtsXmlConfigurationException;
-import org.dataminx.dts.common.xml.DtsXmlTransformationException;
 import org.springframework.util.Assert;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
