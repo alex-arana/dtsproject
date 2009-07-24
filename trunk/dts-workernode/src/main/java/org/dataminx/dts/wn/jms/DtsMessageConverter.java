@@ -19,9 +19,11 @@ import javax.jms.TextMessage;
 import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
+import org.apache.commons.lang.StringUtils;
+import org.dataminx.dts.common.xml.ByteArrayResult;
 import org.dataminx.dts.wn.batch.DtsJob;
 import org.dataminx.dts.wn.batch.DtsJobFactory;
-import org.dataminx.dts.wn.common.util.ByteArrayResult;
+import org.dataminx.dts.wn.common.util.SchemaUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.converter.DefaultJobParametersConverter;
@@ -86,7 +88,12 @@ public class DtsMessageConverter extends SimpleMessageConverter {
 
         // convert the payload into a DTS job definition
         final Object dtsJobRequest = mTransformer.transformPayload(payload);
-        LOG.debug("transformed message payload: " + dtsJobRequest);
+        if (LOG.isDebugEnabled()) {
+            final String auditable = SchemaUtils.getAuditableString(dtsJobRequest);
+            if (StringUtils.isNotBlank(auditable)) {
+                LOG.debug("transformed JMS message payload to DTS schema instance:\n" + auditable);
+            }
+        }
 
         // invoke the job factory to create a new job instance
         final DtsJob dtsJob = mJobFactory.createJob(jobId, dtsJobRequest);
