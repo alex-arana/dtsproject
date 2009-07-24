@@ -106,7 +106,7 @@ public class JobNotificationServiceImpl implements JobNotificationService {
                 errorDetails.addFailureTrace(ExceptionUtils.getFullStackTrace(failure));
             }
 
-            mJobEventQueueSender.doSend(jobId, stepFailureEvent);
+            mJobEventQueueSender.doSend(jobId, document);
         }
     }
 
