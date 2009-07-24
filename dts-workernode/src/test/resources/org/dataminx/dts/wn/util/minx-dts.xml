@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <submitJobRequest xmlns="http://schemas.dataminx.org/dts/2009/07/messages"
     xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:oas="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
     xmlns:dmi="http://schemas.ogf.org/dmi/2008/05/dmi"
-    xsi:noNamespaceSchemaLocation="minx-dts.xsd">
+    xmlns:oas="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+    xsi:noNamespaceSchemaLocation="minx-dts-messages.xsd">
 
   <JobDefinition>
     <jsdl1:JobDescription xsi:type="jsdl:MinxJobDescriptionType" xmlns:jsdl="http://schemas.dataminx.org/dts/2009/07/jsdl" xmlns:jsdl1="http://schemas.ggf.org/jsdl/2005/11/jsdl">
@@ -16,28 +16,16 @@
       </jsdl1:JobIdentification>
       <jsdl:DataTransfer>
         <jsdl:Source>
-          <!--<jsdl1:URI>http://wiki.arcs.org.au/pub/DataMINX/WebPreferences/favicon.ico</jsdl1:URI>-->
-          <!--
-          <jsdl1:URI>gsiftp://ng2.vpac.org/tmp/lcg-info-generic-vpac-brecca.conf</jsdl1:URI>
-          <jsdl1:Credential>
-              <jsdl:MyProxyToken>
-                  <jsdl:MyProxyUsername>gerson</jsdl:MyProxyUsername>
-                  <jsdl:MyProxyPassword>pa55word</jsdl:MyProxyPassword>
-                  <jsdl:MyProxyServer>myproxy2.arcs.org.au</jsdl:MyProxyServer>
-                  <jsdl:MyProxyPort>7512</jsdl:MyProxyPort>
-              </jsdl:MyProxyToken>
-          </jsdl1:Credential>
-          -->
-          <jsdl1:URI>ftp://dm11.intersect.org.au/upload/lcg.conf</jsdl1:URI>
+          <jsdl1:URI>ftp://dm11.intersect.org.au/software/software/httpd-devel-2.2.2-1.x86_64.rpm</jsdl1:URI>
           <jsdl:Credential>
             <oas:UsernameToken>
-              <oas:Username>gerson</oas:Username>
-              <oas:PasswordString>pa55word</oas:PasswordString>
+              <oas:Username>devel</oas:Username>
+              <oas:PasswordString>leveD12345</oas:PasswordString>
             </oas:UsernameToken>
           </jsdl:Credential>
         </jsdl:Source>
         <jsdl:Target>
-          <jsdl1:URI>tmp://DataMINX/favicon.ico</jsdl1:URI>
+          <jsdl1:URI>tmp://DataMINX/httpd-devel-2.2.2-1.x86_64.rpm</jsdl1:URI>
         </jsdl:Target>
         <jsdl:TransferRequirements>
           <dmi:MaxAttempts>0</dmi:MaxAttempts>

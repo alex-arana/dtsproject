@@ -3,7 +3,7 @@
  *
  * License: To Be Announced
  */
-package org.dataminx.dts.wn.common.util;
+package org.dataminx.dts.common.xml;
 
 import java.io.ByteArrayOutputStream;
 import javax.xml.transform.stream.StreamResult;

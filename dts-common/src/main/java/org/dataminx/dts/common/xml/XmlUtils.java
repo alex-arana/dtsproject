@@ -5,11 +5,13 @@
  */
 package org.dataminx.dts.common.xml;
 
-import java.io.ByteArrayOutputStream;
+import static java.util.Collections.unmodifiableMap;
+import static org.apache.commons.collections.MapUtils.putAll;
+
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,7 +24,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.collections.MapUtils;
 import org.dataminx.dts.DtsException;
 import org.springframework.util.Assert;
@@ -42,6 +43,17 @@ public final class XmlUtils {
      * <p>Defaults to "2".
      */
     public static final int DEFAULT_INDENT_AMOUNT = 2;
+
+    /**
+     * Default set of output properties applied when creating a new instance of a {@link Transformer}
+     * object.
+     */
+    @SuppressWarnings("unchecked")
+    private static final Map<String, String> DEFAULT_TRANSFORMER_OUTPUT_PROPERTIES =
+        unmodifiableMap(putAll(new HashMap<String, String>(), new Object[] {
+            new String[] {OutputKeys.INDENT, "yes"},  // pretty-print XML output
+            new String[] {"{http://xml.apache.org/xslt}indent-amount", String.valueOf(DEFAULT_INDENT_AMOUNT)}
+        }));
 
     /**
      * Prevent public instantiation of this class.
@@ -65,15 +77,9 @@ public final class XmlUtils {
     public static String documentToString(final Document document) throws DtsException {
         Assert.notNull(document, "Document is null in call to documentToString()");
         try {
-            final Properties outputProperties = new Properties();
-            outputProperties.setProperty(OutputKeys.INDENT, "yes");
-            // Xalan-specific, but this it will simply be ignored by other implementations
-            outputProperties.setProperty(
-                "{http://xml.apache.org/xslt}indent-amount", String.valueOf(DEFAULT_INDENT_AMOUNT));
-
-            final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            newTransformer(outputProperties).transform(new DOMSource(document), new StreamResult(stream));
-            return stream.toString();
+            final ByteArrayResult result = new ByteArrayResult();
+            newTransformer().transform(new DOMSource(document), result);
+            return result.toString();
         }
         catch (final TransformerException ex) {
             // this is fatal, just dump the stack and throw a runtime exception
@@ -94,9 +100,9 @@ public final class XmlUtils {
             throw new NullPointerException("xmlString is null in call to stringToDocument()");
         }
         try {
-            DocumentBuilderFactory factory =  DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(new InputSource(new StringReader(xmlString)));
+            final DocumentBuilderFactory factory =  DocumentBuilderFactory.newInstance();
+            final DocumentBuilder builder = factory.newDocumentBuilder();
+            final Document document = builder.parse(new InputSource(new StringReader(xmlString)));
             return document;
         }
         catch (final SAXException ex) {
@@ -157,19 +163,47 @@ public final class XmlUtils {
     }
 
     /**
-     * Obtain a new instance of a {@link Transformer} object that may be used to perform an XML transformation.
+     * Creates new instance of a {@link Transformer} using the specified stylesheet  that may then be used
+     * to perform an XML transformation.
+     * <p>
+     * The stylesheet {@link Source} is an XSLT document that conforms to <a href="http://www.w3.org/TR/xslt">
+     * XSL Transformations (XSLT) Version 1.0</a>.
      *
-     * @param properties A set of output properties that will be used to override any of the same properties
-     *        in effect for the transformation.
+     * @param stylesheet <code>Source</code> of XSLT document used to create <code>Transformer</code>
      * @return A new instance of a Transformer object.
      * @throws DtsXmlConfigurationException if the Transformer factory cannot be instantiated due to a
      *         configuration error
      */
-    public static Transformer newTransformer(final Properties properties) throws DtsXmlConfigurationException {
+    public static Transformer newTransformer(final Source stylesheet) throws DtsXmlConfigurationException {
+        Assert.notNull(stylesheet);
+        try {
+            final Transformer transformer = TransformerFactory.newInstance().newTransformer(stylesheet);
+            for (final Map.Entry<String, String> entry : DEFAULT_TRANSFORMER_OUTPUT_PROPERTIES.entrySet()) {
+                transformer.setOutputProperty(entry.getKey(), entry.getValue());
+            }
+            return transformer;
+        }
+        catch (final TransformerConfigurationException ex) {
+            throw new DtsXmlConfigurationException("A transformation configuration error has occurred: " + ex, ex);
+        }
+        catch (final TransformerFactoryConfigurationError ex) {
+            throw new DtsXmlConfigurationException(
+                "A transformation factory configuration error has occurred: " + ex, ex);
+        }
+    }
+
+    /**
+     * Obtain a new instance of a {@link Transformer} object that may be used to perform an XML transformation.
+     *
+     * @return A new instance of a Transformer object.
+     * @throws DtsXmlConfigurationException if the Transformer factory cannot be instantiated due to a
+     *         configuration error
+     */
+    public static Transformer newTransformer() throws DtsXmlConfigurationException {
         try {
             final Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            if (properties != null) {
-                transformer.setOutputProperties(properties);
+            for (final Map.Entry<String, String> entry : DEFAULT_TRANSFORMER_OUTPUT_PROPERTIES.entrySet()) {
+                transformer.setOutputProperty(entry.getKey(), entry.getValue());
             }
             return transformer;
         }
@@ -201,7 +235,38 @@ public final class XmlUtils {
     public static void transform(final Source source, final Result result)
         throws DtsXmlConfigurationException, DtsXmlTransformationException {
         try {
-            newTransformer(null).transform(source, result);
+            newTransformer().transform(source, result);
+        }
+        catch (final TransformerException ex) {
+            throw new DtsXmlTransformationException("An XML transformation error has occurred: " + ex, ex);
+        }
+    }
+
+    /**
+     * Transform the XML {@link Source} input into a {@link Result} object using the specified XSLT
+     * stylesheet.
+     * <p>
+     * The {@link Source} stylesheet is an XSLT document that conforms to <a href="http://www.w3.org/TR/xslt">
+     * XSL Transformations (XSLT) Version 1.0</a>.
+     * <p>
+     * <em>NOTE</em>: Care must be taken not to use XMLBeans DOM documents as input in a transformation
+     * while using DOM Level 3 implementations such as the default JAXP bundled with JDK 1.6.  XMLBeans
+     * only support DOM Level 2.  Refer to this <a href="https://issues.apache.org/jira/browse/XMLBEANS-100">
+     * online resource</a> for additional details.
+     *
+     * @param stylesheet <code>Source</code> of XSLT document used to create <code>Transformer</code>
+     * @param xml The XML input to transform.
+     * @param result The <code>Result</code> of transforming the <code>source</code>
+     *
+     * @throws DtsXmlConfigurationException if the Transformer factory cannot be instantiated due to a
+     *         configuration error
+     * @throws DtsXmlTransformationException If an unrecoverable error occurs during the course of the
+     *         transformation.
+     */
+    public static void transform(final Source stylesheet, final Source xml, final Result result)
+        throws DtsXmlConfigurationException, DtsXmlTransformationException {
+        try {
+            newTransformer(stylesheet).transform(xml, result);
         }
         catch (final TransformerException ex) {
             throw new DtsXmlTransformationException("An XML transformation error has occurred: " + ex, ex);
