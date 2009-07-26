@@ -18,14 +18,17 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
+import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.collections.MapUtils;
 import org.dataminx.dts.DtsException;
+import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -49,7 +52,7 @@ public final class XmlUtils {
      * object.
      */
     @SuppressWarnings("unchecked")
-    private static final Map<String, String> DEFAULT_TRANSFORMER_OUTPUT_PROPERTIES =
+    public static final Map<String, String> DEFAULT_TRANSFORMER_OUTPUT_PROPERTIES =
         unmodifiableMap(putAll(new HashMap<String, String>(), new Object[] {
             new String[] {OutputKeys.INDENT, "yes"},  // pretty-print XML output
             new String[] {"{http://xml.apache.org/xslt}indent-amount", String.valueOf(DEFAULT_INDENT_AMOUNT)}
@@ -159,6 +162,53 @@ public final class XmlUtils {
         }
         catch (final ParserConfigurationException ex) {
             throw new DtsXmlConfigurationException(ex);
+        }
+    }
+
+    /**
+     * Processes the specified stylesheet resource into an instance of a {@link Templates} object, which is a
+     * compiled representation of the source.
+     *
+     * @param stylesheet Resource that references an XSLT document used to create <code>Transformer</code>
+     * @return A new instance of a <code>Templates</code> object.
+     * @throws DtsXmlConfigurationException if either the Transformer factory cannot be instantiated due to a
+     *         configuration error or parsing the Source fails
+     * @see #newTemplates(Source)
+     */
+    public static Templates newTemplates(final Resource stylesheet) throws DtsXmlConfigurationException {
+        Assert.notNull(stylesheet);
+        try {
+            return newTemplates(new StreamSource(stylesheet.getInputStream()));
+        }
+        catch (final IOException ex) {
+            throw new DtsException("An I/O error occurred loading the specified stylesheet: " + stylesheet, ex);
+        }
+    }
+
+    /**
+     * Processes the specified stylesheet into an instance of a {@link Templates} object, which is a compiled
+     * representation of the source. This {@link Templates} object may then be used concurrently across multiple
+     * threads to create {@link Transformer} instances.
+     * <p>
+     * The stylesheet {@link Source} is an XSLT document that conforms to <a href="http://www.w3.org/TR/xslt">
+     * XSL Transformations (XSLT) Version 1.0</a>.
+     *
+     * @param stylesheet <code>Source</code> of XSLT document used to create <code>Transformer</code>
+     * @return A new instance of a <code>Templates</code> object.
+     * @throws DtsXmlConfigurationException if either the Transformer factory cannot be instantiated due to a
+     *         configuration error or parsing the Source fails
+     */
+    public static Templates newTemplates(final Source stylesheet) throws DtsXmlConfigurationException {
+        Assert.notNull(stylesheet);
+        try {
+            return TransformerFactory.newInstance().newTemplates(stylesheet);
+        }
+        catch (final TransformerConfigurationException ex) {
+            throw new DtsXmlConfigurationException("A transformation configuration error has occurred: " + ex, ex);
+        }
+        catch (final TransformerFactoryConfigurationError ex) {
+            throw new DtsXmlConfigurationException(
+                "A transformation factory configuration error has occurred: " + ex, ex);
         }
     }
 
