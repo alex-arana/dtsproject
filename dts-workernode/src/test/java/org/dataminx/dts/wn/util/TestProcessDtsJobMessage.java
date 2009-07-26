@@ -92,7 +92,7 @@ public class TestProcessDtsJobMessage {
             logger.debug(String.format("submitDtsJobAsText ['%s']:%s%s", dtsJobId, LINE_SEPARATOR, dtsJobRequest));
         }
 
-        mJmsQueueSender.doSend(dtsJobId, root.getDomNode());
+        mJmsQueueSender.doSend(dtsJobId, root.xmlText());
     }
 
     private String generateTemporaryFilename(final String filename) {
