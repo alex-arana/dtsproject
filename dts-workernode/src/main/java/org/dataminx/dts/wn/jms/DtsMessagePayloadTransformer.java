@@ -39,7 +39,6 @@ public class DtsMessagePayloadTransformer extends XmlPayloadUnmarshallingTransfo
     @Override
     @Transformer
     public Object transformPayload(final Object payload) {
-        LOG.info("transforming incoming message payload: " + payload);
         if (ClassUtils.isAssignableValue(XmlObject.class, payload)) {
             return payload;
         }
