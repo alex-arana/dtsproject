@@ -259,6 +259,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>ognl</groupId>
+      <artifactId>ognl</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.objenesis</groupId>
       <artifactId>objenesis</artifactId>
       <scope>test</scope>
@@ -276,6 +281,16 @@
     <dependency>
       <groupId>asm</groupId>
       <artifactId>asm-analysis</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymockclassextension</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

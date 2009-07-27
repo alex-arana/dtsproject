@@ -74,10 +74,13 @@
     <xmlbeans-maven-plugin.version>2.3.2</xmlbeans-maven-plugin.version>
     <stax-api.version>1.0.1</stax-api.version>
     <unitils.version>2.3</unitils.version>
+    <ognl.version>2.7.2</ognl.version>
     <objenesis.version>1.1</objenesis.version>
     <cglib.version>2.2</cglib.version>
     <asm-tree.version>3.1</asm-tree.version>
     <asm-analysis.version>3.1</asm-analysis.version>
+    <easymock.version>2.5.1</easymock.version>
+    <easymockclassextension.version>2.4</easymockclassextension.version>
     <commons-io.version>1.4</commons-io.version>
   </properties>
 
@@ -752,6 +755,11 @@
         <version>${unitils.version}</version>
       </dependency>
       <dependency>
+        <groupId>ognl</groupId>
+        <artifactId>ognl</artifactId>
+        <version>${ognl.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.objenesis</groupId>
         <artifactId>objenesis</artifactId>
         <version>${objenesis.version}</version>
@@ -770,6 +778,16 @@
         <groupId>asm</groupId>
         <artifactId>asm-analysis</artifactId>
         <version>${asm-analysis.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymock</artifactId>
+        <version>${easymock.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymockclassextension</artifactId>
+        <version>${easymockclassextension.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
