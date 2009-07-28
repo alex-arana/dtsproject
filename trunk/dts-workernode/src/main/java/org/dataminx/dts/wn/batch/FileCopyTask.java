@@ -102,7 +102,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
     @Override
     public ExitStatus afterStep(final StepExecution stepExecution) {
         final ExitStatus exitStatus = stepExecution.getExitStatus();
-        if (exitStatus.compareTo(ExitStatus.FAILED) == 0) {
+        if (stepExecution.getStatus().isUnsuccessful()) {
             final String dtsJobId = extractDtsJobId(stepExecution);
             mJobNotificationService.notifyStepFailures(dtsJobId, stepExecution);
         }
