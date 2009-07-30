@@ -132,6 +132,7 @@
     <module>dts-schema</module>
     <module>dts-workernode</module>
     <module>dts-ws</module>
+    <module>dts-portal</module>
   </modules>
 
   <build>
