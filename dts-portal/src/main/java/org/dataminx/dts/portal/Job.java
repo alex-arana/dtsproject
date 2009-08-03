@@ -21,7 +21,7 @@ public class Job extends ActionSupport implements SessionAware, ServletRequestAw
         ServletResponseAware, ServletContextAware {
 
     /** The logger. */
-    private static final Log LOGGER = LogFactory.getLog(User.class);
+    private static final Log LOGGER = LogFactory.getLog(Job.class);
 
     /** The job name. */
     private String mName;

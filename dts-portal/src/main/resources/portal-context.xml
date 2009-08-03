@@ -8,15 +8,7 @@
            http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
 
-    <bean id="dtsConfigManager" class="org.dataminx.dts.common.DtsConfigManager">
-      <!--  Hardcode the location here first til I find out why URI inputs don't work -->
-      <!--<property name="dtsConfigLocation" value="classpath:dts-portal.properties"/>-->
-      <property name="dtsConfigLocation" value="/home/gerson/Workspaces/dataminx-new/minx-dts/dts-portal/src/main/resources/dts-portal.properties"/>
-    </bean>
-
-    <bean id="userAction" class="org.dataminx.dts.portal.User" scope="prototype">
-      <property name="dtsConfigManager" ref="dtsConfigManager"/>
-    </bean>
+    <bean id="userAction" class="org.dataminx.dts.portal.User" scope="prototype"/>
     <bean id="jobAction" class="org.dataminx.dts.portal.Job" scope="prototype"/>
     <bean id="dtsMenuAction" class="org.dataminx.dts.portal.Menu" scope="prototype"/>
 

@@ -15,12 +15,18 @@
     <servlet.version>2.4</servlet.version>
     <jsp.version>2.0</jsp.version>
     <maven-jetty-plugin.version>6.1.5</maven-jetty-plugin.version>
+    <jaas.version>1.0.01</jaas.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>${dataminx.group}</groupId>
       <artifactId>dts-common</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${dataminx.group}</groupId>
+      <artifactId>dts-security</artifactId>
     </dependency>
 
     <dependency>
@@ -67,13 +73,6 @@
       <version>${jsp.version}</version>
       <scope>provided</scope>
     </dependency>
-
-    <!-- Proxy Light -->
-    <dependency>
-        <groupId>au.org.arcs.auth</groupId>
-        <artifactId>simpleProxyLib</artifactId>
-    </dependency>
-
   </dependencies>
     <build>
     <finalName>dts-portal</finalName>
