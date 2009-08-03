@@ -1,5 +1,6 @@
 package org.dataminx.dts.common;
 
+import java.net.URL;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -19,11 +20,22 @@ public class DtsConfigManager {
     /**
      * Sets the dts config location.
      *
-     * @param dtsConfigLocation the new dts config location
+     * @param dtsConfigLocation the new dts config location in String format
      * @throws ConfigurationException if an error occurs while initialising the configuration from the
      *         specified location
      */
     public void setDtsConfigLocation(final String dtsConfigLocation) throws ConfigurationException {
+        mDtsConfig = new PropertiesConfiguration(dtsConfigLocation);
+    }
+
+    /**
+     * Sets the dts config location
+     *
+     * @param dtsConfigLocation the new dts config location in URL format
+     * @throws ConfigurationException if an error occurs while initialising the configuration from the
+     *         specified location
+     */
+    public void setDtsConfigLocation(final URL dtsConfigLocation) throws ConfigurationException {
         mDtsConfig = new PropertiesConfiguration(dtsConfigLocation);
     }
 

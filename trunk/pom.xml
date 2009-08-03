@@ -133,6 +133,7 @@
     <module>dts-workernode</module>
     <module>dts-ws</module>
     <module>dts-portal</module>
+    <module>dts-security</module>
   </modules>
 
   <build>
@@ -207,6 +208,11 @@
       </dependency>
       <dependency>
         <artifactId>dts-domain</artifactId>
+        <groupId>${dataminx.group}</groupId>
+        <version>${minx-dts.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>dts-security</artifactId>
         <groupId>${dataminx.group}</groupId>
         <version>${minx-dts.version}</version>
       </dependency>

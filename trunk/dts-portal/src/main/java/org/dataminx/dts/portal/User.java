@@ -5,10 +5,12 @@ import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.StringLengthFieldValidator;
 import com.opensymphony.xwork2.validator.annotations.Validation;
 import java.util.Map;
+import javax.security.auth.Subject;
+import javax.security.auth.login.LoginContext;
+import javax.security.auth.login.LoginException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.configuration.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts2.dispatcher.SessionMap;
@@ -16,11 +18,7 @@ import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.interceptor.ServletResponseAware;
 import org.apache.struts2.interceptor.SessionAware;
 import org.apache.struts2.util.ServletContextAware;
-import org.dataminx.dts.common.DtsConfigManager;
-import org.globus.myproxy.MyProxy;
-import org.globus.myproxy.MyProxyException;
-import org.ietf.jgss.GSSCredential;
-import org.ietf.jgss.GSSException;
+import org.dataminx.dts.security.auth.callback.PassiveCallbackHandler;
 
 /**
  * The User Action class handles the portal's user authentication.
@@ -54,9 +52,6 @@ public class User extends ActionSupport implements SessionAware, ServletRequestA
 
     /** The auto injected servlet context object. */
     private ServletContext mServletContext;
-
-    /** The DTS Configuration. */
-    private Configuration mDtsConfig;
 
     /**
      * {@inheritDoc}
@@ -131,15 +126,6 @@ public class User extends ActionSupport implements SessionAware, ServletRequestA
     }
 
     /**
-     * Sets the dts config manager.
-     *
-     * @param dtsConfigManager the new dts config manager
-     */
-    public void setDtsConfigManager(DtsConfigManager dtsConfigManager) {
-        mDtsConfig = dtsConfigManager.getDtsConfig();
-    }
-
-    /**
      * Performs the necessary checks to see if a user is allowed to get past beyond the login page.
      *
      * @return the result
@@ -151,44 +137,32 @@ public class User extends ActionSupport implements SessionAware, ServletRequestA
         String referer = mServletRequest.getHeader("referer");
         if (referer != null) {
 
-            // TODO: there might be a better way of having these fields be accessed from a static/constant
-            // class somewhere
-            String myProxyHost = mDtsConfig.getString("default.myproxy.host");
-            int myProxyPort = mDtsConfig.getInt("default.myproxy.port");
-            int myProxyCredentialLifetime = mDtsConfig.getInt("default.myproxy.lifetime");
-
-            MyProxy myProxy = new MyProxy(myProxyHost, myProxyPort);
-            GSSCredential credential = null;
-            String commonName = null;
             try {
-                credential = myProxy.get(mUsername, mPassword, myProxyCredentialLifetime);
-                LOGGER.info(String.format("Successfully downloaded a proxy credential from myproxy server, '%s:%s'\n",
-                        myProxyHost,
-                        myProxyPort));
+                PassiveCallbackHandler callbackHandler = new PassiveCallbackHandler(mUsername, mPassword);
+                LoginContext loginContext = new LoginContext("DtsPortal", callbackHandler);
+                loginContext.login();
 
-                String distinguishedName = credential.getName().toString();
-                commonName = distinguishedName.substring(distinguishedName.indexOf(
-                    CN_EQUALS) + CN_EQUALS.length());
+                Subject subject = loginContext.getSubject();
 
+                // use the first principal entry as this user's commonName
                 // commonName will be used from now on as an 'isLoggedIn' sort of attribute
-                mSessionMap.put("commonName", commonName);
-                LOGGER.info(String.format("User '%s' logging in", commonName));
-                // TODO: check if disposing this credential will still let us download a proxy credential later on
+                mSessionMap.put("commonName", subject.getPrincipals().toArray()[0]);
+
+                // we won't be needing loginContext anymore after the last call
+                loginContext.logout();
 
             }
-            catch (MyProxyException ex) {
-                LOGGER.error(String.format("Could not get delegated proxy from server '%s:%s'\n%s",
-                    myProxyHost,
-                    myProxyPort,
-                    ex.getMessage()));
+            catch (LoginException le) {
+                LOGGER.debug("Cannot create LoginContext. " + le.getMessage());
                 mSessionMap.put("loginErrorMessage", "The myproxy details you provided might be wrong. Try again.");
                 result = INPUT;
             }
-            catch (GSSException ex) {
-                // let's ignore this exception
-                LOGGER.error(String.format("Couldn't perform GSSCredential method calls.\n%s", ex.getMessage()));
-                mSessionMap.put("commonName", commonName);
+            catch (SecurityException se) {
+                System.err.println("Cannot create LoginContext. " + se.getMessage());
+                mSessionMap.put("loginErrorMessage", "The myproxy details you provided might be wrong. Try again.");
+                result = INPUT;
             }
+
         }
         else {
             LOGGER.error("User_login.action is being accessed directly.");
