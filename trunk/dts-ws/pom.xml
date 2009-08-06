@@ -32,6 +32,11 @@
     </dependency>
 
     <dependency>
+      <groupId>${dataminx.group}</groupId>
+      <artifactId>dts-security</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
     </dependency>
@@ -53,6 +58,15 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- TestNG -->
+    <!--
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <scope>test</scope>
+    </dependency>
+    -->
+
     <dependency>
       <groupId>org.springframework.ws</groupId>
       <artifactId>spring-oxm</artifactId>
@@ -71,6 +85,11 @@
     <dependency>
       <groupId>org.springframework.ws</groupId>
       <artifactId>spring-ws-core-tiger</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.ws</groupId>
+      <artifactId>spring-ws-security</artifactId>
     </dependency>
 
     <!-- JMS -->
@@ -122,18 +141,29 @@
       <artifactId>jdom</artifactId>
     </dependency>
 
+    <!-- WS-security related libraries -->
     <dependency>
-	    <groupId>org.apache.ws.commons.schema</groupId>
-	    <artifactId>XmlSchema</artifactId>
-	    <version>1.4.5</version>
-		</dependency>
+      <groupId>org.apache.ws.commons.schema</groupId>
+      <artifactId>XmlSchema</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.xml.wsit</groupId>
+      <artifactId>xmlsec</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.xml.messaging.saaj</groupId>
+      <artifactId>saaj-impl</artifactId>
+      <scope>runtime</scope>
+    </dependency>
   </dependencies>
 
   <build>
     <!--
-      Enable resource filters as a workaround to the issue of accidentally uploading Credential
-      details on the test files. Using filters is also a good way to avoid overwriting another
-      developers desktop specific settings (ie Windows or Unix format used for 'file://')
+      Enable resource filters as a workaround to the issue of accidentally uploading Credential details on the test
+      files. Using filters is also a good way to avoid overwriting another developers desktop specific settings (ie
+      Windows or Unix format used for 'file://')
     -->
     <filters>
       <filter>src/test/filters/filter.properties</filter>
@@ -163,12 +193,11 @@
       </plugin>
 
       <!--
-        Allows us to enable this project as a WTP Eclipse project. There is currently no
-        other way of specifying context-root from within maven. You'll always have to go
-        to Project's Properties -> Web Project Settings and manually specifying the context
-        root to "/whatever-you-like". This is only needed if you want to use Tomcat server
-        running inside Eclipse.
-       -->
+        Allows us to enable this project as a WTP Eclipse project. There is currently no other way of specifying
+        context-root from within maven. You'll always have to go to Project's Properties -> Web Project Settings and
+        manually specifying the context root to "/whatever-you-like". This is only needed if you want to use Tomcat
+        server running inside Eclipse.
+      -->
       <plugin>
         <artifactId>maven-eclipse-plugin</artifactId>
         <configuration>

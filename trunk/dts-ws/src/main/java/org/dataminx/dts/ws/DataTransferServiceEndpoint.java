@@ -39,9 +39,9 @@ public class DataTransferServiceEndpoint {
      */
     @PayloadRoot(localPart = "submitJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/07/messages")
     public SubmitJobResponseDocument doit(SubmitJobRequestDocument request) {
+        LOGGER.debug("DataTransferServiceEndpoint doit(SubmitJobRequest)");
         String jobResourceKey = mDataTransferService.submitJob(request);
-        LOGGER.debug("In DataTransferServiceEndpoint.doit(SubmitJobRequest), returned jobResourceKey is "
-            + jobResourceKey);
+        LOGGER.info("New job '" + jobResourceKey + "' created.");
 
         SubmitJobResponseDocument response = SubmitJobResponseDocument.Factory.newInstance();
         response.addNewSubmitJobResponse().setJobResourceKey(jobResourceKey);
@@ -55,6 +55,7 @@ public class DataTransferServiceEndpoint {
      */
     @PayloadRoot(localPart = "cancelJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/07/messages")
     public void doit(CancelJobRequestDocument request) {
+        LOGGER.debug("DataTransferServiceEndpoint doit(CancelJobRequest)");
         mDataTransferService.cancelJob(request);
     }
 
@@ -65,6 +66,7 @@ public class DataTransferServiceEndpoint {
      */
     @PayloadRoot(localPart = "suspendJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/07/messages")
     public void doit(SuspendJobRequestDocument request) {
+        LOGGER.debug("DataTransferServiceEndpoint doit(SuspendJobRequest)");
         mDataTransferService.suspendJob(request);
     }
 
@@ -75,6 +77,7 @@ public class DataTransferServiceEndpoint {
      */
     @PayloadRoot(localPart = "resumeJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/07/messages")
     public void doit(ResumeJobRequestDocument request) {
+        LOGGER.debug("DataTransferServiceEndpoint doit(ResumeJobRequest)");
         mDataTransferService.resumeJob(request);
     }
 
@@ -86,8 +89,8 @@ public class DataTransferServiceEndpoint {
      */
     @PayloadRoot(localPart = "getJobStatusRequest", namespace = "http://schemas.dataminx.org/dts/2009/05/dts")
     public GetJobStatusResponseDocument doit(GetJobStatusRequestDocument request) {
+        LOGGER.debug("DataTransferServiceEndpoint doit(GetJobStatusRequest)");
         String status = mDataTransferService.getJobStatus(request);
-
         GetJobStatusResponseDocument response = GetJobStatusResponseDocument.Factory.newInstance();
         response.getGetJobStatusResponse().getState().setValue(StatusValueType.Enum.forString(status));
         return response;

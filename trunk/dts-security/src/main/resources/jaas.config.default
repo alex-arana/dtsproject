@@ -1,3 +1,7 @@
 DtsPortal {
     org.dataminx.dts.security.auth.module.MyProxyLoginModule required myproxy.host="myproxy2.arcs.org.au" myproxy.port="7512" myproxy.lifetime="600";
 };
+DtsWebService {
+    org.dataminx.dts.security.auth.module.MyProxyLoginModule required myproxy.host="myproxy2.arcs.org.au" myproxy.port="7512" myproxy.lifetime="600";
+};
+

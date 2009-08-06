@@ -5,9 +5,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.UUID;
-
 import javax.xml.transform.Result;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.common.util.JobContentValidator;
@@ -60,7 +58,8 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     public String submitJob(SubmitJobRequestDocument submitJobRequest) {
         String jobName = submitJobRequest.getSubmitJobRequest()
             .getJobDefinition().getJobDescription().getJobIdentification().getJobName();
-        LOGGER.debug("In DataTransferServiceImpl.submitJob, running job " + jobName + "... ");
+        LOGGER.debug("DataTransferServiceImpl submitJob()");
+        LOGGER.debug("Running job: " + jobName);
 
         // we'll assume that once we get to this point, the job definition that the user
         // submitted is valid (in XML terms) or conforms to the schema
@@ -80,6 +79,8 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         newJob.setName(jobName);
         newJob.setResourceKey(newJobResourceKey);
         newJob.setStatus(JobStatus.CREATED);
+
+        // TODO: how do we get the user details?
         newJob.setSubjectName("NEW_USER");
         newJob.setCreationTime(new Date());
         try {
@@ -105,6 +106,7 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
             throw new DtsJobDefinitionException(e.fillInStackTrace());
         }
 
+        // TODO: filter out the credential info from the logs using the one that WN uses
         LOGGER.debug(result.toString());
         mMessageSender.doSend(newJobResourceKey, result.toString());
 
@@ -117,7 +119,8 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     public void cancelJob(CancelJobRequestDocument cancelJobRequest) {
         String jobResourceKey = cancelJobRequest.getCancelJobRequest().getJobResourceKey();
 
-        LOGGER.debug("In DataTransferServiceImpl.cancelJob, cancelling job " + jobResourceKey + "... ");
+        LOGGER.debug("DataTransferServiceImpl cancelJob()");
+        LOGGER.debug("Cancelling job: " + jobResourceKey);
 
         // TODO: let's send a cancel message via JMS to the worker node
 
@@ -134,7 +137,8 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     public void suspendJob(SuspendJobRequestDocument suspendJobRequest) {
         String jobResourceKey = suspendJobRequest.getSuspendJobRequest().getJobResourceKey();
 
-        LOGGER.debug("In DataTransferServiceImpl.suspendJob, suspending job " + jobResourceKey + "... ");
+        LOGGER.debug("DataTransferServiceImpl suspendJob()");
+        LOGGER.debug("Suspending job: " + jobResourceKey);
 
         // after that, let's update the status of this job..
         Job job = mJobRepository.findByResourceKey(jobResourceKey);
@@ -150,7 +154,8 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     public void resumeJob(ResumeJobRequestDocument resumeJobRequest) {
         String jobResourceKey = resumeJobRequest.getResumeJobRequest().getJobResourceKey();
 
-        LOGGER.debug("In DataTransferServiceImpl.resumeJob, resuming job " + jobResourceKey + "... ");
+        LOGGER.debug("DataTransferServiceImpl resumeJob()");
+        LOGGER.debug("Resuming job " + jobResourceKey);
 
         // after that, let's update the status of this job..
         Job job = mJobRepository.findByResourceKey(jobResourceKey);
@@ -165,7 +170,8 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
      */
     public String getJobStatus(GetJobStatusRequestDocument getJobStatusRequest) {
         String jobResourceKey = getJobStatusRequest.getGetJobStatusRequest().getJobResourceKey();
-        LOGGER.debug("In DataTransferServiceImpl.cancelJob, getting job status for " + jobResourceKey  + "... ");
+        LOGGER.debug("DataTransferServiceImpl getJobStatus()");
+        LOGGER.debug("Getting job status of job " + jobResourceKey);
 
         // TODO: need to get this info from the DB.. part of this code need to have the smarts
         // to figure out which status the job is on based on the timing details provided

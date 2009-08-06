@@ -1,6 +1,6 @@
 package org.dataminx.dts.client;
 
-import org.w3c.dom.Document;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 
 /**
  * The Data Transfer Service WS Client.
@@ -15,7 +15,7 @@ public interface DataTransferServiceClient {
      * @param dtsJob the DTS Job definition
      * @return the Universally Unique Identifier for the submitted job
      */
-    String submitJob(Document dtsJob);
+    String submitJob(JobDefinitionDocument dtsJob);
 
     /**
      * Cancel the job.
