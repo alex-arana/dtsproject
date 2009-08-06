@@ -63,6 +63,13 @@ public class JobContentValidator {
             if (StringUtils.isBlank(target.getURI())) {
                 errorMessages.append("  Empty TargetURI.\n");
             }
+            // TODO: uncomment this block once testing phase is finished
+            /*if (source.getURI().startsWith("file://")) {
+                errorMessages.append("  Unsupported transfer protocol on SourceURI.\n");
+            }
+            if (target.getURI().startsWith("file://")) {
+                errorMessages.append("  Unsupported transfer protocol on TargetURI.\n");
+            }*/
             passwordExistsInUsernameToken(source, errorMessages);
             passwordExistsInUsernameToken(target, errorMessages);
         }

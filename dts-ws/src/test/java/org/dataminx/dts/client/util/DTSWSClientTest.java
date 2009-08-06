@@ -1,10 +1,10 @@
 package org.dataminx.dts.client.util;
 
 import java.io.File;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import junit.framework.Assert;
 import org.dataminx.dts.client.DataTransferServiceClient;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.w3c.dom.Document;
 
 /**
  * The Unit Test for the integrated DTS WS, DTS Domain, and DTS Worker Node modules.
@@ -28,7 +27,7 @@ public class DTSWSClientTest {
     private DataTransferServiceClient mClient;
 
     /** The DTS Job XML document. */
-    private Document mDtsJob;
+    private JobDefinitionDocument mDtsJob;
 
     /**
      * Parses the test job and convert to a org.w3c.dom.Document object
@@ -39,8 +38,8 @@ public class DTSWSClientTest {
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 
         File f = new ClassPathResource("ws-minx-dts.xml").getFile();
-        DocumentBuilder builder = docFactory.newDocumentBuilder();
-        mDtsJob = builder.parse(f);
+        mDtsJob = JobDefinitionDocument.Factory.parse(f);
+        Assert.assertNotNull(mDtsJob);
     }
 
     /**
