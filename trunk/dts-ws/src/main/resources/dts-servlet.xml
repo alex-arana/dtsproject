@@ -40,7 +40,9 @@
     <property name="interceptors">
       <list>
         <ref local="loggingInterceptor" />
-        <ref local="wsSecurityInterceptor" />
+        <!-- TODO: need to look into why I couldn't get the two interceptors together -->
+        <!-- <ref local="wsSecurityInterceptor" />-->
+        <ref local="dtsJaasCredentialInterceptor" />
       </list>
     </property>
   </bean>
@@ -69,6 +71,10 @@
   </bean>
 
   <bean id="jaasValidationHandler" class="org.springframework.ws.soap.security.xwss.callback.jaas.JaasPlainTextPasswordValidationCallbackHandler">
+    <property name="loginContextName" value="DtsWebService" />
+  </bean>
+
+  <bean id="dtsJaasCredentialInterceptor" class="org.dataminx.dts.ws.interceptor.DtsJaasCredentialInterceptor">
     <property name="loginContextName" value="DtsWebService" />
   </bean>
 
@@ -120,8 +126,8 @@
     <property name="defaultFault" value="SERVER" />
     <property name="exceptionMappings">
       <props>
-        <prop key="org.springframework.oxm.UnmarshallingFailureException">CLIENT,Invalid request3</prop>
-        <prop key="org.springframework.oxm.ValidationFailureException">CLIENT,Invalid request4</prop>
+        <prop key="org.springframework.oxm.UnmarshallingFailureException">CLIENT,Invalid request</prop>
+        <prop key="org.springframework.oxm.ValidationFailureException">CLIENT,Invalid request</prop>
       </props>
     </property>
     <property name="order" value="2" />

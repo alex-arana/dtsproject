@@ -1,7 +1,6 @@
 package org.dataminx.dts.common.util;
 
 import javax.xml.namespace.QName;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.ws.DtsJobDefinitionException;
@@ -49,7 +48,7 @@ public class JobContentValidator {
         }
         catch (ClassCastException e) {
             errorMessages.append("  Plain JobDescriptionType is not supported.");
-            throw new DtsJobDefinitionException("Invalid request1.\n" + errorMessages);
+            throw new DtsJobDefinitionException("Invalid request\n" + errorMessages);
         }
 
         for (int i = 0; i < transfers.length; i++) {
@@ -75,7 +74,7 @@ public class JobContentValidator {
         }
 
         if (errorMessages.length() > 0) {
-            throw new DtsJobDefinitionException("Invalid request2.\n" + errorMessages);
+            throw new DtsJobDefinitionException("Invalid request\n" + errorMessages);
         }
     }
 

@@ -5,6 +5,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.UUID;
+import javax.security.auth.Subject;
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.transform.Result;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,6 +25,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.oxm.xmlbeans.XmlBeansMarshaller;
 import org.springframework.util.Assert;
+import org.springframework.ws.transport.context.TransportContext;
+import org.springframework.ws.transport.context.TransportContextHolder;
+import org.springframework.ws.transport.http.HttpServletConnection;
 import org.springframework.xml.transform.StringResult;
 
 /**
@@ -35,6 +40,8 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
 
     /** The logger. */
     private static final Log LOGGER = LogFactory.getLog(DataTransferServiceImpl.class);
+
+    private static final String CN_EQUALS = "CN=";
 
     /** The submit job message sender. */
     @Autowired
@@ -58,8 +65,21 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     public String submitJob(SubmitJobRequestDocument submitJobRequest) {
         String jobName = submitJobRequest.getSubmitJobRequest()
             .getJobDefinition().getJobDescription().getJobIdentification().getJobName();
+        String subjectName = "NEW_USER";
+
+        TransportContext txContext = TransportContextHolder.getTransportContext();
+        HttpServletConnection connection = (HttpServletConnection) txContext.getConnection();
+        HttpServletRequest request = connection.getHttpServletRequest();
+        Subject subject = (Subject) request.getSession().getAttribute("subject");
+
+        if (subject != null) {
+            String distinguishedName = subject.getPrincipals().toArray()[0].toString();
+            subjectName = distinguishedName.substring(distinguishedName.indexOf(
+                    CN_EQUALS) + CN_EQUALS.length());
+        }
+
         LOGGER.debug("DataTransferServiceImpl submitJob()");
-        LOGGER.debug("Running job: " + jobName);
+        LOGGER.debug("Running job '" + jobName + "' submitted by user '" + subjectName + "'");
 
         // we'll assume that once we get to this point, the job definition that the user
         // submitted is valid (in XML terms) or conforms to the schema
@@ -79,9 +99,7 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         newJob.setName(jobName);
         newJob.setResourceKey(newJobResourceKey);
         newJob.setStatus(JobStatus.CREATED);
-
-        // TODO: how do we get the user details?
-        newJob.setSubjectName("NEW_USER");
+        newJob.setSubjectName(subjectName);
         newJob.setCreationTime(new Date());
         try {
             newJob.setExecutionHost(InetAddress.getLocalHost().getCanonicalHostName());
@@ -108,7 +126,7 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
 
         // TODO: filter out the credential info from the logs using the one that WN uses
         LOGGER.debug(result.toString());
-        mMessageSender.doSend(newJobResourceKey, result.toString());
+        //mMessageSender.doSend(newJobResourceKey, result.toString());
 
         return newJobResourceKey;
     }
