@@ -144,9 +144,15 @@ public class User extends ActionSupport implements SessionAware, ServletRequestA
 
                 Subject subject = loginContext.getSubject();
 
-                // use the first principal entry as this user's commonName
+                // use the first principal entry as this user's distinguishedName and process it to extract commonName
+                // from the DN
+                String distinguishedName = subject.getPrincipals().toArray()[0].toString();
+
+                String commonName = distinguishedName.substring(distinguishedName.indexOf(
+                        CN_EQUALS) + CN_EQUALS.length());
+
                 // commonName will be used from now on as an 'isLoggedIn' sort of attribute
-                mSessionMap.put("commonName", subject.getPrincipals().toArray()[0]);
+                mSessionMap.put("commonName", commonName);
 
                 // we won't be needing loginContext anymore after the last call
                 loginContext.logout();
@@ -158,7 +164,7 @@ public class User extends ActionSupport implements SessionAware, ServletRequestA
                 result = INPUT;
             }
             catch (SecurityException se) {
-                System.err.println("Cannot create LoginContext. " + se.getMessage());
+                LOGGER.debug("Cannot create LoginContext. " + se.getMessage());
                 mSessionMap.put("loginErrorMessage", "The myproxy details you provided might be wrong. Try again.");
                 result = INPUT;
             }

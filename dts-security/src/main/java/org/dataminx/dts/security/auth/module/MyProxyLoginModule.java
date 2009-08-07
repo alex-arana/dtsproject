@@ -24,9 +24,6 @@ public class MyProxyLoginModule implements LoginModule {
     /** The logger. */
     private static final Log LOGGER = LogFactory.getLog(MyProxyLoginModule.class);
 
-    /** A string that will be used to find the actual Common Name value in a Distinguished Name. */
-    private static final String CN_EQUALS = "CN=";
-
     private CallbackHandler mCallbackHandler;
     private Subject mSubject;
     private Map<String, ?> mSharedState;
@@ -210,13 +207,11 @@ public class MyProxyLoginModule implements LoginModule {
             // we'll not worry about authorisation for now since that's one complicated thing that needs thinking of.
             // just work on authentication first.
 
-            // at this point, we know that we've successfully authenticated. get the subject's details (ie CN)
+            // at this point, we know that we've successfully authenticated. get the subject's details (ie DN)
             String distinguishedName = credential.getName().toString();
-            commonName = distinguishedName.substring(distinguishedName.indexOf(
-                CN_EQUALS) + CN_EQUALS.length());
 
-            mTempPrincipals.add(new MyProxyPrincipal(commonName));
-            LOGGER.info(String.format("User '%s' successfully logged in", commonName));
+            mTempPrincipals.add(new MyProxyPrincipal(distinguishedName));
+            LOGGER.info(String.format("User '%s' successfully logged in", distinguishedName));
 
             // TODO: check if disposing this credential will still let us download a proxy credential later on
             hasSuccessfullyAuthenticated = true;
