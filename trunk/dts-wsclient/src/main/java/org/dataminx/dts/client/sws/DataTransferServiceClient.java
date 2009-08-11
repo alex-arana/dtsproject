@@ -1,6 +1,7 @@
-package org.dataminx.dts.client;
+package org.dataminx.dts.client.sws;
 
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.springframework.ws.client.core.WebServiceMessageCallback;
 
 /**
  * The Data Transfer Service WS Client.
@@ -46,4 +47,12 @@ public interface DataTransferServiceClient {
      * @return the job status
      */
     String getJobStatus(String jobResourceKey);
+
+
+    /**
+     * Sets the web service message callback if further processing is required on the web service message.
+     *
+     * @param wsMessageCallback the web service message callback
+     */
+    void setWebServiceMessageCallback(WebServiceMessageCallback wsMessageCallback);
 }

@@ -12,6 +12,6 @@
 </head>
 <body>
   <h3>DTS Job Details</h3>
-  Job Name: <s:property value="jobName"/>
+  Job Id: <s:property value="jobResourceKey"/>
 </body>
 </html>

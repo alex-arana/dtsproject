@@ -60,7 +60,7 @@ public class DtsJaasCredentialInterceptor implements EndpointInterceptor {
     private LoginContext loginContext;
 
     /**
-     * Logs the {@link LoginContext} if it exists.
+     * Logs out the {@link LoginContext} if it exists.
      *
      * @param messageContext contains both request and response messages
      * @param endpoint the chosen endpoint to invoke
@@ -154,7 +154,7 @@ public class DtsJaasCredentialInterceptor implements EndpointInterceptor {
     }
 
     /**
-     * Logs the {@link LoginContext} if it exists.
+     * Logs out the {@link LoginContext} if it exists.
      *
      * @param messageContext contains both request and response messages
      * @param endpoint the chosen endpoint to invoke

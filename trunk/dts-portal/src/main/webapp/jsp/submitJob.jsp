@@ -14,15 +14,15 @@
   <h3>DTS Job Form</h3>
   Please fill in the job form:
   <s:form action="DtsJob_submit">
-      <s:textfield name="jobName" label="Job Name"/>
+      <s:textfield name="name" label="Job Name" value="testjob"/>
 
-      <s:textfield name="srcUri" label="Source URI"/>
-      <s:textfield name="srcCredUsername" label="Source Credential Username"/>
-      <s:textfield name="srcCredPassword" label="Source Credential Password"/>
+      <s:textfield name="sourceUri" label="Source URI" value="gsiftp://ng2.vpac.org/etc/termcap" size="50"/>
+      <s:textfield name="sourceCredUsername" label="Source Credential Username"/>
+      <s:password name="sourceCredPassword" label="Source Credential Password"/>
 
-      <s:textfield name="targetUri" label="Target URI"/>
+      <s:textfield name="targetUri" label="Target URI" value="ftp://dm11.intersect.org.au/upload/termcap-from-ng2.xml" size="50"/>
       <s:textfield name="targetCredUsername" label="Target Credential Username"/>
-      <s:textfield name="targetCredPassword" label="Target Credential Password"/>
+      <s:password name="targetCredPassword" label="Target Credential Password"/>
       <s:submit />
     </s:form>
     <a href="DtsJob_back.action">back</a>

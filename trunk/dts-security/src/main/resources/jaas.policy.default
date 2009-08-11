@@ -1,0 +1,5 @@
+grant {
+    permission javax.security.auth.PrivateCredentialPermission
+            "org.dataminx.dts.security.auth.module.MyProxyCredential org.dataminx.dts.security.auth.module.MyProxyPrincipal "*"",
+            "read";
+};

@@ -7,10 +7,40 @@
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
+  <bean id="dataTransferServiceClient" class="org.dataminx.dts.client.sws.DataTransferServiceClientImpl">
+    <property name="webServiceTemplate" ref="webServiceTemplate" />
+  </bean>
 
-    <bean id="userAction" class="org.dataminx.dts.portal.User" scope="prototype"/>
-    <bean id="jobAction" class="org.dataminx.dts.portal.Job" scope="prototype"/>
-    <bean id="dtsMenuAction" class="org.dataminx.dts.portal.Menu" scope="prototype"/>
+
+  <bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">
+    <property name="messageFactory">
+      <bean class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory" />
+    </property>
+    <property name="defaultUri" value="http://localhost:8080/dts-ws/" />
+    <property name="messageSender" ref="messageSender" />
+    <property name="marshaller" ref="marshaller" />
+    <property name="unmarshaller" ref="marshaller" />
+  </bean>
+
+  <bean id="messageSender" class="org.springframework.ws.transport.http.HttpUrlConnectionMessageSender">
+  </bean>
+
+  <bean id="marshaller" class="org.springframework.oxm.xmlbeans.XmlBeansMarshaller">
+    <property name="validating" value="false" />
+    <property name="xmlOptions">
+      <bean class="org.apache.xmlbeans.XmlOptionsBean">
+        <property name="savePrettyPrint" value="true" />
+        <property name="saveNamespacesFirst" value="true" />
+      </bean>
+    </property>
+  </bean>
+
+
+  <bean id="userAction" class="org.dataminx.dts.portal.User" scope="prototype"/>
+  <bean id="jobAction" class="org.dataminx.dts.portal.Job" scope="prototype">
+    <property name="dataTransferServiceClient" ref="dataTransferServiceClient"/>
+  </bean>
+  <bean id="dtsMenuAction" class="org.dataminx.dts.portal.Menu" scope="prototype"/>
 
 </beans>
 

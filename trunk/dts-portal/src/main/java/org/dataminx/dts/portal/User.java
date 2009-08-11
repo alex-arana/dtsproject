@@ -1,5 +1,7 @@
 package org.dataminx.dts.portal;
 
+import static org.dataminx.dts.portal.util.PageValidator.isRefererProvided;
+
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.StringLengthFieldValidator;
@@ -19,6 +21,7 @@ import org.apache.struts2.interceptor.ServletResponseAware;
 import org.apache.struts2.interceptor.SessionAware;
 import org.apache.struts2.util.ServletContextAware;
 import org.dataminx.dts.security.auth.callback.PassiveCallbackHandler;
+import org.dataminx.dts.security.auth.module.MyProxyPrincipal;
 
 /**
  * The User Action class handles the portal's user authentication.
@@ -134,8 +137,7 @@ public class User extends ActionSupport implements SessionAware, ServletRequestA
         String result = SUCCESS;
 
         // make sure no one is accessing this page directly
-        String referer = mServletRequest.getHeader("referer");
-        if (referer != null) {
+        if (isRefererProvided(mServletRequest)) {
 
             try {
                 PassiveCallbackHandler callbackHandler = new PassiveCallbackHandler(mUsername, mPassword);
@@ -146,16 +148,18 @@ public class User extends ActionSupport implements SessionAware, ServletRequestA
 
                 // use the first principal entry as this user's distinguishedName and process it to extract commonName
                 // from the DN
-                String distinguishedName = subject.getPrincipals().toArray()[0].toString();
-
-                String commonName = distinguishedName.substring(distinguishedName.indexOf(
+                String distinguishedName = subject.getPrincipals(MyProxyPrincipal.class).toArray()[0].toString();
+                LOGGER.debug("User with DN: '" + distinguishedName  + "' logging in.");
+                String commonName = distinguishedName;
+                if (distinguishedName.indexOf(CN_EQUALS) > 0) {
+                    distinguishedName.substring(distinguishedName.indexOf(
                         CN_EQUALS) + CN_EQUALS.length());
+                }
 
                 // commonName will be used from now on as an 'isLoggedIn' sort of attribute
                 mSessionMap.put("commonName", commonName);
+                mSessionMap.put("loginContext", loginContext);
 
-                // we won't be needing loginContext anymore after the last call
-                loginContext.logout();
 
             }
             catch (LoginException le) {
@@ -183,6 +187,18 @@ public class User extends ActionSupport implements SessionAware, ServletRequestA
      * @return the result
      */
     public String logout() {
+        if (mSessionMap.get("loginContext") != null) {
+            LOGGER.debug("logging out loginContext");
+            LoginContext loginContext = (LoginContext) mSessionMap.get("loginContext");
+            // we won't be needing loginContext anymore after the last call
+            try {
+                loginContext.logout();
+            } catch (LoginException e) {
+                LOGGER.warn("Cannot logout LoginContext. " + e.getMessage());
+            }
+        }
+
+
         if (mSessionMap.get("commonName") != null) {
             LOGGER.info(String.format("User '%s' logging out",
                     mSessionMap.get("commonName").toString()));
