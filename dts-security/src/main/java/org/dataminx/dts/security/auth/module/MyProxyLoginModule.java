@@ -44,12 +44,15 @@ public class MyProxyLoginModule implements LoginModule {
     private boolean mSuccess;
 
     /** Temporary holder of Principal objects. */
-    private List<Principal> mTempPrincipals;
+    private List<MyProxyPrincipal> mTempPrincipals;
+
+    private List<MyProxyCredential> mTempCredentials;
 
     public MyProxyLoginModule() {
         LOGGER.debug("MyProxyLoginModule constructor");
         mSuccess = false;
-        mTempPrincipals = new ArrayList<Principal>();
+        mTempPrincipals = new ArrayList<MyProxyPrincipal>();
+        mTempCredentials = new ArrayList<MyProxyCredential>();
     }
 
     /**
@@ -90,6 +93,10 @@ public class MyProxyLoginModule implements LoginModule {
 
                 mSubject.getPrincipals().addAll(mTempPrincipals);
                 mTempPrincipals.clear();
+                LOGGER.debug("see if we are allowed to edit the private credential?");
+                mSubject.getPrivateCredentials().addAll(mTempCredentials);
+                LOGGER.debug("yes we are allowed to edit the private credential!");
+                mTempCredentials.clear();
 
                 if(mCallbackHandler instanceof PassiveCallbackHandler)
                     ((PassiveCallbackHandler)mCallbackHandler).clearPassword();
@@ -101,6 +108,7 @@ public class MyProxyLoginModule implements LoginModule {
             }
         } else {
             mTempPrincipals.clear();
+            mTempCredentials.clear();
             return true;
         }
     }
@@ -189,6 +197,13 @@ public class MyProxyLoginModule implements LoginModule {
             mSubject.getPrincipals().remove(p);
         }
 
+        // remove the MyProxyCredentials the login module added
+        for (MyProxyCredential c : mSubject.getPrivateCredentials(MyProxyCredential.class)) {
+            LOGGER.debug("removing myproxy credential");
+            c.clearCredential();
+            mSubject.getPrivateCredentials().remove(c);
+        }
+
         return true;
     }
 
@@ -204,6 +219,11 @@ public class MyProxyLoginModule implements LoginModule {
                     mMyProxyHost,
                     mMyProxyPort));
 
+            MyProxyCredential myProxyCredential = new MyProxyCredential();
+            myProxyCredential.setUsername(username);
+            myProxyCredential.setPassword(password);
+            myProxyCredential.setGssCredential(credential);
+
             // we'll not worry about authorisation for now since that's one complicated thing that needs thinking of.
             // just work on authentication first.
 
@@ -212,6 +232,10 @@ public class MyProxyLoginModule implements LoginModule {
 
             mTempPrincipals.add(new MyProxyPrincipal(distinguishedName));
             LOGGER.info(String.format("User '%s' successfully logged in", distinguishedName));
+
+            // TODO: figure out how I can control access to the private credential
+            // use jaas.policy perhaps?
+            mTempCredentials.add(myProxyCredential);
 
             // TODO: check if disposing this credential will still let us download a proxy credential later on
             hasSuccessfullyAuthenticated = true;

@@ -7,10 +7,14 @@
                         http://www.springframework.org/schema/context
                         http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
-  <bean id="dataTransferServiceClient" class="org.dataminx.dts.client.SecuredDataTransferServiceClientImpl">
+  <bean id="dataTransferServiceClient" class="org.dataminx.dts.client.sws.DataTransferServiceClientImpl">
+    <property name="webServiceTemplate" ref="webServiceTemplate" />
+    <property name="webServiceMessageCallback" ref="dtsWsUsernameAuthenticationCallBack" />
+  </bean>
+
+  <bean id="dtsWsUsernameAuthenticationCallBack" class="org.dataminx.dts.client.sws.security.DtsWsUsernameAuthenticationCallback">
     <constructor-arg index="0" value="${myproxy.username}" />
     <constructor-arg index="1" value="${myproxy.password}" />
-    <property name="webServiceTemplate" ref="webServiceTemplate" />
   </bean>
 
   <bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">

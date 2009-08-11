@@ -1,4 +1,4 @@
-package org.dataminx.dts.ws.security;
+package org.dataminx.dts.client.sws.security;
 
 import java.io.IOException;
 import javax.xml.soap.Name;
@@ -134,7 +134,7 @@ public class DtsWsUsernameAuthenticationCallback implements WebServiceMessageCal
             userNameSOAPElement.addTextNode(mUsername);
 
             // Add password to usernameToken
-            SOAPElement    passwordSOAPElement = usernameTokenSOAPElement.addChildElement(
+            SOAPElement passwordSOAPElement = usernameTokenSOAPElement.addChildElement(
                 "Password",
                 WSSE_PREFIX,
                 WSSE_NAMESPACE);

@@ -1,4 +1,4 @@
-package org.dataminx.dts.client;
+package org.dataminx.dts.client.sws;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,6 +15,7 @@ import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument.Resu
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.dataminx.schemas.dts.x2009.x07.messages.SuspendJobRequestDocument.SuspendJobRequest;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.springframework.ws.client.core.WebServiceMessageCallback;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
 /**
@@ -29,6 +30,9 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
 
     /** The Spring-WS web service template. */
     private WebServiceTemplate mWebServiceTemplate;
+
+    /** The message callback to use if provided. */
+    private WebServiceMessageCallback mWsMessageCallback;
 
     /**
      * Instantiates a new data transfer service client impl.
@@ -50,8 +54,15 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
         LOGGER.debug("request payload:\n" + request);
 
         // do the actual WS call here...
-        SubmitJobResponseDocument response =
-            (SubmitJobResponseDocument) mWebServiceTemplate.marshalSendAndReceive(request);
+        SubmitJobResponseDocument response = null;
+        if (mWsMessageCallback != null) {
+            // do authenticated connection to the WS
+            response =
+                (SubmitJobResponseDocument) mWebServiceTemplate.marshalSendAndReceive(request, mWsMessageCallback);
+        }
+        else {
+            response = (SubmitJobResponseDocument) mWebServiceTemplate.marshalSendAndReceive(request);
+        }
 
         LOGGER.debug("response payload:\n" + response);
 
@@ -68,7 +79,13 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
 
         // TODO: will this really not return anything back? how about just a confirmation that cancelJobRequest
         // was successful?
-        mWebServiceTemplate.marshalSendAndReceive(request);
+        if (mWsMessageCallback != null) {
+            // do authenticated connection to the WS
+            mWebServiceTemplate.marshalSendAndReceive(request, mWsMessageCallback);
+        }
+        else {
+            mWebServiceTemplate.marshalSendAndReceive(request);
+        }
     }
 
     /**
@@ -81,7 +98,13 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
 
         // TODO: will this really not return anything back? how about just a confirmation that suspendJobRequest
         // was successful?
-        mWebServiceTemplate.marshalSendAndReceive(request);
+        if (mWsMessageCallback != null) {
+            // do authenticated connection to the WS
+            mWebServiceTemplate.marshalSendAndReceive(request, mWsMessageCallback);
+        }
+        else {
+            mWebServiceTemplate.marshalSendAndReceive(request);
+        }
     }
 
     /**
@@ -94,7 +117,13 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
 
         // TODO: will this really not return anything back? how about just a confirmation that resumeJobRequest
         // was successful?
-        mWebServiceTemplate.marshalSendAndReceive(request);
+        if (mWsMessageCallback != null) {
+            // do authenticated connection to the WS
+            mWebServiceTemplate.marshalSendAndReceive(request, mWsMessageCallback);
+        }
+        else {
+            mWebServiceTemplate.marshalSendAndReceive(request);
+        }
     }
 
     /**
@@ -106,8 +135,15 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
         getJobStatusRequest.setJobResourceKey(jobResourceKey);
 
         // do the actual WS call here...
-        GetJobStatusResponseDocument response =
-            (GetJobStatusResponseDocument) mWebServiceTemplate.marshalSendAndReceive(request);
+        GetJobStatusResponseDocument response = null;
+        if (mWsMessageCallback != null) {
+            // do authenticated connection to the WS
+            response =
+                (GetJobStatusResponseDocument) mWebServiceTemplate.marshalSendAndReceive(request, mWsMessageCallback);
+        }
+        else {
+            response = (GetJobStatusResponseDocument) mWebServiceTemplate.marshalSendAndReceive(request);
+        }
 
         LOGGER.debug("response payload:\n" + response);
 
@@ -121,6 +157,11 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
      */
     public void setWebServiceTemplate(WebServiceTemplate webServiceTemplate) {
         mWebServiceTemplate = webServiceTemplate;
+    }
+
+
+    public void setWebServiceMessageCallback(WebServiceMessageCallback wsMessageCallback) {
+        mWsMessageCallback = wsMessageCallback;
     }
 
 }

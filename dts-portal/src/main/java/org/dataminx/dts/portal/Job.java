@@ -1,16 +1,38 @@
 package org.dataminx.dts.portal;
 
+import static org.dataminx.dts.portal.util.PageValidator.isRefererProvided;
+import static org.dataminx.dts.portal.util.PageValidator.isUserLoggedIn;
+
 import com.opensymphony.xwork2.ActionSupport;
+import java.io.File;
 import java.util.Map;
+import javax.security.auth.Subject;
+import javax.security.auth.login.LoginContext;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.interceptor.ServletResponseAware;
 import org.apache.struts2.interceptor.SessionAware;
 import org.apache.struts2.util.ServletContextAware;
+import org.apache.xmlbeans.XmlObject;
+import org.dataminx.dts.client.sws.DataTransferServiceClient;
+import org.dataminx.dts.client.sws.security.DtsWsUsernameAuthenticationCallback;
+import org.dataminx.dts.security.auth.module.MyProxyCredential;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxSourceTargetType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MyProxyTokenDocument;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MyProxyTokenType;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.oasisOpen.docs.wss.x2004.x01.oasis200401WssWssecuritySecext10.UsernameTokenDocument;
+import org.oasisOpen.docs.wss.x2004.x01.oasis200401WssWssecuritySecext10.UsernameTokenType;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.ws.client.core.WebServiceMessageCallback;
 
 /**
  * The Data Transfer Job Action class.
@@ -23,6 +45,11 @@ public class Job extends ActionSupport implements SessionAware, ServletRequestAw
     /** The logger. */
     private static final Log LOGGER = LogFactory.getLog(Job.class);
 
+    /** The PasswordString's QName. */
+    private static final QName PASSWORD_STRING_QNAME = new QName(
+            "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "PasswordString");
+
+
     /** The job name. */
     private String mName;
 
@@ -34,6 +61,14 @@ public class Job extends ActionSupport implements SessionAware, ServletRequestAw
 
     /** The target URI. */
     private String mTargetUri;
+
+    private String mSourceCredUsername;
+    private String mSourceCredPassword;
+
+    private String mTargetCredUsername;
+    private String mTargetCredPassword;
+
+    private DataTransferServiceClient mDtsClient;
 
     /** The auto injected HTTP session object. */
     private Map mSessionMap;
@@ -143,6 +178,10 @@ public class Job extends ActionSupport implements SessionAware, ServletRequestAw
         return mTargetUri;
     }
 
+    public void setDataTransferServiceClient(DataTransferServiceClient dtsClient) {
+        mDtsClient = dtsClient;
+    }
+
     /**
      * Sets the target uri.
      *
@@ -152,14 +191,109 @@ public class Job extends ActionSupport implements SessionAware, ServletRequestAw
         mTargetUri = targetUri;
     }
 
+    public String getSourceCredUsername() {
+        return mSourceCredUsername;
+    }
+
+    public void setSourceCredUsername(String sourceCredUsername) {
+        mSourceCredUsername = sourceCredUsername;
+    }
+
+    public String getSourceCredPassword() {
+        return mSourceCredPassword;
+    }
+
+    public void setSourceCredPassword(String sourceCredPassword) {
+        mSourceCredPassword = sourceCredPassword;
+    }
+
+    public String getTargetCredUsername() {
+        return mTargetCredUsername;
+    }
+
+    public void setTargetCredUsername(String targetCredUsername) {
+        mTargetCredUsername = targetCredUsername;
+    }
+
+    public String getTargetCredPassword() {
+        return mTargetCredPassword;
+    }
+
+    public void setTargetCredPassword(String targetCredPassword) {
+        mTargetCredPassword = targetCredPassword;
+    }
+
     /**
      * Submits the Data Transfer Job.
      *
      * @return the result
      */
     public String submit() {
+        LOGGER.debug("Job submit()");
 
-        return SUCCESS;
+        String result = SUCCESS;
+
+        // make sure no one is accessing this page directly
+        if (isRefererProvided(mServletRequest) && isUserLoggedIn(mSessionMap)) {
+            JobDefinitionDocument dtsJob = getDtsJobTemplate();
+            if (dtsJob == null) {
+                result = ERROR;
+            }
+
+            //  change the name of the job template
+            MinxJobDescriptionType minxJobDescription =
+                (MinxJobDescriptionType) dtsJob.getJobDefinition().getJobDescription();
+
+            minxJobDescription.getJobIdentification().setJobName(mName);
+
+            if (mSourceCredPassword.length() > 0) {
+                minxJobDescription.getDataTransferArray(0).setSource(
+                    getSourceTargetType(mSourceUri, mSourceCredUsername, mSourceCredPassword));
+            }
+            else {
+                minxJobDescription.getDataTransferArray(0).getSource().setURI(mSourceUri);
+            }
+            if (mTargetCredPassword.length() > 0) {
+                minxJobDescription.getDataTransferArray(0).setTarget(
+                    getSourceTargetType(mTargetUri, mTargetCredUsername, mTargetCredPassword));
+            }
+            else {
+                minxJobDescription.getDataTransferArray(0).getTarget().setURI(mTargetUri);
+            }
+
+            // TODO: remove this debug line later on
+            LOGGER.debug("DtsJob:\n" + dtsJob);
+
+            LoginContext loginContext = (LoginContext) mSessionMap.get("loginContext");
+            Subject subject = loginContext.getSubject();
+
+            MyProxyCredential myProxyCredential = (MyProxyCredential)
+                subject.getPrivateCredentials(MyProxyCredential.class).toArray()[0];
+
+            String username = myProxyCredential.getUsername();
+            String password = myProxyCredential.getPassword();
+            LOGGER.debug("username: " + username + "; password: " + password);
+
+            // then submit the job...
+            WebServiceMessageCallback wsMessageCallback = new DtsWsUsernameAuthenticationCallback(
+                    username, password);
+            mDtsClient.setWebServiceMessageCallback(wsMessageCallback);
+
+            // done with loginContext and its attributes, nullify the references to them
+            loginContext = null;
+            subject = null;
+            myProxyCredential = null;
+            username = null;
+            password = null;
+
+            String jobResourceKey = mDtsClient.submitJob(dtsJob);
+            mServletRequest.setAttribute("jobResourceKey", jobResourceKey);
+        }
+        else {
+            LOGGER.error("DtsJob_submit.action is being accessed directly.");
+            result = INPUT;
+        }
+        return result;
     }
 
     /**
@@ -168,7 +302,7 @@ public class Job extends ActionSupport implements SessionAware, ServletRequestAw
      * @return the result
      */
     public String input() {
-        return checkReferer();
+        return checkPageRequirements();
     }
 
     /**
@@ -177,18 +311,18 @@ public class Job extends ActionSupport implements SessionAware, ServletRequestAw
      * @return the result
      */
     public String back() {
-        return checkReferer();
+        return checkPageRequirements();
     }
 
     /**
-     * Checks if a particular action is being accessed directly or referred by another action.
+     * Checks if a particular action is being accessed directly or referred by another action AND if the session hasn't
+     * expired yet.
      *
      * @return the result
      */
-    private String checkReferer() {
+    private String checkPageRequirements() {
         // make sure that anyone accessing this page has successfully authenticated
-        String referer = mServletRequest.getHeader("referer");
-        if (referer != null) {
+        if (isRefererProvided(mServletRequest) && isUserLoggedIn(mSessionMap)) {
             return SUCCESS;
         }
         else {
@@ -197,5 +331,64 @@ public class Job extends ActionSupport implements SessionAware, ServletRequestAw
         }
     }
 
+    private JobDefinitionDocument getDtsJobTemplate() {
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            File f = new ClassPathResource("minx-dts-job-template.xml").getFile();
+            return JobDefinitionDocument.Factory.parse(f);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred while accessing the DTS Job Template: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private UsernameTokenType getUsernameTokenTypeCredentialTemplate() {
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            File f = new ClassPathResource("minx-dts-username-cred-template.xml").getFile();
+            return UsernameTokenDocument.Factory.parse(f).getUsernameToken();
+        } catch (Exception e) {
+            LOGGER.error("Error occurred while accessing the UsernameToken Template: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private MyProxyTokenType getMyProxyTokenTypeCredentialTemplate() {
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            File f = new ClassPathResource("minx-dts-myproxy-cred-template.xml").getFile();
+            return MyProxyTokenDocument.Factory.parse(f).getMyProxyToken();
+        } catch (Exception e) {
+            LOGGER.error("Error occurred while accessing the MyProxyToken Template: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private MinxSourceTargetType getSourceTargetType(String uri, String username, String password) {
+        CredentialType credential = CredentialType.Factory.newInstance();
+
+        MinxSourceTargetType sourceTarget = MinxSourceTargetType.Factory.newInstance();
+        sourceTarget.setURI(uri);
+
+
+        if (uri.startsWith("gsiftp:")) {
+            credential.setMyProxyToken(getMyProxyTokenTypeCredentialTemplate());
+            MyProxyTokenType myProxyToken = credential.getMyProxyToken();
+            myProxyToken.setMyProxyUsername(username);
+            myProxyToken.setMyProxyPassword(password);
+
+        }
+        else if (uri.startsWith("ftp:")) {
+            credential.setUsernameToken(getUsernameTokenTypeCredentialTemplate());
+            UsernameTokenType usernameToken = credential.getUsernameToken();
+            usernameToken.getUsername().setStringValue(username);
+            XmlObject[] passwordString = usernameToken.selectChildren(PASSWORD_STRING_QNAME);
+            passwordString[0].newCursor().setTextValue(password);
+        }
+
+        sourceTarget.setCredential(credential);
+
+        return sourceTarget;
+    }
 
 }

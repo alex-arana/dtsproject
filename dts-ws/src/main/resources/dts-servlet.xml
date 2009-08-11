@@ -40,7 +40,7 @@
     <property name="interceptors">
       <list>
         <ref local="loggingInterceptor" />
-        <!-- TODO: need to look into why I couldn't get the two interceptors together -->
+        <!-- TODO: need to look into why I couldn't get the two interceptors to work together -->
         <!-- <ref local="wsSecurityInterceptor" />-->
         <ref local="dtsJaasCredentialInterceptor" />
       </list>
@@ -74,7 +74,7 @@
     <property name="loginContextName" value="DtsWebService" />
   </bean>
 
-  <bean id="dtsJaasCredentialInterceptor" class="org.dataminx.dts.ws.interceptor.DtsJaasCredentialInterceptor">
+  <bean id="dtsJaasCredentialInterceptor" class="org.dataminx.dts.ws.interceptor.DtsJaasCredentialInterceptor" scope="prototype">
     <property name="loginContextName" value="DtsWebService" />
   </bean>
 
