@@ -30,7 +30,8 @@
     </action>
 
     <action name="DtsJob_submit" class="jobAction" method="submit">
-      <result name="success">/jsp/jobDetails.jsp</result>
+      <result name="success">/jsp/submitJob.jsp</result>
+      <result name="error">/jsp/submitJob.jsp</result>
     </action>
 
     <action name="DtsJob_back" class="jobAction" method="back">

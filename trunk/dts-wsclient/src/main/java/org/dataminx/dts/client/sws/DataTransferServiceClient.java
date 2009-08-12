@@ -14,7 +14,8 @@ public interface DataTransferServiceClient {
      * Submit the DTS Job.
      *
      * @param dtsJob the DTS Job definition
-     * @return the Universally Unique Identifier for the submitted job
+     * @return the Universally Unique Identifier for the submitted job or null if an error occurred during the job
+     * submission
      */
     String submitJob(JobDefinitionDocument dtsJob);
 

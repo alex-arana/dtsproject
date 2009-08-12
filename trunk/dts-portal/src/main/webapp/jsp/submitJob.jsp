@@ -12,7 +12,16 @@
 </head>
 <body>
   <h3>DTS Job Form</h3>
-  Please fill in the job form:
+
+  <s:if test="#request.jobResourceKey != null">
+      Job has been submitted. Please take note the of the job ID below. You'll need it to query for the job
+      that you just submitted.
+      <p/>Job Id: <s:property value="#request.jobResourceKey"/>
+
+      <p/>Submit another job?
+  </s:if>
+
+  <p/>Please fill in the job form:
   <s:form action="DtsJob_submit">
       <s:textfield name="name" label="Job Name" value="testjob"/>
 

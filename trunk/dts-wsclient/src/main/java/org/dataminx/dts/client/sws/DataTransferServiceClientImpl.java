@@ -66,7 +66,9 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
 
         LOGGER.debug("response payload:\n" + response);
 
-        return response.getSubmitJobResponse().getJobResourceKey();
+        if (response != null)
+            return response.getSubmitJobResponse().getJobResourceKey();
+        return null;
     }
 
     /**
