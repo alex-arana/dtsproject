@@ -272,7 +272,6 @@ public class Job extends ActionSupport implements SessionAware, ServletRequestAw
 
             String username = myProxyCredential.getUsername();
             String password = myProxyCredential.getPassword();
-            LOGGER.debug("username: " + username + "; password: " + password);
 
             // then submit the job...
             WebServiceMessageCallback wsMessageCallback = new DtsWsUsernameAuthenticationCallback(
@@ -287,7 +286,10 @@ public class Job extends ActionSupport implements SessionAware, ServletRequestAw
             password = null;
 
             String jobResourceKey = mDtsClient.submitJob(dtsJob);
-            mServletRequest.setAttribute("jobResourceKey", jobResourceKey);
+            
+            // TODO: decide if we are testing for null or catching a SOAPFault
+            if (jobResourceKey != null)
+                mServletRequest.setAttribute("jobResourceKey", jobResourceKey);
         }
         else {
             LOGGER.error("DtsJob_submit.action is being accessed directly.");

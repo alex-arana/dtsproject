@@ -208,12 +208,14 @@ public class MyProxyLoginModule implements LoginModule {
     }
 
     private boolean myproxyAuthenticate(String username, String password) {
-
+        LOGGER.debug("MyProxyLoginModule myproxyAuthenticate");
         MyProxy myProxy = new MyProxy(mMyProxyHost, mMyProxyPort);
         GSSCredential credential = null;
         String commonName = null;
         boolean hasSuccessfullyAuthenticated = false;
         try {
+        	// TODO: remove this debug line later on
+            LOGGER.debug("username: " + username + "; password: " + password);
             credential = myProxy.get(username, password, mMyProxyLifetime);
             LOGGER.info(String.format("Successfully downloaded a proxy credential from myproxy server, '%s:%s'\n",
                     mMyProxyHost,

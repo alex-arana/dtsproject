@@ -152,7 +152,7 @@ public class User extends ActionSupport implements SessionAware, ServletRequestA
                 LOGGER.debug("User with DN: '" + distinguishedName  + "' logging in.");
                 String commonName = distinguishedName;
                 if (distinguishedName.indexOf(CN_EQUALS) > 0) {
-                    distinguishedName.substring(distinguishedName.indexOf(
+                    commonName = distinguishedName.substring(distinguishedName.indexOf(
                         CN_EQUALS) + CN_EQUALS.length());
                 }
 

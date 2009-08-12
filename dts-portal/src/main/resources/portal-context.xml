@@ -16,7 +16,7 @@
     <property name="messageFactory">
       <bean class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory" />
     </property>
-    <property name="defaultUri" value="http://localhost:8080/dts-ws/" />
+    <property name="defaultUri" value="http://localhost:18080/dts-ws/" />
     <property name="messageSender" ref="messageSender" />
     <property name="marshaller" ref="marshaller" />
     <property name="unmarshaller" ref="marshaller" />
