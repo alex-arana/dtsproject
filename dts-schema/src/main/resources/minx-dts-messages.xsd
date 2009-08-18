@@ -1,11 +1,12 @@
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     targetNamespace="http://schemas.dataminx.org/dts/2009/07/messages"
+    xmlns:mdts-msgs="http://schemas.dataminx.org/dts/2009/07/messages"
     xmlns:mjsdl="http://schemas.dataminx.org/dts/2009/07/jsdl"
     xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl"
     xmlns:dmi="http://schemas.ogf.org/dmi/2008/05/dmi"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     elementFormDefault="qualified" version="1">
-    
+
     <!-- Import OGF and MINX schemas -->
     <xsd:import namespace="http://schemas.dataminx.org/dts/2009/07/jsdl"
                 schemaLocation="minx-jsdl.xsd" />
@@ -15,67 +16,195 @@
                 schemaLocation="dmi-redef.xsd" />
 
 
-    <xsd:element name="submitJobRequest">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element name="JobDefinition" type="jsdl:JobDefinition_Type" />
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
-
-    <xsd:element name="submitJobResponse">
-        <xsd:complexType>
-            <xsd:sequence>
-              <xsd:element ref="mjsdl:JobResourceKey" />
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
-
-    <xsd:element name="suspendJobRequest">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element ref="mjsdl:JobResourceKey" />
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
-  
-    <xsd:element name="resumeJobRequest">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element ref="mjsdl:JobResourceKey" />
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
-
-    <xsd:element name="cancelJobRequest">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element ref="mjsdl:JobResourceKey" />
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
-
-
-    <xsd:element name="getJobStatusRequest">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element ref="mjsdl:JobResourceKey" />
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
-
-    <xsd:element name="getJobStatusResponse">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element ref="dmi:State" />
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
-    
-    <!-- 
-        TODO: Define if possible the WSFaults that can be thrown by the WS... 
+    <!--
+      Operation "submitJobDocument"
+      Input:  <jsdl:JobDefinition />
+      Output: <mjsdl:JobResourceKey />
+      Faults: <mdts-msgs:InvalidJobDefinitionFaultType />
+              <mdts-msgs:TransferProtocolNotSupportedFaultType />
+              <mdts-msgs:AuthenticationFaultType />
+              <mdts-msgs:AuthorisationFaultType />
     -->
-    
-    
-    
+    <xsd:element name="submitJobRequest">
+      <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element name="JobDefinition" type="jsdl:JobDefinition_Type" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="submitJobResponse">
+      <xsd:complexType>
+        <xsd:sequence>
+        <xsd:element ref="mjsdl:JobResourceKey" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:element>
+
+
+    <!--
+      Operation "suspendJobDocument"
+      Input:  <mjsdl:JobResourceKey />
+      Output: n/a
+      Faults: <mdts-msgs:AuthenticationFaultType />  TODO: Not sure if this one's needed here
+              <mdts-msgs:AuthorisationFaultType />
+              <mdts-msgs:NonExistentJobFaultType />
+              <mdts-msgs:JobStatusUpdateFaultType />
+    -->
+    <xsd:element name="suspendJobRequest">
+      <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element ref="mjsdl:JobResourceKey" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:element>
+
+    <!--
+      Operation "resumeJobDocument"
+      Input:  <mjsdl:JobResourceKey />
+      Output: n/a
+      Faults: <mdts-msgs:AuthenticationFaultType />  TODO: Not sure if this one's needed here
+              <mdts-msgs:AuthorisationFaultType />
+              <mdts-msgs:NonExistentJobFaultType />
+              <mdts-msgs:JobStatusUpdateFaultType />
+    -->
+    <xsd:element name="resumeJobRequest">
+      <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element ref="mjsdl:JobResourceKey" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:element>
+
+    <!--
+      Operation "cancelJobDocument"
+      Input:  <mjsdl:JobResourceKey />
+      Output: n/a
+      Faults: <mdts-msgs:AuthenticationFaultType />  TODO: Not sure if this one's needed here
+              <mdts-msgs:AuthorisationFaultType />
+              <mdts-msgs:NonExistentJobFaultType />
+              <mdts-msgs:JobStatusUpdateFaultType />
+    -->
+    <xsd:element name="cancelJobRequest">
+      <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element ref="mjsdl:JobResourceKey" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:element>
+
+    <!--
+      Operation "getJobStatusDocument"
+      Input:  <mjsdl:JobResourceKey />
+      Output: <dmi:State />
+      Faults: <mdts-msgs:AuthenticationFaultType />  TODO: Not sure if this one's needed here
+              <mdts-msgs:AuthorisationFaultType />
+              <mdts-msgs:NonExistentJobFaultType />
+    -->
+    <xsd:element name="getJobStatusRequest">
+      <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element ref="mjsdl:JobResourceKey" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="getJobStatusResponse">
+      <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element ref="dmi:State" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:element>
+
+    <!--
+    Type of faults that could be thrown by DTS...
+
+    during job submissions
+    - validation faults
+    - data transfer protocol not supported
+    - authentication to the WS failed
+    - authorisation failure in accessing the remote files (source and/or sink)
+
+    during get job status
+    - authorisation fault
+    - maybe authentication fault?
+    - non existent job
+
+    during job suspend
+    - authorisation fault
+    - maybe authentication fault?
+    - non existent job
+    - job already in suspended state
+
+    during job cancel
+    - authorisation fault
+    - maybe authentication fault?
+    - non existent job
+    - job already done state (not in suspended or running state)
+    -->
+
+    <!-- Common type for all OGSA-DMI specific faults -->
+    <xsd:complexType name="DtsFaultType">
+      <xsd:sequence>
+        <xsd:element name="Message" type="xsd:string"/>
+        <xsd:element name="Timestamp" type="xsd:dateTime"/>
+        <xsd:any namespace="#other" minOccurs="0" maxOccurs="unbounded"/>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- CustomFault message -->
+    <xsd:element name="CustomFault" type="mdts-msgs:CustomFaultType"/>
+    <xsd:complexType name="CustomFaultType">
+      <xsd:complexContent>
+        <xsd:extension base="mdts-msgs:DtsFaultType"/>
+      </xsd:complexContent>
+    </xsd:complexType>
+
+    <!-- InvalidJobDefinitionFault message -->
+    <xsd:element name="InvalidJobDefinitionFault" type="mdts-msgs:InvalidJobDefinitionFaultType"/>
+    <xsd:complexType name="InvalidJobDefinitionFaultType">
+      <xsd:complexContent>
+        <xsd:extension base="mdts-msgs:DtsFaultType"/>
+      </xsd:complexContent>
+    </xsd:complexType>
+
+    <!-- TransferProtocolNotSupportedFault message -->
+    <xsd:element name="TransferProtocolNotSupportedFault" type="mdts-msgs:TransferProtocolNotSupportedFaultType"/>
+    <xsd:complexType name="TransferProtocolNotSupportedFaultType">
+      <xsd:complexContent>
+        <xsd:extension base="mdts-msgs:DtsFaultType"/>
+      </xsd:complexContent>
+    </xsd:complexType>
+
+    <!-- AuthenticationFault message -->
+    <xsd:element name="AuthenticationFault" type="mdts-msgs:AuthenticationFaultType"/>
+    <xsd:complexType name="AuthenticationFaultType">
+      <xsd:complexContent>
+        <xsd:extension base="mdts-msgs:DtsFaultType"/>
+      </xsd:complexContent>
+    </xsd:complexType>
+
+    <!-- AuthorisationFault message -->
+    <xsd:element name="AuthorisationFault" type="mdts-msgs:AuthorisationFaultType"/>
+    <xsd:complexType name="AuthorisationFaultType">
+      <xsd:complexContent>
+        <xsd:extension base="mdts-msgs:DtsFaultType"/>
+      </xsd:complexContent>
+    </xsd:complexType>
+
+    <!-- NonExistentJobFault message -->
+    <xsd:element name="NonExistentJobFault" type="mdts-msgs:NonExistentJobFaultType"/>
+    <xsd:complexType name="NonExistentJobFaultType">
+      <xsd:complexContent>
+        <xsd:extension base="mdts-msgs:DtsFaultType"/>
+      </xsd:complexContent>
+    </xsd:complexType>
+
+    <!-- JobStatusUpdateFault message -->
+    <xsd:element name="JobStatusUpdateFault" type="mdts-msgs:JobStatusUpdateFaultType"/>
+    <xsd:complexType name="JobStatusUpdateFaultType">
+      <xsd:complexContent>
+        <xsd:extension base="mdts-msgs:DtsFaultType"/>
+      </xsd:complexContent>
+    </xsd:complexType>
+
 </xsd:schema>

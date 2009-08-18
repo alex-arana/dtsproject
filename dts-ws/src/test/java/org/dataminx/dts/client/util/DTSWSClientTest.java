@@ -1,10 +1,8 @@
 package org.dataminx.dts.client.util;
 
-import org.dataminx.dts.client.sws.DataTransferServiceClient;
-
 import java.io.File;
-import javax.xml.parsers.DocumentBuilderFactory;
 import junit.framework.Assert;
+import org.dataminx.dts.client.sws.DataTransferServiceClient;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,8 +34,6 @@ public class DTSWSClientTest {
      */
     @Before
     public void parseDtsJobDef() throws Exception {
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-
         File f = new ClassPathResource("ws-minx-dts.xml").getFile();
         mDtsJob = JobDefinitionDocument.Factory.parse(f);
         Assert.assertNotNull(mDtsJob);
