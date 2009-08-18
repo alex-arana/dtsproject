@@ -1,4 +1,4 @@
-package org.dataminx.dts.service;
+package org.dataminx.dts.service.impl;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -15,7 +15,8 @@ import org.dataminx.dts.domain.model.Job;
 import org.dataminx.dts.domain.model.JobStatus;
 import org.dataminx.dts.domain.repo.JobDao;
 import org.dataminx.dts.jms.JobSubmitQueueSender;
-import org.dataminx.dts.ws.DtsJobDefinitionException;
+import org.dataminx.dts.service.DataTransferService;
+import org.dataminx.dts.ws.InvalidJobDefinitionException;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
@@ -121,7 +122,7 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
             mMarshaller.marshal(submitJobRequest, result);
         }
         catch (IOException e) {
-            throw new DtsJobDefinitionException(e.fillInStackTrace());
+            throw new InvalidJobDefinitionException(e.fillInStackTrace());
         }
 
         // TODO: filter out the credential info from the logs using the one that WN uses

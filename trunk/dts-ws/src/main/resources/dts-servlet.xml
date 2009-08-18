@@ -83,7 +83,7 @@
     <description>This endpoint handles data transfer requests.</description>
   </bean>
 
-  <bean id="dataTransferService" class="org.dataminx.dts.service.DataTransferServiceImpl">
+  <bean id="dataTransferService" class="org.dataminx.dts.service.impl.DataTransferServiceImpl">
     <description>This bean is our "business" service.</description>
   </bean>
 
@@ -109,20 +109,33 @@
     </property>
   </bean>
 
-  <!-- Map existing exceptions that can be thrown on the Web Service into WS Faults -->
-  <bean class="org.springframework.ws.soap.server.endpoint.SoapFaultAnnotationExceptionResolver">
+  <!-- Instead of just mapping exceptions into the generic SoapFault, we'll wrap the actual DTS Fault elements
+  into the SoapFault's detail element -->
+  <bean class="org.dataminx.dts.ws.DtsFaultMappingExceptionResolver">
     <description>
-      This exception resolver maps exceptions with the @SoapFault annotation to SOAP Faults.
-        </description>
+      This exception resolver will add custom DTS related SOAP faults if their respective DTS custom exceptions are
+      thrown.
+    </description>
     <property name="order" value="1" />
   </bean>
 
+  <!-- Map existing exceptions that can be thrown on the Web Service into WS Faults -->
+  <!--
+  <bean class="org.springframework.ws.soap.server.endpoint.SoapFaultAnnotationExceptionResolver">
+    <description>
+      This exception resolver maps exceptions with the @SoapFault annotation to SOAP Faults.
+    </description>
+    <property name="order" value="2" />
+  </bean>
+  -->
+
+  <!-- Let the SoapFaultMappingExceptionResolver handle the rest of the exceptions -->
   <bean class="org.springframework.ws.soap.server.endpoint.SoapFaultMappingExceptionResolver">
     <description>
       This exception resolver maps other exceptions to SOAP Faults. Both UnmarshallingException and
       ValidationFailureException are mapped to a SOAP Fault with a "Client" fault code.
       All other exceptions are mapped to a "Server" error code, the default.
-        </description>
+    </description>
     <property name="defaultFault" value="SERVER" />
     <property name="exceptionMappings">
       <props>
@@ -130,7 +143,7 @@
         <prop key="org.springframework.oxm.ValidationFailureException">CLIENT,Invalid request</prop>
       </props>
     </property>
-    <property name="order" value="2" />
+    <property name="order" value="3" />
   </bean>
 
   <bean id="wsApplicationProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
