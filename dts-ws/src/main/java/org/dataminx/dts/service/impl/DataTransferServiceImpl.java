@@ -42,6 +42,7 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     /** The logger. */
     private static final Log LOGGER = LogFactory.getLog(DataTransferServiceImpl.class);
 
+    /** the constant variable to be used in finding the value of the common name. */
     private static final String CN_EQUALS = "CN=";
 
     /** The submit job message sender. */
@@ -91,7 +92,7 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         // assume we require the following fields to be filled up in the job definition document
         //   * jobname - can't be an empty string
         //   * uri - can't be an empty string
-        mJobValidator.validate(submitJobRequest.getSubmitJobRequest().getJobDefinition());
+        //mJobValidator.validate(submitJobRequest.getSubmitJobRequest().getJobDefinition());
 
         // we now know that at this point, all the required fields from the job definition has
         // been provided by the user. let's give the job a resource key and save it in the DB
