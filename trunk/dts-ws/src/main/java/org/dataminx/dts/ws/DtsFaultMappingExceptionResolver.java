@@ -2,6 +2,7 @@ package org.dataminx.dts.ws;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import org.apache.commons.logging.Log;
@@ -17,11 +18,24 @@ import org.springframework.ws.soap.server.endpoint.AbstractSoapFaultDefinitionEx
 import org.springframework.ws.soap.server.endpoint.SoapFaultDefinition;
 import org.w3c.dom.Node;
 
+/**
+ * The DtsFaultMappingExceptionResolver will resolve DTS exceptions thrown by the Data Transfer Service to the DTS
+ * SOAPFaults defined in the minx-dts-messages schema.
+ *
+ * @author Gerson Galang
+ */
 public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitionExceptionResolver {
 
     /** The logger. */
     private static final Log LOGGER = LogFactory.getLog(DtsFaultMappingExceptionResolver.class);
 
+    /**
+     * Customises the {@link SoapFault} by adding exception specific details into the SoapFault's detail element.
+     *
+     * @param endpoint the executed endpoint, or null if none chosen at the time of the exception
+     * @param ex the exception to be handled
+     * @param fault the created fault
+     */
     @Override
     protected void customizeFault(Object endpoint, Exception ex, SoapFault fault) {
         if (ex instanceof AuthorisationException) {
@@ -60,51 +74,41 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
     }
 
 
+    /**
+     * Template method that returns the {@link SoapFaultDefinition} for the given exception.
+     *
+     * @param endpoint the executed endpoint, or null if none chosen at the time of the exception
+     * @param ex the exception to be handled
+     *
+     * @return the definition mapped to the exception, or null if none is found.
+     */
     @Override
     protected SoapFaultDefinition getFaultDefinition(Object endpoint, Exception ex) {
         LOGGER.debug("DtsFaultMappingExceptionResolver getFaultDefinition()");
-        if (ex instanceof AuthorisationException) {
-            SoapFaultDefinition result = new SoapFaultDefinition();
-            result.setFaultCode(QName.valueOf("CLIENT"));
-            result.setFaultStringOrReason(ex.getMessage());
-            return result;
-        }
-        else if (ex instanceof AuthenticationException) {
-            SoapFaultDefinition result = new SoapFaultDefinition();
-            result.setFaultCode(QName.valueOf("CLIENT"));
-            result.setFaultStringOrReason(ex.getMessage());
-            return result;
-        }
-        else if (ex instanceof InvalidJobDefinitionException) {
-            SoapFaultDefinition result = new SoapFaultDefinition();
-            result.setFaultCode(QName.valueOf("CLIENT"));
-            result.setFaultStringOrReason(ex.getMessage());
-            return result;
-        }
-        else if (ex instanceof JobStatusUpdateException) {
-            SoapFaultDefinition result = new SoapFaultDefinition();
-            result.setFaultCode(QName.valueOf("CLIENT"));
-            result.setFaultStringOrReason(ex.getMessage());
-            return result;
-        }
-        else if (ex instanceof NonExistentJobException) {
-            SoapFaultDefinition result = new SoapFaultDefinition();
-            result.setFaultCode(QName.valueOf("CLIENT"));
-            result.setFaultStringOrReason(ex.getMessage());
-            return result;
-        }
-        else if (ex instanceof TransferProtocolNotSupportedException) {
-            SoapFaultDefinition result = new SoapFaultDefinition();
-            result.setFaultCode(QName.valueOf("CLIENT"));
-            result.setFaultStringOrReason(ex.getMessage());
-            return result;
-        }
         // TODO: remember to add newly defined exception to fault mapping conditions here...
-        else{
+        if (ex instanceof AuthorisationException
+                || ex instanceof AuthenticationException
+                || ex instanceof InvalidJobDefinitionException
+                || ex instanceof JobStatusUpdateException
+                || ex instanceof NonExistentJobException
+                || ex instanceof TransferProtocolNotSupportedException) {
+            SoapFaultDefinition result = new SoapFaultDefinition();
+            result.setFaultCode(QName.valueOf("CLIENT"));
+            result.setFaultStringOrReason(ex.getMessage());
+            return result;
+        }
+        else {
             return null;
         }
     }
 
+    /**
+     * Translates the {@link AuthorisationException} into a {@link AuthorisationFaultDocument}.
+     *
+     * @param ex the AuthorisationException
+     *
+     * @return the AuthorisationFaultDocument
+     */
     private AuthorisationFaultDocument translate(AuthorisationException ex) {
         AuthorisationFaultDocument fault = AuthorisationFaultDocument.Factory.newInstance();
 
@@ -113,6 +117,13 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
         return fault;
     }
 
+    /**
+     * Translates an {@link AuthenticationException} to an {@link AuthenticationFaultDocument}.
+     *
+     * @param ex the AuthenticationException
+     *
+     * @return the AuthenticationFaultDocument
+     */
     private AuthenticationFaultDocument translate(AuthenticationException ex) {
         AuthenticationFaultDocument fault = AuthenticationFaultDocument.Factory.newInstance();
 
@@ -121,6 +132,13 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
         return fault;
     }
 
+    /**
+     * Translates an {@link InvalidJobDefinitionException} to a {@link InvalidJobDefinitionFaultDocument}.
+     *
+     * @param ex the InvalidJobDefinitionException
+     *
+     * @return the InvalidJobDefinitionFaultDocument
+     */
     private InvalidJobDefinitionFaultDocument translate(InvalidJobDefinitionException ex) {
         InvalidJobDefinitionFaultDocument fault = InvalidJobDefinitionFaultDocument.Factory.newInstance();
 
@@ -129,6 +147,13 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
         return fault;
     }
 
+    /**
+     * Translates {@link JobStatusUpdateException} to a {@link JobStatusUpdateFaultDocument}.
+     *
+     * @param ex the JobStatusUpdateException
+     *
+     * @return the JobStatusUpdateFaultDocument
+     */
     private JobStatusUpdateFaultDocument translate(JobStatusUpdateException ex) {
         JobStatusUpdateFaultDocument fault = JobStatusUpdateFaultDocument.Factory.newInstance();
 
@@ -137,6 +162,13 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
         return fault;
     }
 
+    /**
+     * Translates {@link NonExistentJobException} to a {@link NonExistentJobFaultDocument}.
+     *
+     * @param ex the NonExistentJobException
+     *
+     * @return the NonExistentJobFaultDocument
+     */
     private NonExistentJobFaultDocument translate(NonExistentJobException ex) {
         NonExistentJobFaultDocument fault = NonExistentJobFaultDocument.Factory.newInstance();
 
@@ -145,6 +177,14 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
         return fault;
     }
 
+    /**
+     * Translates the {@link TransferProtocolNotSupportedException} to a
+     * {@link TransferProtocolNotSupportedFaultDocument}.
+     *
+     * @param ex the TransferProtocolNotSupportedException
+     *
+     * @return the TransferProtocolNotSupportedFaultDocument
+     */
     private TransferProtocolNotSupportedFaultDocument translate(TransferProtocolNotSupportedException ex) {
         TransferProtocolNotSupportedFaultDocument fault =
             TransferProtocolNotSupportedFaultDocument.Factory.newInstance();
@@ -154,6 +194,12 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
         return fault;
     }
 
+    /**
+     * Transforms fault {@link Source} into a {@link Result} object.
+     *
+     * @param faultNode the {@link Node} representation of the FaultDocument
+     * @param fault the {@link SoapFault} to be transformed
+     */
     private void transform(Node faultNode, SoapFault fault) {
         LOGGER.debug("DtsFaultMappingExceptionResolver transform()");
         DOMSource source = new DOMSource(faultNode);
@@ -161,7 +207,8 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
         try {
             transformer = TransformerFactory.newInstance().newTransformer();
             transformer.transform(source, fault.addFaultDetail().getResult());
-        } catch (Exception e) {
+        }
+        catch (TransformerException e) {
             LOGGER.error(e.getMessage());
         }
     }

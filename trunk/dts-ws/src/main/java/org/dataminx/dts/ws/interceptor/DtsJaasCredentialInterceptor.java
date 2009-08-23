@@ -57,7 +57,7 @@ public class DtsJaasCredentialInterceptor implements EndpointInterceptor {
     private String mLoginContextName;
 
     /** The login context. */
-    private LoginContext loginContext;
+    private LoginContext mLoginContext;
 
     /**
      * Logs out the {@link LoginContext} if it exists.
@@ -71,8 +71,8 @@ public class DtsJaasCredentialInterceptor implements EndpointInterceptor {
      * @throws Exception in case error occurs
      */
     public boolean handleFault(MessageContext messageContext, Object endpoint) throws Exception {
-        if (loginContext != null) {
-            loginContext.logout();
+        if (mLoginContext != null) {
+            mLoginContext.logout();
         }
         return true;
     }
@@ -103,15 +103,17 @@ public class DtsJaasCredentialInterceptor implements EndpointInterceptor {
             String password = "";
 
             for (Iterator<SOAPHeaderElement>
-                soapHeaderElementIter = soapHeader.examineAllHeaderElements(); soapHeaderElementIter.hasNext(); ) {
+                soapHeaderElementIter = soapHeader.examineAllHeaderElements(); soapHeaderElementIter.hasNext();) {
                 SOAPHeaderElement soapHeaderElement = soapHeaderElementIter.next();
                 if (soapHeaderElement.getElementQName().equals(WSSE_SECURITY_QNAME)) {
                     for (Iterator<SOAPElement> usernameTokenIter =
-                        soapHeaderElement.getChildElements(WSSE_USERNAME_TOKEN_QNAME); usernameTokenIter.hasNext(); ) {
+                            soapHeaderElement.getChildElements(WSSE_USERNAME_TOKEN_QNAME);
+                            usernameTokenIter.hasNext();) {
                         SOAPElement usernameTokenElement = usernameTokenIter.next();
 
                         for (Iterator<SOAPElement> usernameTokenChildrenIter =
-                            usernameTokenElement.getChildElements(); usernameTokenChildrenIter.hasNext(); ) {
+                                usernameTokenElement.getChildElements();
+                                usernameTokenChildrenIter.hasNext();) {
 
                             SOAPElement usernameTokenChild = usernameTokenChildrenIter.next();
                             if (usernameTokenChild.getElementQName().equals(WSSE_USERNAME_QNAME)) {
@@ -127,10 +129,10 @@ public class DtsJaasCredentialInterceptor implements EndpointInterceptor {
             }
 
             PassiveCallbackHandler callbackHandler = new PassiveCallbackHandler(username, password);
-            loginContext = new LoginContext(mLoginContextName, callbackHandler);
-            loginContext.login();
+            mLoginContext = new LoginContext(mLoginContextName, callbackHandler);
+            mLoginContext.login();
 
-            Subject subject = loginContext.getSubject();
+            Subject subject = mLoginContext.getSubject();
 
             LOGGER.info("Storing a 'subject' property in the HTTPSession subject attribute");
             TransportContext txContext = TransportContextHolder.getTransportContext();
@@ -140,7 +142,7 @@ public class DtsJaasCredentialInterceptor implements EndpointInterceptor {
 
             // doing a logout here will nullify the subject (which means, the endpoint will have no access to it).
             // so do the logout in the handleResponse or handleFault instead
-            //loginContext.logout();
+            //mLoginContext.logout();
         }
         catch (LoginException le) {
             LOGGER.debug("Cannot create LoginContext. " + le.getMessage());
@@ -164,8 +166,8 @@ public class DtsJaasCredentialInterceptor implements EndpointInterceptor {
      * @throws Exception in case error occurs
      */
     public boolean handleResponse(MessageContext messageContext, Object endpoint) throws Exception {
-        if (loginContext != null) {
-            loginContext.logout();
+        if (mLoginContext != null) {
+            mLoginContext.logout();
         }
         return true;
     }
