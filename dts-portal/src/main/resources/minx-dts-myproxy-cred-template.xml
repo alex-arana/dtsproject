@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<mjsdl:MyProxyToken xmlns:mjsdl="http://schemas.dataminx.org/dts/2009/07/jsdl">
-  <mjsdl:MyProxyUsername>changeme</mjsdl:MyProxyUsername>
-  <mjsdl:MyProxyPassword>changeme</mjsdl:MyProxyPassword>
-  <mjsdl:MyProxyServer>myproxy2.arcs.org.au</mjsdl:MyProxyServer>
-  <mjsdl:MyProxyPort>7512</mjsdl:MyProxyPort>
-</mjsdl:MyProxyToken>
