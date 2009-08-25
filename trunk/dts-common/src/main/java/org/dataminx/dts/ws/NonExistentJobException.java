@@ -1,7 +1,5 @@
 package org.dataminx.dts.ws;
 
-import org.springframework.ws.soap.server.endpoint.annotation.FaultCode;
-import org.springframework.ws.soap.server.endpoint.annotation.SoapFault;
 
 /**
  * An exception that is thrown if the job being queried for, suspended, resumed, or cancelled doesn't exist in the
@@ -9,8 +7,7 @@ import org.springframework.ws.soap.server.endpoint.annotation.SoapFault;
  *
  * @author Gerson Galang
  */
-@SoapFault(faultCode = FaultCode.CLIENT)
-public class NonExistentJobException extends RuntimeException {
+public class NonExistentJobException extends DtsFaultException {
 
     /**
      * Constructs an instance of {@link NonExistentJobException}.

@@ -1,15 +1,11 @@
 package org.dataminx.dts.ws;
 
-import org.springframework.ws.soap.server.endpoint.annotation.FaultCode;
-import org.springframework.ws.soap.server.endpoint.annotation.SoapFault;
-
 /**
  * An exception that gets thrown if the user doesn't have the authority to perform the WS call.
  *
  * @author Gerson Galang
  */
-@SoapFault(faultCode = FaultCode.CLIENT)
-public class AuthorisationException extends RuntimeException {
+public class AuthorisationException extends DtsFaultException {
 
     /**
      * Constructs an instance of {@link AuthorisationException}.

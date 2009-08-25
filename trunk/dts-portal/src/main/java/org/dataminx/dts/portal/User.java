@@ -164,12 +164,12 @@ public class User extends ActionSupport implements SessionAware, ServletRequestA
             }
             catch (LoginException le) {
                 LOGGER.debug("Cannot create LoginContext. " + le.getMessage());
-                mSessionMap.put("loginErrorMessage", "The myproxy details you provided might be wrong. Try again.");
+                mServletRequest.setAttribute("loginErrorMessage", "The myproxy details you provided might be wrong. Try again.");
                 result = INPUT;
             }
             catch (SecurityException se) {
                 LOGGER.debug("Cannot create LoginContext. " + se.getMessage());
-                mSessionMap.put("loginErrorMessage", "The myproxy details you provided might be wrong. Try again.");
+                mServletRequest.setAttribute("loginErrorMessage", "The myproxy details you provided might be wrong. Try again.");
                 result = INPUT;
             }
 

@@ -1,7 +1,5 @@
 package org.dataminx.dts.ws;
 
-import org.springframework.ws.soap.server.endpoint.annotation.FaultCode;
-import org.springframework.ws.soap.server.endpoint.annotation.SoapFault;
 
 /**
  * An exception that gets thrown if the requested protocol to use in a job is not supported by the Data Transfer
@@ -9,8 +7,7 @@ import org.springframework.ws.soap.server.endpoint.annotation.SoapFault;
  *
  * @author Gerson Galang
  */
-@SoapFault(faultCode = FaultCode.CLIENT)
-public class TransferProtocolNotSupportedException  extends RuntimeException {
+public class TransferProtocolNotSupportedException extends DtsFaultException {
 
     /**
      * Constructs an instance of {@link TransferProtocolNotSupportedException}.

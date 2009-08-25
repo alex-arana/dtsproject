@@ -4,7 +4,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
 import org.springframework.validation.Errors;
-import org.springframework.validation.ValidationUtils;
 
 /**
  * The default JobIdentificationValidator implementation.
@@ -28,11 +27,11 @@ public class DefaultJobIdentificationValidator implements JobIdentificationValid
      */
     @Override
     public void validate(Object object, Errors errors) {
-        ValidationUtils.rejectIfEmpty(errors, "jobName", "jobIdentification.jobName.empty");
-        /*JobIdentificationType jobIdentificationType = (JobIdentificationType) object;
+        //ValidationUtils.rejectIfEmpty(errors, "jobName", "jobIdentification.jobName.empty");
+        JobIdentificationType jobIdentificationType = (JobIdentificationType) object;
         if (jobIdentificationType.getJobName().trim().equals("")) {
             errors.rejectValue("jobName", "jobIdentification.jobName.empty");
-        }*/
+        }
     }
 
 }

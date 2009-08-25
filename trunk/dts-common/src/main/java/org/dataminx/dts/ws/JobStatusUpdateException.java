@@ -1,7 +1,5 @@
 package org.dataminx.dts.ws;
 
-import org.springframework.ws.soap.server.endpoint.annotation.FaultCode;
-import org.springframework.ws.soap.server.endpoint.annotation.SoapFault;
 
 /**
  * An exception that gets thrown if the request to change the job's status is not valid (eg suspending job that is
@@ -9,8 +7,7 @@ import org.springframework.ws.soap.server.endpoint.annotation.SoapFault;
  *
  * @author Gerson Galang
  */
-@SoapFault(faultCode = FaultCode.CLIENT)
-public class JobStatusUpdateException extends RuntimeException {
+public class JobStatusUpdateException extends DtsFaultException {
 
     /**
      * Constructs an instance of {@link JobStatusUpdateException}.

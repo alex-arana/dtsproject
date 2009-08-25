@@ -10,14 +10,14 @@
   <jsdl:JobDescription xsi:type="mjsdl:MinxJobDescriptionType" xmlns:mjsdl="http://schemas.dataminx.org/dts/2009/07/jsdl"
     xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl">
     <jsdl:JobIdentification>
-      <jsdl:JobName></jsdl:JobName>
+      <jsdl:JobName>testjob</jsdl:JobName>
       <jsdl:Description>Gerson's Job</jsdl:Description>
       <jsdl:JobAnnotation>Gerson's Job Annotation</jsdl:JobAnnotation>
       <jsdl:JobProject>apollo33</jsdl:JobProject>
     </jsdl:JobIdentification>
     <mjsdl:DataTransfer>
       <mjsdl:Source>
-        <jsdl:URI></jsdl:URI>
+        <jsdl:URI>gsiftp://ng2.vpac.org/etc/termcap</jsdl:URI>
         <mjsdl:Credential>
           <mjsdl:MyProxyToken>
             <mjsdl:MyProxyUsername>${myproxy.username}</mjsdl:MyProxyUsername>

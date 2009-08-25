@@ -1,5 +1,6 @@
 package org.dataminx.dts.ws;
 
+import java.util.Calendar;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -9,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.schemas.dts.x2009.x07.messages.AuthenticationFaultDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.AuthorisationFaultDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.CustomFaultDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.InvalidJobDefinitionFaultDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.JobStatusUpdateFaultDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.NonExistentJobFaultDocument;
@@ -68,6 +70,11 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
             TransferProtocolNotSupportedFaultDocument faultDocument = translate(exception);
             transform(faultDocument.getDomNode(), fault);
         }
+        else if (ex instanceof CustomException) {
+            CustomException exception = (CustomException) ex;
+            CustomFaultDocument faultDocument = translate(exception);
+            transform(faultDocument.getDomNode(), fault);
+        }
         else {
             super.customizeFault(endpoint, ex, fault);
         }
@@ -91,7 +98,8 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
                 || ex instanceof InvalidJobDefinitionException
                 || ex instanceof JobStatusUpdateException
                 || ex instanceof NonExistentJobException
-                || ex instanceof TransferProtocolNotSupportedException) {
+                || ex instanceof TransferProtocolNotSupportedException
+                || ex instanceof CustomException) {
             SoapFaultDefinition result = new SoapFaultDefinition();
             result.setFaultCode(QName.valueOf("CLIENT"));
             result.setFaultStringOrReason(ex.getMessage());
@@ -111,9 +119,10 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
      */
     private AuthorisationFaultDocument translate(AuthorisationException ex) {
         AuthorisationFaultDocument fault = AuthorisationFaultDocument.Factory.newInstance();
-
-        // add fault specific details in here...
-
+        Calendar timestamp = Calendar.getInstance();
+        timestamp.setTime(ex.getTimestamp());
+        fault.addNewAuthorisationFault().setMessage(ex.getMessage());
+        fault.getAuthorisationFault().setTimestamp(timestamp);
         return fault;
     }
 
@@ -126,9 +135,10 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
      */
     private AuthenticationFaultDocument translate(AuthenticationException ex) {
         AuthenticationFaultDocument fault = AuthenticationFaultDocument.Factory.newInstance();
-
-        // add fault specific details in here...
-
+        Calendar timestamp = Calendar.getInstance();
+        timestamp.setTime(ex.getTimestamp());
+        fault.addNewAuthenticationFault().setMessage(ex.getMessage());
+        fault.getAuthenticationFault().setTimestamp(timestamp);
         return fault;
     }
 
@@ -141,9 +151,10 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
      */
     private InvalidJobDefinitionFaultDocument translate(InvalidJobDefinitionException ex) {
         InvalidJobDefinitionFaultDocument fault = InvalidJobDefinitionFaultDocument.Factory.newInstance();
-
-        // add fault specific details in here...
-
+        Calendar timestamp = Calendar.getInstance();
+        timestamp.setTime(ex.getTimestamp());
+        fault.addNewInvalidJobDefinitionFault().setMessage(ex.getMessage());
+        fault.getInvalidJobDefinitionFault().setTimestamp(timestamp);
         return fault;
     }
 
@@ -156,9 +167,10 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
      */
     private JobStatusUpdateFaultDocument translate(JobStatusUpdateException ex) {
         JobStatusUpdateFaultDocument fault = JobStatusUpdateFaultDocument.Factory.newInstance();
-
-        // add fault specific details in here...
-
+        Calendar timestamp = Calendar.getInstance();
+        timestamp.setTime(ex.getTimestamp());
+        fault.addNewJobStatusUpdateFault().setMessage(ex.getMessage());
+        fault.getJobStatusUpdateFault().setTimestamp(timestamp);
         return fault;
     }
 
@@ -171,9 +183,10 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
      */
     private NonExistentJobFaultDocument translate(NonExistentJobException ex) {
         NonExistentJobFaultDocument fault = NonExistentJobFaultDocument.Factory.newInstance();
-
-        // add fault specific details in here...
-
+        Calendar timestamp = Calendar.getInstance();
+        timestamp.setTime(ex.getTimestamp());
+        fault.addNewNonExistentJobFault().setMessage(ex.getMessage());
+        fault.getNonExistentJobFault().setTimestamp(timestamp);
         return fault;
     }
 
@@ -188,9 +201,28 @@ public class DtsFaultMappingExceptionResolver extends AbstractSoapFaultDefinitio
     private TransferProtocolNotSupportedFaultDocument translate(TransferProtocolNotSupportedException ex) {
         TransferProtocolNotSupportedFaultDocument fault =
             TransferProtocolNotSupportedFaultDocument.Factory.newInstance();
+        Calendar timestamp = Calendar.getInstance();
+        timestamp.setTime(ex.getTimestamp());
+        fault.addNewTransferProtocolNotSupportedFault().setMessage(ex.getMessage());
+        fault.getTransferProtocolNotSupportedFault().setTimestamp(timestamp);
+        return fault;
+    }
 
-        // add fault specific details in here...
-
+    /**
+     * Translates the {@link CustomException} to a
+     * {@link CustomFaultDocument}.
+     *
+     * @param ex the CustomException
+     *
+     * @return the CustomFaultDocument
+     */
+    private CustomFaultDocument translate(CustomException ex) {
+        CustomFaultDocument fault =
+            CustomFaultDocument.Factory.newInstance();
+        Calendar timestamp = Calendar.getInstance();
+        timestamp.setTime(ex.getTimestamp());
+        fault.addNewCustomFault().setMessage(ex.getMessage());
+        fault.getCustomFault().setTimestamp(timestamp);
         return fault;
     }
 

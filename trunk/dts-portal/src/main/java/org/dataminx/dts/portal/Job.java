@@ -1,5 +1,7 @@
 package org.dataminx.dts.portal;
 
+import static org.dataminx.dts.portal.DtsAction.SOAP_FAULT_CLIENT_ERROR;
+import static org.dataminx.dts.portal.DtsAction.WEB_SERVICE_IO_ERROR;
 import static org.dataminx.dts.portal.util.PageValidator.isRefererProvided;
 import static org.dataminx.dts.portal.util.PageValidator.isUserLoggedIn;
 
@@ -23,6 +25,13 @@ import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.client.sws.DataTransferServiceClient;
 import org.dataminx.dts.client.sws.security.DtsWsUsernameAuthenticationCallback;
 import org.dataminx.dts.security.auth.module.MyProxyCredential;
+import org.dataminx.dts.ws.AuthenticationException;
+import org.dataminx.dts.ws.AuthorisationException;
+import org.dataminx.dts.ws.CustomException;
+import org.dataminx.dts.ws.InvalidJobDefinitionException;
+import org.dataminx.dts.ws.JobStatusUpdateException;
+import org.dataminx.dts.ws.NonExistentJobException;
+import org.dataminx.dts.ws.TransferProtocolNotSupportedException;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxSourceTargetType;
@@ -32,6 +41,7 @@ import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.oasisOpen.docs.wss.x2004.x01.oasis200401WssWssecuritySecext10.UsernameTokenDocument;
 import org.oasisOpen.docs.wss.x2004.x01.oasis200401WssWssecuritySecext10.UsernameTokenType;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.ws.client.WebServiceIOException;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
 
 /**
@@ -285,9 +295,53 @@ public class Job extends ActionSupport implements SessionAware, ServletRequestAw
             username = null;
             password = null;
 
-            String jobResourceKey = mDtsClient.submitJob(dtsJob);
-            
-            // TODO: decide if we are testing for null or catching a SOAPFault
+            String jobResourceKey = null;
+
+            try {
+                jobResourceKey = mDtsClient.submitJob(dtsJob);
+            }
+            catch (AuthenticationException e) {
+                LOGGER.debug("An AuthenticationFault was thrown by the DTS Web Service. " + e.getMessage());
+                mServletRequest.setAttribute("submitJobErrorMessage", e.getMessage() + " Try again.");
+                result = SOAP_FAULT_CLIENT_ERROR;
+            }
+            catch (AuthorisationException e) {
+                LOGGER.debug("An AuthorisationFault was thrown by the DTS Web Service. " + e.getMessage());
+                mServletRequest.setAttribute("submitJobErrorMessage", e.getMessage() + " Try again.");
+                result = SOAP_FAULT_CLIENT_ERROR;
+            }
+            catch (InvalidJobDefinitionException e) {
+                LOGGER.debug("An InvalidJobDefinitionFault was thrown by the DTS Web Service. " + e.getMessage());
+                mServletRequest.setAttribute("submitJobErrorMessage", e.getMessage() + " Try again.");
+                result = SOAP_FAULT_CLIENT_ERROR;
+            }
+            catch (JobStatusUpdateException e) {
+                LOGGER.debug("A JobStatusUpdateFault was thrown by the DTS Web Service. " + e.getMessage());
+                mServletRequest.setAttribute("submitJobErrorMessage", e.getMessage() + " Try again.");
+                result = SOAP_FAULT_CLIENT_ERROR;
+            }
+            catch (NonExistentJobException e) {
+                LOGGER.debug("A NonExistentFault was thrown by the DTS Web Service. " + e.getMessage());
+                mServletRequest.setAttribute("submitJobErrorMessage", e.getMessage() + " Try again.");
+                result = SOAP_FAULT_CLIENT_ERROR;
+            }
+            catch (TransferProtocolNotSupportedException e) {
+                LOGGER.debug("A TransferProtocolNotSupportedFault was thrown by the DTS Web Service. "
+                        + e.getMessage());
+                mServletRequest.setAttribute("submitJobErrorMessage", e.getMessage() + " Try again.");
+                result = SOAP_FAULT_CLIENT_ERROR;
+            }
+            catch (CustomException e) {
+                LOGGER.debug("A CustomFault was thrown by the DTS Web Service. " + e.getMessage());
+                mServletRequest.setAttribute("submitJobErrorMessage", e.getMessage() + " Try again.");
+                result = SOAP_FAULT_CLIENT_ERROR;
+            }
+            catch (WebServiceIOException e) {
+                LOGGER.debug("A WebServiceIOException was thrown by the DTS Web Service. " + e.getMessage());
+                mServletRequest.setAttribute("submitJobErrorMessage", e.getMessage());
+                result = WEB_SERVICE_IO_ERROR;
+            }
+
             if (jobResourceKey != null)
                 mServletRequest.setAttribute("jobResourceKey", jobResourceKey);
         }
