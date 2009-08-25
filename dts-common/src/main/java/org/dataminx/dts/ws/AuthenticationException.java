@@ -1,15 +1,12 @@
 package org.dataminx.dts.ws;
 
-import org.springframework.ws.soap.server.endpoint.annotation.FaultCode;
-import org.springframework.ws.soap.server.endpoint.annotation.SoapFault;
 
 /**
  * An exception that gets thrown if the user has failed to authenticate on the WS call.
  *
  * @author Gerson Galang
  */
-@SoapFault(faultCode = FaultCode.CLIENT)
-public class AuthenticationException  extends RuntimeException {
+public class AuthenticationException extends DtsFaultException {
 
     /**
      * Constructs an instance of {@link AuthenticationException}.

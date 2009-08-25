@@ -1,15 +1,12 @@
 package org.dataminx.dts.ws;
 
-import org.springframework.ws.soap.server.endpoint.annotation.FaultCode;
-import org.springframework.ws.soap.server.endpoint.annotation.SoapFault;
 
 /**
  * An exception that is thrown if the job failed to meet the minimum validity requirements.
  *
  * @author Gerson Galang
  */
-@SoapFault(faultCode = FaultCode.CLIENT)
-public class InvalidJobDefinitionException extends RuntimeException {
+public class InvalidJobDefinitionException extends DtsFaultException {
 
     /**
      * Constructs an instance of {@link InvalidJobDefinitionException}.

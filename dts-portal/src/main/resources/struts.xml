@@ -15,6 +15,15 @@
         <interceptor-ref name="servlet-config" />
       </interceptor-stack>
     </interceptors>
+
+    <global-results>
+      <result name="error">/jsp/error.jsp</result>
+    </global-results>
+    <global-exception-mappings>
+      <exception-mapping exception="java.lang.Exception"
+              result="error"/>
+    </global-exception-mappings>
+
     <action name="User_input">
       <result>/jsp/login.jsp</result>
     </action>
@@ -31,7 +40,8 @@
 
     <action name="DtsJob_submit" class="jobAction" method="submit">
       <result name="success">/jsp/submitJob.jsp</result>
-      <result name="error">/jsp/submitJob.jsp</result>
+      <result name="webServiceIOError">/jsp/error.jsp</result>
+      <result name="soapFaultClientError">/jsp/submitJob.jsp</result>
     </action>
 
     <action name="DtsJob_back" class="jobAction" method="back">

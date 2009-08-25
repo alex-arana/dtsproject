@@ -2,6 +2,7 @@ package org.dataminx.dts.client.sws;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataminx.dts.ws.DtsFaultException;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusResponseDocument;
@@ -12,9 +13,9 @@ import org.dataminx.schemas.dts.x2009.x07.messages.SuspendJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument.CancelJobRequest;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument.GetJobStatusRequest;
 import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument.ResumeJobRequest;
-import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.dataminx.schemas.dts.x2009.x07.messages.SuspendJobRequestDocument.SuspendJobRequest;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.springframework.ws.client.WebServiceIOException;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
 import org.springframework.ws.client.core.WebServiceTemplate;
 
@@ -45,7 +46,8 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
      */
     public String submitJob(JobDefinitionDocument dtsJob) {
         SubmitJobRequestDocument request = SubmitJobRequestDocument.Factory.newInstance();
-        SubmitJobRequest submitJobRequest = request.addNewSubmitJobRequest();
+        //SubmitJobRequest submitJobRequest =
+        request.addNewSubmitJobRequest();
 
         // replace JobDefinition with the one read from the input file
         request.getSubmitJobRequest().setJobDefinition(dtsJob.getJobDefinition());
@@ -55,20 +57,35 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
 
         // do the actual WS call here...
         SubmitJobResponseDocument response = null;
-        if (mWsMessageCallback != null) {
-            // do authenticated connection to the WS
-            response =
-                (SubmitJobResponseDocument) mWebServiceTemplate.marshalSendAndReceive(request, mWsMessageCallback);
+
+        try {
+            if (mWsMessageCallback != null) {
+                // do authenticated connection to the WS
+                response =
+                    (SubmitJobResponseDocument) mWebServiceTemplate.marshalSendAndReceive(request, mWsMessageCallback);
+            }
+            else {
+                response = (SubmitJobResponseDocument) mWebServiceTemplate.marshalSendAndReceive(request);
+            }
         }
-        else {
-            response = (SubmitJobResponseDocument) mWebServiceTemplate.marshalSendAndReceive(request);
+        // we won't try and catch SoapFaultClientException anymore as having a FaultMessageResolver would mean
+        // that the resolve would handle all the faults thrown by the WS and map them to their respective exception
+        // classes. so make things simple, we'll just catch the generic DtsFaultException here and throw it again...
+        catch (DtsFaultException e) {
+            LOGGER.error("A SOAPFault was thrown by the DTS Web Service. " + e.getMessage());
+            throw e;
+        }
+        catch (WebServiceIOException e) {
+            LOGGER.error("A WebServiceIOException was thrown by the DTS Web Service. " + e.getMessage());
+            throw e;
         }
 
         LOGGER.debug("response payload:\n" + response);
 
-        if (response != null)
-            return response.getSubmitJobResponse().getJobResourceKey();
-        return null;
+        if (response == null)
+            return null;
+
+        return response.getSubmitJobResponse().getJobResourceKey();
     }
 
     /**

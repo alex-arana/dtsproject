@@ -20,6 +20,7 @@
     <property name="messageSender" ref="messageSender" />
     <property name="marshaller" ref="marshaller" />
     <property name="unmarshaller" ref="marshaller" />
+    <property name="faultMessageResolver" ref="dtsFaultMessageResolver" />
   </bean>
 
   <bean id="messageSender" class="org.springframework.ws.transport.http.HttpUrlConnectionMessageSender">
@@ -34,6 +35,8 @@
       </bean>
     </property>
   </bean>
+
+  <bean id="dtsFaultMessageResolver" class="org.dataminx.dts.client.sws.DtsFaultMessageResolver" />
 
 
   <bean id="userAction" class="org.dataminx.dts.portal.User" scope="prototype"/>

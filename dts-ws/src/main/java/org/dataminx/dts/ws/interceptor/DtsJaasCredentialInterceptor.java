@@ -14,6 +14,7 @@ import javax.xml.soap.SOAPMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.security.auth.callback.PassiveCallbackHandler;
+import org.dataminx.dts.ws.AuthenticationException;
 import org.springframework.ws.context.MessageContext;
 import org.springframework.ws.server.EndpointInterceptor;
 import org.springframework.ws.soap.saaj.SaajSoapMessage;
@@ -146,11 +147,11 @@ public class DtsJaasCredentialInterceptor implements EndpointInterceptor {
         }
         catch (LoginException le) {
             LOGGER.debug("Cannot create LoginContext. " + le.getMessage());
-            return false;
+            throw new AuthenticationException(le.getMessage());
         }
         catch (SecurityException se) {
             LOGGER.debug("Cannot create LoginContext. " + se.getMessage());
-            return false;
+            throw new AuthenticationException(se.getMessage());
         }
         return true;
     }

@@ -13,6 +13,7 @@
 <body>
   <h3>DTS Job Form</h3>
 
+  <span class="errorMessage"><s:property value="#request['submitJobErrorMessage']"/></span>
   <s:if test="#request.jobResourceKey != null">
       Job has been submitted. Please take note the of the job ID below. You'll need it to query for the job
       that you just submitted.
