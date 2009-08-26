@@ -44,6 +44,10 @@
     <property name="dataTransferServiceClient" ref="dataTransferServiceClient"/>
   </bean>
   <bean id="dtsMenuAction" class="org.dataminx.dts.portal.Menu" scope="prototype"/>
+  <bean id="jobStatusAction" class="org.dataminx.dts.portal.JobStatus" scope="prototype">
+    <property name="dataTransferServiceClient" ref="dataTransferServiceClient"/>
+  </bean>
+
 
 </beans>
 

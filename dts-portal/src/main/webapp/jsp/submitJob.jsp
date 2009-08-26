@@ -13,7 +13,7 @@
 <body>
   <h3>DTS Job Form</h3>
 
-  <span class="errorMessage"><s:property value="#request['submitJobErrorMessage']"/></span>
+  <span class="errorMessage"><s:property value="#request.submitJobErrorMessage"/></span>
   <s:if test="#request.jobResourceKey != null">
       Job has been submitted. Please take note the of the job ID below. You'll need it to query for the job
       that you just submitted.
@@ -35,6 +35,6 @@
       <s:password name="targetCredPassword" label="Target Credential Password"/>
       <s:submit />
     </s:form>
-    <a href="DtsJob_back.action">back</a>
+    <a href="DtsMenu_display.action">back</a>
 </body>
 </html>

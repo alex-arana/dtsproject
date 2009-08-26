@@ -19,7 +19,7 @@
     <li>If grix webstart didn't work, try using the <a href="http://grix.arcs.org.au/downloads/index.html">grix binary</a>.</li><br/>
     <li>Then login using your myproxy credentials.</li>
     <br/>
-    <span class="errorMessage"><s:property value="#request['loginErrorMessage']"/></span>
+    <span class="errorMessage"><s:property value="#request.loginErrorMessage"/></span>
     <s:form action="User_login">
       <s:textfield key="username" />
       <s:password key="password" showPassword="true" />

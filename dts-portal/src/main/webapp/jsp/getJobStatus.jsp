@@ -7,17 +7,19 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>DTS Error Page</title>
+  <title>DTS Get Job Status Form Page</title>
   <s:head />
 </head>
 <body>
-  <h3>Exception thrown by the service</h3>
+  <h3>DTS Get Job Status Form</h3>
 
-    <s:property value="exception.message"/>
-    <pre>
-    <s:property value="exceptionStack"/>
-    </pre>
+  <span class="errorMessage"><s:property value="#request['submitJobErrorMessage']"/></span>
 
+  <p/>Please provide the id of the job you are inquiring about:
+  <s:form action="DtsJobStatus_getDetails">
+      <s:textfield name="jobResourceKey" label="Job Id"/>
+      <s:submit />
+    </s:form>
     <a href="DtsMenu_display.action">back</a>
 </body>
 </html>

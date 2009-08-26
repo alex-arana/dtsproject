@@ -16,7 +16,7 @@
   <p/>Please select a step you would like to perform:
   <ul>
     <li><a href="DtsJob_input.action">Submit a new job</a></li>
-    <li>Query a job</li>
+    <li><a href="DtsJobStatus_input.action">Query a job</a></li>
   </ul>
   <a href="User_logout.action">logout</a>
 </body>
