@@ -128,7 +128,7 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
 
         // TODO: filter out the credential info from the logs using the one that WN uses
         LOGGER.debug(result.toString());
-        //mMessageSender.doSend(newJobResourceKey, result.toString());
+        mMessageSender.doSend(newJobResourceKey, result.toString());
 
         return newJobResourceKey;
     }

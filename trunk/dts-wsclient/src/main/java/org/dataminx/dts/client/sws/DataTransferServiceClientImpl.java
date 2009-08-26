@@ -155,18 +155,32 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
 
         // do the actual WS call here...
         GetJobStatusResponseDocument response = null;
-        if (mWsMessageCallback != null) {
-            // do authenticated connection to the WS
-            response =
-                (GetJobStatusResponseDocument) mWebServiceTemplate.marshalSendAndReceive(request, mWsMessageCallback);
+
+        try {
+            if (mWsMessageCallback != null) {
+                // do authenticated connection to the WS
+                response =
+                    (GetJobStatusResponseDocument) mWebServiceTemplate.marshalSendAndReceive(request, mWsMessageCallback);
+            }
+            else {
+                response = (GetJobStatusResponseDocument) mWebServiceTemplate.marshalSendAndReceive(request);
+            }
         }
-        else {
-            response = (GetJobStatusResponseDocument) mWebServiceTemplate.marshalSendAndReceive(request);
+        // we won't try and catch SoapFaultClientException anymore as having a FaultMessageResolver would mean
+        // that the resolve would handle all the faults thrown by the WS and map them to their respective exception
+        // classes. so make things simple, we'll just catch the generic DtsFaultException here and throw it again...
+        catch (DtsFaultException e) {
+            LOGGER.error("A SOAPFault was thrown by the DTS Web Service. " + e.getMessage());
+            throw e;
+        }
+        catch (WebServiceIOException e) {
+            LOGGER.error("A WebServiceIOException was thrown by the DTS Web Service. " + e.getMessage());
+            throw e;
         }
 
         LOGGER.debug("response payload:\n" + response);
 
-        return response.getGetJobStatusResponse().getState().toString();
+        return response.getGetJobStatusResponse().getState().getValue().toString();
     }
 
     /**

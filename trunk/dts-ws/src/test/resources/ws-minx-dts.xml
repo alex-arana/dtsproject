@@ -40,12 +40,14 @@
         <!--
         <jsdl:URI>file:///tmp/lcg-info-generic-vpac-brecca.conf</jsdl:URI>
         -->
-        <jsdl:URI>ftp://dm11.intersect.org.au/upload/pom-from-pub.xml</jsdl:URI>
+        <jsdl:URI>gsiftp://ng2.vpac.org/tmp/termcap.from.vpac</jsdl:URI>
         <mjsdl:Credential>
-          <wsse:UsernameToken>
-            <wsse:Username>${ftp.username}</wsse:Username>
-            <wsse:PasswordString>${ftp.password}</wsse:PasswordString>
-          </wsse:UsernameToken>
+          <mjsdl:MyProxyToken>
+            <mjsdl:MyProxyUsername>${myproxy.username}</mjsdl:MyProxyUsername>
+            <mjsdl:MyProxyPassword>${myproxy.password}</mjsdl:MyProxyPassword>
+            <mjsdl:MyProxyServer>myproxy2.arcs.org.au</mjsdl:MyProxyServer>
+            <mjsdl:MyProxyPort>7512</mjsdl:MyProxyPort>
+          </mjsdl:MyProxyToken>
         </mjsdl:Credential>
       </mjsdl:Target>
       <mjsdl:TransferRequirements>
