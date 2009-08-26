@@ -44,6 +44,16 @@ public class DataTransferServiceEndpoint {
     /** The reference to the message resolver so that validation error messages are taken from a ResourceBundle. */
     private MessageSource mMessageSource;
 
+    /** The DTS Messages namespace. */
+    private static final String DTS_MESSAGES_NS = "http://schemas.dataminx.org/dts/2009/07/messages";
+
+    private static final String SUBMIT_JOB_REQUEST_LOCAL_NAME = "submitJobRequest";
+    private static final String CANCEL_JOB_REQUEST_LOCAL_NAME = "cancelJobRequest";
+    private static final String SUSPEND_JOB_REQUEST_LOCAL_NAME = "suspendJobRequest";
+    private static final String RESUME_JOB_REQUEST_LOCAL_NAME = "resumeJobRequest";
+    private static final String GET_JOB_STATUS_REQUEST_LOCAL_NAME = "getJobStatusRequest";
+
+
     /**
      * Handles the submit job request.
      *
@@ -51,7 +61,7 @@ public class DataTransferServiceEndpoint {
      *
      * @return the response to the submit job call
      */
-    @PayloadRoot(localPart = "submitJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/07/messages")
+    @PayloadRoot(localPart = SUBMIT_JOB_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
     public SubmitJobResponseDocument doit(SubmitJobRequestDocument request) {
         LOGGER.debug("DataTransferServiceEndpoint doit(SubmitJobRequest)");
 
@@ -85,7 +95,7 @@ public class DataTransferServiceEndpoint {
      *
      * @param request the cancel job request
      */
-    @PayloadRoot(localPart = "cancelJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/07/messages")
+    @PayloadRoot(localPart = CANCEL_JOB_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
     public void doit(CancelJobRequestDocument request) {
         LOGGER.debug("DataTransferServiceEndpoint doit(CancelJobRequest)");
         mDataTransferService.cancelJob(request);
@@ -96,7 +106,7 @@ public class DataTransferServiceEndpoint {
      *
      * @param request the suspend job request
      */
-    @PayloadRoot(localPart = "suspendJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/07/messages")
+    @PayloadRoot(localPart = SUSPEND_JOB_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
     public void doit(SuspendJobRequestDocument request) {
         LOGGER.debug("DataTransferServiceEndpoint doit(SuspendJobRequest)");
         mDataTransferService.suspendJob(request);
@@ -107,7 +117,7 @@ public class DataTransferServiceEndpoint {
      *
      * @param request the resume job request
      */
-    @PayloadRoot(localPart = "resumeJobRequest", namespace = "http://schemas.dataminx.org/dts/2009/07/messages")
+    @PayloadRoot(localPart = RESUME_JOB_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
     public void doit(ResumeJobRequestDocument request) {
         LOGGER.debug("DataTransferServiceEndpoint doit(ResumeJobRequest)");
         mDataTransferService.resumeJob(request);
@@ -120,12 +130,12 @@ public class DataTransferServiceEndpoint {
      *
      * @return the response to the get job status call
      */
-    @PayloadRoot(localPart = "getJobStatusRequest", namespace = "http://schemas.dataminx.org/dts/2009/05/dts")
+    @PayloadRoot(localPart = GET_JOB_STATUS_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
     public GetJobStatusResponseDocument doit(GetJobStatusRequestDocument request) {
         LOGGER.debug("DataTransferServiceEndpoint doit(GetJobStatusRequest)");
         String status = mDataTransferService.getJobStatus(request);
         GetJobStatusResponseDocument response = GetJobStatusResponseDocument.Factory.newInstance();
-        response.getGetJobStatusResponse().getState().setValue(StatusValueType.Enum.forString(status));
+        response.addNewGetJobStatusResponse().addNewState().setValue(StatusValueType.Enum.forString(status));
         return response;
     }
 

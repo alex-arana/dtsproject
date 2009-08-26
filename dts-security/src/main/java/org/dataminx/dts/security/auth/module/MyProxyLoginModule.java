@@ -214,8 +214,8 @@ public class MyProxyLoginModule implements LoginModule {
         String commonName = null;
         boolean hasSuccessfullyAuthenticated = false;
         try {
-        	// TODO: remove this debug line later on
-            LOGGER.debug("username: " + username + "; password: " + password);
+            // TODO: remove this debug line later on
+            //LOGGER.debug("username: " + username + "; password: " + password);
             credential = myProxy.get(username, password, mMyProxyLifetime);
             LOGGER.info(String.format("Successfully downloaded a proxy credential from myproxy server, '%s:%s'\n",
                     mMyProxyHost,
