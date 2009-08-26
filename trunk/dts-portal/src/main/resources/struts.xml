@@ -44,11 +44,13 @@
       <result name="soapFaultClientError">/jsp/submitJob.jsp</result>
     </action>
 
+<!--
     <action name="DtsJob_back" class="jobAction" method="back">
       <interceptor-ref name="dtsBasicStack"/>
       <result name="success">/jsp/dtsMenu.jsp</result>
       <result name="login">/jsp/login.jsp</result>
     </action>
+-->
 
     <action name="DtsJob_input" class="jobAction" method="input">
       <interceptor-ref name="dtsBasicStack"/>
@@ -56,5 +58,23 @@
       <result name="login">/jsp/login.jsp</result>
     </action>
 
+    <action name="DtsJobStatus_input" class="jobStatusAction" method="input">
+      <interceptor-ref name="dtsBasicStack"/>
+      <result name="success">/jsp/getJobStatus.jsp</result>
+    </action>
+
+    <action name="DtsMenu_display" class="jobStatusAction" method="back">
+      <interceptor-ref name="dtsBasicStack"/>
+      <result name="success">/jsp/dtsMenu.jsp</result>
+      <result name="login">/jsp/login.jsp</result>
+    </action>
+
+    <action name="DtsJobStatus_getDetails" class="jobStatusAction" method="getDetails">
+      <result name="success">/jsp/jobDetails.jsp</result>
+      <result name="webServiceIOError">/jsp/error.jsp</result>
+      <result name="soapFaultClientError">/jsp/getJobStatus.jsp</result>
+      <result name="input">/jsp/getJobStatus.jsp</result>
+      <result name="login">/jsp/login.jsp</result>
+    </action>
   </package>
 </struts>

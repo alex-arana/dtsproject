@@ -29,8 +29,6 @@ import org.dataminx.dts.ws.AuthenticationException;
 import org.dataminx.dts.ws.AuthorisationException;
 import org.dataminx.dts.ws.CustomException;
 import org.dataminx.dts.ws.InvalidJobDefinitionException;
-import org.dataminx.dts.ws.JobStatusUpdateException;
-import org.dataminx.dts.ws.NonExistentJobException;
 import org.dataminx.dts.ws.TransferProtocolNotSupportedException;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
@@ -312,16 +310,6 @@ public class Job extends ActionSupport implements SessionAware, ServletRequestAw
             }
             catch (InvalidJobDefinitionException e) {
                 LOGGER.debug("An InvalidJobDefinitionFault was thrown by the DTS Web Service. " + e.getMessage());
-                mServletRequest.setAttribute("submitJobErrorMessage", e.getMessage() + " Try again.");
-                result = SOAP_FAULT_CLIENT_ERROR;
-            }
-            catch (JobStatusUpdateException e) {
-                LOGGER.debug("A JobStatusUpdateFault was thrown by the DTS Web Service. " + e.getMessage());
-                mServletRequest.setAttribute("submitJobErrorMessage", e.getMessage() + " Try again.");
-                result = SOAP_FAULT_CLIENT_ERROR;
-            }
-            catch (NonExistentJobException e) {
-                LOGGER.debug("A NonExistentFault was thrown by the DTS Web Service. " + e.getMessage());
                 mServletRequest.setAttribute("submitJobErrorMessage", e.getMessage() + " Try again.");
                 result = SOAP_FAULT_CLIENT_ERROR;
             }
