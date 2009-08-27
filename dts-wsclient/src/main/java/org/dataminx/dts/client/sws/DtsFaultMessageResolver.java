@@ -46,57 +46,69 @@ public class DtsFaultMessageResolver implements FaultMessageResolver {
         LOGGER.debug("DtsFaultMessageResolver resolveFault()");
         SoapMessage soapMessage = (SoapMessage) message;
         SoapFault soapFault = soapMessage.getSoapBody().getFault();
-        DOMSource detailSource = (DOMSource) soapFault.getFaultDetail().getSource();
-        Node detailNode = detailSource.getNode();
-        NodeList childNodes = detailNode.getChildNodes();
 
-        // need to make sure that all the SoapFault detail always exists
-        Assert.isTrue(childNodes.getLength() > 0, "SoapFault.detail is not empty");
+        // there are times when the Fault thrown by the web service doesn't contain any fault details. in these
+        // occassions, we'll just have to log the basic info we could get from a SoapFault.
+        if (soapFault.getFaultDetail() == null) {
+            LOGGER.error("A SoapFault was thrown by the DTS Web Service which doesn't contain a Fault Detail. "
+                    + "Throwing a CustomException. The SoapFault's StringOrReason: \n"
+                    + soapFault.getFaultStringOrReason());
+            throw new CustomException(soapFault.getFaultStringOrReason());
+        }
+        // else we'll map them to known exceptions
+        else {
+            DOMSource detailSource = (DOMSource) soapFault.getFaultDetail().getSource();
+            Node detailNode = detailSource.getNode();
+            NodeList childNodes = detailNode.getChildNodes();
 
-        for (int i=0; i < childNodes.getLength(); i++) {
-            Node currentNode = childNodes.item(i);
-            if (currentNode.getLocalName().equals(AUTHENTICATION_FAULT) &&
-                    currentNode.getNamespaceURI().equals(DTS_MESSAGES_NS)) {
-                AuthenticationException e = new AuthenticationException(getMessage(currentNode));
-                e.setTimestamp(getTimeStamp(currentNode));
-                throw e;
-            }
-            if (currentNode.getLocalName().equals(AUTHORISATION_FAULT) &&
-                    currentNode.getNamespaceURI().equals(DTS_MESSAGES_NS)) {
-                AuthorisationException e = new AuthorisationException(getMessage(currentNode));
-                e.setTimestamp(getTimeStamp(currentNode));
-                throw e;
-            }
-            if (currentNode.getLocalName().equals(INVALID_JOB_DEFINITION_FAULT) &&
-                    currentNode.getNamespaceURI().equals(DTS_MESSAGES_NS)) {
-                InvalidJobDefinitionException e = new InvalidJobDefinitionException(getMessage(currentNode));
-                e.setTimestamp(getTimeStamp(currentNode));
-                throw e;
-            }
-            if (currentNode.getLocalName().equals(TRANSFER_PROTOCOL_NOT_SUPPORTED_FAULT) &&
-                    currentNode.getNamespaceURI().equals(DTS_MESSAGES_NS)) {
-                TransferProtocolNotSupportedException e = new TransferProtocolNotSupportedException(
-                        getMessage(currentNode));
-                e.setTimestamp(getTimeStamp(currentNode));
-                throw e;
-            }
-            if (currentNode.getLocalName().equals(NON_EXISTENT_JOB_FAULT) &&
-                    currentNode.getNamespaceURI().equals(DTS_MESSAGES_NS)) {
-                NonExistentJobException e = new NonExistentJobException(getMessage(currentNode));
-                e.setTimestamp(getTimeStamp(currentNode));
-                throw e;
-            }
-            if (currentNode.getLocalName().equals(JOB_STATUS_UPDATE_FAULT) &&
-                    currentNode.getNamespaceURI().equals(DTS_MESSAGES_NS)) {
-                JobStatusUpdateException e = new JobStatusUpdateException(getMessage(currentNode));
-                e.setTimestamp(getTimeStamp(currentNode));
-                throw e;
-            }
-            if (currentNode.getLocalName().equals(CUSTOM_FAULT) &&
-                    currentNode.getNamespaceURI().equals(DTS_MESSAGES_NS)) {
-                CustomException e = new CustomException(getMessage(currentNode));
-                e.setTimestamp(getTimeStamp(currentNode));
-                throw e;
+            // need to make sure that all the SoapFault detail always exists
+            Assert.isTrue(childNodes.getLength() > 0, "SoapFault.detail is not empty");
+
+            for (int i=0; i < childNodes.getLength(); i++) {
+                Node currentNode = childNodes.item(i);
+                if (currentNode.getLocalName().equals(AUTHENTICATION_FAULT) &&
+                        currentNode.getNamespaceURI().equals(DTS_MESSAGES_NS)) {
+                    AuthenticationException e = new AuthenticationException(getMessage(currentNode));
+                    e.setTimestamp(getTimeStamp(currentNode));
+                    throw e;
+                }
+                if (currentNode.getLocalName().equals(AUTHORISATION_FAULT) &&
+                        currentNode.getNamespaceURI().equals(DTS_MESSAGES_NS)) {
+                    AuthorisationException e = new AuthorisationException(getMessage(currentNode));
+                    e.setTimestamp(getTimeStamp(currentNode));
+                    throw e;
+                }
+                if (currentNode.getLocalName().equals(INVALID_JOB_DEFINITION_FAULT) &&
+                        currentNode.getNamespaceURI().equals(DTS_MESSAGES_NS)) {
+                    InvalidJobDefinitionException e = new InvalidJobDefinitionException(getMessage(currentNode));
+                    e.setTimestamp(getTimeStamp(currentNode));
+                    throw e;
+                }
+                if (currentNode.getLocalName().equals(TRANSFER_PROTOCOL_NOT_SUPPORTED_FAULT) &&
+                        currentNode.getNamespaceURI().equals(DTS_MESSAGES_NS)) {
+                    TransferProtocolNotSupportedException e = new TransferProtocolNotSupportedException(
+                            getMessage(currentNode));
+                    e.setTimestamp(getTimeStamp(currentNode));
+                    throw e;
+                }
+                if (currentNode.getLocalName().equals(NON_EXISTENT_JOB_FAULT) &&
+                        currentNode.getNamespaceURI().equals(DTS_MESSAGES_NS)) {
+                    NonExistentJobException e = new NonExistentJobException(getMessage(currentNode));
+                    e.setTimestamp(getTimeStamp(currentNode));
+                    throw e;
+                }
+                if (currentNode.getLocalName().equals(JOB_STATUS_UPDATE_FAULT) &&
+                        currentNode.getNamespaceURI().equals(DTS_MESSAGES_NS)) {
+                    JobStatusUpdateException e = new JobStatusUpdateException(getMessage(currentNode));
+                    e.setTimestamp(getTimeStamp(currentNode));
+                    throw e;
+                }
+                if (currentNode.getLocalName().equals(CUSTOM_FAULT) &&
+                        currentNode.getNamespaceURI().equals(DTS_MESSAGES_NS)) {
+                    CustomException e = new CustomException(getMessage(currentNode));
+                    e.setTimestamp(getTimeStamp(currentNode));
+                    throw e;
+                }
             }
         }
     }

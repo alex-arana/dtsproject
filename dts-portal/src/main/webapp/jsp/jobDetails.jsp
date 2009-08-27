@@ -14,8 +14,11 @@
   <h3>Job Status Details</h3>
   Job id: <s:property value="#request.jobResourceKey"/><br/>
   Status: <s:property value="#request.jobStatus"/>
-  <br/>
-  <br/>
-  <a href="DtsMenu_display.action">back</a>
+  <s:if test="#request.jobStatus != 'Done' && #request.jobStatus != 'Failed'">
+  <p/>
+  <a href="DtsJobStatus_getDetails.action?jobResourceKey=<s:property value="#request.jobResourceKey"/>">refresh status of the same job?</a>
+  </s:if>
+  <p/>
+  <a href="DtsMenu_display.action">dts menu</a>
 </body>
 </html>

@@ -8,8 +8,10 @@ import org.dataminx.dts.domain.model.JobStatus;
 import org.dataminx.dts.domain.repo.JobDao;
 import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument;
 import org.dataminx.schemas.dts.x2009.x07.jms.FireUpStepFailureEventDocument;
+import org.dataminx.schemas.dts.x2009.x07.jms.JobErrorEventDetailType;
 import org.dataminx.schemas.dts.x2009.x07.jms.JobEventDetailType;
 import org.dataminx.schemas.dts.x2009.x07.jms.JobEventUpdateRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument.FireUpJobErrorEvent;
 import org.dataminx.schemas.dts.x2009.x07.jms.JobEventUpdateRequestDocument.JobEventUpdateRequest;
 import org.ogf.schemas.dmi.x2008.x05.dmi.StatusValueType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +83,17 @@ public class DtsJobEventUpdateHandler {
         else if (payload instanceof FireUpJobErrorEventDocument) {
             LOGGER.info("DtsJobEventUpdateHandler received a FireUpJobErrorEvent.");
 
-            // TODO: handle the job error event here
+            FireUpJobErrorEvent errorEvent = ((FireUpJobErrorEventDocument) payload).getFireUpJobErrorEvent();
+            String jobWithErrorResourceKey = errorEvent.getJobResourceKey();
+            JobErrorEventDetailType jobErrorDetail = errorEvent.getJobErrorEventDetail();
+
+            // job to update
+            Job job = mJobRepository.findByResourceKey(jobWithErrorResourceKey);
+            job.setStatus(JobStatus.FAILED);
+
+            // TODO: handle other 'Failed' status variations and the jobErrorDetail
+
+            mJobRepository.saveOrUpdate(job);
         }
         else if (payload instanceof FireUpStepFailureEventDocument) {
             LOGGER.info("DtsJobEventUpdateHandler received a FireUpStepFailureEvent.");

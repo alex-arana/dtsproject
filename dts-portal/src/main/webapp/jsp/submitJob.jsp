@@ -15,9 +15,10 @@
 
   <span class="errorMessage"><s:property value="#request.submitJobErrorMessage"/></span>
   <s:if test="#request.jobResourceKey != null">
-      Job has been submitted. Please take note the of the job ID below. You'll need it to query for the job
-      that you just submitted.
-      <p/>Job Id: <s:property value="#request.jobResourceKey"/>
+      Job has been submitted. Please take note the of the job ID below because we are currently not keeping track
+      of all the jobs that you submit to the DTS WebService. If you want to know the status of the job, you can either
+      go to the link provided below or go DTS Menu's <a href="DtsJobStatus_input.action">Get Job Status page</a>.
+      <p/>Job Id: <a href="DtsJobStatus_getDetails.action?jobResourceKey=<s:property value="#request.jobResourceKey"/>"><s:property value="#request.jobResourceKey"/></a>
 
       <p/>Submit another job?
   </s:if>
@@ -26,11 +27,11 @@
   <s:form action="DtsJob_submit">
       <s:textfield name="name" label="Job Name" value="testjob"/>
 
-      <s:textfield name="sourceUri" label="Source URI" value="gsiftp://ng2.vpac.org/etc/termcap" size="50"/>
+      <s:textfield name="sourceUri" label="Source URI" value="ftp://mirror.aarnet.edu.au/pub/firefox/3.5rc3/linux-i686/ta/firefox-3.5rc3.tar.bz2" size="50"/>
       <s:textfield name="sourceCredUsername" label="Source Credential Username"/>
       <s:password name="sourceCredPassword" label="Source Credential Password"/>
 
-      <s:textfield name="targetUri" label="Target URI" value="ftp://dm11.intersect.org.au/upload/termcap-from-ng2.xml" size="50"/>
+      <s:textfield name="targetUri" label="Target URI" value="gsiftp://ng2.sapac.edu.au/tmp/ff-3.5rc3.tar.bz2" size="50"/>
       <s:textfield name="targetCredUsername" label="Target Credential Username"/>
       <s:password name="targetCredPassword" label="Target Credential Password"/>
       <s:submit />

@@ -6,7 +6,6 @@ import static org.dataminx.dts.portal.util.PageValidator.isRefererProvided;
 import static org.dataminx.dts.portal.util.PageValidator.isUserLoggedIn;
 
 import com.opensymphony.xwork2.ActionSupport;
-import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.Validation;
 import java.util.Map;
 import javax.security.auth.Subject;
@@ -26,6 +25,7 @@ import org.dataminx.dts.security.auth.module.MyProxyCredential;
 import org.dataminx.dts.ws.AuthenticationException;
 import org.dataminx.dts.ws.CustomException;
 import org.dataminx.dts.ws.NonExistentJobException;
+import org.springframework.util.Assert;
 import org.springframework.ws.client.WebServiceIOException;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
 
@@ -92,7 +92,7 @@ public class JobStatus extends ActionSupport implements SessionAware, ServletReq
         return mJobResourceKey;
     }
 
-    @RequiredStringValidator(message = "Please enter a job id", trim = true)
+    //@RequiredStringValidator(message = "Please enter a job id", trim = true)
     public void setJobResourceKey(String jobResourceKey) {
         mJobResourceKey = jobResourceKey;
     }
@@ -128,6 +128,7 @@ public class JobStatus extends ActionSupport implements SessionAware, ServletReq
             String jobStatus = null;
 
             try {
+                Assert.notNull(mJobResourceKey);
                 jobStatus = mDtsClient.getJobStatus(mJobResourceKey);
             }
             catch (AuthenticationException e) {

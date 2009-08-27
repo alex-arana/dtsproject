@@ -48,6 +48,7 @@ public class JobJpaDaoImpl implements JobDao {
      * {@inheritDoc}
      */
     public Job findById(Long id) {
+        LOGGER.debug("JobJapDaoImpl findById()");
         return mEntityManager.find(Job.class, id);
     }
 
@@ -55,6 +56,7 @@ public class JobJpaDaoImpl implements JobDao {
      * {@inheritDoc}
      */
     public Job findByResourceKey(String resourceKey) {
+        LOGGER.debug("JobJapDaoImpl findByResourceKey()");
         Query query = mEntityManager.createNamedQuery("Job.findJobByResourceKey");
         query.setParameter("resourceKey", resourceKey);
         return (Job) query.getSingleResult();
@@ -64,6 +66,7 @@ public class JobJpaDaoImpl implements JobDao {
      * {@inheritDoc}
      */
     public List<Job> findByUser(String subjectName) {
+        LOGGER.debug("JobJapDaoImpl findByUser()");
         Query query = mEntityManager.createNamedQuery("Job.findJobByUser");
         query.setParameter("userDN", subjectName);
         return query.getResultList();
@@ -73,6 +76,7 @@ public class JobJpaDaoImpl implements JobDao {
      * {@inheritDoc}
      */
     public List<Job> findByUserAndStatus(String subjectName, JobStatus status) {
+        LOGGER.debug("JobJapDaoImpl findByUserAndStatus()");
         Query query = mEntityManager.createNamedQuery("Job.findJobByUserAndStatus");
         query.setParameter("userDN", subjectName);
         query.setParameter("status", status);
@@ -83,6 +87,7 @@ public class JobJpaDaoImpl implements JobDao {
      * {@inheritDoc}
      */
     public void saveOrUpdate(Job job) {
+        LOGGER.debug("JobJapDaoImpl saveOrUpdate()");
         if (job.getJobId() == null) {
             // save
             LOGGER.debug("save(job)");

@@ -17,6 +17,7 @@ import org.dataminx.dts.domain.repo.JobDao;
 import org.dataminx.dts.jms.JobSubmitQueueSender;
 import org.dataminx.dts.service.DataTransferService;
 import org.dataminx.dts.ws.InvalidJobDefinitionException;
+import org.dataminx.dts.ws.NonExistentJobException;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
@@ -86,14 +87,6 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         // we'll assume that once we get to this point, the job definition that the user
         // submitted is valid (in XML terms) or conforms to the schema
 
-        // TODO: add the WSFault definition in the schema file, if possible
-
-        // now let's check for semantic issues..
-        // assume we require the following fields to be filled up in the job definition document
-        //   * jobname - can't be an empty string
-        //   * uri - can't be an empty string
-        //mJobValidator.validate(submitJobRequest.getSubmitJobRequest().getJobDefinition());
-
         // we now know that at this point, all the required fields from the job definition has
         // been provided by the user. let's give the job a resource key and save it in the DB
         Job newJob = new Job();
@@ -145,9 +138,18 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         // TODO: let's send a cancel message via JMS to the worker node
 
         // after that, let's update the status of this job..
-        Job job = mJobRepository.findByResourceKey(jobResourceKey);
-        job.setStatus(JobStatus.DONE);
-        mJobRepository.saveOrUpdate(job);
+        Job foundJob = null;
+        try {
+            foundJob = mJobRepository.findByResourceKey(jobResourceKey);
+        }
+        catch (Exception e) {
+            LOGGER.error(e.getClass().getName() + " was thrown. " + e.getMessage());
+        }
+        if (foundJob == null)
+            throw new NonExistentJobException("Job doesn't exist.");
+
+        foundJob.setStatus(JobStatus.DONE);
+        mJobRepository.saveOrUpdate(foundJob);
 
     }
 
@@ -161,9 +163,18 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         LOGGER.debug("Suspending job: " + jobResourceKey);
 
         // after that, let's update the status of this job..
-        Job job = mJobRepository.findByResourceKey(jobResourceKey);
-        job.setStatus(JobStatus.SUSPENDED);
-        mJobRepository.saveOrUpdate(job);
+        Job foundJob = null;
+        try {
+            foundJob = mJobRepository.findByResourceKey(jobResourceKey);
+        }
+        catch (Exception e) {
+            LOGGER.error(e.getClass().getName() + " was thrown. " + e.getMessage());
+        }
+        if (foundJob == null)
+            throw new NonExistentJobException("Job doesn't exist.");
+
+        foundJob.setStatus(JobStatus.SUSPENDED);
+        mJobRepository.saveOrUpdate(foundJob);
 
         // TODO: send the suspend job to the JMS layer...
     }
@@ -178,9 +189,18 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         LOGGER.debug("Resuming job " + jobResourceKey);
 
         // after that, let's update the status of this job..
-        Job job = mJobRepository.findByResourceKey(jobResourceKey);
-        job.setStatus(JobStatus.TRANSFERRING);
-        mJobRepository.saveOrUpdate(job);
+        Job foundJob = null;
+        try {
+            foundJob = mJobRepository.findByResourceKey(jobResourceKey);
+        }
+        catch (Exception e) {
+            LOGGER.error(e.getClass().getName() + " was thrown. " + e.getMessage());
+        }
+        if (foundJob == null)
+            throw new NonExistentJobException("Job doesn't exist.");
+
+        foundJob.setStatus(JobStatus.TRANSFERRING);
+        mJobRepository.saveOrUpdate(foundJob);
 
         // TODO: send the resume job to the JMS layer...
     }
@@ -197,7 +217,17 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         // to figure out which status the job is on based on the timing details provided
         // in the DB. if the smarts is not going to be put here, we need to have a way of having
         // the status get updated every time a new job event gets triggered
-        return mJobRepository.findByResourceKey(jobResourceKey).getStatus().getStringValue();
+
+        Job foundJob = null;
+        try {
+            foundJob = mJobRepository.findByResourceKey(jobResourceKey);
+        }
+        catch (Exception e) {
+            LOGGER.error(e.getClass().getName() + " was thrown. " + e.getMessage());
+        }
+        if (foundJob == null)
+            throw new NonExistentJobException("Job doesn't exist.");
+        return foundJob.getStatus().getStringValue();
     }
 
     /**
