@@ -149,6 +149,8 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
      * {@inheritDoc}
      */
     public String getJobStatus(String jobResourceKey) {
+        LOGGER.debug("DataTransferServiceClientImpl getJobStatus()");
+        LOGGER.debug("Getting job status of " + jobResourceKey);
         GetJobStatusRequestDocument request = GetJobStatusRequestDocument.Factory.newInstance();
         GetJobStatusRequest getJobStatusRequest = request.addNewGetJobStatusRequest();
         getJobStatusRequest.setJobResourceKey(jobResourceKey);

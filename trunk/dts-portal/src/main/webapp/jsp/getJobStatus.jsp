@@ -19,7 +19,7 @@
   <s:form action="DtsJobStatus_getDetails">
       <s:textfield name="jobResourceKey" label="Job Id"/>
       <s:submit />
-    </s:form>
-    <a href="DtsMenu_display.action">back</a>
+  </s:form>
+  <a href="DtsMenu_display.action">back</a>
 </body>
 </html>

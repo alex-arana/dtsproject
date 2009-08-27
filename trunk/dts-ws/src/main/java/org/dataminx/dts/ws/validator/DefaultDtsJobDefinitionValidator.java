@@ -32,6 +32,12 @@ public class DefaultDtsJobDefinitionValidator extends AbstractDtsJobDefinitionVa
      */
     @Override
     public void validate(Object object, Errors errors) {
+        LOGGER.debug("DefaultDtsJobDefinitionValidator validate()");
+        // now let's check for semantic issues..
+        // assume we require the following fields to be filled up in the job definition document
+        //   * jobname - can't be an empty string
+        //   * uri - can't be an empty string
+        //mJobValidator.validate(submitJobRequest.getSubmitJobRequest().getJobDefinition());
 
         JobDefinitionType jobDefinition = (JobDefinitionType) object;
 
