@@ -68,7 +68,8 @@ public class JobJpaDaoImplTest extends AbstractTransactionalDataSourceSpringCont
     /**
      * Find job by resource key.
      */
-    @Test public void testFindJobByResourceKey() {
+    @Test
+    public void testFindJobByResourceKey() {
         Job job = mJobRepository.findByResourceKey(SEARCH_GUID);
         Assert.assertEquals("job1", job.getName());
     }

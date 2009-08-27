@@ -1,0 +1,16 @@
+r175
+working prototype (for me anyway)
+dts-portal has been provided
+dts-ws throws proper exceptions
+dts-wsclient can catch and map those exceptions
+xmlbean is used as the OXM
+uses myproxy authentication to access grid file systems
+uses plain username password authentication for others
+uses jaas
+spring validator is used on the dts-ws
+
+
+r133
+working version of the dts that needs a few more features
+implemented before it can be called a prototype. this version
+still uses jaxb
