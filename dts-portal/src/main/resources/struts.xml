@@ -61,6 +61,7 @@
     <action name="DtsJobStatus_input" class="jobStatusAction" method="input">
       <interceptor-ref name="dtsBasicStack"/>
       <result name="success">/jsp/getJobStatus.jsp</result>
+      <result name="login">/jsp/login.jsp</result>
     </action>
 
     <action name="DtsMenu_display" class="jobStatusAction" method="back">
