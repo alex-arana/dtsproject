@@ -14,6 +14,11 @@
 
   <name>MINX-DTS Worker Node</name>
   <artifactId>dts-workernode</artifactId>
+  <packaging>war</packaging>
+
+  <properties>
+    <servlet.version>2.4</servlet.version>
+  </properties>
 
   <build>
     <plugins>
@@ -23,6 +28,20 @@
         <configuration>
           <mainClass>org.dataminx.dts.wn.DtsWorkerNodeCommandLineRunner</mainClass>
           <classpathScope>runtime</classpathScope>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-eclipse-plugin</artifactId>
+        <configuration>
+          <wtpversion>2.0</wtpversion>
+          <useProjectReferences>true</useProjectReferences>
+          <additionalBuildcommands>
+            <buildcommand>org.springframework.ide.eclipse.core.springbuilder</buildcommand>
+          </additionalBuildcommands>
+          <additionalProjectnatures>
+            <projectnature>org.springframework.ide.eclipse.core.springnature</projectnature>
+          </additionalProjectnatures>
         </configuration>
       </plugin>
     </plugins>
@@ -292,6 +311,12 @@
       <groupId>org.easymock</groupId>
       <artifactId>easymockclassextension</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>${servlet.version}</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
