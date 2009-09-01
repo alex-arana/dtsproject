@@ -21,7 +21,13 @@
       <scope>test</scope>
     </dependency>
 
-     <!-- Proxy Light -->
+    <dependency>
+      <groupId>external.jglobus</groupId>
+      <artifactId>cog-jglobus</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Proxy Light -->
     <dependency>
         <groupId>au.org.arcs.auth</groupId>
         <artifactId>simpleProxyLib</artifactId>

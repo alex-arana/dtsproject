@@ -1,0 +1,17 @@
+<web-app
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+    <display-name>Data Transfer (Prototype) Service Worker Node</display-name>
+
+    <servlet>
+        <servlet-name>dts-workernode</servlet-name>
+        <servlet-class>
+            org.dataminx.dts.wn.DtsWorkerNodeServlet
+        </servlet-class>
+        <init-param>
+            <param-name>dataminxDirectory</param-name>
+            <param-value>${user.home}/.dataminx</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+</web-app>
