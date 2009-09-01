@@ -39,6 +39,7 @@
     <dependency>
       <groupId>${dataminx.group}</groupId>
       <artifactId>dts-wsclient</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>

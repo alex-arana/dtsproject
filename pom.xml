@@ -484,6 +484,12 @@
         <groupId>org.springframework.ws</groupId>
         <artifactId>spring-ws-security</artifactId>
         <version>${spring-ws.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>bouncycastle</groupId>
+            <artifactId>bcprov-jdk14</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <!-- JDOM -->
@@ -624,6 +630,14 @@
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>external.jglobus</groupId>
+            <artifactId>cryptix32</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>external.jglobus</groupId>
+            <artifactId>cryptix-asn1</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
 
@@ -729,19 +743,26 @@
         <version>${easymock.version}</version>
       </dependency>
 
+      <dependency>
+        <groupId>external.jglobus</groupId>
+        <artifactId>cog-jglobus</artifactId>
+        <version>1.6.0</version>
+      </dependency>
+
       <!-- Proxy Light -->
       <dependency>
         <groupId>au.org.arcs.auth</groupId>
         <artifactId>simpleProxyLib</artifactId>
         <version>${simpleProxyLib.version}</version>
-        <!--<exclusions>-->
-          <!-- The cryptix*jar files should be put in a shared location especially now that the dts-portal
-               and dts-ws are being run on the same web container
-               ref: http://www.globus.org/mail_archive/discuss/2005/02/msg00163.html
-               TODO: need to figure out how we can enable the jar files again if dts-portal and dts-ws will run
-               on different machines
-          -->
-          <!--<exclusion>
+
+        <!-- The cryptix*jar files should be put in a shared location especially now that the dts-portal
+             and dts-ws are being run on the same web container
+             ref: http://www.globus.org/mail_archive/discuss/2005/02/msg00163.html
+             TODO: need to figure out how we can enable the jar files again if dts-portal and dts-ws will run
+             on different machines
+        -->
+        <exclusions>
+          <exclusion>
             <groupId>external.jglobus</groupId>
             <artifactId>cryptix32</artifactId>
           </exclusion>
@@ -759,14 +780,13 @@
           </exclusion>
           <exclusion>
             <groupId>external.jglobus</groupId>
-            <artifactId>jgss</artifactId>
+            <artifactId>puretls</artifactId>
           </exclusion>
           <exclusion>
             <groupId>bouncycastle</groupId>
             <artifactId>bcprov-jdk15</artifactId>
           </exclusion>
         </exclusions>
-        -->
       </dependency>
 
       <!-- DbUnit for DB testing -->
