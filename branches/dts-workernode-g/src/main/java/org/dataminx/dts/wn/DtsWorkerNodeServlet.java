@@ -19,16 +19,25 @@ public class DtsWorkerNodeServlet extends HttpServlet {
     /** The logger. */
     private static final Log LOGGER = LogFactory.getLog(DtsWorkerNodeServlet.class);
 
+    /**
+     * {@inheritDoc}
+     */
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
         super.doGet(request, response);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
         super.doPost(request, response);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void init(ServletConfig servletConfig) throws ServletException {
         super.init(servletConfig);
         String dataminxDirectory = servletConfig.getInitParameter("dataminxDirectory");
