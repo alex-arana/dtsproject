@@ -9,21 +9,51 @@ At present, we have resorted to a composite schema that combines both JSDL^1^ an
  
 = DMI Discussion Points =
 
-===Non-WSRF DMI rendering (Doc-literal/RESTfull)===
-DMI is currently very WSRF centric. We require a document-literal/RESTfull approach as defined in the rendering at the links below. 
-The key difference between this document-centric rendering and the DMI WSRF-centric approach is that we pass JobIDs back to the client rather than WS-Addressing Endpoint References (the endpoint reference points to a DMI service Instance that was previously created from a factory). 
+===1) Requirement for a Non-WSRF DMI rendering (Doc-literal/RESTfull)===
+DMI is currently very WSRF centric. We require a document-literal/RESTfull approach, i.e. something like the proposal at the link below; 
 
 Schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
+The key difference between this document-centric rendering and the DMI WSRF-centric approach is that we pass JobIDs back to the client rather than WS-Addressing Endpoint References (the endpoint reference points to a DMI service Instance that was previously created from a factory). 
 
-===Multiple transfers in DMI=== 
-The DMI functional spec can be used to define a single data transfer between a single source and sink. To accommodate multiple transfers, the client interacts with DMI to create multiple service instances, each responsible for a separate transfer. This requires many communications between the client and service (e.g. in the case of 1000 separate files).  
-We need to be able to define multiple data transfers within the same request message. To do this, we have devised the following 'dmi-wrapped' rendering that effectively wraps a source and sink DEPR within a single parent element which can be defined/repeated  multiple times within a single request. 
+
+===2) Need to accommodate multiple transfers in DMI=== 
+The DMI functional spec can be used to define a single data transfer between a single source and sink. To accommodate multiple transfers, the client interacts with DMI to create multiple service instances, each responsible for a separate transfer (please comment if i am wrong). This places a large communication overhead on the client since many interactions are required between the client and service (e.g. consider when copying 1000 separate files).  
+We need to be able to define multiple data transfers within the same 'atomic' request message/packet so that the client can be very thin (i.e. fire and forget). To do this, we have devised the following 'dmi-wrapped' rendering that effectively combines a source and sink DEPR within a single element which can be defined/repeated multiple times in a single request. See the pseudo code below;
+{{{
+   Pseudo schema request:
+    ======================
+    <dmi-msg:SubmitWrappedDataTransferRequestMessage>
+        <dmi-msg:Start/>
+        <dmi-msg:WrappedSourceSinkDEPRs>
+            <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
+            <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
+            <dmi-msg:TransferRequirements/>
+        </dmi-msg:WrappedSourceSinkDEPRs>
+        <dmi-msg:WrappedSourceSinkDEPRs>
+            <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
+            <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
+            <dmi-msg:TransferRequirements/>
+        </dmi-msg:WrappedSourceSinkDEPRs>
+        <dmi-msg:WrappedSourceSinkDEPRs>
+            <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
+            <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
+            <dmi-msg:TransferRequirements/>
+        </dmi-msg:WrappedSourceSinkDEPRs>
+        ...
+    </dmi-msg:SubmitWrappedDataTransferRequestMessage>
+
+    Pseudo schema response:
+    =======================
+   <dmi-msg:GetWrappedDataTransferInstanceResponseMessage>
+       <dmi-msg:JobID>jobid-adfafq24-59-4-13</dmi-msg:JobID>
+   </dmi-msg:GetWrappedDataTransferInstanceResponseMessage>
+}}}
 
 Schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
 Doc example: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-WrappedDataTransferRequest.xml
 
 
-===Extensions===
-Add something like the jsdl:CreationOption (overwrite, dontOverwrite, append) to the dmi:
+===3) Required extensions===
+The jsdl CreationOption element (overwrite, dontOverwrite, append) to the dmi:
