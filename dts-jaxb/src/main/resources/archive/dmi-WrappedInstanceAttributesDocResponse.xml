@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : dmi-WrappedInstanceAttributesDocResponse.xml
+    Created on : 09 September 2009, 14:53
+    Author     : djm76
+    Description:
+        Purpose of the document follows.
+-->
+
+<dmi-msg:GetWrappedInstanceAttributesDocumentResponseMessage
+   xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:dmi='http://schemas.ogf.org/dmi/2008/05/dmi'
+   xmlns:dmi-msg='http://schemas.ogf.org/dmi/2009/09/dmi/rendering/wrapped'
+   xsi:schemaLocation='http://schemas.ogf.org/dmi/2008/05/dmi ../dmi.xsd
+   http://schemas.ogf.org/dmi/2009/09/dmi/rendering/wrapped dmi-wrappedMessagesProposals.xsd'>
+
+    <dmi-msg:InstanceAttributes>
+        <dmi:StartTime>2001-10-26T21:32:52.12679</dmi:StartTime>
+        <dmi:State value="Failed:Unclean">
+            <!--<dmi:Detail>
+            </dmi:Detail>-->
+        </dmi:State>
+        <dmi:CompletionTime>2001-10-26T21:32:52.12679</dmi:CompletionTime>
+        <dmi:TotalDataSize>23546452</dmi:TotalDataSize>
+        <dmi:BytesTransferred>23546452</dmi:BytesTransferred>
+        <dmi:Attempts>1</dmi:Attempts>
+    </dmi-msg:InstanceAttributes>
+
+</dmi-msg:GetWrappedInstanceAttributesDocumentResponseMessage>
