@@ -12,7 +12,7 @@ With these issues in mind, parallelisation using threads should occur by:
   * each thread owning its own thread-local security context/session 
   * NOT by each thead sharing a security context/session
 
-The overhead of having a thread-local security session is minimal. Typically, this would allow a transfer to be parallelized into say ~50 threads (certainly no more than 100?? i guess this depends on your network and the number of available high ports). 
+The overhead of having a thread-local security session is minimal. Typically, this would allow a transfer to be parallelized into say ~50 threads (certainly no more than 100?? i guess this depends on your network and the number of available high ports). Special consideration should also be taken when using more than a certain number of threads as the channel/link between two sites/states might be used by other non-DTS users as well. In ARCS, 1000 ports have been opened to be used as ephimeral ports. So if a transfer requires 2 ports, the DTS will have a maximum of 500 threads to use.
 
 === Parallel Apache Commons VFS Example ===
 
@@ -24,4 +24,4 @@ Create a new {{{DefaultFileSystemManager}}} instance *per thread* (note, if usin
 
 === Protocol native Get/Put rather than byte streaming ===
 
-dave todo
+Commons VFS Grid currently uses a byte streaming approach to transferring files from the source to the destination. We plan to investigate on what advantages/disadvantages we could get if change it to do a native Get/Put approach. This approach would require the files to be staged into the workernode/s and staged out to the target destination. The workernodes will then need to have a big and fast hard drive.
