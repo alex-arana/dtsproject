@@ -10,11 +10,11 @@ At present, we have resorted to a composite schema that combines both JSDL^1^ an
 
 
 ===1) Requirement for a Non-WSRF DMI rendering (Doc-literal/RESTfull)===
-DMI is currently very WSRF centric. We require a document-literal/RESTfull approach, i.e. something like the proposal at the link below; 
+DMI is currently very WSRF centric. We require a document-literal/RESTfull approach that does not require WSRF service instances and factories, i.e. something like the proposal at the link below; 
 
 Schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
-The key difference between this document-centric rendering and the DMI WSRF-centric approach is that it passes JobIDs back to the client rather than WS-Addressing Endpoint References (in DMI, the endpoint reference points to a DMI service Instance that was previously created from a factory). 
+The key difference between this document-centric rendering and the DMI WSRF-centric approach is that it passes JobIDs back to the client rather than WS-Addressing Endpoint References (which point to DMI service Instances previously created from a factory). 
 
 
 ===2) Need to accommodate multiple transfers in DMI=== 
@@ -55,10 +55,17 @@ Full Doc example: http://code.google.com/p/dtsproject/source/browse/trunk/dts-ja
    </dmi-msg:GetWrappedDataTransferInstanceResponseMessage>
 }}}
 
+At present the proposal returns a single JobID for the whole 'bulk' transfer (since a bulk transfer can be made up of multiple sub transfers). This implies that any subsequent request that uses this id (e.g. a request for state, or a request for the dmi instance attributes document) refers to the state of the whole 'bulk' transfer. for example, the total number of bytes transferred would be calculated across all the sub-transfers. Similary, if one sub-transfer failed out of ten, then the state of the bulk transfer would be 'failed'.
+
+This could certainly be extended further if it is a requirement to query the state of each separate sub-transfer. To do this, the request message (GetDataTransferInstanceRequestType) would have to be extended to incorporate additional user defined sub-transfer tags/ids elements defined for each separate sub-transfer(e.g. mytransferA, mytransferB, mytransferC). In doing this, any subsequent request made by the client could use a combination of the JobID and the sub-transfer tag/id (ie. '<JobID>:<transferTag>') to isolate that specific sub-transfer. The returned state would then represent only that sub-transfer as per the dmi spec.
+
+Note, it is important that the client assigns the sub-transfer tags/ids while the service assigns the bulk transfer JobID. This is because we do not want to place any significance on the ordering of the sub-transfers in the initial request. 
+
+
 ===3) JSDL CreationOption in DMI ===
 The jsdl CreationOption element, which defines overwrite, dontOverwrite, append enums, to the dmi:
 
 === 4) Extension points in DMI schema ===
 A number of xsd extension points (xsd:any) are required in the current dmi functional spec, e.g in the following DMI elements
-  *dmi:Data 
+  * dmi:Data 
   
