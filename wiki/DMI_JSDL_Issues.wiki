@@ -18,16 +18,16 @@ The key difference between this document-centric rendering and the DMI WSRF-cent
 
 
 ===2) Need to accommodate multiple transfers in DMI=== 
-The DMI functional spec can be used to define a single data transfer between a single source and a single sink. To accommodate multiple transfers, the client interacts with DMI to create multiple service instances, each responsible for a separate transfer (please comment on this if i am wrong!). Potentially, this can place a large communication overhead on the client since many interactions are required between the client and service (e.g. consider the case when copying many different files from a number of different sources). 
+The DMI functional spec can be used to define a single data transfer between a single source and a single sink. To accommodate multiple transfers, the client interacts with DMI to create multiple service instances, each responsible for a separate transfer (please correct me/comment on this if i am wrong!). Potentially, this can place a large communication overhead on the client since many interactions are required between the client and service (e.g. consider the case when copying many different files from a number of different sources). 
  
 We therefore need to be able to define multiple data transfers within the same request message/packet so that the client can be very thin, i.e. fire a single request and periodically poll for status updates (see http://www.eaipatterns.com/MessagingComponentsIntro.html for the 'atomic' message/packet definition). 
 
-To do this, we have devised the following 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the JSDL DataStaging elements that can be defined multiple times within a single JSDL document. See the example schema, doc and pseudo code-frag below;
+To do this, we have devised the following 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document. See the example schema, doc and pseudo code-frag below;
 
-Schema: 
+Schema: <br/>
 http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
-Full Doc example: 
+Full Doc example: <br/>
 http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-WrappedDataTransferRequest.xml
 
 {{{
@@ -60,7 +60,7 @@ http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resour
    </dmi-msg:GetWrappedDataTransferInstanceResponseMessage>
 }}}
 
-At present the proposal above returns a single JobID for the whole 'bulk' transfer (since a bulk transfer can be made up of multiple sub transfers). This implies that any subsequent request that uses this id (e.g. a request for state, or a request for the dmi instance attributes document) refers to the state of the whole 'bulk' transfer. for example, the total number of bytes transferred would be calculated across all the sub-transfers. Similarly, if one sub-transfer failed out of ten, then the state of the bulk transfer would be 'failed'.
+At present the proposal above returns a single JobID for the whole 'bulk' transfer (since a bulk transfer can be made up of multiple sub transfers). This implies that any subsequent request that uses this JobID(e.g. a request for state, or a request for the dmi instance attributes document) refers to the state of the whole 'bulk' transfer. For example, the total number of bytes transferred would be calculated across all the sub-transfers. Similarly, if one sub-transfer failed out of ten, then the state of the bulk transfer would be 'failed'. Note, this has similar semantics to defining a [data EPR] that represents a data aggregate residing on the same source, such as a collection of files (see current DMI spec). 
 
 This could certainly be extended further if it is a requirement to query the state of each separate sub-transfer. To do this, the request message (GetDataTransferInstanceRequestType) would have to be extended to incorporate additional user defined sub-transfer tags/ids elements defined for each separate sub-transfer(e.g. mytransferA, mytransferB, mytransferC). In doing this, any subsequent request made by the client could use a combination of the JobID and the sub-transfer tag/id {{{(ie. '<JobID>:<transferTag>')}}} to isolate that specific sub-transfer. The returned state would then represent only that sub-transfer as per the dmi spec.
 
