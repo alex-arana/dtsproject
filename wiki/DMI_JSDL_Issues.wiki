@@ -1,22 +1,29 @@
 A comparison between DMI and JSDL and some related issues.
 
-= Introduction =
+At present, we have resorted to a composite schema that combines both JSDL^1^ and DMI^2^ elements with our own proprietary extensions. Ideally, we would like to produce a standards compliant message format and Web Service implementation (rather than resorting to our proprietary format). This wiki identifies some key issues/extensions.  
 
-At present, we have resorted to a composite schema that combines both JSDL^1^ and DMI^2^ elements with our own proprietary extensions. Ideally, we would like to produce a standards compliant message format and Web Service implementation. This wiki identifies some key issues/extensions.  
+^1^JSDL HPC File Staging Profile: http://www.ogf.org/documents/GFD.135.pdf
 
-^1^OGSA Data Movement Interface: http://www.ogf.org/documents/GFD.135.pdf
+^2^OGSA Data Movement Interface: http://www.ogf.org/documents/GFD.135.pdf
 
-^2^JSDL HPC File Staging Profile: http://www.ogf.org/documents/GFD.135.pdf 
+ 
+= DMI Discussion Points =
 
+===Non-WSRF DMI rendering (Doc-literal/RESTfull)===
+DMI is currently very WSRF centric. We require a document-literal/RESTfull approach as defined in the rendering at the links below. 
+The key difference between this document-centric rendering and the DMI WSRF-centric approach is that we pass JobIDs back to the client rather than WS-Addressing Endpoint References (the endpoint reference points to a DMI service Instance that was previously created from a factory). 
 
-= Details =
+Schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
+
 
 ===Multiple transfers in DMI=== 
+The DMI functional spec can be used to define a single data transfer between a single source and sink. To accommodate multiple transfers, the client interacts with DMI to create multiple service instances, each responsible for a separate transfer. This requires many communications between the client and service (e.g. in the case of 1000 separate files).  
+We need to be able to define multiple data transfers within the same request message. To do this, we have devised the following 'dmi-wrapped' rendering that effectively wraps a source and sink DEPR within a single parent element which can be defined/repeated  multiple times within a single request. 
 
-===Non-WSRF DMI rendering===
-DMI is currently very 'WSRF' centric. We are working to provide a 'DMI like' service that has a document-literal/RESTFULL rendering. 
 Schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
+
 Doc example: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-WrappedDataTransferRequest.xml
+
 
 ===Extensions===
 Add something like the jsdl:CreationOption (overwrite, dontOverwrite, append) to the dmi:
