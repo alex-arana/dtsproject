@@ -1,47 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  The OGF takes no position regarding the validity or scope of any
-  intellectual property or other rights that might be claimed to
-  pertain to the implementation or use of the technology described
-  in this document or the extent to which any license under such
-  rights might or might not be available; neither does it represent
-  that it has made any effort to identify any such rights.  Copies
-  of claims of rights made available for publication and any
-  assurances of licenses to be made available, or the result of an
-  attempt made to obtain a general license or permission for the use
-  of such proprietary rights by implementers or users of this
-  specification can be obtained from the OGF Secretariat.
+    Document   : dmi-wrappedMessagesProposals.xml
+    Created on : 09 September 2009, 14:19
+    Author     : David Meredith
+    Description:
+       Defines multiple WrappedSourceSinkDEPR elements within a single
+       GetWrappedDataTransferInstanceRequestMessage. We would like to be able
+       to define this type data transfer request in order to transfer multiple
+       files/directories witin a single 'atomic' request message/packet (see below).
 
-  The OGF invites any interested party to bring to its attention any
-  copyrights, patents or patent applications, or other proprietary
-  rights which may cover technology that may be required to practice
-  this recommendation.  Please address the information to the OGF
-  Executive Director.
+       See http://www.eaipatterns.com/MessagingComponentsIntro.html
+       Quote from eaipatterns:
+       "A Message is an atomic packet of data that can be transmitted on a channel.
+       Thus to transmit data, an application must break the data into one or more
+       packets, wrap each packet as a message, and then send the message on a
+       channel. "
 
-  This document and the information contained herein is provided on
-  an "As Is" basis and the OGF disclaims all warranties, express or
-  implied, including but not limited to any warranty that the use
-  of the information herein will not infringe any rights or any
-  implied warranties of merchantability or fitness for a particular
-  purpose.
 
-  Copyright (C) Open Grid Forum (2008). All Rights Reserved.
+       For example, a WS could implement the GetWrappedDataTransferInstanceRequest
+       operation which accepts a single document (packet).
 
-  This document and translations of it may be copied and furnished to
-  others, and derivative works that comment on or otherwise explain
-  it or assist in its implementation may be prepared, copied, published
-  and distributed, in whole or in part, without restriction of any
-  kind, provided that the above copyright notice and this paragraph are
-  included on all such copies and derivative works. However, this
-  document itself may not be modified in any way, such as by removing
-  the copyright notice or references to the OGF or other organizations,
-  except as needed for the purpose of developing Grid Recommendations
-  in which case the procedures for copyrights defined in the OGF
-  Document process must be followed, or as required to translate it
-  into languages other than English.
+       Therefore, rather than define a single source and sink as before:
+           GetDataTransferInstance( [source DEPR], [sink DEPR], [transfer requirements] );
+       We define:
+           SubmitWrappedDataTransferInstanceRequestMessage ;
 
-  The limited permissions granted above are perpetual and will not be
-  revoked by the OGF or its successors or assignees.
+
+    Pseudo schema request:
+    ======================
+    <dmi-msg:SubmitWrappedDataTransferRequestMessage>
+        <dmi-msg:Start/>
+        <dmi-msg:WrappedSourceSinkDEPRs>
+            <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
+            <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
+            <dmi-msg:TransferRequirements/>
+        </dmi-msg:WrappedSourceSinkDEPRs>
+        <dmi-msg:WrappedSourceSinkDEPRs>
+            <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
+            <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
+            <dmi-msg:TransferRequirements/>
+        </dmi-msg:WrappedSourceSinkDEPRs>
+        <dmi-msg:WrappedSourceSinkDEPRs>
+            <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
+            <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
+            <dmi-msg:TransferRequirements/>
+        </dmi-msg:WrappedSourceSinkDEPRs>
+        ...
+    </dmi-msg:SubmitWrappedDataTransferRequestMessage>
+
+    Pseudo schema response:
+    =======================
+   <dmi-msg:GetWrappedDataTransferInstanceResponseMessage>
+       <dmi-msg:JobID>jobid-adfafq24-59-4-13</dmi-msg:JobID>
+   </dmi-msg:GetWrappedDataTransferInstanceResponseMessage>
 -->
 <schema
 targetNamespace="http://schemas.ogf.org/dmi/2009/09/dmi/rendering/wrapped"
@@ -53,7 +64,7 @@ xmlns:wsa="http://www.w3.org/2005/08/addressing" elementFormDefault="qualified">
 
   <!-- ======================================================== -->
   <!-- ==                                                    == -->
-  <!-- == OGSA DMI WS-I Message model                        == -->
+  <!-- == OGSA DMI WS-I 'Wrapped' Message model proposal (draft)  == -->
   <!-- ==                                                    == -->
   <!-- == This XML Schema document defines the XML elements  == -->
   <!-- == necessary to define WS-I compliant WS operations   == -->
@@ -186,9 +197,14 @@ xmlns:wsa="http://www.w3.org/2005/08/addressing" elementFormDefault="qualified">
     <sequence>
         <!--
         define optional start element so that you don't have to submit an extra
-        dmi-wrapped:StartRequestMessage to the service service
+        dmi-wrapped:StartRequestMessage to the service service. if not provided,
+        then follow dmi state model. 
         -->
         <element name="Start" minOccurs="0" maxOccurs="1"/>
+        <!--
+        here we wrap multiple GetDataTransferInstanceRequestTypes to provide
+        multiple data transfers.
+        -->
         <element name="WrappedSourceSinkDEPR" type="dmi-wrapped:GetDataTransferInstanceRequestType" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
   </complexType>
@@ -205,6 +221,31 @@ xmlns:wsa="http://www.w3.org/2005/08/addressing" elementFormDefault="qualified">
   <element name="GetWrappedDataTransferInstanceResponseMessage" type="dmi-wrapped:GetWrappedDataTransferInstanceResponseType"/>
   <complexType name="GetWrappedDataTransferInstanceResponseType">
     <sequence>
+        <!--
+        At present return a single JobID for the whole 'bulk' transfer
+        (since a bulk transfer can be made up of multiple sub transfers).
+        This implies that any subsequent request that uses this id (e.g. a request for state,
+        or a request for the dmi instance attributes document) refers to the state of the
+        whole 'bulk' transfer. for example, the total number of bytes transfered
+        would be calculated across all the sub-transfers. Similary, if one sub
+        transfer failed out of ten, then the state of the bulk transfer would be
+        'failed'.
+
+        This could certainly be extended further if it is a requirement to query
+        the state of each separate sub-transfer. To do this, the request message
+        (GetDataTransferInstanceRequestType) would
+        have to be extended to incorporate additional user defined sub-transfer tags/ids
+        elements defined for each separate sub-transfer
+        (e.g. mytransferA, mytransferB, mytransferC). In doing
+        this, any subsequent request made by the client could use a combination of the JobID and the
+        sub-transfer tag/id (ie. '<JobID>:<transferTag>') to isolate that specific
+        sub-transfer. The returned state would then represent only that sub-transfer 
+        as per the dmi spec.
+        Note, it is important that the client assigns the sub-transfer tags/ids
+        while the service assigns the bulk transfer JobID. This is because we do
+        not want to place any significance on the ordering of the sub-transfers
+        in the intial request. 
+        -->
       <element ref="dmi-wrapped:JobID"/>
     </sequence>
   </complexType>
@@ -242,7 +283,10 @@ xmlns:wsa="http://www.w3.org/2005/08/addressing" elementFormDefault="qualified">
         note, the InstanceAttributes doc represents the whole 'wrapped' transfer
         which can consist of multiple sub-transfers. Consequently, attributes
         such as TotalDataSize, BytesTransferred, StartTime, Attepts etc are
-        calculated across all the sub-transfers.
+        calculated across all the sub-transfers. This could easily be extended
+
+        Refer to above definition of GetWrappedDataTransferInstanceResponseMessage
+        for more info.
         -->
         <element name="InstanceAttributes" type="dmi-wrapped:InstanceAttributesType"/>
     </sequence>
