@@ -1,5 +1,4 @@
 #labels DMI,JSDL
-
 At present, we have resorted to a composite schema that combines both JSDL^1^ and DMI^2^ elements with our own proprietary extensions. Ideally, we would like to produce a standards compliant message format and Web Service implementation (rather than resorting to our proprietary format). This wiki identifies some key issues/extensions.  
 
 ^1^JSDL HPC File Staging Profile: http://www.ogf.org/documents/GFD.135.pdf
@@ -14,7 +13,7 @@ DMI is currently very WSRF centric. We require a document-literal/RESTfull appro
 
 Schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
-The key difference between this document-centric rendering and the DMI WSRF-centric approach is that we pass JobIDs back to the client rather than WS-Addressing Endpoint References (the endpoint reference points to a DMI service Instance that was previously created from a factory). 
+The key difference between this document-centric rendering and the DMI WSRF-centric approach is that it passes JobIDs back to the client rather than WS-Addressing Endpoint References (in DMI, the endpoint reference points to a DMI service Instance that was previously created from a factory). 
 
 
 ===2) Need to accommodate multiple transfers in DMI=== 
