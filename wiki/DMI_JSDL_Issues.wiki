@@ -21,9 +21,11 @@ The key difference between this document-centric rendering and the DMI WSRF-cent
 The DMI functional spec can be used to define a single data transfer between a single source and sink. To accommodate multiple transfers, the client interacts with DMI to create multiple service instances, each responsible for a separate transfer (please comment if i am wrong). This places a large communication overhead on the client since many interactions are required between the client and service (e.g. consider when copying 1000 separate files).  
 We need to be able to define multiple data transfers within the same 'atomic' request message/packet so that the client can be very thin (i.e. fire and forget). To do this, we have devised the following 'dmi-wrapped' rendering that effectively combines a source and sink DEPR within a single element which can be defined multiple times in a single request. This is very similar to the JSDL DataStaging elements that can be defined multiple times within a single JSDL doc. See the pseudo code below;
 
-Schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
+Schema: 
+http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
-Full Doc example: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-WrappedDataTransferRequest.xml
+Full Doc example: 
+http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-WrappedDataTransferRequest.xml
 
 {{{
    Pseudo schema request:
@@ -63,7 +65,20 @@ Note, in this scenario, it would be important that the client assigns the sub-tr
 
 
 ===3) JSDL CreationOption in DMI ===
-The jsdl CreationOption element, which defines overwrite, dontOverwrite, append enums, to the dmi:
+Add the the {{{<jsdl:CreationFlag>}}} element, which defines overwrite, dontOverwrite and append enums, to the {{{<dmi:TransferRequirementsType>}}}, e.g. something like the following, but define the CreationFlag within the dmi namespace ?
+
+{{{
+        <dmi-msg:TransferRequirements>
+            <!--<dmi:StartNotBefore></dmi:StartNotBefore>
+            <dmi:EndNoLaterThan>6</dmi:EndNoLaterThan>
+            <dmi:StayAliveTime>6</dmi:StayAliveTime>-->
+            <dmi:MaxAttempts>2</dmi:MaxAttempts>
+            <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+        </dmi-msg:TransferRequirements>
+
+}}} 
+
+
 
 === 4) Extension points in DMI schema ===
 A number of xsd extension points (xsd:any) are required in the current dmi functional spec, e.g in the following DMI elements
