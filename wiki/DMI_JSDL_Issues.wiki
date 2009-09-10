@@ -1,4 +1,5 @@
-A comparison between DMI and JSDL and some related issues.
+#labels DMI,JSDL
+DMI, JSDL and some related issues.
 
 At present, we have resorted to a composite schema that combines both JSDL^1^ and DMI^2^ elements with our own proprietary extensions. Ideally, we would like to produce a standards compliant message format and Web Service implementation (rather than resorting to our proprietary format). This wiki identifies some key issues/extensions.  
 
@@ -19,7 +20,12 @@ The key difference between this document-centric rendering and the DMI WSRF-cent
 
 ===2) Need to accommodate multiple transfers in DMI=== 
 The DMI functional spec can be used to define a single data transfer between a single source and sink. To accommodate multiple transfers, the client interacts with DMI to create multiple service instances, each responsible for a separate transfer (please comment if i am wrong). This places a large communication overhead on the client since many interactions are required between the client and service (e.g. consider when copying 1000 separate files).  
-We need to be able to define multiple data transfers within the same 'atomic' request message/packet so that the client can be very thin (i.e. fire and forget). To do this, we have devised the following 'dmi-wrapped' rendering that effectively combines a source and sink DEPR within a single element which can be defined/repeated multiple times in a single request. See the pseudo code below;
+We need to be able to define multiple data transfers within the same 'atomic' request message/packet so that the client can be very thin (i.e. fire and forget). To do this, we have devised the following 'dmi-wrapped' rendering that effectively combines a source and sink DEPR within a single element which can be defined multiple times in a single request. This is very similar to the JSDL DataStaging elements that can be defined multiple times within a single JSDL doc. See the pseudo code below;
+
+Schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
+
+Full Doc example: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-WrappedDataTransferRequest.xml
+
 {{{
    Pseudo schema request:
     ======================
@@ -50,10 +56,10 @@ We need to be able to define multiple data transfers within the same 'atomic' re
    </dmi-msg:GetWrappedDataTransferInstanceResponseMessage>
 }}}
 
-Schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
+===3) JSDL CreationOption in DMI ===
+The jsdl CreationOption element, which defines overwrite, dontOverwrite, append enums, to the dmi:
 
-Doc example: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-WrappedDataTransferRequest.xml
-
-
-===3) Required extensions===
-The jsdl CreationOption element (overwrite, dontOverwrite, append) to the dmi:
+=== 4) Extension points in DMI schema ===
+A number of xsd extension points (xsd:any) are required in the current dmi functional spec, e.g in the following DMI elements
+  *dmi:Data 
+  
