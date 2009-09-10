@@ -1,4 +1,4 @@
-#a comparison between DMI and JSDL and some related issues.
+A comparison between DMI and JSDL and some related issues.
 
 = Introduction =
 
