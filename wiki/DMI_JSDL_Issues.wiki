@@ -1,5 +1,5 @@
 #labels DMI,JSDL
-= DMI Discussion Points =
+= DMI Discussion Points / Proposal =
 
 == Intro ==
 At present, we have resorted to a composite schema that combines both JSDL^1^ and DMI^2^ elements with our own proprietary extensions. Ideally, we would like to produce a standards compliant message format and Web Service implementation (rather than resorting to our proprietary format). This wiki identifies some issues/discussion points and proposed extensions.  
