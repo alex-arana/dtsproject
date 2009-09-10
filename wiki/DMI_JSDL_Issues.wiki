@@ -14,8 +14,7 @@ DMI is currently very WSRF centric. We require a document-literal/RESTfull appro
 
 Schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
-The key difference between this document-centric rendering and the DMI WSRF-centric approach is that it passes JobIDs back to the client rather than WS-Addressing Endpoint References (which point to DMI service Instances previously created from a factory). 
-
+The key difference between this document-centric rendering (above) and the DMI WSRF-centric approach, is that the doc-centric approach passes a JobID back to the client rather than a WS-Addressing Endpoint Reference (which point to a DMI service Instance previously created from a factory). In addition, since there is no separate service instance, the client must submit the JobID to the service on each subsequent status request/query. 
 
 ===2) Need to accommodate multiple transfers in DMI=== 
 The DMI functional spec can be used to define a single data transfer between a single source and a single sink. To accommodate multiple transfers, the client interacts with DMI to create multiple service instances, each responsible for a separate transfer (please correct me/comment on this if i am wrong!). Potentially, this can place a large communication overhead on the client since many interactions are required between the client and service (e.g. consider the case when copying many different files from a number of different sources). 
