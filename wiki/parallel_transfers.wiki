@@ -1,0 +1,15 @@
+Thoughts on perfomring parallel transfers
+
+= Parallel transfer considerations =
+
+Each connection to a file system (e.g. SRB) spawns a server process listening on a port in the range you have specified to the file system (ephemeral port range). That server process is connected to by the client and receives commands and data from that client. It is a request/response communication protocol where each side waits for the other to finish before issuing another instruction. If one were to have multiple client threads sharing the same security context (session) and server process, then things would get very confused because the server would be receiving concurrent requests when it is meant to be processing a response for another thread etc. 
+
+In terms of how many authenticated sessions a server can manage, this is usually limited by two factors: 
+a) Firstly, the number of high ports available for use by a server process, and 
+b) Secondly any protocol specific issues, e.g. for srb, the number of permitted backend DB connections since usually one srbServer process ultimately means 1 DB connection by the MCAT server i.e. SRB does not do connection pooling and reuse.
+
+With these issues in mind, parallelisation using threads should occur by:
+  *each thread owning a thread-local security context/session 
+  *NOT by each thead sharing a security context/session
+
+The overhead of having a thread-local security session is minimal. Typically, this would allow a transfer to be parallelized into say ~50 threads (certainly no more than 100). 
