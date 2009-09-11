@@ -112,7 +112,7 @@ A number of xsd extension points (xsd:any) are required in the current dmi funct
 
 === HPC file staging profile ===
 
-The HPC file staging profile supports a credential nested within the {{{<DataStaging>}}} element. However, this supports only one credential, either for the {{{<Source>}}} or {{{<Target>}}}, not both. 
+The HPC file staging profile supports a credential nested within the {{{<DataStaging>}}} element. However, this supports only one credential, either for the {{{<Source>}}} or {{{<Target>}}}, not both, e.g:
 
 {{{
 <DataStaging>
@@ -163,4 +163,7 @@ To get round this issue, we redefined the jsdl hpc schema slightly (using xsd:re
     </mjsdl:DataTransfer>
 
 }}}
+
+Take a look at for more details: <br/>
+http://code.google.com/p/dtsproject/source/browse/trunk/dts-schema/src/main/resources 
   
