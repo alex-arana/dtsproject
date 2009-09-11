@@ -5,7 +5,7 @@
 We are implementing a scalable data transfer service that performs recursive directory copying between different (incompatible) storage/file systems, including, GridFTP, iRODS, SRB, FTP, SFTP, HTTP(S), local FILE, WEBDAV?. 
 The service is based on an architecture that deploys data transfer worker agents implemented using Apache Virtual File System (VFS) into a fully scalable worker node pool/cloud. Remote worker nodes are invoked via asynchronous message queues, which are implemented using JMS queues and topics (i.e. asynchronous point-to-point and publish-subscribe message channels). Alternatively, a worker agent can be deployed locally for directly enabling single client applications.  
 
-=== Proposed Message Format / Messaging Model ===
+== Proposed Message Format / Messaging Model ==
 To implement this service, we require a message format for describing a data transfer that may consist of multiple data sources and sinks. At present, we have resorted to a composite schema for defining our message formats that combines both JSDL^1^ and DMI^2^ elements with our own proprietary extensions. Ideally, we would like to produce a standards compliant message format (rather than resorting to our proprietary format). 
 This wiki identifies some issues/discussion points and proposals.  
 
@@ -30,6 +30,7 @@ http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resour
 
 *Doc example:* <br/>
 http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-WrappedDataTransferRequest.xml
+
 
 ==Proposal features/requirements:==
 
