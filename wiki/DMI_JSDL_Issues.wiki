@@ -103,6 +103,6 @@ Add the the {{{<jsdl:CreationFlag>}}} element, which defines overwrite, dontOver
 
 === 4) Extension points in DMI schema ===
 A number of xsd extension points (xsd:any) are required in the current dmi functional spec, e.g in the following DMI elements
-  * Data element 
-  * list elements here 
+  * {{{<dmi:Data/>}}} element 
+  * list elements here - is it a good idea to add {{{<xsd:any/>}}} to all dmi complex types ? 
   
