@@ -31,7 +31,7 @@ http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resour
 *Doc example:* <br/>
 http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-WrappedDataTransferRequest.xml
 
-Some features/requirements of the proposal are discussed below: 
+==Proposal features/requirements:==
 
 ===1) Doc-literal/RESTfull (Non-WSRF) DMI rendering ===
 At present, DMI appears to be WSRF centric. We require a document-literal type approach that does not require WSRF service factories and instances (accessed via WS-Addressing Endpoint References). 
