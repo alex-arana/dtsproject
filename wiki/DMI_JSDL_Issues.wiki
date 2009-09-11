@@ -107,4 +107,60 @@ Add the the {{{<jsdl:CreationFlag>}}} element, which defines overwrite, dontOver
 A number of xsd extension points (xsd:any) are required in the current dmi functional spec, e.g in the following DMI elements
   * {{{<dmi:Data/>}}} element 
   * list elements here - is it a good idea to add {{{<xsd:any/>}}} to all dmi complex types much like JSDL ? 
+
+== Other Stuff ==
+
+=== HPC file staging profile ===
+
+The HPC file staging profile supports a credential nested within the {{{<DataStaging>}}} element. However, this supports only one credential, either for the {{{<Source>}}} or {{{<Target>}}}, not both. 
+
+{{{
+<DataStaging>
+    <FileName>output.txt</FileName>
+    <CreationFlag>overwrite</CreationFlag>
+    <Target>
+       <URI>ftp://server.inthe.sky:1234</URI>
+    </Target>
+    <Credential xmlns="http://schemas.ogf.org/hpcp/2007/11/ac">
+      <UsernameToken xmlns="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+        <Username>demo</Username>
+        <Password>pass</Password>
+      </UsernameToken>
+    </Credential>
+</DataStaging>
+}}}
+
+To get round this issue, we redefined the jsdl hpc schema slightly (using xsd:redef) to overide and modify the existing jsdl schema to: 
+  # redefine {{{<jsdl:DataStaging>}}} as {{{<jsdl:DataTransfer>}}}
+  # allow the nesting of credentials in the source and target elements (as below): 
+
+{{{
+   <mjsdl:DataTransfer>
+      <mjsdl:Source>
+        <jsdl:URI>gsiftp://ng2.vpac.org/etc/termcap</jsdl:URI>
+        <mjsdl:Credential>
+            <mjsdl:MyProxyToken>
+                <mjsdl:MyProxyUsername>${myproxy.username}</mjsdl:MyProxyUsername>
+                <mjsdl:MyProxyPassword>${myproxy.password}</mjsdl:MyProxyPassword>
+                <mjsdl:MyProxyServer>myproxy2.arcs.org.au</mjsdl:MyProxyServer>
+                <mjsdl:MyProxyPort>7512</mjsdl:MyProxyPort>
+            </mjsdl:MyProxyToken>
+        </mjsdl:Credential>
+      </mjsdl:Source>
+      <mjsdl:Target>
+        <jsdl:URI>ftp://dm11.intersect.org.au/upload/pom-from-pub.xml</jsdl:URI>
+        <mjsdl:Credential>
+            <wsse:UsernameToken>
+              <wsse:Username>${ftp.username}</wsse:Username>
+              <wsse:PasswordString>${ftp.password}</wsse:PasswordString>
+            </wsse:UsernameToken>
+        </mjsdl:Credential>
+      </mjsdl:Target>
+      <mjsdl:TransferRequirements>
+        <dmi:MaxAttempts>0</dmi:MaxAttempts>
+        <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+      </mjsdl:TransferRequirements>
+    </mjsdl:DataTransfer>
+
+}}}
   
