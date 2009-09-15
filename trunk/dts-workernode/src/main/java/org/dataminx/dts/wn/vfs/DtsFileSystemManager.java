@@ -10,14 +10,17 @@ import static org.dataminx.dts.wn.common.DtsWorkerNodeConstants.WS_SECURITY_NAME
 import static org.dataminx.dts.wn.common.util.XmlBeansUtils.extractElementTextAsString;
 import static org.dataminx.dts.wn.common.util.XmlBeansUtils.selectAnyElement;
 
+import java.io.File;
 import javax.xml.namespace.QName;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemOptions;
 import org.apache.commons.vfs.auth.StaticUserAuthenticator;
+import org.apache.commons.vfs.impl.DefaultFileReplicator;
 import org.apache.commons.vfs.impl.DefaultFileSystemConfigBuilder;
 import org.apache.commons.vfs.impl.StandardFileSystemManager;
 import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
+import org.apache.commons.vfs.provider.temp.TemporaryFileProvider;
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.DtsException;
 import org.dataminx.dts.wn.service.DtsFileSystemAuthenticationException;
@@ -41,6 +44,7 @@ import org.springframework.util.Assert;
  * DTS File System Manager implementation.
  *
  * @author Alex Arana
+ * @author Gerson Galang
  */
 @Component
 @Scope("singleton")
@@ -64,6 +68,26 @@ public class DtsFileSystemManager extends StandardFileSystemManager implements I
 
     /** Default set of options for most file systems. */
     private FileSystemOptions mDefaultFileSystemOptions = new DtsFileSystemOptions();
+
+    /**
+     * {@inheritDoc}
+     */
+    public void init() throws FileSystemException {
+        super.init();
+
+        // let's specify our own tmp directory to be used by our own tmp scheme if providers.xml doesn't
+        // list tmp as a scheme to be supported
+        if (!hasProvider("tmp")) {
+            // let's add tmp as a protocol to be supported as well
+            File xFile = new File(System.getProperty("java.io.tmpdir", "/tmp"));
+            if (!xFile.exists()) {
+                throw new IllegalStateException(
+                        "cannot allocate temporary directory. Please set java.io.tmpdir system property");
+            }
+            addProvider("tmp", new TemporaryFileProvider(xFile));
+            setTemporaryFileStore(new DefaultFileReplicator(xFile));
+        }
+    }
 
     /**
      * Locates a file by URI using the default FileSystemOptions for file-system creation.

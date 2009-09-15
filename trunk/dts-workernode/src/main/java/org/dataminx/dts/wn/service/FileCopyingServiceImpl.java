@@ -5,6 +5,7 @@
  */
 package org.dataminx.dts.wn.service;
 
+import java.io.IOException;
 import org.apache.commons.vfs.Capability;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSelector;
@@ -19,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import uk.ac.dl.escience.vfs.util.MarkerListenerImpl;
+import uk.ac.dl.escience.vfs.util.VFSUtil;
 
 /**
  * Default implementation of {@link FileCopyingService}.
@@ -92,7 +95,21 @@ public class FileCopyingServiceImpl implements FileCopyingService {
         Assert.notNull(destinationFile);
 
         //TODO handle overwrites
-        destinationFile.copyFrom(sourceFile, DEFAULT_FILE_SELECTOR);
+        // only works on file to file type of transfer
+        //destinationFile.copyFrom(sourceFile, DEFAULT_FILE_SELECTOR);
+
+        //TODO we might later decide to not use VFSUtil.copy if we start tracking a file copy progress.
+        //     dealing directly with ObjectFiles will give more control on what we do in every step of the
+        //     data transfer process.
+        try {
+            VFSUtil.copy(sourceFile, destinationFile, new MarkerListenerImpl(), true);
+        }
+        catch (IOException e) {
+            LOG.error(String.format("IOException was thrown while trying to copy source '%s' to target '%s\n%s",
+                    sourceFile.getURL().toString(), destinationFile.getURL().toString(), e.getMessage()));
+            throw new FileSystemException(e.getMessage(), e.getCause());
+        }
+
         if (mPreserveLastModified
             && sourceFile.getFileSystem().hasCapability(Capability.GET_LAST_MODIFIED)
             && destinationFile.getFileSystem().hasCapability(Capability.SET_LAST_MODIFIED_FILE))
