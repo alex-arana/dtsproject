@@ -5,6 +5,8 @@
  */
 package org.dataminx.dts.wn.service;
 
+import org.dataminx.dts.vfs.DtsFileSystemManager;
+
 import java.io.IOException;
 import org.apache.commons.vfs.Capability;
 import org.apache.commons.vfs.FileObject;
@@ -12,7 +14,6 @@ import org.apache.commons.vfs.FileSelector;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.Selectors;
 import org.dataminx.dts.wn.common.util.StopwatchTimer;
-import org.dataminx.dts.wn.vfs.DtsFileSystemManager;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

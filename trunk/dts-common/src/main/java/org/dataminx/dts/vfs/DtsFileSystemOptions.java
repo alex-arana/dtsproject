@@ -3,7 +3,7 @@
  *
  * License: To Be Announced
  */
-package org.dataminx.dts.wn.vfs;
+package org.dataminx.dts.vfs;
 
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemOptions;
