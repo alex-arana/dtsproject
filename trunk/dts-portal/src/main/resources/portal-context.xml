@@ -39,12 +39,12 @@
   <bean id="dtsFaultMessageResolver" class="org.dataminx.dts.client.sws.DtsFaultMessageResolver" />
 
 
-  <bean id="userAction" class="org.dataminx.dts.portal.User" scope="prototype"/>
-  <bean id="jobAction" class="org.dataminx.dts.portal.Job" scope="prototype">
+  <bean id="userAction" class="org.dataminx.dts.portal.server.User" scope="prototype"/>
+  <bean id="jobAction" class="org.dataminx.dts.portal.server.Job" scope="prototype">
     <property name="dataTransferServiceClient" ref="dataTransferServiceClient"/>
   </bean>
   <bean id="dtsMenuAction" class="org.dataminx.dts.portal.Menu" scope="prototype"/>
-  <bean id="jobStatusAction" class="org.dataminx.dts.portal.JobStatus" scope="prototype">
+  <bean id="jobStatusAction" class="org.dataminx.dts.portal.server.JobStatus" scope="prototype">
     <property name="dataTransferServiceClient" ref="dataTransferServiceClient"/>
   </bean>
 

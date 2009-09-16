@@ -94,7 +94,9 @@
       <artifactId>gwt-servlet</artifactId>
     </dependency>
   </dependencies>
-    <build>
+  <build>
+    <outputDirectory>war/WEB-INF/classes</outputDirectory>
+
     <finalName>dts-portal</finalName>
     <plugins>
       <plugin>
@@ -118,6 +120,23 @@
             <projectnature>org.springframework.ide.eclipse.core.springnature
             </projectnature>
           </additionalProjectnatures>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>gwt-maven-plugin</artifactId>
+        <version>1.1-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>
+              <goal>generateAsync</goal>
+              <goal>test</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <runTarget>org.dataminx.dts.portal.Application/Application.html</runTarget>
         </configuration>
       </plugin>
     </plugins>
