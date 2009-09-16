@@ -16,6 +16,11 @@
   <artifactId>dts-common</artifactId>
 
   <dependencies>
+    <dependency>
+      <artifactId>dts-schema</artifactId>
+      <groupId>${dataminx.group}</groupId>
+    </dependency>
+
     <!-- Log4J -->
     <dependency>
       <groupId>log4j</groupId>
@@ -38,6 +43,25 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring</artifactId>
+    </dependency>
+
+    <!-- commons-vfs-grid -->
+    <dependency>
+      <groupId>commons-vfs-grid</groupId>
+      <artifactId>commons-vfs-grid</artifactId>
+    </dependency>
+
+    <!-- SL4J -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.5.5</version>
+    </dependency>
+
+    <!-- Spring OXM -->
+    <dependency>
+      <groupId>org.springframework.ws</groupId>
+      <artifactId>spring-oxm</artifactId>
     </dependency>
   </dependencies>
 </project>

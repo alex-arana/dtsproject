@@ -39,4 +39,8 @@ public class DtsConstants {
      * credential.
      */
     public static final String DEFAULT_MYPROXY_CREDENTIAL_LIFETIME_KEY = "default.myproxy.lifetime";
+
+    /** Holds the namespace URI of the WS-Security namespace. */
+    public static final String WS_SECURITY_NAMESPACE_URI =
+        "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
 }

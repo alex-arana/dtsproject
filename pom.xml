@@ -87,6 +87,9 @@
     <joda-time.version>1.6</joda-time.version>
     <external.jglobus.packages.version>1.6.0</external.jglobus.packages.version>
     <bouncycastle.version>140</bouncycastle.version>
+    <gwt-maven-plugin.version>1.1</gwt-maven-plugin.version>
+    <gxt.version>2.0.1</gxt.version>
+    <gwt.version>1.7.0</gwt.version>
   </properties>
 
   <repositories>
@@ -161,6 +164,11 @@
           <downloadSources>true</downloadSources>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>gwt-maven-plugin</artifactId>
+        <version>${gwt-maven-plugin.version}</version>
+      </plugin>
     </plugins>
 
     <pluginManagement>
@@ -173,6 +181,11 @@
             <configLocation>${checkstyle_config_dir}/checkstyle-checks.xml</configLocation>
             <propertyExpansion>checkstyle_config_dir=${checkstyle_config_dir}</propertyExpansion>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>gwt-maven-plugin</artifactId>
+          <version>${gwt-maven-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -922,6 +935,23 @@
         <groupId>joda-time</groupId>
         <artifactId>joda-time</artifactId>
         <version>${joda-time.version}</version>
+      </dependency>
+
+      <!-- GXT/GWT dependencies -->
+      <dependency>
+        <groupId>com.extjs</groupId>
+        <artifactId>gxt</artifactId>
+        <version>${gxt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt-user</artifactId>
+        <version>${gwt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt-servlet</artifactId>
+        <version>${gwt.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

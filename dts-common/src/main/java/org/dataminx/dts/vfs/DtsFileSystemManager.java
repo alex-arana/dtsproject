@@ -3,10 +3,10 @@
  *
  * License: To Be Announced
  */
-package org.dataminx.dts.wn.vfs;
+package org.dataminx.dts.vfs;
 
 import static org.apache.commons.lang.StringUtils.EMPTY;
-import static org.dataminx.dts.wn.common.DtsWorkerNodeConstants.WS_SECURITY_NAMESPACE_URI;
+import static org.dataminx.dts.common.DtsConstants.WS_SECURITY_NAMESPACE_URI;
 import static org.dataminx.dts.wn.common.util.XmlBeansUtils.extractElementTextAsString;
 import static org.dataminx.dts.wn.common.util.XmlBeansUtils.selectAnyElement;
 
