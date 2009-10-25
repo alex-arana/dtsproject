@@ -3,7 +3,7 @@
 
 == Intro ==
 We are implementing a scalable data transfer service that performs recursive directory copying between different (incompatible) storage/file systems, including, GridFTP, iRODS, SRB, FTP, SFTP, HTTP(S), local FILE, WEBDAV?. 
-The service is based on an architecture that deploys data transfer worker agents implemented using Apache Virtual File System (VFS) into a fully scalable worker node pool/cloud. Remote worker nodes are invoked via asynchronous message queues, which are implemented using JMS queues and topics (i.e. asynchronous point-to-point and publish-subscribe message channels). Alternatively, a worker agent can be deployed locally for directly enabling single client applications.  
+The service is based on an architecture that deploys data transfer worker agents implemented using Apache Virtual File System (VFS) into a fully scalable worker node pool. Remote worker nodes are invoked via asynchronous message queues, which are implemented using JMS(i.e. asynchronous point-to-point message channels). Worker agents can be installed within particular network domains, the only requirement is that a worker can access the (remote) message broker. In doing this, workers can be stragically deployed at a particular data source and/or sink. Alternatively, a worker agent can be deployed locally for directly enabling single client applications.  
 
 == Proposed Message Format / Messaging Model ==
 To implement this service, we require a message format for describing a data transfer that may consist of multiple data sources and sinks. At present, we have resorted to a composite schema for defining our message formats that combines both JSDL^1^ and DMI^2^ elements with our own proprietary extensions. Ideally, we would like to produce a standards compliant message format (rather than resorting to our proprietary format). 
@@ -11,19 +11,20 @@ This wiki identifies some issues/discussion points and proposals.
 
 ^1^JSDL HPC File Staging Profile: http://www.ogf.org/documents/GFD.135.pdf
 <br/>
-^2^OGSA Data Movement Interface: http://www.ogf.org/documents/GFD.135.pdf
+^2^OGSA Data Movement Interface: http://www.ogf.org/documents/GFD.134.pdf
 
 
 Two key requirements of the message format are:
   # All messages must be fully self contained and place no assumptions on the underlying transport mechanism so that they are transport agnostic. E.g. the messaging model should be applicable for use with the following delivery methods: 
     * used within the soap body of a doc-literal Web Service invocation
-    * simply posted to a RESTfull endpoint
-    * posted to a JMS queue/topic
+    * posted to a RESTfull endpoint
+    * posted to an asynchronous message channel (e.g. JMS queue/topic)
     * email
   # We need to describe multiple data transfers in the same request message. 
 
 
-To do this, we have devised the following 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document: 
+To do this, we devised the following 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document. 
+*Note*, this proposal does not require modification to the existing DMI spec (other than the addition of some {{{<xsd:any/>}}} extension points), rather, it builds on the DMI spec by re-using the existing elements in a new 'wrapped' schema. 
 
 *Proposal Schema:* <br/>
 http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
@@ -34,10 +35,10 @@ http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resour
 
 ==Proposal features/requirements:==
 
-===1) Doc-literal/RESTfull (Non-WSRF) DMI rendering ===
-At present, DMI appears to be WSRF centric. We require a document-literal type approach that does not require WSRF service factories and instances (accessed via WS-Addressing Endpoint References). 
+===1) Doc-literal/RESTfull (Non-WSRF) rendering ===
+We require a document-literal type approach that does not use WSRF service factories and instances that are accessed via WS-Addressing Endpoint References. 
 
-The key difference between this document-centric rendering (above) and the current DMI WSRF-centric approach, is that the doc-centric approach passes a JobID back to the client rather than a WS-Addressing Endpoint Reference (which point to a DMI service Instance previously created from a factory). In addition, since there is no separate service instance, the client must submit the JobID to the service on each subsequent status request/query. 
+The key difference between this document-centric rendering (above) and the current DMI WSRF approach, is that the doc-centric approach passes a JobID back to the client rather than a WS-Addressing Endpoint Reference (which point to a DMI service Instance previously created from a factory). In addition, since there is no separate service instance, the client must submit the JobID to the service on each subsequent status request/query. 
 
 ===2) Accommodation of multiple transfers === 
 The current DMI functional spec is used to define a single data transfer between a single source and a single sink. A single data aggregate, such as a directory that resides at one sink can be specified in the [data EPR] (e.g. by appending the '/' char to an EPR to identify a directory). However this appears to account for only one directory. We have a requirement to be able to define multiple files and/or directories, potentially residing at different locations. 
@@ -79,7 +80,7 @@ To do this, we have devised the following 'dmi-wrapped' rendering proposal that 
 
 At present the proposal above returns a single JobID for the whole 'bulk' transfer (since a bulk transfer can be made up of multiple sub transfers). This implies that any subsequent request that uses this JobID(e.g. a request for state, or a request for the dmi instance attributes document) refers to the state of the whole 'bulk' transfer. For example, the total number of bytes transferred would be calculated across all the sub-transfers. Similarly, if one sub-transfer failed out of ten, then the state of the bulk transfer would be 'failed'. Note, this has similar semantics to defining an aggregate [data EPR] that represents a data aggregate residing on the same source, such as a single directory (see current DMI spec). 
 
-Alternatively, this could certainly be extended further if it is a (probable) requirement to query the state of each separate sub-transfer. To do this, the request message (GetDataTransferInstanceRequestType) would have to be extended to incorporate additional user defined sub-transfer tags/ids elements defined for each separate sub-transfer(e.g. mytransferA, mytransferB, mytransferC). In doing this, any subsequent request made by the client could use a combination of the JobID and the sub-transfer tag/id {{{(ie. '<JobID>:<transferTag>')}}} to isolate that specific sub-transfer. The returned state would then represent only that sub-transfer as per the dmi spec.
+Alternatively, this could certainly be extended further if it is a (probable) requirement to query the state of each separate sub-transfer. To do this, the request message (GetDataTransferInstanceRequestType) would have to be extended to incorporate an additional user defined sub-transfer tag/id element defined for each separate sub-transfer(e.g. mytransferA, mytransferB, mytransferC). In doing this, any subsequent request made by the client could use a combination of the JobID and the sub-transfer tag/id {{{(ie. '<JobID>:<transferTag>')}}} to isolate that specific sub-transfer. The returned state would then represent only that sub-transfer as per the dmi spec.
 
 *Note*, in this scenario, it would be important that the client assigns the sub-transfer tags/ids while the service assigns the bulk transfer JobID. This is because we do not want to place any significance on the ordering of the sub-transfers in the initial request.
 
