@@ -150,12 +150,16 @@ The HPC file staging profile supports a credential nested within the {{{<DataSta
 
 While this serves the purpose of staging data to and from a compute resource, the notion of the intermediary is redundant in a DMI type service (i.e. linking the source and target file using {{{<jsdl:FileName/> and <jsdl:FileSystem/>}}} elements is unnecessary overhead). To get round this issue, it is possible to redfine the jsdl hpc schema slightly (using xsd:redef) to overide and modify the existing jsdl schema to: 
   # redefine {{{<jsdl:DataStaging>}}} as {{{<jsdl:DataTransfer>}}}
-  # allow the nesting of credentials in the source and target elements (as below): 
+  # allow the nesting of credentials in the source and target elements (as below)
+  # add an abstract URIProperties element in order to add additional information that is necessary for the service to contact the data source and sink, e.g. srb requires McatZone, MdasDomain information. The URIProperties element is abstract so that it can be implemented for different protocols using a substitution group.
+
+The modified hpc file staging and jsdl schema are defined at: 
+http://code.google.com/p/dtsproject/source/browse/trunk/dts-schema/src/main/resources/minx-jsdl.xsd
 
 {{{
    <mjsdl:DataTransfer>
       <mjsdl:Source>
-        <jsdl:URI>gsiftp://ng2.vpac.org/etc/termcap</jsdl:URI>
+        <jsdl:URI>srb://ng2.vpac.org/etc/termcap</jsdl:URI>
         <mjsdl:Credential>
             <mjsdl:MyProxyToken>
                 <mjsdl:MyProxyUsername>${myproxy.username}</mjsdl:MyProxyUsername>
@@ -163,8 +167,22 @@ While this serves the purpose of staging data to and from a compute resource, th
                 <mjsdl:MyProxyServer>myproxy2.arcs.org.au</mjsdl:MyProxyServer>
                 <mjsdl:MyProxyPort>7512</mjsdl:MyProxyPort>
             </mjsdl:MyProxyToken>
+             <!--
+             define protocol specifics
+             -->
+            <mjsdl:SrbProtocolProperties>
+                <mjsdl:McatZone>mymcatZone</mjsdl:mjsdl:McatZone>
+                <mjsdl:MdasDomain>my mdas domain </mjsdl:MdasDomain>
+                <mjsdl:HomeDirectory>/home/whatever</mjsdl:HomeDirectory>
+                <mjsdl:DefaultResource>srb1.ngs.ac.uk</mjsdl:DefaultResource>
+                <mjsdl:PortRange>
+                    <mjsdl:portMin>6400</mjsdl:portMin>
+                    <mjsdl:portMax>6500</mjsdl:portMax>
+                </mjsdl:PortRange>
+             </SrbProtocolProperties>
         </mjsdl:Credential>
       </mjsdl:Source>
+
       <mjsdl:Target>
         <jsdl:URI>ftp://dm11.intersect.org.au/upload/pom-from-pub.xml</jsdl:URI>
         <mjsdl:Credential>
@@ -182,6 +200,8 @@ While this serves the purpose of staging data to and from a compute resource, th
 
 }}}
 
-Take a look at for more details: <br/>
+
+
+Please take a look at for more details: <br/>
 http://code.google.com/p/dtsproject/source/browse/trunk/dts-schema/src/main/resources 
   
