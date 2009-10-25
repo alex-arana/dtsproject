@@ -24,7 +24,8 @@ Two key requirements of the message format are:
 
 
 To do this, we devised the following 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document. 
-*Note*, this proposal does not require modification to the existing DMI spec (other than the addition of some {{{<xsd:any/>}}} extension points), rather, it builds on the DMI spec by re-using the existing elements within a new 'wrapped' schema. 
+
+*Note, this proposal does not require modification to the existing DMI spec (other than the addition of some {{{<xsd:any/>}}} extension points), rather, it builds on the DMI spec by re-using the existing elements within a new 'wrapped' schema. *
 
 *Proposal Schema:* <br/>
 http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
@@ -33,12 +34,12 @@ http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resour
 http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-WrappedDataTransferRequest.xml
 
 
-==Proposal features/requirements:==
+==Proposal feature requirements:==
 
-===1) Doc-literal/RESTfull (Non-WSRF) rendering ===
+===1) Use of JobID for Doc-literal/RESTfull (Non-WSRF) rendering (rather than using WSRF factory and instance for maintaining a transfer session) ===
 We require a document-literal type approach that does not use WSRF service factories and instances that are accessed via WS-Addressing Endpoint References. 
 
-The key difference between this document-centric rendering (above) and the current DMI WSRF approach, is that the doc-centric approach passes a JobID back to the client rather than a WS-Addressing Endpoint Reference (which point to a DMI service Instance previously created from a factory). In addition, since there is no separate service instance, the client must submit the JobID to the service on each subsequent status request/query. 
+The key difference between this document-centric rendering (above) and the current DMI WSRF approach, is that the doc-centric approach *passes a JobID back to the client rather than a WS-Addressing Endpoint Reference* (which point to a DMI service Instance previously created from a factory). In addition, since there is no separate service instance, the client must submit the JobID to the service on each subsequent status request/query. 
 
 ===2) Accommodation of multiple transfers === 
 The current DMI functional spec is used to define a single data transfer between a single source and a single sink. A single data aggregate, such as a directory that resides at one sink can be specified in the [data EPR] (e.g. by appending the '/' char to an EPR to identify a directory). However this appears to account for only one directory. We have a requirement to be able to define multiple files and/or directories, potentially residing at different locations. 
