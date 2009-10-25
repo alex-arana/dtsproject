@@ -36,7 +36,7 @@ http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resour
 
 ==Proposal feature requirements:==
 
-===1) Use of JobID for Doc-literal/RESTfull (Non-WSRF) rendering (rather than using WSRF factory and instance for maintaining a transfer session) ===
+===1) Use of JobID for Doc-literal/RESTfull rendering (rather than using WSRF instance to maintain a transfer session) ===
 We require a document-literal type approach that does not use WSRF service factories and instances that are accessed via WS-Addressing Endpoint References. 
 
 The key difference between this document-centric rendering (above) and the current DMI WSRF approach, is that the doc-centric approach *passes a JobID back to the client rather than a WS-Addressing Endpoint Reference* (which point to a DMI service Instance previously created from a factory). In addition, since there is no separate service instance, the client must submit the JobID to the service on each subsequent status request/query. 
