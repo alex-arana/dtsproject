@@ -65,8 +65,10 @@ We therefore need to be able to define multiple data transfers within the same r
 To do this, we have devised the following 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document. See pseudo code-frag below;
 
 {{{
-   Pseudo schema request:
+    <!--
+    Pseudo schema request:
     ======================
+    -->
     <dmi-msg:SubmitWrappedDataTransferRequestMessage>
         <dmi-msg:Start/>
         <dmi-msg:WrappedSourceSinkDEPRs>
@@ -89,11 +91,13 @@ To do this, we have devised the following 'dmi-wrapped' rendering proposal that 
             <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
             <dmi-msg:TransferRequirements/>
         </dmi-msg:WrappedSourceSinkDEPRs>
-        ...
+        
     </dmi-msg:SubmitWrappedDataTransferRequestMessage>
 
+    <!--
     Pseudo schema response:
     =======================
+    -->
    <dmi-msg:GetWrappedDataTransferInstanceResponseMessage>
        <dmi-msg:JobID>jobid-adfafq24-59-4-13</dmi-msg:JobID>
    </dmi-msg:GetWrappedDataTransferInstanceResponseMessage>
