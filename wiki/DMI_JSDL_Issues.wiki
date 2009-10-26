@@ -27,7 +27,7 @@ Two key requirements of the message format are:
 
 =Proposals=
 To do this, we devised the following proposals: 
-  * *1) <a href="#dmib">DMIB Proposal (DMI for _Bulk_-transfers)</a>*
+  * *1) DMIB Proposal (DMI for _Bulk_-transfers)*
 <br/>
 A 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document.
 
@@ -41,7 +41,7 @@ This proposal adds some extra information (inc. the MinxTransferRequirementsType
 <br/>
 
 =1) DMIB Proposal Schema= 
-<a name="dmib">(DMIB for Bulk-transfers)</a> Note, this proposal does not require modification to the existing DMI spec (other than the addition of some {{{<xsd:any/>}}} extension points), rather, it builds on the DMI spec by re-using the existing elements within a new 'wrapped' schema.
+<a name="labela">Any content</a> (DMIB for Bulk-transfers) Note, this proposal does not require modification to the existing DMI spec (other than the addition of some {{{<xsd:any/>}}} extension points), rather, it builds on the DMI spec by re-using the existing elements within a new 'wrapped' schema.
 <br/>
   * Proposal schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
