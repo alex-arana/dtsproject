@@ -116,7 +116,7 @@ The JSDL file staging profile could potentially be used to implement a data tran
 
 === HPC file staging profile ===
 
-The HPC file staging profile supports a credential nested within the {{{<DataStaging>}}} element. However, this supports only one credential, either for the {{{<Source>}}} or {{{<Target>}}}, not both. This is by design, it serves the purpose of staging files to an intermediary (i.e. the compute resource) and then optionally staging files from the intermediary following job completion. The source and sink can be linked by defining two DataStaging elements with the same {{{<jsdl:FileName/>}}} element as below:
+The HPC file staging profile supports a credential nested within the {{{<DataStaging>}}} element. However, this supports only one credential, either for the {{{<Source>}}} or {{{<Target>}}}, not both. This is by design, *it serves the purpose of staging files to an intermediary (i.e. the compute resource) and then optionally staging files from the intermediary following job completion. The source and sink can be linked by defining two DataStaging elements with the same {{{<jsdl:FileName/>}}} element as below*. 
 
 {{{
 <DataStaging>
@@ -149,7 +149,7 @@ The HPC file staging profile supports a credential nested within the {{{<DataSta
 </DataStaging>
 }}}
 
-While this serves the purpose of staging data to and from a compute resource, the notion of the intermediary is redundant in a DMI type service (i.e. linking the source and target file using {{{<jsdl:FileName/> and <jsdl:FileSystem/>}}} elements is unnecessary overhead). To get round this issue, it is possible to redfine the jsdl hpc schema slightly (using xsd:redef) to overide and modify the existing jsdl schema to: 
+While this serves the purpose of staging data to and from a compute resource, *the notion of the intermediary is redundant in a DMI type service* (i.e. linking the source and target file using {{{<jsdl:FileName/> and <jsdl:FileSystem/>}}} elements is unnecessary overhead). To get round this issue, it is possible to redfine the jsdl hpc schema slightly (using xsd:redef) to overide and modify the existing jsdl schema to: 
   # redefine {{{<jsdl:DataStaging>}}} as {{{<jsdl:DataTransfer>}}}
   # allow the nesting of credentials in the source and target elements (as below)
   # add an abstract URIProperties element required to define additional necessary information for the service to contact the data source and sink, e.g. srb requires McatZone, MdasDomain information. The URIProperties element is abstract so that it can be implemented for different protocols using a substitution group. So far, we have defined GridFTPURIProperties and SrbProtocolProperties used to define additional information (e.g. PortRange, MdasDomain, McatZone etc). 
