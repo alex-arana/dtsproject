@@ -70,7 +70,9 @@ To do this, we have devised the following 'dmi-wrapped' rendering proposal that 
     <dmi-msg:SubmitWrappedDataTransferRequestMessage>
         <dmi-msg:Start/>
         <dmi-msg:WrappedSourceSinkDEPRs>
-            <!-- <dmi-msg:SubTransferID> see below discussion </dmi-msg:SubTransferID>-->
+            <!-- 
+            <dmi-msg:SubTransferID> client assigned, see below discussion </dmi-msg:SubTransferID>
+            -->
             <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
             <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
             <dmi-msg:TransferRequirements/>
@@ -102,15 +104,16 @@ To do this, we have devised the following 'dmi-wrapped' rendering proposal that 
 At present the proposal above returns a single JobID for the whole 'bulk' transfer (since a bulk transfer can be made up of multiple sub transfers). This implies that any subsequent request that uses this JobID (e.g. a request for state, or a request for the dmi instance attributes document) refers to the state of the whole 'bulk' transfer. For example, the total number of bytes copied would be calculated across all the sub-transfers. Similarly, if one sub-transfer failed out of ten, then the state of the bulk transfer would be 'failed'. Note, this has similar semantics to defining an aggregate data EPR that represents a single directory (as per current DMI spec). 
 
 
-The proposal could certainly be extended further if it is a (probable) requirement to drill down and query the state of each separate sub-transfer. To do this, the request data model could be extended to incorporate an additional user defined sub-transfer id/alias (i.e. a unique element or attribute) defined for each separate sub-transfer. In doing this, any subsequent request made by the client could use a combination of the JobID and the sub-transfer id to isolate that specific sub-transfer, i.e. {{{('<JobID>:<subTransferID>')}}}. The returned state would then represent only that sub-transfer as per the dmi spec.
+The proposal could certainly be extended further if it is a (probable) requirement to drill down and query the state of each separate sub-transfer. To do this, the request data model could be extended to incorporate an additional user defined sub-transfer id/alias (i.e. a unique element or attribute) defined for each separate sub-transfer. In doing this, any subsequent request made by the client could use a combination of the JobID and the sub-transfer id to isolate that specific sub-transfer, e.g. {{{('<JobID>:<subTransferID>')}}}. The returned state would then represent only that sub-transfer as per the dmi spec.
 
 *Note*, in this scenario, the client should? assign the sub-transfer ids/alias while the service assigns the bulk transfer JobID. This is because:
-  * We do not want to place any significance on the ordering of the sub-transfers in the initial request.
+  * We do not want to place any significance on the ordering of the sub-transfers in the request.
   * Clients can assign meaningful names to sub-transfers (e.g. 'BulkJobIDxyz:myKnownCriticalFile'). 
   * XSD constraints could be used to ensure that the sub-transfer id is unique within the context of the xml doc (whether element or attribute value). 
+  * If the sub-transferID is made optional, the service could fall back to assigning this id if not specified by the client. 
   
 
-*Note*, this would be a requirement if the multi-transfer request is split into separate message packets by the service and each sub-transfer packet is processed separately, rather than sending the whole composite data transfer request to the JMS queue to be processed by a single worker. See message splitter and aggregator patterns (http://www.eaipatterns.com/Sequencer.html, http://www.eaipatterns.com/Aggregator.html).
+*Note*, something like this would be a requirement if the multi-transfer request is split into separate message packets by the service and each sub-transfer packet is processed separately, rather than sending the whole composite data transfer request to the JMS queue to be processed by a single worker. See message splitter and aggregator patterns (http://www.eaipatterns.com/Sequencer.html, http://www.eaipatterns.com/Aggregator.html).
 
 
 ===Addition of JSDL CreationOption in DMI ===
