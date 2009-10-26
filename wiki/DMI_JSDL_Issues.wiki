@@ -6,14 +6,12 @@ We are implementing a scalable data transfer service that performs recursive dir
 The service is based on an architecture that deploys data transfer worker agents implemented using Apache Virtual File System (VFS) into a fully scalable worker node pool. Remote worker nodes are invoked via asynchronous message queues, which are implemented using JMS (i.e. asynchronous point-to-point message channels). Worker agents can be installed within a particular network topology, the only requirement is that a worker can access the (remote) trusted message broker. In doing this, workers can be strategically deployed at or close to a particular data source and/or sink (i.e. facilitating both access to the data and for improving transfer efficacy).   
 
 == Proposed Message Format / Messaging Model ==
-To implement this service, we require a message format for describing a data transfer that may consist of multiple data sources and sinks. At present, we have proposed two potential composite schemas, one extends DMI^1^, the other modifies JSDL^2^ HPC file staging profile^3^ . Ideally, we would like to produce a single standards compliant message format. 
+To implement this service, we require a message format for describing a data transfer that may consist of multiple data sources and sinks. At present, we have proposed two potential composite schemas, one extends DMI^1^, the other modifies JSDL HPC file staging profile^2^ . Ideally, we would like to produce a single standards compliant message format. 
 This wiki page identifies some issues/discussion points and proposals.  
 
 ^1^OGSA Data Movement Interface: http://www.ogf.org/documents/GFD.134.pdf
 <br/>
 ^2^JSDL HPC File Staging Profile: http://www.ogf.org/documents/GFD.135.pdf
-<br/>
-^3^http://www.gridforum.org/documents/GFD.135.pdf
 
 
 Two key requirements of the message format are:
@@ -28,11 +26,13 @@ Two key requirements of the message format are:
 
 To do this, we devised the following proposals. 
 * 1) DMIB Proposal Schema (DMI for Bulk-transfers):
-A 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document. 
+A 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document.
+<br/> 
 Proposal schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
 * 2) A modified version of the JSDL file staging profile:
 This proposal adds some extra information (inc. the MinxTransferRequirementsType which itself extends the DMI TransferRequirementsType, a re-positioned Credential element within the src and target URI element, and an abstract URIProperties element that can be used to define additional information for connecting to the the src/target URI). 
+<br/>
 Proposal schema http://code.google.com/p/dtsproject/source/browse/trunk/dts-schema/src/main/resources/minx-jsdl.xsd
 
 
