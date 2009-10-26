@@ -27,11 +27,11 @@ Two key requirements of the message format are:
 
 =Proposals=
 To do this, we devised the following proposals: 
-  * *1) DMIB Proposal (DMI for _Bulk_-transfers):*<br/>
+  * *1) DMIB Proposal (DMI for _Bulk_-transfers)*<br/>
 A 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document.
 
 
-  * *2) <a href="#modjsdlfilestage">A modified version of the JSDL file staging profile:</a>*<br/>
+  * *2) A modified version of the JSDL file staging profile*<br/>
 This proposal adds some extra information (inc. the MinxTransferRequirementsType which itself extends the DMI TransferRequirementsType, a re-positioned Credential element within the src and target URI element, and an abstract URIProperties element that can be used to define additional information for connecting to the the src/target URI). 
 
 <br/>
@@ -94,7 +94,7 @@ To do this, we have devised the following 'dmi-wrapped' rendering proposal that 
 
 *Note.* At present the proposal above returns a single JobID for the whole 'bulk' transfer (since a bulk transfer can be made up of multiple sub transfers). This implies that any subsequent request that uses this JobID(e.g. a request for state, or a request for the dmi instance attributes document) refers to the state of the whole 'bulk' transfer. For example, the total number of bytes transferred would be calculated across all the sub-transfers. Similarly, if one sub-transfer failed out of ten, then the state of the bulk transfer would be 'failed'. Note, this has similar semantics to defining an aggregate [data EPR] that represents a data aggregate residing on the same source, such as a single directory (see current DMI spec). 
 
-This could certainly be extended further if it is a (probable) requirement to drill down and query the state of each separate sub-transfer. To do this, the request message (GetDataTransferInstanceRequestType) could be extended to incorporate an additional user defined sub-transfer tag/id element defined for each separate sub-transfer(e.g. mytransferA, mytransferB, mytransferC). In doing this, any subsequent request made by the client could use a combination of the JobID and the sub-transfer tag/id {{{(ie. '<JobID>:<transferTag>')}}} to isolate that specific sub-transfer. The returned state would then represent only that sub-transfer as per the dmi spec.
+This _could certainly be extended further if it is a (probable) requirement to drill down and query the state of each separate sub-transfer._ To do this, the request message (GetDataTransferInstanceRequestType) could be extended to incorporate an additional user defined sub-transfer tag/id/alias (as a unique element or attribute) which could be defined for each separate sub-transfer(e.g. mytransferA, mytransferB, mytransferC). In doing this, any subsequent request made by the client could use a combination of the JobID and the sub-transfer tag/id {{{(ie. '<JobID>:<transferTag>')}}} to isolate that specific sub-transfer. The returned state would then represent only that sub-transfer as per the dmi spec.
 
 *Note*, in this scenario, it would be important that the client assigns the sub-transfer tags/ids while the service assigns the bulk transfer JobID. This is because we do not want to place any significance on the ordering of the sub-transfers in the initial request.
 
