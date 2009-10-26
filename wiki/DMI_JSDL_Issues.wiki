@@ -149,7 +149,7 @@ The HPC file staging profile supports a credential nested within the {{{<DataSta
 </DataStaging>
 }}}
 
-While this serves the purpose of staging data to and from a compute resource, *the notion of the intermediary is redundant in a DMI type service* (i.e. linking the source and target file using {{{<jsdl:FileName/> and <jsdl:FileSystem/>}}} elements is unnecessary overhead). To get round this issue, it is possible to redfine the jsdl hpc schema slightly (using xsd:redef) to overide and modify the existing jsdl schema to: 
+While this serves the purpose of staging data to and from a compute resource, *the notion of the intermediary is redundant in a DMI type service* (i.e. to link the source and target destinations on the intermediary using {{{<jsdl:FileName/> and <jsdl:FileSystem/>}}} elements is unnecessary overhead). To get round this issue, it is possible to redfine the jsdl hpc schema slightly (using xsd:redef) to overide and modify the existing jsdl schema to: 
   # redefine {{{<jsdl:DataStaging>}}} as {{{<jsdl:DataTransfer>}}}
   # allow the nesting of credentials in the source and target elements (as below)
   # add an abstract URIProperties element required to define additional necessary information for the service to contact the data source and sink, e.g. srb requires McatZone, MdasDomain information. The URIProperties element is abstract so that it can be implemented for different protocols using a substitution group. So far, we have defined GridFTPURIProperties and SrbProtocolProperties used to define additional information (e.g. PortRange, MdasDomain, McatZone etc). 
