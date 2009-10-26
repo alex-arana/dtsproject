@@ -27,22 +27,21 @@ Two key requirements of the message format are:
 
 =Proposals=
 To do this, we devised the following proposals: 
-  * *1) DMIB Proposal (DMI for _Bulk_-transfers)*
+  * *1) DMIB Proposal (DMI for _Bulk_-transfers)* (see below)
 <br/>
-<a href="#labela">Any content</a> 
-A 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document.
+A 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document. Some other stuff too. 
 
 
-  * *2) A modified version of the JSDL file staging profile*
+  * *2) A modified version of the JSDL file staging profile* (see below)
 <br/>
-This proposal adds some extra information (inc. the MinxTransferRequirementsType which itself extends the DMI TransferRequirementsType, a re-positioned Credential element within the src and target URI element, and an abstract URIProperties element that can be used to define additional information for connecting to the the src/target URI). 
+This proposal adds some extra information (inc. the MinxTransferRequirementsType which itself extends the DMI TransferRequirementsType, a re-positioned Credential element within the src and target URI element, and an abstract URIProperties element that can be used to define additional information for connecting to the the src/target URI). Some other stuff too.  
 
 <br/>
 <hr/>
 <br/>
 
 =1) DMIB Proposal Schema= 
-<a name="labela">Any content</a> (DMIB for Bulk-transfers) Note, this proposal does not require modification to the existing DMI spec (other than the addition of some {{{<xsd:any/>}}} extension points), rather, it builds on the DMI spec by re-using the existing elements within a new 'wrapped' schema.
+(DMIB for Bulk-transfers) Note, this proposal does not require modification to the existing DMI spec (other than the addition of some {{{<xsd:any/>}}} extension points), rather, it builds on the DMI spec by re-using the existing elements within a new 'wrapped' schema.
 <br/>
   * Proposal schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
@@ -57,7 +56,7 @@ We require a document-literal type approach that does not use WSRF service facto
 
 The key difference between this document-centric rendering (above) and the current DMI WSRF approach, is that the doc-centric approach *passes a JobID back to the client rather than a WS-Addressing Endpoint Reference* (which point to a DMI service Instance previously created from a factory). In addition, since there is no separate service instance, the client must submit the JobID to the service on each subsequent status request/query. 
 
-===Accommodation of multiple transfers === 
+===Multiple transfers=== 
 The current DMI functional spec is used to define a single data transfer between a single source and a single sink. A single data aggregate, such as a directory that resides at one sink can be specified in the [data EPR] (e.g. by appending the '/' char to an EPR to identify a directory). However this appears to account for only one directory. We have a requirement to be able to define multiple files and/or directories, potentially residing at different locations. 
 In order to accommodate multiple transfers in DMI, the client interacts with a DMI factory to create multiple service instances, each responsible for a separate transfer (please correct me/comment on this if i am wrong!). Potentially, this can place a large communication overhead on the client since many interactions are required between the client and service (e.g. consider the case when copying many ~1000 different files from a number of different sources). 
  
@@ -71,16 +70,19 @@ To do this, we have devised the following 'dmi-wrapped' rendering proposal that 
     <dmi-msg:SubmitWrappedDataTransferRequestMessage>
         <dmi-msg:Start/>
         <dmi-msg:WrappedSourceSinkDEPRs>
+            <!-- <dmi-msg:SubTransferID> see below discussion </dmi-msg:SubTransferID>-->
             <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
             <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
             <dmi-msg:TransferRequirements/>
         </dmi-msg:WrappedSourceSinkDEPRs>
         <dmi-msg:WrappedSourceSinkDEPRs>
+            <!-- <dmi-msg:SubTransferID> see below discussion </dmi-msg:SubTransferID>-->
             <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
             <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
             <dmi-msg:TransferRequirements/>
         </dmi-msg:WrappedSourceSinkDEPRs>
         <dmi-msg:WrappedSourceSinkDEPRs>
+            <!-- <dmi-msg:SubTransferID> see below discussion </dmi-msg:SubTransferID>-->
             <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
             <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
             <dmi-msg:TransferRequirements/>
@@ -95,16 +97,17 @@ To do this, we have devised the following 'dmi-wrapped' rendering proposal that 
    </dmi-msg:GetWrappedDataTransferInstanceResponseMessage>
 }}}
 
-===JobID for bulk transfer and for sub-transfers===
-*Single Bulk JobID for whole transfer*
-At present the proposal above returns a single JobID for the whole 'bulk' transfer (since a bulk transfer can be made up of multiple sub transfers). This implies that any subsequent request that uses this JobID (e.g. a request for state, or a request for the dmi instance attributes document) refers to the state of the whole 'bulk' transfer. For example, the total number of bytes transferred would be calculated across all the sub-transfers. Similarly, if one sub-transfer failed out of ten, then the state of the bulk transfer would be 'failed'. Note, this has similar semantics to defining an aggregate [data EPR] that represents a data aggregate residing on the same source, such as a single directory (see current DMI spec). 
+===Service-Assigned BulkJobID and Client-Assigned sub-transferID===
 
-*BulkJobID + subtransferAliasID for sub-transfer status*
-This could certainly be extended further if it is a (probable) requirement to drill down and query the state of each separate sub-transfer. To do this, the request message (GetDataTransferInstanceRequestType) could be extended to incorporate an additional user defined sub-transfer tag/id/alias (i.e. a unique element or attribute) which could be defined for each separate sub-transfer, such as mytransferA, mytransferB, mytransferC. In doing this, any subsequent request made by the client could use a combination of the JobID and the sub-transfer tag/id {{{(ie. '<JobID>:<transferTag>')}}} to isolate that specific sub-transfer. The returned state would then represent only that sub-transfer as per the dmi spec.
+At present the proposal above returns a single JobID for the whole 'bulk' transfer (since a bulk transfer can be made up of multiple sub transfers). This implies that any subsequent request that uses this JobID (e.g. a request for state, or a request for the dmi instance attributes document) refers to the state of the whole 'bulk' transfer. For example, the total number of bytes copied would be calculated across all the sub-transfers. Similarly, if one sub-transfer failed out of ten, then the state of the bulk transfer would be 'failed'. Note, this has similar semantics to defining an aggregate data EPR that represents a single directory (as per current DMI spec). 
 
-*Note*, in this scenario, it would be important that the client assigns the sub-transfer tags/ids/alias while the service assigns the bulk transfer JobID. This is because:
+
+The proposal could certainly be extended further if it is a (probable) requirement to drill down and query the state of each separate sub-transfer. To do this, the request data model could be extended to incorporate an additional user defined sub-transfer id/alias (i.e. a unique element or attribute) defined for each separate sub-transfer. In doing this, any subsequent request made by the client could use a combination of the JobID and the sub-transfer id to isolate that specific sub-transfer, i.e. {{{('<JobID>:<subTransferID>')}}}. The returned state would then represent only that sub-transfer as per the dmi spec.
+
+*Note*, in this scenario, the client should? assign the sub-transfer ids/alias while the service assigns the bulk transfer JobID. This is because:
   * We do not want to place any significance on the ordering of the sub-transfers in the initial request.
-  * Client can assign a meaningful name to the sub-transfer (e.g. 'BulkJobID:myCriticalFile'). 
+  * Clients can assign meaningful names to sub-transfers (e.g. 'BulkJobIDxyz:myKnownCriticalFile'). 
+  * XSD constraints could be used to ensure that the sub-transfer id is unique within the context of the xml doc (whether element or attribute value). 
   
 
 *Note*, this would be a requirement if the multi-transfer request is split into separate message packets by the service and each sub-transfer packet is processed separately, rather than sending the whole composite data transfer request to the JMS queue to be processed by a single worker. See message splitter and aggregator patterns (http://www.eaipatterns.com/Sequencer.html, http://www.eaipatterns.com/Aggregator.html).
