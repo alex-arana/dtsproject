@@ -41,7 +41,7 @@ This proposal adds some extra information (inc. the MinxTransferRequirementsType
 <br/>
 
 =1) DMIB Proposal Schema= 
-(DMIB for Bulk-transfers) Note, this proposal does not require modification to the existing DMI spec (other than the addition of some {{{<xsd:any/>}}} extension points), rather, it builds on the DMI spec by re-using the existing elements within a new 'wrapped' schema.
+(DMIB for _Bulk_-transfers) Note, this proposal does not require modification to the existing DMI spec (other than the addition of some {{{<xsd:any/>}}} extension points), rather, it builds on the DMI spec by re-using the existing elements within a new 'wrapped' schema.
 <br/>
   * Proposal schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
@@ -73,7 +73,10 @@ To do this, we have devised the following 'dmi-wrapped' rendering proposal that 
         <dmi-msg:Start/>
         <dmi-msg:WrappedSourceSinkDEPRs>
             <!-- 
-            <dmi-msg:SubTransferID> client assigned, see below discussion </dmi-msg:SubTransferID>
+            <dmi-msg:SubTransferID> 
+                client assigned id, see below discussion. should this be client or 
+                service assigned.    
+            </dmi-msg:SubTransferID>
             -->
             <dmi-msg:SourceDEPR></dmi-msg:SourceDEPR>
             <dmi-msg:SinkDEPR></dmi-msg:SinkDEPR>
@@ -114,13 +117,13 @@ The proposal could certainly be extended further if it is a (probable) requireme
   * We do not want to place any significance on the ordering of the sub-transfers in the request.
   * Clients can assign meaningful names to sub-transfers (e.g. 'BulkJobIDxyz:myKnownCriticalFile'). 
   * XSD constraints could be used to ensure that the sub-transfer id is unique within the context of the xml doc (whether element or attribute value). 
-  * If the sub-transferID is made optional, the service could fall back to assigning this id if not specified by the client. 
+  * The sub-transferID could be made optional so that the service could fall-back to automatically assigning these ids if not specified by the client. 
   
 
 *Note*, something like this would be a requirement if the multi-transfer request is split into separate message packets by the service and each sub-transfer packet is processed separately, rather than sending the whole composite data transfer request to the JMS queue to be processed by a single worker. See message splitter and aggregator patterns (http://www.eaipatterns.com/Sequencer.html, http://www.eaipatterns.com/Aggregator.html).
 
 
-===Addition of JSDL CreationOption in DMI ===
+===Addition of JSDL CreationOption to DMI TransferRequirements ===
 Add the the {{{<jsdl:CreationFlag>}}} element, which defines overwrite, dontOverwrite and append enums, to the {{{<dmi:TransferRequirementsType>}}}, e.g. something like the following, but define the CreationFlag within the dmi namespace ?
 
 {{{
@@ -137,7 +140,7 @@ Add the the {{{<jsdl:CreationFlag>}}} element, which defines overwrite, dontOver
 
 
 
-=== Extension points in DMI schema ===
+=== New Extension points in DMI schema ===
 A number of xsd extension points (xsd:any) are required in the current dmi functional spec, e.g in the following DMI elements
   * {{{<dmi:Data/>}}} element 
   * list elements here - is it a good idea to add {{{<xsd:any/>}}} to all dmi complex types much like JSDL ? 
@@ -148,7 +151,7 @@ A number of xsd extension points (xsd:any) are required in the current dmi funct
 
 =2) Modified and extended JSDL HPC File Staging Profile=
 <a name="modjsdlfilestage"/>
-The JSDL file staging profile could potentially be used to implement a data transfer style service, but this spec is focused mostly on compute. We have used {{{<xsd:redef/>}}} to extend and modify the profile for bulk data transfers. 
+The JSDL file staging profile could potentially be used to implement a data transfer style service, but this spec is focused mostly on compute. We have used {{{<xsd:redef/>}}} to extend/modify the profile so that it is more suitable for use in bulk data transfers. 
 <br/>
 <br/>
   * Proposal schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-schema/src/main/resources/minx-jsdl.xsd
@@ -202,6 +205,7 @@ While the vanilla hpc file staging profile serves the purpose of staging data to
 *Modified JSDL file staging example:*
 {{{
    <mjsdl:DataTransfer>
+      <!-- source -->
       <mjsdl:Source>
         <jsdl:URI>srb://ng2.vpac.org/etc/termcap</jsdl:URI>
         <mjsdl:Credential>
@@ -212,7 +216,8 @@ While the vanilla hpc file staging profile serves the purpose of staging data to
                 <mjsdl:MyProxyPort>7512</mjsdl:MyProxyPort>
             </mjsdl:MyProxyToken>
              <!--
-             define protocol specifics for data access 
+             define protocol specifics by using abstract URIProperties and xsd 
+             substitution group
              -->
             <mjsdl:SrbProtocolProperties>
                 <mjsdl:McatZone>mymcatZone</mjsdl:mjsdl:McatZone>
@@ -227,6 +232,7 @@ While the vanilla hpc file staging profile serves the purpose of staging data to
         </mjsdl:Credential>
       </mjsdl:Source>
 
+      <!-- target -->
       <mjsdl:Target>
         <jsdl:URI>ftp://dm11.intersect.org.au/upload/pom-from-pub.xml</jsdl:URI>
         <mjsdl:Credential>
@@ -236,10 +242,15 @@ While the vanilla hpc file staging profile serves the purpose of staging data to
             </wsse:UsernameToken>
         </mjsdl:Credential>
       </mjsdl:Target>
+
+      <!-- 
+      DMI redefined transfer requirements 
+      -->
       <mjsdl:TransferRequirements>
         <dmi:MaxAttempts>0</dmi:MaxAttempts>
         <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
       </mjsdl:TransferRequirements>
+
     </mjsdl:DataTransfer>
 
 }}}
