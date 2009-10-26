@@ -25,26 +25,27 @@ Two key requirements of the message format are:
 
 
 
-
+=Proposals=
 To do this, we devised the following proposals: 
-  * *1) DMIB Proposal Schema (DMI for Bulk-transfers):*<br/>
+  * *1) DMIB Proposal Schema[DMIB_Proposal_Schema] (DMI for Bulk-transfers):*<br/>
 A 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document.
 <br/> 
 Proposal schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
-  * 2) *A modified version of the JSDL file staging profile:*<br/>
+  * *2) A modified version of the JSDL file staging profile:*<br/>
 This proposal adds some extra information (inc. the MinxTransferRequirementsType which itself extends the DMI TransferRequirementsType, a re-positioned Credential element within the src and target URI element, and an abstract URIProperties element that can be used to define additional information for connecting to the the src/target URI). 
 <br/>
-Proposal schema http://code.google.com/p/dtsproject/source/browse/trunk/dts-schema/src/main/resources/minx-jsdl.xsd
+Proposal schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-schema/src/main/resources/minx-jsdl.xsd
+<br/>
+Doc example: http://code.google.com/p/dtsproject/source/browse/trunk/dts-schema/src/main/resources/minx-jsdl-example.xml
 
 
 =1) DMIB Proposal Schema (DMI for Bulk-transfers)=
 Note, this proposal does not require modification to the existing DMI spec (other than the addition of some {{{<xsd:any/>}}} extension points), rather, it builds on the DMI spec by re-using the existing elements within a new 'wrapped' schema.
 <br/>
-Proposal schema http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
-
-*Doc example:* <br/>
-http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-WrappedDataTransferRequest.xml
+Proposal schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
+<br/>
+Doc example: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-WrappedDataTransferRequest.xml
 
 
 ==DMIB Proposal features:==
