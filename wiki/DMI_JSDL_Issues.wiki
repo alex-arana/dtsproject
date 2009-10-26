@@ -27,11 +27,14 @@ Two key requirements of the message format are:
 
 =Proposals=
 To do this, we devised the following proposals: 
-  * *1) DMIB Proposal (DMI for _Bulk_-transfers)*<br/>
+  * *1) DMIB Proposal (DMI for _Bulk_-transfers)*
+<br/>
+[goto here #1)_DMIB_Proposal_Schema]
 A 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document.
 
 
-  * *2) A modified version of the JSDL file staging profile*<br/>
+  * *2) A modified version of the JSDL file staging profile*
+<br/>
 This proposal adds some extra information (inc. the MinxTransferRequirementsType which itself extends the DMI TransferRequirementsType, a re-positioned Credential element within the src and target URI element, and an abstract URIProperties element that can be used to define additional information for connecting to the the src/target URI). 
 
 <br/>
