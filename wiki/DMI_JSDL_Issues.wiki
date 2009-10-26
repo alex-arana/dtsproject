@@ -3,38 +3,48 @@
 
 == Intro ==
 We are implementing a scalable data transfer service that performs recursive directory copying between different (incompatible) storage/file systems, including, GridFTP, iRODS, SRB, FTP, SFTP, HTTP(S), local FILE, WEBDAV?. 
-The service is based on an architecture that deploys data transfer worker agents implemented using Apache Virtual File System (VFS) into a fully scalable worker node pool. Remote worker nodes are invoked via asynchronous message queues, which are implemented using JMS(i.e. asynchronous point-to-point message channels). Worker agents can be installed within a particular network topology, the only requirement is that a worker can access the (remote) trusted message broker. In doing this, workers can be stragically deployed at a particular data source and/or sink (facilitating access to the data and for improving transfer efficacy).   
+The service is based on an architecture that deploys data transfer worker agents implemented using Apache Virtual File System (VFS) into a fully scalable worker node pool. Remote worker nodes are invoked via asynchronous message queues, which are implemented using JMS (i.e. asynchronous point-to-point message channels). Worker agents can be installed within a particular network topology, the only requirement is that a worker can access the (remote) trusted message broker. In doing this, workers can be strategically deployed at or close to a particular data source and/or sink (i.e. facilitating both access to the data and for improving transfer efficacy).   
 
 == Proposed Message Format / Messaging Model ==
-To implement this service, we require a message format for describing a data transfer that may consist of multiple data sources and sinks. At present, we have resorted to a composite schema for defining our message formats that extends DMI^2^ and also includes a JSDL^1^ element. Ideally, we would like to produce a standards compliant message format. 
+To implement this service, we require a message format for describing a data transfer that may consist of multiple data sources and sinks. At present, we have proposed two potential composite schemas, one extends DMI^1^, the other modifies JSDL^2^ HPC file staging profile^3^ . Ideally, we would like to produce a single standards compliant message format. 
 This wiki page identifies some issues/discussion points and proposals.  
 
-^1^JSDL HPC File Staging Profile: http://www.ogf.org/documents/GFD.135.pdf
+^1^OGSA Data Movement Interface: http://www.ogf.org/documents/GFD.134.pdf
 <br/>
-^2^OGSA Data Movement Interface: http://www.ogf.org/documents/GFD.134.pdf
+^2^JSDL HPC File Staging Profile: http://www.ogf.org/documents/GFD.135.pdf
+<br/>
+^3^http://www.gridforum.org/documents/GFD.135.pdf
 
 
 Two key requirements of the message format are:
-  # All messages must be fully self contained and place no assumptions on the underlying transport mechanism so that they are transport agnostic. E.g. the messaging model should be applicable for use with the following delivery methods: 
-    * used within the soap body of a doc-literal Web Service invocation
+  # All messages must be fully self contained and place no assumptions on the underlying transport mechanism so that they are fully transport agnostic. The messaging model should be applicable for use with the following delivery methods: 
+    * used within the soap bodies of doc-literal Web Service invocations/responses
     * posted to a RESTfull endpoint
-    * posted to an asynchronous message channel (e.g. JMS queue/topic)
+    * posted to/from an asynchronous message channel (e.g. JMS queue/topic)
     * email
-  # We need to describe multiple data transfers in the same request message. 
+  # We need to define multiple data transfers in the same request message. 
 
 
-To do this, we devised the following 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document. 
 
-*Note, this proposal does not require modification to the existing DMI spec (other than the addition of some {{{<xsd:any/>}}} extension points), rather, it builds on the DMI spec by re-using the existing elements within a new 'wrapped' schema. *
+To do this, we devised the following proposals. 
+* 1) DMIB Proposal Schema (DMI for Bulk-transfers):
+A 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document. 
+Proposal schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
-*Proposal Schema:* <br/>
+* 2) A modified version of the JSDL file staging profile:
+This proposal adds some extra information (inc. the MinxTransferRequirementsType which itself extends the DMI TransferRequirementsType, a re-positioned Credential element within the src and target URI element, and an abstract URIProperties element that can be used to define additional information for connecting to the the src/target URI). 
+Proposal schema http://code.google.com/p/dtsproject/source/browse/trunk/dts-schema/src/main/resources/minx-jsdl.xsd
+
+
+=1) DMIB Proposal Schema (DMI for Bulk-transfers)=
+Note, this proposal does not require modification to the existing DMI spec (other than the addition of some {{{<xsd:any/>}}} extension points), rather, it builds on the DMI spec by re-using the existing elements within a new 'wrapped' schema. *
 http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
 *Doc example:* <br/>
 http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-WrappedDataTransferRequest.xml
 
 
-==Proposal feature requirements:==
+==DMIB Proposal features:==
 
 ===1) Use of JobID for Doc-literal/RESTfull rendering (rather than using WSRF instance to maintain a transfer session) ===
 We require a document-literal type approach that does not use WSRF service factories and instances that are accessed via WS-Addressing Endpoint References. 
@@ -88,7 +98,7 @@ This could certainly be extended further if it is a (probable) requirement to dr
 *Note*, this would be a requirement if the multi-transfer request is split into separate message packets by the service and each sub-transfer packet is processed separately, rather than sending the whole composite data transfer request to the JMS queue to be processed by a single worker. See message splitter and aggregator patterns (http://www.eaipatterns.com/Sequencer.html, http://www.eaipatterns.com/Aggregator.html).
 
 
-===3) JSDL CreationOption in DMI ===
+===3) Addition of JSDL CreationOption in DMI ===
 Add the the {{{<jsdl:CreationFlag>}}} element, which defines overwrite, dontOverwrite and append enums, to the {{{<dmi:TransferRequirementsType>}}}, e.g. something like the following, but define the CreationFlag within the dmi namespace ?
 
 {{{
@@ -110,9 +120,9 @@ A number of xsd extension points (xsd:any) are required in the current dmi funct
   * {{{<dmi:Data/>}}} element 
   * list elements here - is it a good idea to add {{{<xsd:any/>}}} to all dmi complex types much like JSDL ? 
 
-== Other Stuff - JSDL and HPC File Staging ==
+=2) Modified JSDL and HPC File Staging Profile=
 
-The JSDL file staging profile could potentially be used to implement a data transfer style service, but this spec is focussed mostly on compute. 
+The JSDL file staging profile could potentially be used to implement a data transfer style service, but this spec is focused mostly on compute. 
 
 === HPC file staging profile ===
 
