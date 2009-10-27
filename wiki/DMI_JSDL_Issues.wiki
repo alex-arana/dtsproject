@@ -32,9 +32,9 @@ To do this, we devised the following proposals:
 A 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document. Some other stuff too. 
 
 
-  * *2) A modified version of the JSDL file staging profile* (see below)
+  * *2) JSDL File Transfer proposal* (see below)
 <br/>
-This proposal adds some extra information (inc. the MinxTransferRequirementsType which itself extends the DMI TransferRequirementsType, a re-positioned Credential element within the src and target URI element, and an abstract URIProperties element that can be used to define additional information for connecting to the the src/target URI). Some other stuff too.  
+This proposal modifies the HPC file staging profile and adds some extra information (inc. the MinxTransferRequirementsType which itself extends the DMI TransferRequirementsType, a re-positioned Credential element within the src and target URI element, and an abstract URIProperties element that can be used to define additional information for connecting to the the src/target URI). Some other stuff too.  
 
 <br/>
 <hr/>
@@ -200,8 +200,8 @@ The HPC file staging profile supports a credential nested within the {{{<DataSta
 </DataStaging>
 }}}
 
-==Modified HPC File Staging Proposal features==
-While the vanilla hpc file staging profile serves the purpose of staging data to and from a compute resource, *the notion of the intermediary compute resource is redundant in a DMI type service,* i.e. to link the source and target destinations on the intermediary using {{{<jsdl:FileName/> and <jsdl:FileSystem/>}}} elements is unnecessary overhead. Even if a service implementation effectively performs a 'Get' and a 'Put' using an intermediary, in this type of service, this is an implementation detail and should not be exposed in a service contract. To get round this issue, it is possible to redfine the jsdl hpc schema slightly (using {{{<xsd:redef/>}}}) to override and modify the existing jsdl schema to: 
+==JSDL File Transfer Proposal features==
+While the vanilla hpc file staging profile serves the purpose of staging data to and from a compute resource, *the notion of the intermediary (i.e. stage to and from the compute resoruce) is redundant in a service that is focused on data transfer/copying,* i.e. linking the source and target destinations on the intermediary by using {{{<jsdl:FileName/> and <jsdl:FileSystem/>}}} elements is unnecessary overhead. Even if a service implementation effectively does perform a 'Get' and a 'Put' using an intermediary, in this type of service, this is an implementation detail and should not be exposed in a service contract. To get round this issue, it is possible to redfine the jsdl hpc schema slightly (using {{{<xsd:redef/>}}}) to override and modify the existing jsdl schema to: 
   # redefine {{{<jsdl:DataStaging>}}} as {{{<jsdl:DataTransfer>}}}
   # allow the nesting of credentials in the source and target elements (as below)
   # add an abstract URIProperties element required to define additional necessary information for the service to contact the data source and sink, e.g. srb requires McatZone, MdasDomain information. The URIProperties element is abstract so that it can be implemented for different protocols using a substitution group. So far, we have defined GridFTPURIProperties and SrbProtocolProperties used to define additional information (e.g. PortRange, MdasDomain, McatZone etc). 
