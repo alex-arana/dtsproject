@@ -153,9 +153,8 @@ A number of xsd extension points (xsd:any) are required in the current dmi funct
 <hr/>
 <br/>
 
-=2) Modified and extended JSDL HPC File Staging Profile=
-<a name="modjsdlfilestage"/>
-The JSDL file staging profile could potentially be used to implement a data transfer style service, but this spec is focused mostly on compute. We have used {{{<xsd:redef/>}}} to extend/modify the profile so that it is more suitable for use in a bulk data transfer type service. 
+=2)JSDL File Transfer proposal =
+The JSDL file _staging_ profile could potentially be used to implement a data transfer style service, but this spec is focused mostly on staging to/from an intermediary compute resource rather than transfer between source and sink. We have used {{{<xsd:redef/>}}} to extend/modify the file staging profile so that it is more suitable for use in a bulk data transfers. 
 <br/>
 <br/>
   * Proposal schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-schema/src/main/resources/minx-jsdl.xsd
@@ -165,7 +164,7 @@ The JSDL file staging profile could potentially be used to implement a data tran
 
 === Vanilla HPC file staging profile ===
 
-The HPC file staging profile supports a credential nested within the {{{<DataStaging>}}} element. However, this supports only one credential, either for the {{{<Source>}}} or {{{<Target>}}}, not both. This is by design, *it serves the purpose of staging files to an intermediary (i.e. the compute resource). Data can then be optionally staged from the compute resource following job completion. For a data transfer between a source and sink (rather than a data staging operation), a file/dir can be linked to both the source and sink by defining two DataStaging elements that define the same {{{<jsdl:FileName/> and, optionally <jsdl:FileSystemName/>}}} elements as below*. 
+The HPC file staging profile supports a credential nested within the {{{<DataStaging>}}} element. However, this supports only one credential, either for the {{{<Source>}}} or {{{<Target>}}}, not both. This is by design, *it serves the purpose of staging files to an intermediary (i.e. the compute resource). Data can then be optionally staged from the compute resource following job completion. In order to perform a data transfer between a source and sink, a file/dir can be linked to both the source and sink by defining two DataStaging elements that define the same {{{<jsdl:FileName/> and, optionally <jsdl:FileSystemName/>}}} elements as below*. 
 
 {{{
 <!-- stage to compute -->
@@ -201,14 +200,16 @@ The HPC file staging profile supports a credential nested within the {{{<DataSta
 }}}
 
 ==JSDL File Transfer Proposal features==
-While the vanilla hpc file staging profile serves the purpose of staging data to and from a compute resource, *the notion of the intermediary (i.e. stage to and from the compute resoruce) is redundant in a service that is focused on data transfer/copying,* i.e. linking the source and target destinations on the intermediary by using {{{<jsdl:FileName/> and <jsdl:FileSystem/>}}} elements is unnecessary overhead. Even if a service implementation effectively does perform a 'Get' and a 'Put' using an intermediary, in this type of service, this is an implementation detail and should not be exposed in a service contract. To get round this issue, it is possible to redfine the jsdl hpc schema slightly (using {{{<xsd:redef/>}}}) to override and modify the existing jsdl schema to: 
+While the vanilla hpc file staging profile serves the purpose of staging data to and from a compute resource, *the notion of the intermediary (i.e. stage to and from the compute resource) is redundant in a service that is focused on data transfer/copying,* i.e. linking the source and target destinations on the intermediary by using {{{<jsdl:FileName/> and <jsdl:FileSystem/>}}} elements is unnecessary overhead. Even if a service implementation effectively _does_ perform a 'Get' and a 'Put' using an intermediary, this is an implementation detail and should not be exposed in a service contract. To get round this issue, we re-defined the jsdl hpc file staging schema slightly (using {{{<xsd:redef/>}}}) to override and modify the existing jsdl schema to: 
+
   # redefine {{{<jsdl:DataStaging>}}} as {{{<jsdl:DataTransfer>}}}
   # allow the nesting of credentials in the source and target elements (as below)
   # add an abstract URIProperties element required to define additional necessary information for the service to contact the data source and sink, e.g. srb requires McatZone, MdasDomain information. The URIProperties element is abstract so that it can be implemented for different protocols using a substitution group. So far, we have defined GridFTPURIProperties and SrbProtocolProperties used to define additional information (e.g. PortRange, MdasDomain, McatZone etc). 
+  # add the client defined sub-transfer id for each sub-transfer (please refer to the discussion above on service-assigned bulkTransferId and client-assigned subTransferId)
 
 
 
-*Modified JSDL file staging example:*
+*JSDL file transfer example:*
 {{{
    <mjsdl:DataTransfer>
 
@@ -238,6 +239,11 @@ While the vanilla hpc file staging profile serves the purpose of staging data to
              </SrbProtocolProperties>
         </mjsdl:Credential>
       </mjsdl:Source>
+ 
+     <!-- 
+      no requirement to link source and target on the intermediary compute resource 
+      jsdl:FileName 
+     --> 
 
       <!-- target -->
       <mjsdl:Target>
