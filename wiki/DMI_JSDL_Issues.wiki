@@ -42,6 +42,8 @@ This proposal adds some extra information (inc. the MinxTransferRequirementsType
 
 =1) DMIB Proposal Schema= 
 (DMIB for _Bulk_-transfers) Note, this proposal does not require modification to the existing DMI spec (other than the addition of some {{{<xsd:any/>}}} extension points), rather, it builds on the DMI spec by re-using the existing elements within a new 'wrapped' schema.
+This proposal effectively wraps together the SourceDEPR and SinkDEPR elements (both {{{<wsa:EndpointReferenceTypeS>}}}) with the {{{<dmi:TransferRequirements>}}} into a single wrapping element. This ‘wrapping’ element can be defined multiple times in a single request packet in order to define a transfer that caters for multiple data sources and sinks. (The {{{<dmi:DataLocations> <dmi:Data>}}} elements are re-used as per the dmi spec). Semantically, this appears to be similar to defining multiple source and target <jsdl:DataStaging/> element combination's. 
+
 <br/>
   * Proposal schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-jaxb/src/main/resources/archive/dmi-wrappedMessagesProposals.xsd 
 
@@ -108,6 +110,8 @@ To do this, we have devised the following 'dmi-wrapped' rendering proposal that 
 
 ===Service-Assigned BulkJobID and Client-Assigned sub-transferID===
 
+*Note this discussion also relates to the modified file staging proposal - both will probably require some form of composite id (bulk and sub-transfer idS) for drilling down to query the status of a single sub-transfer.*
+
 At present the proposal above returns a single JobID for the whole 'bulk' transfer (since a bulk transfer can be made up of multiple sub transfers). This implies that any subsequent request that uses this JobID (e.g. a request for state, or a request for the dmi instance attributes document) refers to the state of the whole 'bulk' transfer. For example, the total number of bytes copied would be calculated across all the sub-transfers. Similarly, if one sub-transfer failed out of ten, then the state of the bulk transfer would be 'failed'. Note, this has similar semantics to defining an aggregate data EPR that represents a single directory (as per current DMI spec). 
 
 
@@ -151,7 +155,7 @@ A number of xsd extension points (xsd:any) are required in the current dmi funct
 
 =2) Modified and extended JSDL HPC File Staging Profile=
 <a name="modjsdlfilestage"/>
-The JSDL file staging profile could potentially be used to implement a data transfer style service, but this spec is focused mostly on compute. We have used {{{<xsd:redef/>}}} to extend/modify the profile so that it is more suitable for use in bulk data transfers. 
+The JSDL file staging profile could potentially be used to implement a data transfer style service, but this spec is focused mostly on compute. We have used {{{<xsd:redef/>}}} to extend/modify the profile so that it is more suitable for use in a bulk data transfer type service. 
 <br/>
 <br/>
   * Proposal schema: http://code.google.com/p/dtsproject/source/browse/trunk/dts-schema/src/main/resources/minx-jsdl.xsd
@@ -161,9 +165,10 @@ The JSDL file staging profile could potentially be used to implement a data tran
 
 === Vanilla HPC file staging profile ===
 
-The HPC file staging profile supports a credential nested within the {{{<DataStaging>}}} element. However, this supports only one credential, either for the {{{<Source>}}} or {{{<Target>}}}, not both. This is by design, *it serves the purpose of staging files to an intermediary (i.e. the compute resource) and then optionally staging files from the compute resource following job completion. A source and sink can be linked by defining two DataStaging elements with the same {{{<jsdl:FileName/>}}} element as below*. 
+The HPC file staging profile supports a credential nested within the {{{<DataStaging>}}} element. However, this supports only one credential, either for the {{{<Source>}}} or {{{<Target>}}}, not both. This is by design, *it serves the purpose of staging files to an intermediary (i.e. the compute resource). Data can then be optionally staged from the compute resource following job completion. For a data transfer between a source and sink (rather than a data staging operation), a file/dir can be linked to both the source and sink by defining two DataStaging elements that define the same {{{<jsdl:FileName/> and, optionally <jsdl:FileSystemName/>}}} elements as below*. 
 
 {{{
+<!-- stage to compute -->
 <DataStaging>
     <FileName>fileA.txt</FileName>
     <CreationFlag>overwrite</CreationFlag>
@@ -179,6 +184,7 @@ The HPC file staging profile supports a credential nested within the {{{<DataSta
 </DataStaging>
 
 
+<!-- stage same file from compute -->
 <DataStaging>
     <FileName>fileA.txt</FileName>
     <CreationFlag>overwrite</CreationFlag>
@@ -195,7 +201,7 @@ The HPC file staging profile supports a credential nested within the {{{<DataSta
 }}}
 
 ==Modified HPC File Staging Proposal features==
-While the vanilla hpc file staging profile serves the purpose of staging data to and from a compute resource, *the notion of the intermediary compute resource is redundant in a DMI type service,* i.e. to link the source and target destinations on the intermediary using {{{<jsdl:FileName/> and <jsdl:FileSystem/>}}} elements is unnecessary overhead. Even if a service implementation effectivley performs a 'Get' and a 'Put' using an intermediary, in this type of service, this is an implementation detail and should not be exposed in a public service contract. To get round this issue, it is possible to redfine the jsdl hpc schema slightly (using {{{<xsd:redef/>}}}) to override and modify the existing jsdl schema to: 
+While the vanilla hpc file staging profile serves the purpose of staging data to and from a compute resource, *the notion of the intermediary compute resource is redundant in a DMI type service,* i.e. to link the source and target destinations on the intermediary using {{{<jsdl:FileName/> and <jsdl:FileSystem/>}}} elements is unnecessary overhead. Even if a service implementation effectively performs a 'Get' and a 'Put' using an intermediary, in this type of service, this is an implementation detail and should not be exposed in a service contract. To get round this issue, it is possible to redfine the jsdl hpc schema slightly (using {{{<xsd:redef/>}}}) to override and modify the existing jsdl schema to: 
   # redefine {{{<jsdl:DataStaging>}}} as {{{<jsdl:DataTransfer>}}}
   # allow the nesting of credentials in the source and target elements (as below)
   # add an abstract URIProperties element required to define additional necessary information for the service to contact the data source and sink, e.g. srb requires McatZone, MdasDomain information. The URIProperties element is abstract so that it can be implemented for different protocols using a substitution group. So far, we have defined GridFTPURIProperties and SrbProtocolProperties used to define additional information (e.g. PortRange, MdasDomain, McatZone etc). 
@@ -205,6 +211,7 @@ While the vanilla hpc file staging profile serves the purpose of staging data to
 *Modified JSDL file staging example:*
 {{{
    <mjsdl:DataTransfer>
+
       <!-- source -->
       <mjsdl:Source>
         <jsdl:URI>srb://ng2.vpac.org/etc/termcap</jsdl:URI>
@@ -251,10 +258,18 @@ While the vanilla hpc file staging profile serves the purpose of staging data to
         <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
       </mjsdl:TransferRequirements>
 
+      <!-- 
+      <SubTransferID> 
+         client-assigned sub-transfer id? should this be defined in the transfer 
+         requirements ? see above discussion 
+      </SubTransferID> 
+      -->
+
     </mjsdl:DataTransfer>
 
 }}}
 
+*Note, the bulk JobID and sub-transferID arguments also applies to this proposal - please see above section*
 
 
 Please take a look at for more details: <br/>
