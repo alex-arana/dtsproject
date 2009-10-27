@@ -205,6 +205,7 @@ While the vanilla hpc file staging profile serves the purpose of staging data to
   # redefine {{{<jsdl:DataStaging>}}} as {{{<jsdl:DataTransfer>}}}
   # allow the nesting of credentials in the source and target elements (as below)
   # add an abstract URIProperties element required to define additional necessary information for the service to contact the data source and sink, e.g. srb requires McatZone, MdasDomain information. The URIProperties element is abstract so that it can be implemented for different protocols using a substitution group. So far, we have defined GridFTPURIProperties and SrbProtocolProperties used to define additional information (e.g. PortRange, MdasDomain, McatZone etc). 
+  # addition of a modified TransferRequirements element (modified from dmi:TransferRequirements to add the {{{<jsdl:CreationFlag/>}}})
   # add the client defined sub-transfer id for each sub-transfer (please refer to the discussion above on service-assigned bulkTransferId and client-assigned subTransferId)
 
 
