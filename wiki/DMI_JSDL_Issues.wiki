@@ -32,7 +32,7 @@ To do this, we devised the following proposals:
 A 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document. Some other stuff too. 
 
 
-  * *2) JSDL File Transfer proposal* (see below)
+  * *2) JSDL Data _Transfer_ proposal* (see below)
 <br/>
 This proposal modifies the HPC file staging profile and adds some extra information (inc. the MinxTransferRequirementsType which itself extends the DMI TransferRequirementsType, a re-positioned Credential element within the src and target URI element, and an abstract URIProperties element that can be used to define additional information for connecting to the the src/target URI). Some other stuff too.  
 
@@ -199,7 +199,7 @@ The HPC file staging profile supports a credential nested within the {{{<DataSta
 </DataStaging>
 }}}
 
-==JSDL File Transfer Proposal features==
+==JSDL Data Transfer Proposal features==
 While the vanilla hpc file staging profile serves the purpose of staging data to and from a compute resource, *the notion of the intermediary (i.e. stage to and from the compute resource) is redundant in a service that is focused on data transfer/copying,* i.e. linking the source and target destinations on the intermediary by using {{{<jsdl:FileName/> and <jsdl:FileSystem/>}}} elements is unnecessary overhead. Even if a service implementation effectively _does_ perform a 'Get' and a 'Put' using an intermediary, this is an implementation detail and should not be exposed in a service contract. To get round this issue, we re-defined the jsdl hpc file staging schema slightly (using {{{<xsd:redef/>}}}) to override and modify the existing jsdl schema to: 
 
   # redefine {{{<jsdl:DataStaging>}}} as {{{<jsdl:DataTransfer>}}}
@@ -209,7 +209,7 @@ While the vanilla hpc file staging profile serves the purpose of staging data to
 
 
 
-*JSDL file transfer example:*
+*JSDL data transfer example:*
 {{{
    <mjsdl:DataTransfer>
 
