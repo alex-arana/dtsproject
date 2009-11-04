@@ -49,7 +49,7 @@
 
   <bean id="dtsFileSystemManager"
         init-method="init"
-        class="org.dataminx.dts.wn.vfs.DtsFileSystemManager">
+        class="org.dataminx.dts.vfs.DtsFileSystemManager">
     <property name="configurationResource" value="vfs/providers.xml"/>
     <property name="myProxyCredentialLifetime" value="${default.myproxy.lifetime}"/>
   </bean>
