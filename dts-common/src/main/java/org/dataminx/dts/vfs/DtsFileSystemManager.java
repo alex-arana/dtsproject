@@ -20,13 +20,18 @@ import org.apache.commons.vfs.impl.DefaultFileReplicator;
 import org.apache.commons.vfs.impl.DefaultFileSystemConfigBuilder;
 import org.apache.commons.vfs.impl.StandardFileSystemManager;
 import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
+import org.apache.commons.vfs.provider.irods.IRODSFileSystemConfigBuilder;
+import org.apache.commons.vfs.provider.storageresourcebroker.SRBFileSystemConfigBuilder;
 import org.apache.commons.vfs.provider.temp.TemporaryFileProvider;
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.DtsException;
 import org.dataminx.dts.wn.service.DtsFileSystemAuthenticationException;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.GridFtpURIPropertiesType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.IrodsURIPropertiesType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxSourceTargetType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MyProxyTokenType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.SrbURIPropertiesType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 import org.globus.myproxy.MyProxy;
 import org.globus.myproxy.MyProxyException;
@@ -134,6 +139,7 @@ public class DtsFileSystemManager extends StandardFileSystemManager implements I
         if (sourceOrTarget instanceof MinxSourceTargetType) {
             final MinxSourceTargetType minxSourceOrTarget = (MinxSourceTargetType) sourceOrTarget;
             final CredentialType credentialType = minxSourceOrTarget.getCredential();
+            final XmlObject uriPropertiesXML = minxSourceOrTarget.getURIProperties();
             if (credentialType != null) {
                 // at the moment we're only supporting MyProxy credentials
                 if (credentialType.getMyProxyToken() != null) {
@@ -146,10 +152,8 @@ public class DtsFileSystemManager extends StandardFileSystemManager implements I
                         credential = myproxy.get(myProxyDetails.getMyProxyUsername(),
                             myProxyDetails.getMyProxyPassword(), mMyProxyCredentialLifetime);
                         GridFtpFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
-
-                        //TODO set the credential for all the other Grid file systems we want
-                        //     to support in the future
-                        //SRBFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
+                        SRBFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
+                        IRODSFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
                     }
                     catch (final MyProxyException ex) {
                         LOG.error(String.format("Could not get delegated proxy from server '%s:%s'\n%s",
@@ -166,9 +170,77 @@ public class DtsFileSystemManager extends StandardFileSystemManager implements I
                     final String password = element == null ? EMPTY : extractElementTextAsString(element);
                     final StaticUserAuthenticator auth = new StaticUserAuthenticator(null, username, password);
                     DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(options, auth);
+                    SRBFileSystemConfigBuilder.getInstance().setUserAuthenticator(options, auth);
+                    IRODSFileSystemConfigBuilder.getInstance().setUserAuthenticator(options, auth);
                 }
 
                 //TODO support other types of credentials
+            }
+            if (uriPropertiesXML != null) {
+                if (uriPropertiesXML instanceof GridFtpURIPropertiesType) {
+                    GridFtpURIPropertiesType gridFtpUriProperties = (GridFtpURIPropertiesType) uriPropertiesXML;
+
+                    // TODO: need to check with the Commons VFS Grid guys if there's a way of setting
+                    // other GridFTP URI related properties through GridFtpFileSystemConfigBuilder
+                }
+                else if (uriPropertiesXML instanceof SrbURIPropertiesType) {
+                    SrbURIPropertiesType srbUriProperties = (SrbURIPropertiesType) uriPropertiesXML;
+                    String defaultStorageResource = srbUriProperties.getDefaultResource();
+                    //int firewallPortMax = srbUriProperties.
+                    //int firewallPortMin = srbUriProperties.
+                    String homeDirectory = srbUriProperties.getMdasCollectionHome();
+                    String mcatZone = srbUriProperties.getMcatZone();
+                    String mdasDomainName = srbUriProperties.getMdasDomainHome();
+
+
+                    if (defaultStorageResource != null && !defaultStorageResource.trim().equals("")) {
+                        LOG.debug("Setting SRB.defaultStorageResource to " + defaultStorageResource);
+                        SRBFileSystemConfigBuilder.getInstance().setDefaultStorageResource(options, defaultStorageResource);
+                    }
+
+                    //SRBFileSystemConfigBuilder.getInstance().setFileWallPortMax(options, max);
+                    //SRBFileSystemConfigBuilder.getInstance().setFileWallPortMin(options, min);
+
+                    if (homeDirectory != null && !homeDirectory.trim().equals("")) {
+                        LOG.debug("Setting SRB.homeDirectory to " + homeDirectory);
+                        SRBFileSystemConfigBuilder.getInstance().setHomeDirectory(options, homeDirectory);
+                    }
+
+                    if (mcatZone != null && !mcatZone.trim().equals("")) {
+                        LOG.debug("Setting SRB.mcatZone to " + mcatZone);
+                        SRBFileSystemConfigBuilder.getInstance().setMcatZone(options, mcatZone);
+                    }
+
+                    if (mdasDomainName != null && !mdasDomainName.trim().equals("")) {
+                        LOG.debug("Setting SRB.mdasDomainName to " + mdasDomainName);
+                        SRBFileSystemConfigBuilder.getInstance().setMdasDomainName(options, mdasDomainName);
+                    }
+
+                    SRBFileSystemConfigBuilder.getInstance().setQueryTimeout(options, 10);
+
+                }
+                else if (uriPropertiesXML instanceof IrodsURIPropertiesType) {
+                    IrodsURIPropertiesType irodsUriProperties = (IrodsURIPropertiesType) uriPropertiesXML;
+                    String defaultStorageResource = irodsUriProperties.getIrodsDefaultResource();
+                    String homeDirectory = irodsUriProperties.getIrodsHome();
+                    String zone = irodsUriProperties.getIrodsZone();
+
+                    if (defaultStorageResource != null && !defaultStorageResource.trim().equals("")) {
+                        LOG.debug("Setting IRODS.defaultStorageResource to " + defaultStorageResource);
+                        IRODSFileSystemConfigBuilder.getInstance().setDefaultStorageResource(options,
+                                defaultStorageResource);
+                    }
+                    if (homeDirectory != null && !homeDirectory.trim().equals("")) {
+                        LOG.debug("Setting IRODS.homeDirectory to " + homeDirectory);
+                        IRODSFileSystemConfigBuilder.getInstance().setHomeDirectory(options, homeDirectory);
+                    }
+                    if (zone != null && !zone.trim().equals("")) {
+                        LOG.debug("Setting IRODS.zone to " + zone);
+                        IRODSFileSystemConfigBuilder.getInstance().setZone(options, zone);
+                    }
+                    
+                }
+
             }
         }
 

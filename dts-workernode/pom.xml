@@ -265,6 +265,36 @@
       <scope>test</scope>
     </dependency>
 
+    <!--
+        The following security libraries will need to be commented out from the
+        respective DTS module pom files if we are to deploy the following DTS
+        modules (ws, workernode, portal) on a single web container
+
+        TODO: decide on how shared/unshared security libraries can be dealt with
+        if we are going to support deployment of the DTS modules in a single or
+        multiple web containers.
+    -->
+    <dependency>
+      <groupId>external.jglobus</groupId>
+      <artifactId>cryptix32</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>external.jglobus</groupId>
+      <artifactId>cryptix-asn1</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>external.jglobus</groupId>
+      <artifactId>cryptix</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>external.jglobus</groupId>
+      <artifactId>puretls</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>bouncycastle</groupId>
+      <artifactId>bcprov-jdk16</artifactId>
+    </dependency>
+
     <!-- Proxy Light -->
     <dependency>
         <groupId>au.org.arcs.auth</groupId>
