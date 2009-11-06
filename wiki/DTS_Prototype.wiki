@@ -27,7 +27,7 @@ In addition, you will need access to an Oracle database. It is recommended that 
    * [http://www.oracle.com/technology/software/products/database/xe/index.html Oracle XE]
 
 ==== Getting The Code ====
-The DTS codebase is currently hosted in the DTS GoogleCode SVN repository. You can check out the code by running:
+The DTS codebase is currently hosted in the DTS Google Code SVN repository. You can check out the code by running:
 {{{
   > svn checkout http://dtsproject.googlecode.com/svn/trunk/ dtsproject
 }}}
