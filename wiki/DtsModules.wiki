@@ -24,7 +24,7 @@ This module is used by the dts-ws. It's basically the DTS WS' domain layer. This
 
 This module contains the security classes and configuration that the dts-ws and dts-portal use. The dts-workernode currently doesn't use the dts-security but it'll be a good idea to have it use this module instead of its own security related calls that it does when it processes a !GridFTP related job.
 
-This module uses JAAS to make it easy for any of the other DTS modules using the dts-security to plugin other types of authentication and authorisation modules. As a part of this module, I've defined a MyProxy implementation of the AA module for JAAS to use.
+This module uses JAAS to make it easy for any of the other DTS modules using the dts-security to plugin other types of authentication and authorisation modules. As a part of this module, I've defined a !MyProxy implementation of the AA module for JAAS to use.
 
 ===dts-workernode===
 
