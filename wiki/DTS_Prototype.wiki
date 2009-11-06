@@ -1,3 +1,5 @@
+<wiki:toc max_depth="3" />
+
 == DTS Prototype ==
 
 A prototype of the Data Transfer Service has been commissioned and is currently being developed within the DataMINX project. Such prototype will allow the team to explore design alternatives and technologies that best meet the project goals.
@@ -47,8 +49,157 @@ A directory containing specific configuration files that the application require
 If this flag is not set, the application looks for the default dataminx configuration directory at the following location: `${user.home}/.dataminx`. The location of the `user.home` directories varies with the platform but in Linux this would be equivalent to `~/.dataminx`.
 
 The application directory must contain the following files:
+   * *`dts-workernode.properties`* This file contains a set of all properties required to configure the dts-workernode module including the spring batch module and its associated data source as well as the spring integration module and its associated JMS infrastructure. The following file (dts-workernode.properties) can be used as a template:
+{{{
+#########################################################################
+#                       DTS-WorkerNode configuration
+#
+
+#
+# Spring Batch configuration
+
+# Oracle JDBC driver
+#batch.jdbc.driver = oracle.jdbc.driver.OracleDriver
+
+# HSQLDB JDBC driver
+batch.jdbc.driver = org.hsqldb.jdbcDriver
+
+# Oracle Database URL
+#batch.jdbc.url = jdbc:oracle:thin:@localhost:1521:XE
+
+# HSQLDB Database URL (standalone mode -- file)
+batch.jdbc.url = jdbc:hsqldb:file:${java.io.tmpdir}/dtsdb
+
+# Schema details
+batch.jdbc.user = sa
+batch.jdbc.password = 
+batch.schema = 
 
 
+#
+# Spring Integration configuration
 
+# URL for ActiveMQ running in stand-alone mode
+si.jms.brokerURL = tcp://localhost:61616
+
+# URL for ActiveMQ running in embedded mode
+#si.jms.brokerURL = vm://localhost
+
+# JMS listener container caching settings
+si.jms.sessionCacheSize = 10
+si.jms.cacheProducers = false
+
+# DTS JMS Queue/Topic names
+si.jms.jobSubmitQueueName = dts.job.submit.queue
+si.jms.jobEventQueueName = dts.job.event.queue
+si.jms.jobControlTopicName = dts.job.control.topic
+
+
+#
+# Additional configuration
+
+# lifetime of MyProxy credentials (in seconds, 0 for maximum)
+default.myproxy.lifetime = 43200
+
+}}}
+
+   * *`log4j.xml`* This file is optional and can be used to customise the amount and type of logging output by the application. Here's the example log4j.xml file included with the dts-common module:
+{{{
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "http://jakarta.apache.org/log4j/dtd/log4j.dtd">
+
+<!-- ===================================== -->
+<!--          Log4j Configuration          -->
+<!-- ===================================== -->
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+  <!-- ============================== -->
+  <!--        Console Appender        -->
+  <!-- ============================== -->
+
+  <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+    <param name="Target" value="System.out"/>
+    <!--<param name="Threshold" value="INFO"/>-->
+
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%t] %C{1}: %m%n"/>
+    </layout>
+  </appender>
+
+  <!-- ============================== -->
+  <!--          DTS Log File          -->
+  <!-- ============================== -->
+
+  <!-- A time/date based rolling appender -->
+  <appender name="FILE" class="org.apache.log4j.RollingFileAppender">
+    <param name="File" value="minx-dts.log"/>
+    <param name="Append" value="false"/>
+    <param name="MaxFileSize" value="10MB"/>
+    <param name="MaxBackupIndex" value="0"/>
+
+    <layout class="org.apache.log4j.PatternLayout">
+      <!-- The default pattern: Date Priority [Thread] Logger Message\n -->
+      <param name="ConversionPattern" value="%d %-5p [%t] %C{1} - %m%n"/>
+    </layout>
+  </appender>
+
+
+  <!-- ================ -->
+  <!--    Thresholds    -->
+  <!-- ================ -->
+
+  <logger name="org.dataminx.dts">
+    <level value="DEBUG"/>
+  </logger>
+
+  <logger name="org.springframework">
+    <level value="INFO"/>
+  </logger>
+
+
+  <!-- ======================= -->
+  <!--  Setup the Root logger  -->
+  <!-- ======================= -->
+  <root>
+    <level value="INFO"/>
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </root>
+
+</log4j:configuration>
+}}}
+
+===== Data Source =====
+Currently, DTS-WN supports the following types of databases: Oracle, MySQL and HSQLDB. The relevant Spring Batch schema creation scripts for each of those database types are part of the DTS-WN distribution and must be run prior to attempting to run the application for the first time. You will find the database creation scripts in the following resource folder of DTS-WN: `src/main/resources/db`.
+
+===== JMS Provider =====
+Prior to running the application, all the required JMS infrastructure and its associated Queues/Topics must first be configured. Currently, DTS-WN supports only [http://activemq.apache.org/ ActiveMQ] as a JMS provider but that list will be expanded in due course. You can download the latest [http://activemq.apache.org/ ActiveMQ] distribution [http://activemq.apache.org/download.html here].
+
+Running [http://activemq.apache.org/ ActiveMQ] is extremely simple. Just download the latest distribution archive, unzip to a local directory and then run the startup script provided in the bin folder, `activemq.sh` or `activemq.bat`. By default, [http://activemq.apache.org/ ActiveMQ] will create the required Queues and Topics on first use if they do not yet exist (very convenient :). 
+
+==== Running the DTS-WN service ====
+Just to re-emphasise what has already been said earlier, you need required infrastructure components to be configured and operational prior to running the DTS Worker Node. Those required components are:
+
+    * Database with Spring Batch schema already created
+    * JMS Provider (eg. ActiveMQ)
+
+If you've already taken care of the prerequisites, let's get on with the show... In order to run the DTS Worker Node you must first deploy all required dependencies to the local repository. You can do this by running the following command at the root of the DTS project directory structure:
+{{{
+  > mvn install
+}}}
+Then, change to the dts-workernode folder and launch the DTS Worker Node using the following command:
+{{{
+  > cd dts-workernode
+  > mvn exec:java
+}}}
+If you would like to specify the location of the application directory, otherwise known as `dataminx.dir`, you would specify it on the command line as follows:
+{{{
+  > mvn -Ddataminx.dir=/home/alex/dataminx/config exec:java
+}}}
+Finally, you can also specify additional options to Maven, such as heap thresholds etc., using the special environment variable `MAVEN_OPTS` as shown in the following example:
+{{{
+  > set MAVEN_OPTS=-Xms128m -Xmx512m -XX:MaxPermSize=128m   (Windows)
+  > export MAVEN_OPTS=-Xms128m -Xmx512m -XX:MaxPermSize=128m   (Linux bash)
+}}}
 
 === DTS Web Service ===
