@@ -1,0 +1,54 @@
+== DTS Prototype ==
+
+A prototype of the Data Transfer Service has been commissioned and is currently being developed within the DataMINX project. Such prototype will allow the team to explore design alternatives and technologies that best meet the project goals.
+
+=== DTS Workernode ===
+The prototype of the DTS Worker Node part of the DTS component implements some core technologies that have already been discussed in the project documentation including the [http://en.wikipedia.org/wiki/Java_Message_Service Java Messaging Service] (JMS) and XML. In addition, the initial prototype of the DTS-WN uses elements of the [http://www.springsource.org/ Spring Framework] at its core. Most notably, the DTS-WN uses the following Spring modules:
+   * [http://static.springsource.org/spring-batch/ Spring Batch] Spring Batch is a lightweight, comprehensive batch framework designed to enable the development of robust batch applications vital for the daily operations of enterprise systems. Spring Batch builds upon the productivity, POJO-based development approach, and general ease of use capabilities people have come to know from the Spring Framework, while making it easy for developers to access and leverage more advance enterprise services when necessary. Amongst other things, the Spring Batch framework allows developers to:
+      * Handle large data by splitting it in small chunks
+      * Restart a batch exactly where it has stopped
+      * Define how many handled chunks per commit steps
+      * Automatic Rollback / Retry in case of error
+   * [http://www.springsource.org/spring-integration Spring Integration] Spring Integration enables simple messaging within Spring-based applications and integrates with external systems via simple adapters. Those adapters provide a higher-level of abstraction over Spring's support for remoting, messaging, and scheduling.
+   * Spring OXM This is a subproject of the larger [http://static.springsource.org/spring-ws/sites/1.5/ Spring Web Services] project and it provides bi-directional Object/XML Mapping (OXM) support.
+
+==== Software Prerequisites ====
+Following is a list of software components required as part of the DataMINX development environment. Each item in the list contains a link to the product website where you can download the required distribution files:
+
+   * [http://java.sun.com/javase/downloads/ Java SE JDK] Current release is [http://java.sun.com/javase/6/webnotes/6u14.html JDK 6 Update 14]
+   * [http://subversion.tigris.org/getting.html Subversion]
+   * [http://maven.apache.org/ Maven]
+   * [http://www.poweredbypulse.com/download.php Pulse]
+
+In addition, you will need access to an Oracle database. It is recommended that Oracle XE be installed in all development environments:
+
+   * [http://www.oracle.com/technology/software/products/database/xe/index.html Oracle XE]
+
+==== Getting The Code ====
+The DTS codebase is currently hosted in the DTS GoogleCode SVN repository. You can check out the code by running:
+{{{
+  > svn checkout http://dtsproject.googlecode.com/svn/trunk/ dtsproject
+}}}
+
+==== Building the project ====
+Open a command prompt and change to the directory containing the working copy of the DTS checked out in the previous step. You can build the entire project using Maven with the following:
+{{{
+  > mvn -Dmaven.test.skip=true
+}}}
+
+==== Configuring the DTS-WN service ====
+In order to configure the DTS Worker Node the following resources must be configured: 
+
+===== Application Directory =====
+A directory containing specific configuration files that the application requires in order to launch. The application resolves the location of this directory by first looking for the Java system property `dataminx.dir`. Such a system property can be passed to the application as a command line parameter as demonstrated below:
+{{{
+  java -Ddataminx.dir=/home/alex/dataminx/config org.etc.DtsWorkerNodeCommandLineRunner
+}}}
+If this flag is not set, the application looks for the default dataminx configuration directory at the following location: `${user.home}/.dataminx`. The location of the `user.home` directories varies with the platform but in Linux this would be equivalent to `~/.dataminx`.
+
+The application directory must contain the following files:
+
+
+
+
+=== DTS Web Service ===
