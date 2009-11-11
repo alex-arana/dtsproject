@@ -224,21 +224,21 @@ While the vanilla hpc file staging profile serves the purpose of staging data to
                 <mjsdl:MyProxyServer>myproxy2.arcs.org.au</mjsdl:MyProxyServer>
                 <mjsdl:MyProxyPort>7512</mjsdl:MyProxyPort>
             </mjsdl:MyProxyToken>
-             <!--
-             define protocol specifics by using abstract URIProperties and xsd 
-             substitution group
-             -->
-            <mjsdl:SrbProtocolProperties>
-                <mjsdl:McatZone>mymcatZone</mjsdl:mjsdl:McatZone>
-                <mjsdl:MdasDomain>my mdas domain </mjsdl:MdasDomain>
-                <!--<mjsdl:HomeDirectory>/home/whatever</mjsdl:HomeDirectory>
-                <mjsdl:DefaultResource>ng2.vpac.org</mjsdl:DefaultResource>-->
-                <mjsdl:PortRange>
-                    <mjsdl:portMin>6400</mjsdl:portMin>
-                    <mjsdl:portMax>6500</mjsdl:portMax>
-                </mjsdl:PortRange>
-             </SrbProtocolProperties>
         </mjsdl:Credential>
+        <!--
+          define protocol specifics by using abstract URIProperties and xsd 
+          substitution group
+         -->
+         <mjsdl:SrbProtocolProperties>
+              <mjsdl:McatZone>mymcatZone</mjsdl:mjsdl:McatZone>
+              <mjsdl:MdasDomain>my mdas domain </mjsdl:MdasDomain>
+              <!--<mjsdl:HomeDirectory>/home/whatever</mjsdl:HomeDirectory>
+              <mjsdl:DefaultResource>ng2.vpac.org</mjsdl:DefaultResource>-->
+              <mjsdl:PortRange>
+                  <mjsdl:portMin>6400</mjsdl:portMin>
+                  <mjsdl:portMax>6500</mjsdl:portMax>
+              </mjsdl:PortRange>
+         </SrbProtocolProperties>       
       </mjsdl:Source>
  
      <!-- 
@@ -261,7 +261,7 @@ While the vanilla hpc file staging profile serves the purpose of staging data to
       DMI redefined transfer requirements 
       -->
       <mjsdl:TransferRequirements>
-        <dmi:MaxAttempts>0</dmi:MaxAttempts>
+        <dmi:MaxAttempts>3</dmi:MaxAttempts>
         <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
       </mjsdl:TransferRequirements>
 
