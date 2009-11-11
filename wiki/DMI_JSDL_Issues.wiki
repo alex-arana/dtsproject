@@ -238,7 +238,7 @@ While the vanilla hpc file staging profile serves the purpose of staging data to
                   <mjsdl:portMin>6400</mjsdl:portMin>
                   <mjsdl:portMax>6500</mjsdl:portMax>
               </mjsdl:PortRange>
-         </SrbProtocolProperties>       
+         </mjsdl:SrbProtocolProperties>       
       </mjsdl:Source>
  
      <!-- 
