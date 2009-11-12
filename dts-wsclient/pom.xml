@@ -11,7 +11,7 @@
     <version>${minx-dts.version}</version>
   </parent>
 
-  <name>MINX-DTS WS</name>
+  <name>MINX-DTS WS Client</name>
   <artifactId>dts-wsclient</artifactId>
   <packaging>jar</packaging>
 

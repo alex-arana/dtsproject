@@ -100,35 +100,34 @@
     </xsd:complexType>
     <xsd:element name="PortRange" type="mjsdl:PortRangeType" />
 
-    <!--
-    <xsd:element name="SrbURIProperties" substitutionGroup="tns:URIProperties">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element name="McatZone" minOccurs="0">
-                    <xsd:simpleType>
-                        <xsd:restriction base="xsd:string" />
-                    </xsd:simpleType>
-                </xsd:element>
-                <xsd:element name="MdasDomain" minOccurs="0">
-                    <xsd:simpleType>
-                        <xsd:restriction base="xsd:string" />
-                    </xsd:simpleType>
-                </xsd:element>
-                <xsd:element name="HomeDirectory" minOccurs="0">
-                    <xsd:simpleType>
-                        <xsd:restriction base="xsd:string" />
-                    </xsd:simpleType>
-                </xsd:element>
-                <xsd:element name="DefaultResource" minOccurs="0">
-                    <xsd:simpleType>
-                        <xsd:restriction base="xsd:string" />
-                    </xsd:simpleType>
-                </xsd:element>
-                <xsd:element ref="tns:PortRange" minOccurs="0" />
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
-    -->
+    <xsd:complexType name="SrbURIPropertiesType">
+        <xsd:sequence>
+            <xsd:element name="MdasDomainHome" type="xsd:string"  minOccurs="1" />
+            <xsd:element name="MdasCollectionHome" type="xsd:string" minOccurs="1" />
+            <xsd:element name="ServerDN" type="xsd:string" minOccurs="0" />
+            <xsd:element name="DefaultResource" type="xsd:string" minOccurs="0" />
+            <!-- <xsd:element name="PortRange" type="mjsdl:PortRangeType" minOccurs="0" />-->
+            <xsd:element name="McatZone" type="xsd:string" minOccurs="0" />
+            <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+        <xsd:anyAttribute namespace="##other"
+            processContents="lax" />
+    </xsd:complexType>
+    <xsd:element name="SrbURIProperties" type="mjsdl:SrbURIPropertiesType" substitutionGroup="mjsdl:URIProperties" />
+
+    <xsd:complexType name="IrodsURIPropertiesType">
+        <xsd:sequence>
+            <xsd:element name="IrodsHome" type="xsd:string"  minOccurs="0" />
+            <xsd:element name="IrodsCwd" type="xsd:string" minOccurs="0" />
+            <xsd:element name="IrodsServerDN" type="xsd:string" minOccurs="0" />
+            <xsd:element name="IrodsDefaultResource" type="xsd:string" minOccurs="0" />
+            <xsd:element name="IrodsZone" type="xsd:string" minOccurs="1" />
+            <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+        <xsd:anyAttribute namespace="##other"
+            processContents="lax" />
+    </xsd:complexType>
+    <xsd:element name="IrodsURIProperties" type="mjsdl:IrodsURIPropertiesType" substitutionGroup="mjsdl:URIProperties" />
 
     <!--
         Now lets extend JSDL's SourceTarget_Type to temporarily make our lives easy in terms
