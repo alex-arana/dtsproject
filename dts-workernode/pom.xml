@@ -57,10 +57,6 @@
       <groupId>${dataminx.group}</groupId>
     </dependency>
     <dependency>
-      <artifactId>dts-domain</artifactId>
-      <groupId>${dataminx.group}</groupId>
-    </dependency>
-    <dependency>
       <artifactId>dts-schema</artifactId>
       <groupId>${dataminx.group}</groupId>
     </dependency>
