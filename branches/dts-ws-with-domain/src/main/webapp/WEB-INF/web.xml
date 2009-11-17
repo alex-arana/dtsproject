@@ -1,0 +1,23 @@
+<web-app
+  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  version="2.4">
+  <display-name>Data Transfer (Prototype) Service</display-name>
+
+  <servlet>
+    <servlet-name>dts</servlet-name>
+    <servlet-class>
+      org.springframework.ws.transport.http.MessageDispatcherServlet
+    </servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>classpath:/dts-servlet.xml classpath:/domain-context.xml classpath:/activemq/jms-context.xml classpath:/integration-context.xml</param-value>
+    </init-param>
+
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>dts</servlet-name>
+    <url-pattern>/*</url-pattern>
+  </servlet-mapping>
+</web-app>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jsdl:JobDefinition xmlns:mjsdl="http://schemas.dataminx.org/dts/2009/07/jsdl"
+  xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl"
+  xmlns:dmi="http://schemas.ogf.org/dmi/2008/05/dmi"
+  xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <!--
+    For some unknown reason, namespace definitions should be set in the JobDescription element again
+  -->
+  <jsdl:JobDescription xsi:type="mjsdl:MinxJobDescriptionType" xmlns:mjsdl="http://schemas.dataminx.org/dts/2009/07/jsdl"
+    xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+    <jsdl:JobIdentification>
+      <jsdl:JobName>testjob</jsdl:JobName>
+      <jsdl:Description>Gerson's Job</jsdl:Description>
+      <jsdl:JobAnnotation>Gerson's Job Annotation</jsdl:JobAnnotation>
+      <jsdl:JobProject>apollo33</jsdl:JobProject>
+    </jsdl:JobIdentification>
+    <mjsdl:DataTransfer>
+      <mjsdl:Source>
+        <!--<jsdl:URI>file:///tmp/enhance80967296649670298.log</jsdl:URI>-->
+        <jsdl:URI>http://www.google.com/index.html</jsdl:URI>
+
+        <!--
+        <jsdl:URI>gsiftp://ng2.vpac.org/etc/yum.repos.d/</jsdl:URI>
+        <mjsdl:Credential>
+          <mjsdl:MyProxyToken>
+            <mjsdl:MyProxyUsername>${myproxy.username}</mjsdl:MyProxyUsername>
+            <mjsdl:MyProxyPassword>${myproxy.password}</mjsdl:MyProxyPassword>
+            <mjsdl:MyProxyServer>myproxy2.arcs.org.au</mjsdl:MyProxyServer>
+            <mjsdl:MyProxyPort>7512</mjsdl:MyProxyPort>
+          </mjsdl:MyProxyToken>
+        </mjsdl:Credential>
+        -->
+
+        <!--
+        <jsdl:URI>ftp://dm11.intersect.org.au/pub/DataMINX/minx-dts/pom.xml</jsdl:URI>
+        <mjsdl:Credential>
+          <wsse:UsernameToken>
+            <wsse:Username>${ftp.username}</wsse:Username>
+            <wsse:PasswordString>${ftp.password}</wsse:PasswordString>
+          </wsse:UsernameToken>
+        </mjsdl:Credential>
+        -->
+
+        <!--
+        <jsdl:URI>srb://srb.versi.unimelb.edu.au:5544/versi.melbourne/home/gerson.versi.melbourne/mydir</jsdl:URI>
+        <mjsdl:Credential>
+          <wsse:UsernameToken>
+            <wsse:Username>${srb.username}</wsse:Username>
+            <wsse:PasswordString>${srb.password}</wsse:PasswordString>
+          </wsse:UsernameToken>
+        </mjsdl:Credential>
+        <mjsdl:SrbURIProperties>
+            <mjsdl:MdasDomainHome>versi.melbourne</mjsdl:MdasDomainHome>
+            <mjsdl:MdasCollectionHome>/versi.melbourne/home/gerson.versi.melbourne</mjsdl:MdasCollectionHome>
+            <mjsdl:DefaultResource>disk-vbl-mu</mjsdl:DefaultResource>
+            <mjsdl:McatZone>versi.melbourne</mjsdl:McatZone>
+        </mjsdl:SrbURIProperties>
+        -->
+
+        <!--
+        -irodsHost 'ngdata-dev.hpcu.uq.edu.au'
+        -irodsPort 1247
+        -irodsDefResource 'ngdata-dev.hpcu.uq.edu.au'
+        -irodsZone 'ARCSDEV'
+        -irodsAuthScheme 'GSI'
+        -irodsServerDn '/C=AU/O=APACGrid/OU=UQ/CN=ngdata-dev.hpcu.uq.edu.au'
+        -irodsUserName 'gerson.galang'
+        irodsHome '/ARCSDEV/home/gerson.galang'
+        -->
+        <!-- user SLIX client to generate irods usernamd and password -->
+
+        <!--<jsdl:URI>irods://arcs-df.vpac.org:1247/ARCS/home/gerson.galang/test</jsdl:URI>
+        <mjsdl:Credential>
+          <mjsdl:MyProxyToken>
+            <mjsdl:MyProxyUsername>${irods.username}</mjsdl:MyProxyUsername>
+            <mjsdl:MyProxyPassword>${irods.password}</mjsdl:MyProxyPassword>
+            <mjsdl:MyProxyServer>myproxy.arcs.org.au</mjsdl:MyProxyServer>
+            <mjsdl:MyProxyPort>7512</mjsdl:MyProxyPort>
+          </mjsdl:MyProxyToken>
+        </mjsdl:Credential>
+         <mjsdl:IrodsURIProperties>
+            <mjsdl:IrodsHome>/ARCS/home/gerson.galang</mjsdl:IrodsHome>
+            <mjsdl:IrodsServerDN>/C=AU/O=APACGrid/OU=UQ/CN=arcs-df.vpac.org</mjsdl:IrodsServerDN>
+            <mjsdl:IrodsDefaultResource>arcs-df.vpac.org</mjsdl:IrodsDefaultResource>
+            <mjsdl:IrodsZone>ARCS</mjsdl:IrodsZone>
+        </mjsdl:IrodsURIProperties>-->
+
+      </mjsdl:Source>
+      <mjsdl:Target>
+
+        <jsdl:URI>file:///tmp/hellog/</jsdl:URI>
+
+      </mjsdl:Target>
+      <mjsdl:TransferRequirements>
+        <dmi:MaxAttempts>0</dmi:MaxAttempts>
+        <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+      </mjsdl:TransferRequirements>
+    </mjsdl:DataTransfer>
+  </jsdl:JobDescription>
+</jsdl:JobDefinition>
