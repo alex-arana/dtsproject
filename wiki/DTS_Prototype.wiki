@@ -225,6 +225,17 @@ Assuming you have Eclipse up and running, download the entire DTS project (even 
 http://dtsproject.googlecode.com/svn/trunk
 }}}
 
+
+==== One time installation of the JTA library ===
+{{{
+download jta-1.0.1B classes zipped file
+unzip
+jar
+
+then..
+mvn install:install-file -DgroupId=javax.transaction -DartifactId=jta -Dversion=1.0.1B -Dpackaging=jar -Dfile=jta-1.0.1B.jar
+}}}
+
 ==== Integrating with Eclipse ====
 Right click on each of the modules, go to maven, then select "update project configuration". The web enabled projects like dts-ws and dts-portal still will need to be wtp enabled. You can do it by...
 {{{
@@ -280,4 +291,3 @@ You can use try this option if you don't feel like configuring Tomcat from withi
 
 ==== FAQ ====
    * I'm getting this exception (`com.sun.xml.internal.messaging.saaj.soap.LocalStrings != com.sun.xml.messaging.saaj.soap.LocalStrings`) if I run both the portal and ws on a single tomcat instance http://forums.java.net/jive/thread.jspa?threadID=41696 use a newer version of saaj (> 1.3.1) and put in tomcat's common/endorsed directory
-
