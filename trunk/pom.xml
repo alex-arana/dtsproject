@@ -136,7 +136,6 @@
   <modules>
     <module>build-tools</module>
     <module>dts-common</module>
-    <module>dts-domain</module>
     <module>dts-schema</module>
     <module>dts-workernode</module>
     <module>dts-ws</module>
@@ -222,11 +221,6 @@
       </dependency>
       <dependency>
         <artifactId>dts-schema</artifactId>
-        <groupId>${dataminx.group}</groupId>
-        <version>${minx-dts.version}</version>
-      </dependency>
-      <dependency>
-        <artifactId>dts-domain</artifactId>
         <groupId>${dataminx.group}</groupId>
         <version>${minx-dts.version}</version>
       </dependency>
