@@ -1,6 +1,0 @@
-download jta-1.0.1B classes zipped file
-unzip
-jar
-
-then..
-mvn install:install-file -DgroupId=javax.transaction -DartifactId=jta -Dversion=1.0.1B -Dpackaging=jar -Dfile=jta-1.0.1B.jar
