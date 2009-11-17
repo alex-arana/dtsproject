@@ -28,11 +28,6 @@
 
     <dependency>
       <groupId>${dataminx.group}</groupId>
-      <artifactId>dts-domain</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>${dataminx.group}</groupId>
       <artifactId>dts-security</artifactId>
     </dependency>
 
@@ -42,15 +37,10 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Log4J -->
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-    </dependency>
-
-    <!-- Spring Test -->
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
     </dependency>
 
     <dependency>
@@ -63,6 +53,33 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.transaction</groupId>
+      <artifactId>jta</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>javassist</groupId>
+      <artifactId>javassist</artifactId>
+    </dependency>
+
+    <!-- Spring Test -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+    </dependency>
+
 
     <!-- TestNG -->
     <!--
@@ -96,6 +113,61 @@
     <dependency>
       <groupId>org.springframework.ws</groupId>
       <artifactId>spring-ws-security</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring</artifactId>
+    </dependency>
+
+    <!-- Oracle -->
+    <dependency>
+      <groupId>com.oracle</groupId>
+      <artifactId>ojdbc14</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- MySQL -->
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- HSQLDB JDBC Driver -->
+    <dependency>
+      <groupId>hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- DbUnit for DB testing -->
+    <dependency>
+      <groupId>org.dbunit</groupId>
+      <artifactId>dbunit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- JPA -->
+    <dependency>
+      <groupId>javax.persistence</groupId>
+      <artifactId>persistence-api</artifactId>
+    </dependency>
+
+    <!-- Hibernate -->
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-entitymanager</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-annotations</artifactId>
     </dependency>
 
     <!-- JMS -->
@@ -188,6 +260,39 @@
     </testResources>
 
     <plugins>
+      <plugin>
+        <!-- Handy plugin if we want to output the DDL -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>hibernate3-maven-plugin</artifactId>
+        <version>2.2</version>
+        <executions>
+          <execution>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>hbm2ddl</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <components>
+            <component>
+              <name>hbm2ddl</name>
+              <implementation>annotationconfiguration</implementation>
+            </component>
+          </components>
+          <componentProperties>
+            <implementation>jpaconfiguration</implementation>
+            <persistenceunit>punit</persistenceunit>
+            <outputfilename>dtsjob.ddl</outputfilename>
+            <propertyfile>${basedir}/src/main/resources/database.properties</propertyfile>
+            <drop>true</drop>
+            <create>true</create>
+            <export>false</export>
+            <format>true</format>
+          </componentProperties>
+        </configuration>
+      </plugin>
+
       <!-- Force maven to use the intended context root to be the name of the WAR file -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

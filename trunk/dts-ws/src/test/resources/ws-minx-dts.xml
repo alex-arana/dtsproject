@@ -18,7 +18,7 @@
     <mjsdl:DataTransfer>
       <mjsdl:Source>
         <!--<jsdl:URI>file:///tmp/enhance80967296649670298.log</jsdl:URI>-->
-        <jsdl:URI>http://www.google.com/index.html</jsdl:URI>
+        <jsdl:URI>file:////etc/lsb-release</jsdl:URI>
 
         <!--
         <jsdl:URI>gsiftp://ng2.vpac.org/etc/yum.repos.d/</jsdl:URI>
