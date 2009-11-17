@@ -16,10 +16,6 @@ The OriginsOfTheDtsSchema discusses more information about the DTS schema defini
 
 This module holds the commonly used classes that the DTS modules use. It includes XML processors, JMS message senders and receiveers, etc.
 
-===dts-domain===
-
-This module is used by the dts-ws. It's basically the DTS WS' domain layer. This module accesses the job database that gets updated by the web service itself and messages sent by the workernode. Since the dts-domain is not really usable to any other DTS modules, it's probably better to have it merged (or at least have its classes moved) to the dts-ws module.
-
 ===dts-security===
 
 This module contains the security classes and configuration that the dts-ws and dts-portal use. The dts-workernode currently doesn't use the dts-security but it'll be a good idea to have it use this module instead of its own security related calls that it does when it processes a !GridFTP related job.
@@ -38,7 +34,7 @@ The classes in this module used to be in dts-ws' module's test directory. I thou
 
 ===dts-ws===
 
-This module is the web service implementation of the DTS. Jobs submitted to the web service gets checked if it conforms to the dts schema. It also uses a credential interceptor to check if the message (SOAP) header contains the myproxy authentication information it requires from teh user submitting the job. If the user is allowed to submit a job, the dts-ws validates if the user's job definition document. It's possible for a job to be validate against a schema but not to the more specific rrequirements we have set to each of the elements in the schema. The dts-ws then tries and submit the job to the dts-workernode. If it didn't get any exception at the time of submission, it logs the new info about the job into the job DB and returns the job's id to the user submitting the job.
+This module is the web service implementation of the DTS. Jobs submitted to the web service gets checked if it conforms to the dts schema. It also uses a credential interceptor to check if the message (SOAP) header contains the myproxy authentication information it requires from teh user submitting the job. If the user is allowed to submit a job, the dts-ws validates if the user's job definition document. It's possible for a job to be validate against a schema but not to the more specific requirements we have set to each of the elements in the schema. The dts-ws then tries and submit the job to the dts-workernode. If it didn't get any exception at the time of submission, it logs the new info about the job into the job DB and returns the job's id to the user submitting the job.
 
 The dts-ws can also be queried for the status of the jobs submitted to it. It cannot support job suspension, resumption, and cancellation yet as the workernode will need to do this as well.
 
