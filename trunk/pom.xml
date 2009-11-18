@@ -139,7 +139,8 @@
     <module>dts-schema</module>
     <module>dts-workernode</module>
     <module>dts-ws</module>
-    <module>dts-portal</module>
+    <!-- temporarily disable the dts-portal module until we start working on it again -->
+    <!--<module>dts-portal</module>-->
     <module>dts-security</module>
     <module>dts-wsclient</module>
   </modules>
