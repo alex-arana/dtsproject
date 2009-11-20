@@ -17,15 +17,14 @@
     </jsdl:JobIdentification>
     <mjsdl:DataTransfer>
       <mjsdl:Source>
-        <!--<jsdl:URI>file:///tmp/enhance80967296649670298.log</jsdl:URI>-->
-        <jsdl:URI>file:////etc/lsb-release</jsdl:URI>
+		<jsdl:URI>file:////etc/passwd</jsdl:URI>
 
         <!--
         <jsdl:URI>gsiftp://ng2.vpac.org/etc/yum.repos.d/</jsdl:URI>
         <mjsdl:Credential>
           <mjsdl:MyProxyToken>
-            <mjsdl:MyProxyUsername>${myproxy.username}</mjsdl:MyProxyUsername>
-            <mjsdl:MyProxyPassword>${myproxy.password}</mjsdl:MyProxyPassword>
+            <mjsdl:MyProxyUsername>${auth.username}</mjsdl:MyProxyUsername>
+            <mjsdl:MyProxyPassword>${auth.password}</mjsdl:MyProxyPassword>
             <mjsdl:MyProxyServer>myproxy2.arcs.org.au</mjsdl:MyProxyServer>
             <mjsdl:MyProxyPort>7512</mjsdl:MyProxyPort>
           </mjsdl:MyProxyToken>
@@ -68,7 +67,7 @@
         -irodsUserName 'gerson.galang'
         irodsHome '/ARCSDEV/home/gerson.galang'
         -->
-        <!-- user SLIX client to generate irods usernamd and password -->
+        <!-- user SLIX client to generate irods username and password -->
 
         <!--<jsdl:URI>irods://arcs-df.vpac.org:1247/ARCS/home/gerson.galang/test</jsdl:URI>
         <mjsdl:Credential>
@@ -88,9 +87,7 @@
 
       </mjsdl:Source>
       <mjsdl:Target>
-
-        <jsdl:URI>file:///tmp/hellog/</jsdl:URI>
-
+        <jsdl:URI>file:///tmp/passwd.copy</jsdl:URI>
       </mjsdl:Target>
       <mjsdl:TransferRequirements>
         <dmi:MaxAttempts>0</dmi:MaxAttempts>

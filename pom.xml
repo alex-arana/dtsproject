@@ -90,6 +90,7 @@
     <gwt-maven-plugin.version>1.1</gwt-maven-plugin.version>
     <gxt.version>2.0.1</gxt.version>
     <gwt.version>1.7.0</gwt.version>
+    <jaas.version>1.0.01</jaas.version>
   </properties>
 
   <repositories>
@@ -143,6 +144,10 @@
     <!--<module>dts-portal</module>-->
     <module>dts-security</module>
     <module>dts-wsclient</module>
+    <!--
+    <module>dts-portal-gwt</module>
+    <module>dts-gwt</module>
+    -->
   </modules>
 
   <build>
@@ -828,6 +833,13 @@
             <artifactId>bcprov-jdk15</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+
+      <!-- JAAS -->
+      <dependency>
+        <groupId>javax.security</groupId>
+        <artifactId>jaas</artifactId>
+        <version>${jaas.version}</version>
       </dependency>
 
       <!-- DbUnit for DB testing -->

@@ -46,7 +46,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @ContextConfiguration(locations = { "/client-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
-public class DTSWSClientTest {
+public class DtsWsIntegrationTest {
 
     /** The DTS WS client. */
     @Autowired
