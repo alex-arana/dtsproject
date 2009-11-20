@@ -275,18 +275,27 @@ copy log4j.xml to .dataminx
 ==== Deploying the WS on Tomcat ====
    * Before you go ahead and follow the succeeding instructions, you might consider just running the DTS-WS as an embedded Jetty web application for test purposes. If you do, have a look at the "Running the DTS-WS as an embedded application inside Jetty" section on this page.
    * On Eclipse, from the servers view, add (with "Add Remove Projects") the dts-ws module (which is an Eclipse project now)
-   * Run the server once, then stop it. Now go to run configurations of yoru tomcat server and add `-Djava.security.auth.login.config="/<thedirectory-on-where-your-jaas-config-is-located>/jaas.config"` for me, on my development box, it's in `/home/gerson/Workspaces/dataminx-new/minx-dts/dts-security/src/main/resources/jaas.config.default`. Now run it again.
+   * Run the server once, then stop it. Now go to run configurations of your tomcat server and add `-Djava.security.auth.login.config="/<thedirectory-on-where-your-jaas-config-is-located>/jaas.config" -Ddataminx.dir=/<your-dataminx-config-directory"` for me, on my development box, `jaas.config` is in `/home/gerson/Workspaces/dataminx-new/minx-dts/dts-security/src/main/resources/jaas.config.default` and `dataminx.dir` points to `/home/gerson.dataminx`. Now run it again.
    * An alternative to specifying the `java.security.auth.login.config` is to edit `/usr/lib/jvm/java-1.6.0-sun-1.6.0.11/jre/lib/security/java.security` and add `url.1` as `${user.home}/.java.login.config`. Please note you'll need to copy `jaas.config.default` in the dts-security module to `~/.java.login.config`
-   * Check if you can see the WSDL by going to http://localhost:8080/dts-ws/dts.wsdl. If you are not getting any 404 error message, the DTS-WS deployment worked for you.
+   * Check if you can see the WSDL by going to http://localhost:18080/dts-ws/dts.wsdl. If you are not getting any 404 error message, the DTS-WS deployment worked for you.
+   * Note that jaas.config.default file uses a clear text password file for authentication. Before running a test job on the web service, you'll need to put a file, `passwd` into your `$HOME/.dataminx` directory. passwd should contain this line:
+{{{
+test:test
+}}}
+   * (Optional) If you have an X509 cert and also have an access to the ARCS MyProxy repository, you can try using the `jaas.config.myproxy`. You need to start up the Tomcat server using `jaas.config.myproxy` as the parameter to `java.security.auth.login.config` system property.
 
 ==== Testing the DTS-WS ====
-   * now run mvn test or right click the org.dataminx.dts.client.util.DTSWSClientTest class and run as a JUnit test. This test will submit a job to the WS which will then pass on the work to the WN. It is important that you have the WN running before you try out this integration test. You can have a look on the DTSWorkerNodePrototype for more info on how to configure and get the DTS-WN module running.
+This test will submit a job to the WS which will then pass on the work to the WN. It is important that you have the WN running before you try out this integration test. You can have a look on the DTSWorkerNodePrototype for more info on how to configure and get the DTS-WN module running.
+{{{
+   > cd dts-ws
+   > mvn integration-test
+}}}
 
 ==== Running the DTS-WS as an embedded application inside Jetty (Optional). ====
-You can use try this option if you don't feel like configuring Tomcat from within Eclipse.
+You can use try this option if you don't feel like configuring Tomcat from within Eclipse or you just want to quickly test the Data Transfer Service.
 {{{
   > cd ~/Workspaces/dataminx/minx-dts/dts-ws
-  > mvn exec:java
+  > mvn -Djava.security.auth.login.config="/<path-to>/jaas.config.default" -Ddataminx.dir=/home/gerson/.dataminx exec:java
 }}}
 
 ==== FAQ ====
