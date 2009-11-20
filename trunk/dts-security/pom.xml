@@ -10,10 +10,6 @@
   <artifactId>dts-security</artifactId>
   <packaging>jar</packaging>
 
-  <properties>
-    <jaas.version>1.0.01</jaas.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -66,7 +62,6 @@
     <dependency>
       <groupId>javax.security</groupId>
       <artifactId>jaas</artifactId>
-      <version>${jaas.version}</version>
     </dependency>
   </dependencies>
 </project>

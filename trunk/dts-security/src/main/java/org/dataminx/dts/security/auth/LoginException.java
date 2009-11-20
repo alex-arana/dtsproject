@@ -25,48 +25,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dataminx.dts.security.auth.module;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.ietf.jgss.GSSCredential;
-import org.ietf.jgss.GSSException;
+package org.dataminx.dts.security.auth;
 
 /**
  *
  * @author Gerson Galang
  */
-public class MyProxyCredential extends BasicPrivateCredential {
+public class LoginException extends Exception {
 
     // TODO: javadoc
 
-    private GSSCredential mGssCredential;
-
-    /** The logger. */
-    private static final Log LOGGER = LogFactory.getLog(MyProxyCredential.class);
-
-    public MyProxyCredential() {
+    public LoginException() {
+        super();
     }
 
-    public void setGssCredential(GSSCredential gssCredential) {
-        mGssCredential = gssCredential;
+    public LoginException(String msg) {
+        super(msg);
     }
 
-    public GSSCredential getGssCredential() {
-        return mGssCredential;
+    public LoginException(String msg, Throwable cause) {
+        super(msg, cause);
     }
 
-    public void clearCredential() {
-        super.clearCredential();
-
-        if (mGssCredential != null) {
-            try {
-                mGssCredential.dispose();
-            }
-            catch (GSSException gssEx) {
-                LOGGER.warn("GSSException thrown: " + gssEx.getMessage());
-            }
-        }
+    public LoginException(Throwable cause) {
+        super(cause);
     }
-
 }

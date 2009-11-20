@@ -29,6 +29,7 @@ package org.dataminx.dts.client.sws;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataminx.dts.wn.common.util.SchemaUtils;
 import org.dataminx.dts.ws.DtsFaultException;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument;
@@ -80,7 +81,8 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
         request.getSubmitJobRequest().setJobDefinition(dtsJob.getJobDefinition());
 
         // TODO: filter out the credential info from the logs using the one that WN uses
-        LOGGER.debug("request payload:\n" + request);
+        String auditableRequest = SchemaUtils.getAuditableString(request);
+        LOGGER.debug("request payload:\n" + auditableRequest);
 
         // do the actual WS call here...
         SubmitJobResponseDocument response = null;

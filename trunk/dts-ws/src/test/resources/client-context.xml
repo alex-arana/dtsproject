@@ -13,8 +13,8 @@
   </bean>
 
   <bean id="dtsWsUsernameAuthenticationCallBack" class="org.dataminx.dts.client.sws.security.DtsWsUsernameAuthenticationCallback">
-    <constructor-arg index="0" value="${myproxy.username}" />
-    <constructor-arg index="1" value="${myproxy.password}" />
+    <constructor-arg index="0" value="${auth.username}" />
+    <constructor-arg index="1" value="${auth.password}" />
   </bean>
 
   <bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">

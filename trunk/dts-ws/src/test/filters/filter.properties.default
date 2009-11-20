@@ -1,8 +1,12 @@
-myproxy.username=changeme
-myproxy.password=ch@ng3w3
+# provide the myproxy details here if you are using the myproxy JAAS module
+auth.username=test
+auth.password=test
+
 ftp.username=changeme
 ftp.password=ch@ng3w3
+
 srb.username=changeme
 srb.password=ch@ng3w3
+
 irods.username=changeme
 irods.password=ch@ng3w3

@@ -27,46 +27,43 @@
  */
 package org.dataminx.dts.security.auth.module;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.ietf.jgss.GSSCredential;
-import org.ietf.jgss.GSSException;
-
 /**
  *
  * @author Gerson Galang
  */
-public class MyProxyCredential extends BasicPrivateCredential {
+public class BasicPrivateCredential {
 
     // TODO: javadoc
 
-    private GSSCredential mGssCredential;
+    private char[] mPassword;
+    private String mUsername;
 
-    /** The logger. */
-    private static final Log LOGGER = LogFactory.getLog(MyProxyCredential.class);
-
-    public MyProxyCredential() {
+    public void setPassword(String password) {
+        mPassword = password.toCharArray();
     }
 
-    public void setGssCredential(GSSCredential gssCredential) {
-        mGssCredential = gssCredential;
+    public String getPassword() {
+        return String.valueOf(mPassword);
     }
 
-    public GSSCredential getGssCredential() {
-        return mGssCredential;
+    public String getUsername() {
+        return mUsername;
+    }
+
+    public void setUsername(String username) {
+        mUsername = username;
     }
 
     public void clearCredential() {
-        super.clearCredential();
+        if (mPassword != null) {
+            for (int i = 0; i < mPassword.length; i++) {
+                mPassword[i] = ' ';
+            }
+            mPassword = null;
+        }
 
-        if (mGssCredential != null) {
-            try {
-                mGssCredential.dispose();
-            }
-            catch (GSSException gssEx) {
-                LOGGER.warn("GSSException thrown: " + gssEx.getMessage());
-            }
+        if (mUsername != null) {
+            mUsername = null;
         }
     }
-
 }
