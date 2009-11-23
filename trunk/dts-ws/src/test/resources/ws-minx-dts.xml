@@ -17,14 +17,14 @@
     </jsdl:JobIdentification>
     <mjsdl:DataTransfer>
       <mjsdl:Source>
-		<jsdl:URI>file:////etc/passwd</jsdl:URI>
+    <jsdl:URI>file:////etc/passwd</jsdl:URI>
 
         <!--
         <jsdl:URI>gsiftp://ng2.vpac.org/etc/yum.repos.d/</jsdl:URI>
         <mjsdl:Credential>
           <mjsdl:MyProxyToken>
-            <mjsdl:MyProxyUsername>${auth.username}</mjsdl:MyProxyUsername>
-            <mjsdl:MyProxyPassword>${auth.password}</mjsdl:MyProxyPassword>
+            <mjsdl:MyProxyUsername>${myproxy.username}</mjsdl:MyProxyUsername>
+            <mjsdl:MyProxyPassword>${myproxy.password}</mjsdl:MyProxyPassword>
             <mjsdl:MyProxyServer>myproxy2.arcs.org.au</mjsdl:MyProxyServer>
             <mjsdl:MyProxyPort>7512</mjsdl:MyProxyPort>
           </mjsdl:MyProxyToken>
