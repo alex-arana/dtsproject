@@ -50,7 +50,7 @@
     <jms.version>1.1</jms.version>
     <jsch.version>0.1.41</jsch.version>
     <!-- <commons-vfs.version>1.0</commons-vfs.version> -->
-    <commons-vfs-grid.version>1.4.3-SNAPSHOT</commons-vfs-grid.version>
+    <commons-vfs-grid.version>1.4.3-TEMP</commons-vfs-grid.version>
     <commons-httpclient.version>3.1</commons-httpclient.version>
     <junit.version>4.4</junit.version>
     <testng.version>5.5</testng.version>
@@ -115,8 +115,12 @@
       <url>http://repository.jboss.com/maven2/</url>
     </repository>
     <repository>
-      <id>vpac-repo</id>
-      <url>http://hudson.vpac.org/maven_repository</url>
+      <id>vpac-repo-releases</id>
+      <url>http://code.arcs.org.au/nexus/content/repositories/releases/</url>
+    </repository>
+    <repository>
+      <id>vpac-repo-snapshots</id>
+      <url>http://code.arcs.org.au/nexus/content/repositories/snapshots/</url>
     </repository>
   </repositories>
 
@@ -637,7 +641,7 @@
 
       <!-- commons-vfs-grid -->
       <dependency>
-        <groupId>commons-vfs-grid</groupId>
+        <groupId>external.grisu-core</groupId>
         <artifactId>commons-vfs-grid</artifactId>
         <version>${commons-vfs-grid.version}</version>
         <exclusions>
