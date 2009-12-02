@@ -166,7 +166,7 @@
 
     <!-- commons-vfs-grid -->
     <dependency>
-      <groupId>commons-vfs-grid</groupId>
+      <groupId>external.grisu-core</groupId>
       <artifactId>commons-vfs-grid</artifactId>
     </dependency>
 
