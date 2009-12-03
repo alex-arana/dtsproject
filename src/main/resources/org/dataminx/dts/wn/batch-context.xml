@@ -31,11 +31,14 @@
   </bean>
 
   <bean id="dtsJobPartitioner" scope="step" class="org.dataminx.dts.wn.batch.DtsJobPartitioner">
+    <property name="jobId" value="#{jobExecutionContext[DTS_JOB_ID_KEY]}"/>
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
+    <property name="splitterStrategy" ref="dtsSingleFileSplitter"/>
+    <!--<property name="splitterStrategy" ref="dtsDataTransferSplitter"/>-->
   </bean>
 
   <bean id="fileCopyTask" class="org.dataminx.dts.wn.batch.FileCopyTask" scope="step">
-    <property name="dataTransfer" value="#{stepExecutionContext[DATA_TRANSFER_STEP]}"/>
+    <property name="fileTransferDetails" value="#{stepExecutionContext[DATA_TRANSFER_STEP]}"/>
   </bean>
 
   <batch:step id="taskOrientedStep">

@@ -5,14 +5,13 @@
  */
 package org.dataminx.dts.wn.batch;
 
+import static org.apache.commons.lang.SystemUtils.LINE_SEPARATOR;
 import static org.dataminx.dts.wn.common.DtsWorkerNodeConstants.DTS_DATA_TRANSFER_STEP_KEY;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections.CollectionUtils;
-import org.dataminx.dts.wn.common.util.SchemaUtils;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+import org.apache.commons.collections.MapUtils;
+import org.dataminx.dts.wn.common.util.StopwatchTimer;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +35,14 @@ public class DtsJobPartitioner implements Partitioner {
     /** Internal logger object. */
     private static final Logger LOG = LoggerFactory.getLogger(DtsJobPartitioner.class);
 
+    /** A reference to the strategy used to split the job into its finer parts. */
+    private DtsJobSplitterStrategy mSplitterStrategy;
+
     /** A reference to the input DTS job request. */
     private SubmitJobRequest mSubmitJobRequest;
+
+    /** The identifier for the job corresponding to this partitioner. */
+    private String mJobId;
 
     /**
      * {@inheritDoc}
@@ -45,29 +50,49 @@ public class DtsJobPartitioner implements Partitioner {
     @Override
     public Map<String, ExecutionContext> partition(final int gridSize) {
         Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
-        final List<DataTransferType> dataTransfers = SchemaUtils.getDataTransfers(mSubmitJobRequest);
-        if (CollectionUtils.isEmpty(dataTransfers)) {
-            LOG.warn("DTS job request is incomplete as it does not contain any data transfer elements.");
-            throw new DtsJobExecutionException("DTS job request contains no data transfer elements.");
-        }
 
         // the current partitioning strategy merely creates a new execution context for every
-        // data transfer element in the input.
-        // TODO refine partitioning logic so it becomes granular at the individual file transfer
-        //      level. ie. currently a single data transfer element could potentially contain a
-        //      directory holding hundreds or more files...
+        // file transfer details object returned by the associated job splitter
         int i = 0;
+        final StopwatchTimer timer = new StopwatchTimer();
+        final DtsFileTransferDetailsPlan fileTransfers = mSplitterStrategy.splitJobRequest(mSubmitJobRequest);
+        LOG.info(String.format("Scoped DTS job '%s' in %s", mJobId, timer.getFormattedElapsedTime()));
         final Map<String, ExecutionContext> map = new HashMap<String, ExecutionContext>(gridSize);
-        for (final DataTransferType dataTransfer : dataTransfers) {
+        for (final DtsFileTransferDetails transferDetails : fileTransfers.values()) {
             final ExecutionContext context = new ExecutionContext();
-            context.put(DTS_DATA_TRANSFER_STEP_KEY, dataTransfer);
+            context.put(DTS_DATA_TRANSFER_STEP_KEY, transferDetails);
             map.put(String.format("%s:%03d", DTS_DATA_TRANSFER_STEP_KEY, i), context);
             i++;
+        }
+
+        if (LOG.isDebugEnabled() && MapUtils.isNotEmpty(map)) {
+            final StringBuilder buffer = new StringBuilder();
+            buffer.append(String.format("Split DTS job '%s' into %d individual step(s):", mJobId, map.size()));
+            for (final Map.Entry<String, ExecutionContext> entry : map.entrySet()) {
+                final DtsFileTransferDetails transferDetails =
+                    (DtsFileTransferDetails) entry.getValue().get(DTS_DATA_TRANSFER_STEP_KEY);
+                buffer.append(LINE_SEPARATOR);
+                buffer.append(String.format("%s: '%s' => '%s'",
+                    entry.getKey(), transferDetails.getSourceUri(), transferDetails.getTargetUri()));
+            }
+            LOG.debug(buffer.toString());
         }
         return map;
     }
 
+    public DtsJobSplitterStrategy getSplitterStrategy() {
+        return mSplitterStrategy;
+    }
+
+    public void setSplitterStrategy(final DtsJobSplitterStrategy splitterStrategy) {
+        mSplitterStrategy = splitterStrategy;
+    }
+
     public void setSubmitJobRequest(final SubmitJobRequest submitJobRequest) {
         mSubmitJobRequest = submitJobRequest;
+    }
+
+    public void setJobId(final String jobId) {
+        mJobId = jobId;
     }
 }

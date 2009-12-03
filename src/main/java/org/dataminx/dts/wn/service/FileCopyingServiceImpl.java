@@ -10,9 +10,10 @@ import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSelector;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.Selectors;
+import org.dataminx.dts.wn.batch.DtsFileTransferDetails;
 import org.dataminx.dts.wn.common.util.StopwatchTimer;
 import org.dataminx.dts.wn.vfs.DtsFileSystemManager;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxSourceTargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,30 +50,38 @@ public class FileCopyingServiceImpl implements FileCopyingService {
      * {@inheritDoc}
      */
     @Override
-    public void copyFiles(final String sourceURI, final String targetURI) {
-        LOG.info(String.format("Copying source '%s' to target '%s'...", sourceURI, targetURI));
-        try {
-            final StopwatchTimer timer = new StopwatchTimer();
-            copyFiles(mFileSystemManager.resolveFile(sourceURI), mFileSystemManager.resolveFile(targetURI));
-            LOG.info(String.format("Finished copying source '%s' to target '%s' in %s.",
-                sourceURI, targetURI, timer.getFormattedElapsedTime()));
-        }
-        catch (final FileSystemException ex) {
-            LOG.error("An error has occurred during a file copy operation: " + ex, ex);
-            throw new DtsFileCopyOperationException(ex);
-        }
+    public void copyFiles(final DtsFileTransferDetails fileTransferDetails) {
+        copyFiles(fileTransferDetails.getSourceUri(), fileTransferDetails.getSourceParameters(),
+            fileTransferDetails.getTargetUri(), fileTransferDetails.getTargetParameters());
     }
 
     /**
-     * {@inheritDoc}
+     * Copies the content from a source file given to a destination file given their corresponding URIs
+     * and any additional parameters contained in the input job request.
+     *
+     * @param sourceUri Source URI string
+     * @param sourceParameters DTS schema entity containing any additional copy parameters such as
+     *        authentication credentials and file copy flags
+     * @param targetUri Target URI string
+     * @param targetParameters DTS schema entity containing any additional copy parameters such as
+     *        authentication credentials and file copy flags
      */
-    public void copyFiles(final SourceTargetType source, final SourceTargetType target) {
-        LOG.info(String.format("Copying source '%s' to target '%s'...", source.getURI(), target.getURI()));
+    private void copyFiles(
+        final String sourceUri,
+        final MinxSourceTargetType sourceParameters,
+        final String targetUri,
+        final MinxSourceTargetType targetParameters) {
+
+        Assert.notNull(sourceUri);
+        Assert.notNull(targetUri);
+        LOG.info(String.format("Copying source '%s' to target '%s'...", sourceUri, targetUri));
         try {
             final StopwatchTimer timer = new StopwatchTimer();
-            copyFiles(mFileSystemManager.resolveFile(source), mFileSystemManager.resolveFile(target));
+            final FileObject sourceFile = mFileSystemManager.resolveFile(sourceUri, sourceParameters);
+            final FileObject targetFile = mFileSystemManager.resolveFile(targetUri, targetParameters);
+            copyFiles(sourceFile, targetFile);
             LOG.info(String.format("Finished copying source '%s' to target '%s' in %s.",
-                source.getURI(), target.getURI(), timer.getFormattedElapsedTime()));
+                sourceUri, targetUri, timer.getFormattedElapsedTime()));
         }
         catch (final FileSystemException ex) {
             LOG.error("An error has occurred during a file copy operation: " + ex, ex);

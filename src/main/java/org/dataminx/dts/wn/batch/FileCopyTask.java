@@ -7,8 +7,6 @@ package org.dataminx.dts.wn.batch;
 
 import org.dataminx.dts.wn.service.FileCopyingService;
 import org.dataminx.dts.wn.service.JobNotificationService;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
@@ -26,8 +24,8 @@ import org.springframework.util.Assert;
  * {@link Tasklet}-oriented version of the DTS file transfer job implementation.  It is expected that the
  * item-oriented version of this operation will become the preferred implementation.
  * <p>
- * It is a requirement that the {@link DataTransferType} input to this class be either injected or set manually
- * prior to its {@link #execute(StepContribution, ChunkContext)} method being called.
+ * It is a requirement that the {@link DtsFileTransferDetails} input to this class be either injected or set
+ * manually prior to its {@link #execute(StepContribution, ChunkContext)} method being called.
  *
  * @author Alex Arana
  */
@@ -43,8 +41,8 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
     @Autowired
     private JobNotificationService mJobNotificationService;
 
-    /** A reference to the input data transfer data structure. */
-    private DataTransferType mDataTransfer;
+    /** A reference to the input file transfer details data structure. */
+    private DtsFileTransferDetails mFileTransferDetails;
 
     /**
      * {@inheritDoc}
@@ -53,28 +51,13 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
     public RepeatStatus execute(final StepContribution contribution, final ChunkContext chunkContext) throws Exception {
         final StepContext stepContext = chunkContext.getStepContext();
         LOG.info("Executing file copy step: " + stepContext.getStepName());
-
-        Assert.state(mDataTransfer != null, "Unable to find data transfer input data in step context.");
-        final SourceTargetType source = mDataTransfer.getSource();
-        final SourceTargetType target = mDataTransfer.getTarget();
-
-        //TODO pass the creation flags to the file copying service
-        //final CreationFlagEnumeration creationFlag = dataTransfer.getTransferRequirements().getCreationFlag();
-
-        //TODO consider breaking up the job here, by working out all files that need to be transferred as
-        //     part of the DataTransferType input and keep returning RepeatStatus.CONTINUABLE to the
-        //     framework until all files have been transferred.  Currently, invoking VFS to do an atomic transfer..
-
-        //TODO decide if we should go with this approach later on...
-        // Gerson commented this bit to test the changes he made to make GridFTP transfer work
-        //mFileCopyingService.copyFiles(source.getURI(), target.getURI());
-        mFileCopyingService.copyFiles(source, target);
-
+        Assert.state(mFileTransferDetails != null, "Unable to find file transfer details in step context.");
+        mFileCopyingService.copyFiles(mFileTransferDetails);
         return RepeatStatus.FINISHED;
     }
 
-    public void setDataTransfer(final DataTransferType dataTransfer) {
-        mDataTransfer = dataTransfer;
+    public void setFileTransferDetails(final DtsFileTransferDetails fileTransferDetails) {
+        mFileTransferDetails = fileTransferDetails;
     }
 
     /**
@@ -86,7 +69,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
     }
 
     /**
-     * Extracts the ID of this Step's parent DTS Job from the specifiec Step execution context.
+     * Extracts the ID of this Step's parent DTS Job from the specific Step execution context.
      *
      * @param stepExecution A reference to this Step's execution context
      * @return The parent DTS Job identifier
