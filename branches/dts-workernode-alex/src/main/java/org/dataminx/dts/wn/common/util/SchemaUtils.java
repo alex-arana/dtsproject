@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.dom.DOMSource;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.common.xml.XmlUtils;
@@ -23,12 +24,12 @@ import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.Subm
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.DataStagingType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.Assert;
 import org.springframework.xml.transform.StringResult;
-import org.springframework.xml.transform.StringSource;
 
 /**
  * Collection of convenience methods for dealing with DTS schema data types.
@@ -73,7 +74,7 @@ public final class SchemaUtils {
                 for (final Map.Entry<String, String> entry : DEFAULT_TRANSFORMER_OUTPUT_PROPERTIES.entrySet()) {
                     transformer.setOutputProperty(entry.getKey(), entry.getValue());
                 }
-                transformer.transform(new StringSource(xmlObject.xmlText()), result);
+                transformer.transform(new DOMSource(xmlObject.getDomNode()), result);
                 return result.toString();
             }
             catch (final TransformerException ex) {
@@ -137,5 +138,19 @@ public final class SchemaUtils {
             }
         }
         return result;
+    }
+
+    /**
+     * Extracts the description pertaining to the specified {@link SubmitJobRequest} schema entity or an
+     * empty <code>String</code> if one was not present as it is an optional attribute.
+     *
+     * @param submitJobRequest A DTS schema entity corresponding to a submit job request
+     * @return A description corresponding to a DTS submit job request (or blank)
+     */
+    public static String extractJobDescription(final SubmitJobRequest submitJobRequest) {
+        Assert.notNull(submitJobRequest);
+        final JobIdentificationType jobIdentification =
+            submitJobRequest.getJobDefinition().getJobDescription().getJobIdentification();
+        return jobIdentification == null ? EMPTY : jobIdentification.getDescription();
     }
 }

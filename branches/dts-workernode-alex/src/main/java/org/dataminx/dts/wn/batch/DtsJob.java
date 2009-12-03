@@ -5,9 +5,9 @@
  */
 package org.dataminx.dts.wn.batch;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.dataminx.dts.wn.service.DtsWorkerNodeInformationService;
 import org.dataminx.dts.wn.service.JobNotificationService;
-
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInterruptedException;
 import org.springframework.batch.core.JobParametersIncrementer;
@@ -128,5 +128,13 @@ public abstract class DtsJob extends SimpleJob {
 
     public JobNotificationService getJobNotificationService() {
         return mJobNotificationService;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this).append("jobId", mJobId).toString();
     }
 }

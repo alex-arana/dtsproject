@@ -5,7 +5,7 @@
  */
 package org.dataminx.dts.wn.service;
 
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
+import org.dataminx.dts.wn.batch.DtsFileTransferDetails;
 
 /**
  * Describes the File Copying service behaviour.
@@ -16,21 +16,11 @@ import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 public interface FileCopyingService {
 
     /**
-     * Copies the content from a source file to a destination file.
-     * TODO: Implement this method using Apache commons-vfs
+     * Performs a file transfer operation given the input details object which contains all the information
+     * required to carry out the operation including the source and target URIs.
      *
-     * @param sourceURI Source URI string
-     * @param targetURI Target URI string
+     * @param fileTransferDetails an instance of <code>DtsFileTransferDetails</code> containing all required
+     *        inputs to the file copy operation
      */
-    void copyFiles(String sourceURI, String targetURI);
-
-    /**
-     * Copies the source to the destination. This method provides more flexibility
-     * in cases where Source and Target URIs come with their own URI Properties.
-     *
-     * @param source the source
-     * @param target the target
-     */
-    void copyFiles(SourceTargetType source, SourceTargetType target);
-
+    void copyFiles(DtsFileTransferDetails fileTransferDetails);
 }

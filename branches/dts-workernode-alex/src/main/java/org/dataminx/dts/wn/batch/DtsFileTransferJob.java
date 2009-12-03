@@ -6,14 +6,17 @@
 package org.dataminx.dts.wn.batch;
 
 
+import static org.dataminx.dts.wn.common.DtsWorkerNodeConstants.DTS_JOB_ID_KEY;
 import static org.dataminx.dts.wn.common.DtsWorkerNodeConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.dataminx.dts.domain.model.JobStatus;
+import org.dataminx.dts.wn.common.util.SchemaUtils;
+import org.dataminx.dts.wn.common.util.StopwatchTimer;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInterruptedException;
 import org.springframework.batch.core.StartLimitExceededException;
@@ -27,7 +30,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * DTS Job that performs a file copy operation.
@@ -37,6 +39,9 @@ import org.springframework.util.ObjectUtils;
 @Component("dtsFileTransferJob")
 @Scope("prototype")
 public class DtsFileTransferJob extends DtsJob {
+    /** Internal logger object. */
+    private final Logger mLogger = LoggerFactory.getLogger(DtsFileTransferJob.class);
+
     /** Holds the information about the job request. */
     private final SubmitJobRequest mJobRequest;
 
@@ -74,40 +79,7 @@ public class DtsFileTransferJob extends DtsJob {
      */
     @Override
     public String getDescription() {
-        String description = null;
-        final JobIdentificationType jobIdentification = getJobIdentification();
-        if (jobIdentification != null) {
-            description = jobIdentification.getDescription();
-        }
-        return description;
-    }
-
-    /**
-     * Returns the job description, containing all details about the underlying job.
-     *
-     * @return Job request details
-     */
-    protected JobDescriptionType getJobDescription() {
-        JobDescriptionType result = null;
-        final JobDefinitionType jobDefinition = mJobRequest.getJobDefinition();
-        if (jobDefinition != null) {
-            result = jobDefinition.getJobDescription();
-        }
-        return result;
-    }
-
-    /**
-     * Returns the job identification, containing all details about the underlying job.
-     *
-     * @return Job identification details
-     */
-    protected JobIdentificationType getJobIdentification() {
-        JobIdentificationType result = null;
-        final JobDescriptionType jobDescription = getJobDescription();
-        if (jobDescription != null) {
-            result = jobDescription.getJobIdentification();
-        }
-        return result;
+        return SchemaUtils.extractJobDescription(mJobRequest);
     }
 
     /**
@@ -125,14 +97,16 @@ public class DtsFileTransferJob extends DtsJob {
 
         // first, store the DTS job request object in the job execution context
         final ExecutionContext context = execution.getExecutionContext();
+        context.put(DTS_JOB_ID_KEY, getJobId());
         context.put(DTS_SUBMIT_JOB_REQUEST_KEY, mJobRequest);
 
         //TODO convert to application exceptions
+        final StopwatchTimer timer = new StopwatchTimer();
         final StepExecution stepExecution = handleStep(mPartitioningStep, execution);
 
         // update the job status to have the same status as the master step
         if (stepExecution != null) {
-            logger.debug("Upgrading JobExecution status: " + stepExecution);
+            mLogger.debug("Upgrading JobExecution status: " + stepExecution);
             execution.upgradeStatus(stepExecution.getStatus());
             execution.setExitStatus(stepExecution.getExitStatus());
         }
@@ -144,6 +118,7 @@ public class DtsFileTransferJob extends DtsJob {
 
         // TODO move this somewhere it always gets called
         registerCompletedTime();
+        mLogger.info(String.format("Executed job '%s' in %s", getJobId(), timer.getFormattedElapsedTime()));
         getJobNotificationService().notifyJobStatus(this, JobStatus.DONE);
     }
 
@@ -152,10 +127,9 @@ public class DtsFileTransferJob extends DtsJob {
      */
     @Override
     public String toString() {
-        final StringBuilder buffer = new StringBuilder();
-        buffer.append(ObjectUtils.identityToString(this));
-        buffer.append(" [jobId").append("='").append(getJobId()).append("' ");
-        buffer.append("jobDescription").append("='").append(getDescription()).append("']");
-        return buffer.toString();
+        return new ToStringBuilder(this)
+            .append("jobId", getJobId())
+            .append("description", getDescription())
+            .toString();
     }
 }
