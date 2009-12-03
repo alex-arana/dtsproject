@@ -1,7 +1,0 @@
-DtsPortal {
-    org.dataminx.dts.security.auth.module.ClearTextPasswordFileLoginModule required password.file="${dataminx.dir}/passwd";
-};
-DtsWebService {
-    org.dataminx.dts.security.auth.module.ClearTextPasswordFileLoginModule required password.file="${dataminx.dir}/passwd";
-};
-

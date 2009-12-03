@@ -1,8 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<dataset>
-	<job job_id='1' resource_key="505f48c9-d31f-4c68-ba7b-1c69db06107a" status_id='0' name='job1' subject_name='NEW_USER_1'/>
-	<job job_id='2' resource_key="d92e7c7d-650d-4ef3-bd8f-6da5b6e3e2b0" status_id='3' name='job2' subject_name='NEW_USER_1'/>
-	<job job_id='3' resource_key="62fd858a-2972-4f47-8c21-804bda1cb786" status_id='0' name='job3' subject_name='NEW_USER_1'/>
-    <job job_id='4' resource_key="78fd858a-2972-4f47-8c21-804bda1cb754" status_id='0' name='job4' subject_name='NEW_USER_2'/>
-    <job job_id='5' resource_key="29fd858a-2972-4f47-8c21-804bda1cb729" status_id='0' name='job5' subject_name='NEW_USER_2'/>
-</dataset>
