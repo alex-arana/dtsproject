@@ -26,7 +26,7 @@ Two key requirements of the message format are:
 
 
 =Proposals=
-To do this, we devised the following proposals: 
+To do this, we devised the following proposals which ideally need to be *unified into a single common Bulk Data Copy Activity Document*: 
   * *1) DMIB Proposal (DMI for _Bulk_-transfers)* (see below)
 <br/>
 A 'dmi-wrapped' rendering proposal that effectively combines a source and a sink DEPR within a single element which can be defined multiple times in a single request/packet. This is very similar to the {{{<jsdl:DataStaging>}}} elements that can be defined multiple times within a single JSDL document. Some other stuff too. 
