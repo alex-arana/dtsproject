@@ -4,7 +4,7 @@
   xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl"
   targetNamespace="http://schemas.ggf.org/jsdl/2005/11/jsdl"
   elementFormDefault="qualified">
-  <xsd:redefine schemaLocation="http://schemas.ggf.org/jsdl/2005/11/jsdl">
+  <xsd:redefine schemaLocation="jsdl.xsd">
   
     <xsd:complexType name="SourceTarget_Type">
       <xsd:complexContent>
