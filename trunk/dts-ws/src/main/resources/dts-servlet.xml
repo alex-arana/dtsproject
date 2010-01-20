@@ -26,6 +26,7 @@
       <list>
         <value>classpath:dmi.xsd</value>
         <value>classpath:dmi-redef.xsd</value>
+        <value>classpath:jsdl.xsd</value>
         <value>classpath:jsdl-redef.xsd</value>
         <value>classpath:minx-jsdl.xsd</value>
         <value>classpath:minx-jms-messages.xsd</value>
