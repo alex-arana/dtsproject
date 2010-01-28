@@ -148,6 +148,7 @@
     <!--<module>dts-portal</module>-->
     <module>dts-security</module>
     <module>dts-wsclient</module>
+    <module>dts-broker</module>    
     <!--
     <module>dts-portal-gwt</module>
     <module>dts-gwt</module>
