@@ -27,6 +27,9 @@
  */
 package org.dataminx.dts.wn.service;
 
+import org.dataminx.dts.vfs.DtsFileSystemManager;
+import org.dataminx.dts.vfs.DtsVfsUtil;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 
 /**
@@ -38,13 +41,16 @@ import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 public interface FileCopyingService {
 
     /**
-     * Copies the content from a source file to a destination file.
-     * TODO: Implement this method using Apache commons-vfs
+     * Copies the content from a source file to a destination file. This method has a 
+     * limitation of not being able to apply user provided URI properties and credentials. 
+     * This method should only be used for transferring normal files ie. the ones that 
+     * use "file://" protocol.
      *
      * @param sourceURI Source URI string
      * @param targetURI Target URI string
+     * @param fileSystemManager the FileSystemManager
      */
-    void copyFiles(String sourceURI, String targetURI);
+    void copyFiles(String sourceURI, String targetURI, DtsFileSystemManager fileSystemManager);
 
     /**
      * Copies the source to the destination. This method provides more flexibility
@@ -52,7 +58,24 @@ public interface FileCopyingService {
      *
      * @param source the source
      * @param target the target
+     * @param fileSystemManager the FileSystemManager
      */
-    void copyFiles(SourceTargetType source, SourceTargetType target);
+    void copyFiles(SourceTargetType source, SourceTargetType target, DtsFileSystemManager fileSystemManager);
+    
+    /**
+     * Copies the source to the destination. This method is used if a file inside a
+     * directory specified in the Source element needs to be transfered and there's no
+     * way for the user to get the extra details that only the dataTransferType will be
+     * able to provide.
+     * @param sourceURI Source URI string
+     * @param targetURI Target URI string
+     * @param dataTransferType dataTransferType which will provide the URI properties of 
+     * the source and target and the user credentials.
+     * @param fileSystemManager the FileSystemManager
+     */
+    void copyFiles(String sourceURI, String targetURI, DataTransferType dataTransferType, 
+    		DtsFileSystemManager fileSystemManager);
+    
+    void setDtsVfsUtil(DtsVfsUtil dtsVfsUtil);
 
 }

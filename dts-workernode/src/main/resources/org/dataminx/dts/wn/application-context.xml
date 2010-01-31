@@ -47,12 +47,10 @@
     <property name="dataSource" ref="dataSource"/>
   </bean>
 
-  <bean id="dtsFileSystemManager"
-        init-method="init"
-        class="org.dataminx.dts.vfs.DtsFileSystemManager">
-    <property name="configurationResource" value="vfs/providers.xml"/>
-    <property name="myProxyCredentialLifetime" value="${default.myproxy.lifetime}"/>
-  </bean>
+  <bean id="dtsFileSystemManagerDispenser"
+        class="org.dataminx.dts.vfs.DtsFileSystemManagerDispenser">
+    <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
+   </bean>    
 
   <bean id="applicationProperties"
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -65,5 +63,16 @@
     <property name="ignoreUnresolvablePlaceholders" value="false"/>
     <property name="order" value="1"/>
   </bean>
-
+  
+  <bean id="dtsVfsUtil" class="org.dataminx.dts.vfs.DtsVfsUtil">
+    <property name="ftpSupported" value="true"/>
+    <property name="sftpSupported" value="true"/>
+    <property name="httpSupported" value="true"/>
+    <property name="gsiftpSupported" value="true"/>
+    <property name="srbSupported" value="true"/>
+    <property name="fileSupported" value="true"/>
+    <property name="irodsSupported" value="true"/>
+    <property name="myProxyCredentialLifetime" value="${default.myproxy.lifetime}"/>
+  </bean>
+  
 </beans>

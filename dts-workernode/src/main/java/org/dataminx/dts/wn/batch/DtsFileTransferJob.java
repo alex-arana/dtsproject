@@ -66,6 +66,11 @@ public class DtsFileTransferJob extends DtsJob {
     @Autowired
     @Qualifier("partitioningStep")
     private Step mPartitioningStep;
+    
+    
+    @Autowired
+    @Qualifier("maxStreamCountingStep")
+    private Step mMaxStreamCountingStep;
 
     /**
      * Constructs a new instance of <code>DtsSubmitJob</code> using the specified job request details.
@@ -75,7 +80,7 @@ public class DtsFileTransferJob extends DtsJob {
      * @param jobRepository Job repository
      */
     public DtsFileTransferJob(final String jobId,
-        final SubmitJobRequestDocument jobRequest, final JobRepository jobRepository) {
+    		final SubmitJobRequestDocument jobRequest, final JobRepository jobRepository) {
 
         super(jobId);
         Assert.notNull(jobRequest, "Cannot construct a DTS submit job without the required job details.");
@@ -148,9 +153,16 @@ public class DtsFileTransferJob extends DtsJob {
         // first, store the DTS job request object in the job execution context
         final ExecutionContext context = execution.getExecutionContext();
         context.put(DTS_SUBMIT_JOB_REQUEST_KEY, mJobRequest);
+        
+        
 
+        
         //TODO convert to application exceptions
-        final StepExecution stepExecution = handleStep(mPartitioningStep, execution);
+        StepExecution stepExecution;// = handleStep(mMaxStreamCountingStep, execution);
+        	
+        //TODO handle repeat of steps if failure occurs	
+        	
+        stepExecution = handleStep(mPartitioningStep, execution);
 
         // update the job status to have the same status as the master step
         if (stepExecution != null) {
@@ -162,7 +174,8 @@ public class DtsFileTransferJob extends DtsJob {
         if (stepExecution.getStatus().isUnsuccessful()) {
             getJobNotificationService().notifyJobError(getJobId(), execution);
             return;
-        }
+        }       
+        
 
         // TODO move this somewhere it always gets called
         registerCompletedTime();

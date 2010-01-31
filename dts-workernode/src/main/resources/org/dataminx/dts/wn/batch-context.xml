@@ -32,10 +32,13 @@
 
   <bean id="dtsJobPartitioner" scope="step" class="org.dataminx.dts.wn.batch.DtsJobPartitioner">
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
+    <property name="jobScoper" ref="jobScoper" />
+    <property name="fileSystemManagerDispenser" ref="dtsFileSystemManagerDispenser"/>
   </bean>
 
   <bean id="fileCopyTask" class="org.dataminx.dts.wn.batch.FileCopyTask" scope="step">
-    <property name="dataTransfer" value="#{stepExecutionContext[DATA_TRANSFER_STEP]}"/>
+    <property name="jobStep" value="#{stepExecutionContext[DATA_TRANSFER_STEP]}"/>
+    <property name="fileSystemManagerDispenser" ref="dtsFileSystemManagerDispenser"/>
   </bean>
 
   <batch:step id="taskOrientedStep">
@@ -47,7 +50,7 @@
     <property name="partitionHandler">
       <bean class="org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler">
         <property name="taskExecutor">
-          <bean class="org.springframework.core.task.SimpleAsyncTaskExecutor"/>
+          <bean class="org.springframework.core.task.SyncTaskExecutor"/>
         </property>
         <property name="step" ref="taskOrientedStep"/>
         <property name="gridSize" value="1"/>
@@ -61,6 +64,18 @@
       </bean>
     </property>
     <property name="jobRepository" ref="jobRepository"/>
+  </bean>
+  
+  <bean id="jobScoper" class="org.dataminx.dts.wn.batch.JobScoperImpl"/>
+  
+  
+  <batch:step id="maxStreamCountingStep">
+       <batch:tasklet ref="maxStreamCounterTask"/>
+  </batch:step>
+  
+  <bean id="maxStreamCounterTask" class="org.dataminx.dts.wn.batch.MaxStreamCounterTask" scope="step">
+    <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
+    <property name="maxConnectionsToTry" value="${default.max.parallel.connections}"/>
   </bean>
 
 </beans>

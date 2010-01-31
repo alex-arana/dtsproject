@@ -32,9 +32,8 @@ import static org.dataminx.dts.wn.common.DtsWorkerNodeConstants.DTS_DATA_TRANSFE
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections.CollectionUtils;
-import org.dataminx.dts.wn.common.util.SchemaUtils;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+import org.dataminx.dts.vfs.DtsFileSystemManager;
+import org.dataminx.dts.vfs.DtsFileSystemManagerDispenser;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +59,10 @@ public class DtsJobPartitioner implements Partitioner {
 
     /** A reference to the input DTS job request. */
     private SubmitJobRequest mSubmitJobRequest;
+    
+    private JobScoper mJobScoper;
+    
+    private DtsFileSystemManagerDispenser mFileSystemManagerDispenser;
 
     /**
      * {@inheritDoc}
@@ -67,29 +70,37 @@ public class DtsJobPartitioner implements Partitioner {
     @Override
     public Map<String, ExecutionContext> partition(final int gridSize) {
         Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
-        final List<DataTransferType> dataTransfers = SchemaUtils.getDataTransfers(mSubmitJobRequest);
-        if (CollectionUtils.isEmpty(dataTransfers)) {
-            LOG.warn("DTS job request is incomplete as it does not contain any data transfer elements.");
-            throw new DtsJobExecutionException("DTS job request contains no data transfer elements.");
-        }
-
-        // the current partitioning strategy merely creates a new execution context for every
-        // data transfer element in the input.
-        // TODO refine partitioning logic so it becomes granular at the individual file transfer
-        //      level. ie. currently a single data transfer element could potentially contain a
-        //      directory holding hundreds or more files...
+        
+        DtsFileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
+        mJobScoper.setFileSystemManager(fileSystemManager);
+        
+        DtsJobDetails jobDetails = mJobScoper.scopeTheJob(mSubmitJobRequest.getJobDefinition());
+        
+        // TODO: we'll probably need to close the fileSystemManager..
+        
+        List<DtsJobStep> jobSteps = jobDetails.getJobSteps();
         int i = 0;
-        final Map<String, ExecutionContext> map = new HashMap<String, ExecutionContext>(gridSize);
-        for (final DataTransferType dataTransfer : dataTransfers) {
-            final ExecutionContext context = new ExecutionContext();
-            context.put(DTS_DATA_TRANSFER_STEP_KEY, dataTransfer);
-            map.put(String.format("%s:%03d", DTS_DATA_TRANSFER_STEP_KEY, i), context);
-            i++;
+        
+        Map<String, ExecutionContext> map = new HashMap<String, ExecutionContext>(gridSize);
+        for (DtsJobStep jobStep : jobSteps) {
+        	ExecutionContext context = new ExecutionContext();
+        	context.put(DTS_DATA_TRANSFER_STEP_KEY, jobStep);
+        	map.put(String.format("%s:%03d", DTS_DATA_TRANSFER_STEP_KEY, i), context);
+        	i++;
         }
+        
         return map;
     }
 
     public void setSubmitJobRequest(final SubmitJobRequest submitJobRequest) {
         mSubmitJobRequest = submitJobRequest;
+    }
+    
+    public void setJobScoper(JobScoper jobScoper) {
+    	mJobScoper = jobScoper;
+    }
+     
+    public void setFileSystemManagerDispenser(DtsFileSystemManagerDispenser fileSystemManagerDispenser) {
+    	mFileSystemManagerDispenser = fileSystemManagerDispenser;
     }
 }
