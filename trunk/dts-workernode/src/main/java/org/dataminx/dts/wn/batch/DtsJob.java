@@ -61,6 +61,9 @@ public abstract class DtsJob extends SimpleJob {
     /** A reference to the application's job notification service. */
     @Autowired
     private JobNotificationService mJobNotificationService;
+    
+    @Autowired
+    private JobScoper mJobScoper;
 
     /**
      * Constructs a new instance of {@link DtsJob} using the specified job identifier.
@@ -149,5 +152,9 @@ public abstract class DtsJob extends SimpleJob {
 
     public JobNotificationService getJobNotificationService() {
         return mJobNotificationService;
+    }
+    
+    public JobScoper getJobScoper() {
+    	return mJobScoper;
     }
 }

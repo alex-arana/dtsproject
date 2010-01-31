@@ -27,10 +27,12 @@
  */
 package org.dataminx.dts.wn.batch;
 
+import java.util.List;
+import org.dataminx.dts.vfs.DtsFileSystemManager;
+import org.dataminx.dts.vfs.DtsFileSystemManagerDispenser;
 import org.dataminx.dts.wn.service.FileCopyingService;
 import org.dataminx.dts.wn.service.JobNotificationService;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
@@ -64,41 +66,52 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
     /** A reference to the application's job notification service. */
     @Autowired
     private JobNotificationService mJobNotificationService;
-
-    /** A reference to the input data transfer data structure. */
-    private DataTransferType mDataTransfer;
+    
+    private DtsFileSystemManagerDispenser mFileSystemManagerDispenser;
+    
+    private DtsJobStep mJobStep;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public RepeatStatus execute(final StepContribution contribution, final ChunkContext chunkContext) throws Exception {
-        final StepContext stepContext = chunkContext.getStepContext();
-        LOG.info("Executing file copy step: " + stepContext.getStepName());
-
-        Assert.state(mDataTransfer != null, "Unable to find data transfer input data in step context.");
-        final SourceTargetType source = mDataTransfer.getSource();
-        final SourceTargetType target = mDataTransfer.getTarget();
-
-        //TODO pass the creation flags to the file copying service
-        //final CreationFlagEnumeration creationFlag = dataTransfer.getTransferRequirements().getCreationFlag();
-
-        //TODO consider breaking up the job here, by working out all files that need to be transferred as
-        //     part of the DataTransferType input and keep returning RepeatStatus.CONTINUABLE to the
-        //     framework until all files have been transferred.  Currently, invoking VFS to do an atomic transfer..
-
-        //TODO decide if we should go with this approach later on...
-        // Gerson commented this bit to test the changes he made to make GridFTP transfer work
-        //mFileCopyingService.copyFiles(source.getURI(), target.getURI());
-        mFileCopyingService.copyFiles(source, target);
-
-        return RepeatStatus.FINISHED;
+    	StepContext stepContext = chunkContext.getStepContext();
+    	LOG.info("Executing copy step: " + stepContext.getStepName());
+    	
+    	Assert.state(mJobStep != null, "Unable to find data transfer input data in step context.");
+    	LOG.info(mJobStep.toString());
+    	
+    	List<DtsDataTransferUnit> dataTransferUnits = mJobStep.getDataTransferUnits();
+    	DtsFileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
+    	
+    	// TODO reimplement this with threadpool
+    	for (DtsDataTransferUnit dataTransferUnit : dataTransferUnits) {
+    		
+    		// TODO when we start to run this by threads.. we'll need to get each thread to use one ThreadLocal
+    		// instance of the FileSystemManager
+    		mFileCopyingService.copyFiles(
+    				dataTransferUnit.getSourceFileURI(), 
+    				dataTransferUnit.getDestinationFileURI(), 
+    				dataTransferUnit.getDataTransfer(),
+    				fileSystemManager);
+    	}
+    	
+    	// TODO figure out when we should close fileSystemManager
+    	
+    	// TODO handle failures by returning ...
+    	
+    	return RepeatStatus.FINISHED;
     }
-
-    public void setDataTransfer(final DataTransferType dataTransfer) {
-        mDataTransfer = dataTransfer;
+        
+    public void setJobStep(DtsJobStep jobStep) {
+    	mJobStep = jobStep;
     }
-
+    
+    public void setFileSystemManagerDispenser(DtsFileSystemManagerDispenser fileSystemManagerDispenser) {
+    	mFileSystemManagerDispenser = fileSystemManagerDispenser;
+    }
+    
     /**
      * {@inheritDoc}
      */
