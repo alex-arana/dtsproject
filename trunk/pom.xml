@@ -50,7 +50,7 @@
     <jms.version>1.1</jms.version>
     <jsch.version>0.1.41</jsch.version>
     <!-- <commons-vfs.version>1.0</commons-vfs.version> -->
-    <commons-vfs-grid.version>1.4.3-TEMP</commons-vfs-grid.version>
+    <commons-vfs-grid.version>1.5.0-beta</commons-vfs-grid.version>
     <commons-httpclient.version>3.1</commons-httpclient.version>
     <junit.version>4.4</junit.version>
     <testng.version>5.5</testng.version>
@@ -122,6 +122,14 @@
       <id>vpac-repo-snapshots</id>
       <url>http://code.arcs.org.au/nexus/content/repositories/snapshots/</url>
     </repository>
+    <repository>
+      <id>commons-vfs-grid-repo</id>
+      <url>http://commonsvfsgrid.sourceforge.net/maven/</url>
+    </repository>
+    <repository>
+      <id>arcs-external</id>
+      <url>https://code.arcs.org.au/nexus/content/groups/public</url>
+    </repository>
   </repositories>
 
   <pluginRepositories>
@@ -148,7 +156,7 @@
     <!--<module>dts-portal</module>-->
     <module>dts-security</module>
     <module>dts-wsclient</module>
-    <module>dts-broker</module>    
+    <module>dts-broker</module>
     <!--
     <module>dts-portal-gwt</module>
     <module>dts-gwt</module>
@@ -642,7 +650,7 @@
 
       <!-- commons-vfs-grid -->
       <dependency>
-        <groupId>external.grisu-core</groupId>
+        <groupId>commons-vfs-grid</groupId>
         <artifactId>commons-vfs-grid</artifactId>
         <version>${commons-vfs-grid.version}</version>
         <exclusions>
