@@ -33,12 +33,12 @@
   <bean id="dtsJobPartitioner" scope="step" class="org.dataminx.dts.wn.batch.DtsJobPartitioner">
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
     <property name="jobScoper" ref="jobScoper" />
-    <property name="fileSystemManagerDispenser" ref="dtsFileSystemManagerDispenser"/>
+    <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
   </bean>
 
   <bean id="fileCopyTask" class="org.dataminx.dts.wn.batch.FileCopyTask" scope="step">
     <property name="jobStep" value="#{stepExecutionContext[DATA_TRANSFER_STEP]}"/>
-    <property name="fileSystemManagerDispenser" ref="dtsFileSystemManagerDispenser"/>
+    <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
   </bean>
 
   <batch:step id="taskOrientedStep">
@@ -66,7 +66,9 @@
     <property name="jobRepository" ref="jobRepository"/>
   </bean>
   
-  <bean id="jobScoper" class="org.dataminx.dts.wn.batch.JobScoperImpl"/>
+  <bean id="jobScoper" class="org.dataminx.dts.wn.batch.JobScoperImpl">
+    <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
+  </bean>
   
   
   <batch:step id="maxStreamCountingStep">

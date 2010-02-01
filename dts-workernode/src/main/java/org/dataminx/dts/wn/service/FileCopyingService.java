@@ -27,7 +27,7 @@
  */
 package org.dataminx.dts.wn.service;
 
-import org.dataminx.dts.vfs.DtsFileSystemManager;
+import org.apache.commons.vfs.FileSystemManager;
 import org.dataminx.dts.vfs.DtsVfsUtil;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
@@ -50,7 +50,7 @@ public interface FileCopyingService {
      * @param targetURI Target URI string
      * @param fileSystemManager the FileSystemManager
      */
-    void copyFiles(String sourceURI, String targetURI, DtsFileSystemManager fileSystemManager);
+    void copyFiles(String sourceURI, String targetURI, FileSystemManager fileSystemManager);
 
     /**
      * Copies the source to the destination. This method provides more flexibility
@@ -60,7 +60,7 @@ public interface FileCopyingService {
      * @param target the target
      * @param fileSystemManager the FileSystemManager
      */
-    void copyFiles(SourceTargetType source, SourceTargetType target, DtsFileSystemManager fileSystemManager);
+    void copyFiles(SourceTargetType source, SourceTargetType target, FileSystemManager fileSystemManager);
     
     /**
      * Copies the source to the destination. This method is used if a file inside a
@@ -74,7 +74,7 @@ public interface FileCopyingService {
      * @param fileSystemManager the FileSystemManager
      */
     void copyFiles(String sourceURI, String targetURI, DataTransferType dataTransferType, 
-    		DtsFileSystemManager fileSystemManager);
+    		FileSystemManager fileSystemManager);
     
     void setDtsVfsUtil(DtsVfsUtil dtsVfsUtil);
 

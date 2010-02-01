@@ -47,8 +47,8 @@
     <property name="dataSource" ref="dataSource"/>
   </bean>
 
-  <bean id="dtsFileSystemManagerDispenser"
-        class="org.dataminx.dts.vfs.DtsFileSystemManagerDispenser">
+  <bean id="fileSystemManagerDispenser"
+        class="org.dataminx.dts.vfs.FileSystemManagerDispenser">
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
    </bean>    
 

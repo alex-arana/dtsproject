@@ -32,8 +32,8 @@ import static org.dataminx.dts.wn.common.DtsWorkerNodeConstants.DTS_DATA_TRANSFE
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.dataminx.dts.vfs.DtsFileSystemManager;
-import org.dataminx.dts.vfs.DtsFileSystemManagerDispenser;
+import org.apache.commons.vfs.FileSystemManager;
+import org.dataminx.dts.vfs.FileSystemManagerDispenser;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +62,7 @@ public class DtsJobPartitioner implements Partitioner {
     
     private JobScoper mJobScoper;
     
-    private DtsFileSystemManagerDispenser mFileSystemManagerDispenser;
+    private FileSystemManagerDispenser mFileSystemManagerDispenser;
 
     /**
      * {@inheritDoc}
@@ -71,7 +71,7 @@ public class DtsJobPartitioner implements Partitioner {
     public Map<String, ExecutionContext> partition(final int gridSize) {
         Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
         
-        DtsFileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
+        FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
         mJobScoper.setFileSystemManager(fileSystemManager);
         
         DtsJobDetails jobDetails = mJobScoper.scopeTheJob(mSubmitJobRequest.getJobDefinition());
@@ -100,7 +100,7 @@ public class DtsJobPartitioner implements Partitioner {
     	mJobScoper = jobScoper;
     }
      
-    public void setFileSystemManagerDispenser(DtsFileSystemManagerDispenser fileSystemManagerDispenser) {
+    public void setFileSystemManagerDispenser(FileSystemManagerDispenser fileSystemManagerDispenser) {
     	mFileSystemManagerDispenser = fileSystemManagerDispenser;
     }
 }

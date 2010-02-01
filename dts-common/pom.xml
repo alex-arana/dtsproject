@@ -47,7 +47,7 @@
 
     <!-- commons-vfs-grid -->
     <dependency>
-      <groupId>external.grisu-core</groupId>
+      <groupId>commons-vfs-grid</groupId>
       <artifactId>commons-vfs-grid</artifactId>
     </dependency>
 

@@ -5,24 +5,15 @@ import static org.dataminx.dts.common.DtsConstants.WS_SECURITY_NAMESPACE_URI;
 import static org.dataminx.dts.wn.common.util.XmlBeansUtils.extractElementTextAsString;
 import static org.dataminx.dts.wn.common.util.XmlBeansUtils.selectAnyElement;
 
-import java.io.File;
 import javax.xml.namespace.QName;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemOptions;
 import org.apache.commons.vfs.auth.StaticUserAuthenticator;
-import org.apache.commons.vfs.impl.DefaultFileReplicator;
 import org.apache.commons.vfs.impl.DefaultFileSystemConfigBuilder;
-import org.apache.commons.vfs.provider.ftp.FtpFileProvider;
-import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileProvider;
+import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfigBuilder;
-import org.apache.commons.vfs.provider.http.HttpFileProvider;
-import org.apache.commons.vfs.provider.irods.IRODSFileProvider;
 import org.apache.commons.vfs.provider.irods.IRODSFileSystemConfigBuilder;
-import org.apache.commons.vfs.provider.local.DefaultLocalFileProvider;
-import org.apache.commons.vfs.provider.sftp.SftpFileProvider;
-import org.apache.commons.vfs.provider.storageresourcebroker.SRBFileProvider;
 import org.apache.commons.vfs.provider.storageresourcebroker.SRBFileSystemConfigBuilder;
-import org.apache.commons.vfs.provider.temp.TemporaryFileProvider;
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.wn.service.DtsFileSystemAuthenticationException;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
@@ -40,7 +31,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.dl.escience.vfs.util.VFSUtil;
 
-
+/**
+ * 
+ * @author Gerson Galang
+ */
 public class DtsVfsUtil extends VFSUtil {
 	
 	/** Qualified name of the XML element containing a password within a credentials element. */
@@ -137,45 +131,10 @@ public class DtsVfsUtil extends VFSUtil {
 		mTmpDirPath = tmpDirPath;
 	}
 
-	public DtsFileSystemManager createNewDtsFsManager() throws FileSystemException {		
-		DtsFileSystemManager fsManager = new DtsFileSystemManager();
-        if (mFtpSupported) {
-            fsManager.addProvider("ftp", new FtpFileProvider());
-        }
-        if (mSftpSupported) {
-            fsManager.addProvider("sftp", new SftpFileProvider());
-        }
-        if (mHttpSupported) {
-            fsManager.addProvider("http", new HttpFileProvider());
-        }
-        if (mGsiftpSupported) {
-            fsManager.addProvider("gsiftp", new GridFtpFileProvider());
-        }
-        if (mSrbSupported) {
-            fsManager.addProvider("srb", new SRBFileProvider());
-        }
-        if (mFileSupported) {
-            fsManager.addProvider("file", new DefaultLocalFileProvider());
-        }
-        if(mIrodsSupported){
-            fsManager.addProvider("irods", new IRODSFileProvider());
-        }
-
-        File xFile = null;
-        if (mTmpDirPath != null) {
-            xFile = new File(mTmpDirPath);
-        } else {
-            xFile = new File(System.getProperty("java.io.tmpdir", "/tmp"));
-        }
-        if (!xFile.exists()) {
-            throw new IllegalStateException("cannot allocate temporary directory. Please set java.io.tmpdir system property");
-        }
-        fsManager.addProvider("tmp", new TemporaryFileProvider(xFile));
-        fsManager.setTemporaryFileStore(new DefaultFileReplicator(xFile));
-        fsManager.init();
-        
-        fsManager.setDtsVfsUtil(this);
-        return fsManager;
+	public DefaultFileSystemManager createNewFsManager() throws FileSystemException {		
+		return VFSUtil.createNewFsManager(
+				mFtpSupported, mSftpSupported, mHttpSupported, mGsiftpSupported, mSrbSupported, 
+				mFileSupported, mIrodsSupported, mTmpDirPath);
 	}
 	
 	/**

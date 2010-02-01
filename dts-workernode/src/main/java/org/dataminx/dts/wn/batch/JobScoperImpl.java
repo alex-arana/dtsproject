@@ -8,8 +8,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.vfs.FileName;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
+import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.FileType;
-import org.dataminx.dts.vfs.DtsFileSystemManager;
+import org.dataminx.dts.DtsException;
+import org.dataminx.dts.vfs.DtsVfsUtil;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.CreationFlagEnumeration;
@@ -27,18 +29,20 @@ public class JobScoperImpl implements JobScoper {
     private ArrayList<String> mExcluded = new ArrayList<String>();
     
     //@Autowired
-    private DtsFileSystemManager mFileSystemManager;
-    	
+    private FileSystemManager mFileSystemManager;
+    
+    private DtsVfsUtil mDtsVfsUtil;
+
 	private static final Log LOGGER = LogFactory.getLog(JobScoperImpl.class);
 	
 	private DtsJobStepAllocator mDtsJobStepAllocator;
 	
 	public static final int BATCH_SIZE_LIMIT = 2;
 		
-	public void setFileSystemManager(DtsFileSystemManager fileSystemManager) {
+	public void setFileSystemManager(FileSystemManager fileSystemManager) {
 		
 		// jobScoper only needs access to a fileSystemManager that has to be handed to it by its caller.
-		// a DtsFileSystemManagerDispenser is only needed if the scoping task will be run more than one thread.
+		// a FileSystemManagerDispenser is only needed if the scoping task will be run more than one thread.
 		mFileSystemManager = fileSystemManager;
 	}
 	
@@ -69,9 +73,18 @@ public class JobScoperImpl implements JobScoper {
         for (DataTransferType dataTransfer : dataTransfers) {        	
         	mDtsJobStepAllocator.initNewDataTransfer();
         	
-        	prepare(mFileSystemManager.resolveFile(dataTransfer.getSource()), 
-        			mFileSystemManager.resolveFile(dataTransfer.getTarget()), 
-        			dataTransfer);
+        	try {
+	            prepare(mFileSystemManager.resolveFile(dataTransfer.getSource().getURI(), 
+	            		mDtsVfsUtil.createFileSystemOptions(dataTransfer.getSource())), 
+	            		mFileSystemManager.resolveFile(dataTransfer.getTarget().getURI(),
+	            		mDtsVfsUtil.createFileSystemOptions(dataTransfer.getTarget())), 
+	            		dataTransfer);
+            } catch (DtsJobCancelledException e) {
+	            // TODO Auto-generated catch block
+	            e.printStackTrace();
+            } catch (FileSystemException e) {
+            	throw new DtsException(e);
+            }
         	
         	mDtsJobStepAllocator.closeNewDataTransfer();
         	
@@ -192,6 +205,10 @@ public class JobScoperImpl implements JobScoper {
         LOGGER.error(e);
         
         //invokeTransferFailedListeners();
+    }
+		
+	public void setDtsVfsUtil(DtsVfsUtil dtsVfsUtil) {
+    	mDtsVfsUtil = dtsVfsUtil;
     }
 	
 	private class DtsJobStepAllocator {
