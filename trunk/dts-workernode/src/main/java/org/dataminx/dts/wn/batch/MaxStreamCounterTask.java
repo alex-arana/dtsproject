@@ -75,7 +75,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
 	}
 	
 	private int getMaxConnection(DataTransferType dataTransferType) {
-		return 1;
+        return 1;
 	}
 
 }

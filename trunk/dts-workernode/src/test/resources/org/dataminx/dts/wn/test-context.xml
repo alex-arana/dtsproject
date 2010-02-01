@@ -16,7 +16,6 @@
     don't care to mock for the purposes of testing.
   -->
   <context:component-scan base-package="org.dataminx.dts">
-    <context:exclude-filter type="assignable" expression="org.dataminx.dts.wn.vfs.DtsFileSystemManager"/>
     <context:exclude-filter type="assignable" expression="org.dataminx.dts.wn.service.FileCopyingServiceImpl"/>
   </context:component-scan>
 

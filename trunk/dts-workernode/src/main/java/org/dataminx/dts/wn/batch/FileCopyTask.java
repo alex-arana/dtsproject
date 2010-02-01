@@ -28,8 +28,8 @@
 package org.dataminx.dts.wn.batch;
 
 import java.util.List;
-import org.dataminx.dts.vfs.DtsFileSystemManager;
-import org.dataminx.dts.vfs.DtsFileSystemManagerDispenser;
+import org.apache.commons.vfs.FileSystemManager;
+import org.dataminx.dts.vfs.FileSystemManagerDispenser;
 import org.dataminx.dts.wn.service.FileCopyingService;
 import org.dataminx.dts.wn.service.JobNotificationService;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
@@ -67,7 +67,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
     @Autowired
     private JobNotificationService mJobNotificationService;
     
-    private DtsFileSystemManagerDispenser mFileSystemManagerDispenser;
+    private FileSystemManagerDispenser mFileSystemManagerDispenser;
     
     private DtsJobStep mJobStep;
 
@@ -83,7 +83,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
     	LOG.info(mJobStep.toString());
     	
     	List<DtsDataTransferUnit> dataTransferUnits = mJobStep.getDataTransferUnits();
-    	DtsFileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
+    	FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
     	
     	// TODO reimplement this with threadpool
     	for (DtsDataTransferUnit dataTransferUnit : dataTransferUnits) {
@@ -108,7 +108,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
     	mJobStep = jobStep;
     }
     
-    public void setFileSystemManagerDispenser(DtsFileSystemManagerDispenser fileSystemManagerDispenser) {
+    public void setFileSystemManagerDispenser(FileSystemManagerDispenser fileSystemManagerDispenser) {
     	mFileSystemManagerDispenser = fileSystemManagerDispenser;
     }
     

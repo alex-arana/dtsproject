@@ -16,16 +16,16 @@
       </jsdl1:JobIdentification>
       <jsdl:DataTransfer>
         <jsdl:Source>
-          <jsdl1:URI>ftp://dm11.intersect.org.au/pub/DataMINX/minx-dts/pom.xml</jsdl1:URI>
+          <jsdl1:URI>ftp://dm11/pub/Ubuntu/LiveCD</jsdl1:URI>
           <jsdl:Credential>
             <oas:UsernameToken>
               <oas:Username>gerson</oas:Username>
-              <oas:PasswordString>pa55word</oas:PasswordString>
+              <oas:PasswordString>Pru9A5tA</oas:PasswordString>
             </oas:UsernameToken>
           </jsdl:Credential>
         </jsdl:Source>
         <jsdl:Target>
-          <jsdl1:URI>tmp://pom.xml</jsdl1:URI>
+          <jsdl1:URI>tmp://DataMINX-dude/minx-dts</jsdl1:URI>
         </jsdl:Target>
         <jsdl:TransferRequirements>
           <dmi:MaxAttempts>0</dmi:MaxAttempts>

@@ -32,8 +32,8 @@ import org.apache.commons.vfs.Capability;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSelector;
 import org.apache.commons.vfs.FileSystemException;
+import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.Selectors;
-import org.dataminx.dts.vfs.DtsFileSystemManager;
 import org.dataminx.dts.vfs.DtsVfsUtil;
 import org.dataminx.dts.wn.common.util.StopwatchTimer;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
@@ -76,7 +76,7 @@ public class FileCopyingServiceImpl implements FileCopyingService {
      * {@inheritDoc}
      */
     @Override
-    public void copyFiles(final String sourceURI, final String targetURI, DtsFileSystemManager fileSystemManager) {
+    public void copyFiles(final String sourceURI, final String targetURI, FileSystemManager fileSystemManager) {
         LOG.info(String.format("Copying source '%s' to target '%s'...", sourceURI, targetURI));
         try {
             final StopwatchTimer timer = new StopwatchTimer();
@@ -94,11 +94,14 @@ public class FileCopyingServiceImpl implements FileCopyingService {
      * {@inheritDoc}
      */
     public void copyFiles(final SourceTargetType source, final SourceTargetType target, 
-    		DtsFileSystemManager fileSystemManager) {
+    		FileSystemManager fileSystemManager) {
         LOG.info(String.format("Copying source '%s' to target '%s'...", source.getURI(), target.getURI()));
         try {
             final StopwatchTimer timer = new StopwatchTimer();
-            copyFiles(fileSystemManager.resolveFile(source), fileSystemManager.resolveFile(target));
+            copyFiles(fileSystemManager.resolveFile(source.getURI(), 
+            		mDtsVfsUtil.createFileSystemOptions(source)), 
+            		fileSystemManager.resolveFile(target.getURI(),
+            		mDtsVfsUtil.createFileSystemOptions(target)));
             LOG.info(String.format("Finished copying source '%s' to target '%s' in %s.",
                 source.getURI(), target.getURI(), timer.getFormattedElapsedTime()));
         }
@@ -112,7 +115,7 @@ public class FileCopyingServiceImpl implements FileCopyingService {
      * {@inheritDoc}
      */
     public void copyFiles(String sourceURI, String targetURI, DataTransferType dataTransferType, 
-    		DtsFileSystemManager fileSystemManager)  {
+    		FileSystemManager fileSystemManager)  {
     	SourceTargetType source = dataTransferType.getSource();
     	SourceTargetType target = dataTransferType.getTarget();
     	FileObject sourceFO = null;
