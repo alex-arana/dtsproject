@@ -6,6 +6,8 @@ import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 
 public interface JobScoper {
 	void setFileSystemManager(FileSystemManager fileSystemManager);
+
 	DtsJobDetails scopeTheJob(JobDefinitionType jobDefinition);
+
 	void setDtsVfsUtil(DtsVfsUtil dtsVfsUtil);
 }

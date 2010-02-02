@@ -13,38 +13,36 @@ import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 public class FileSystemManagerDispenser {
 
 	private static final Log LOGGER = LogFactory.getLog(FileSystemManagerDispenser.class);
-	
+
 	private DtsVfsUtil mDtsVfsUtil;
-	
-	private ThreadLocal <DefaultFileSystemManager> mThreadLocalFsManager = 
-		new ThreadLocal <DefaultFileSystemManager> () {
-            @Override
-            protected DefaultFileSystemManager initialValue() {
-    			try {
-	                return mDtsVfsUtil.createNewFsManager();
-                } catch (FileSystemException e) {
-	                LOGGER.error("FileSystemException was thrown while creating a new FileSystemManager", e);	                
-                }
-                return null;
-    		}
-            
-            @Override
-            public void remove() {
-            	((DefaultFileSystemManager) get()).close();
-            }
-    };
-    
+
+	private ThreadLocal<DefaultFileSystemManager> mThreadLocalFsManager = new ThreadLocal<DefaultFileSystemManager>() {
+		@Override
+		protected DefaultFileSystemManager initialValue() {
+			try {
+				return mDtsVfsUtil.createNewFsManager();
+			} catch (FileSystemException e) {
+				LOGGER.error("FileSystemException was thrown while creating a new FileSystemManager", e);
+			}
+			return null;
+		}
+
+		@Override
+		public void remove() {
+			((DefaultFileSystemManager) get()).close();
+		}
+	};
+
 	public DefaultFileSystemManager getFileSystemManager() {
 		return mThreadLocalFsManager.get();
 	}
-	
+
 	public void closeFileSystemManager() {
 		mThreadLocalFsManager.remove();
 	}
-	
-	public void setDtsVfsUtil(DtsVfsUtil dtsVfsUtil) {
-    	mDtsVfsUtil = dtsVfsUtil;
-    }
 
+	public void setDtsVfsUtil(DtsVfsUtil dtsVfsUtil) {
+		mDtsVfsUtil = dtsVfsUtil;
+	}
 
 }

@@ -70,14 +70,14 @@
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
   </bean>
   
-  
+  <!-- TODO...
   <batch:step id="maxStreamCountingStep">
        <batch:tasklet ref="maxStreamCounterTask"/>
-  </batch:step>
+  </batch:step>  
   
   <bean id="maxStreamCounterTask" class="org.dataminx.dts.wn.batch.MaxStreamCounterTask" scope="step">
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
     <property name="maxConnectionsToTry" value="${default.max.parallel.connections}"/>
   </bean>
-
+  -->
 </beans>
