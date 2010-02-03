@@ -78,17 +78,17 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
 	 */
 	@Override
 	public RepeatStatus execute(final StepContribution contribution, final ChunkContext chunkContext) throws Exception {
-		StepContext stepContext = chunkContext.getStepContext();
+		final StepContext stepContext = chunkContext.getStepContext();
 		LOG.info("Executing copy step: " + stepContext.getStepName());
 
 		Assert.state(mJobStep != null, "Unable to find data transfer input data in step context.");
 		LOG.info(mJobStep.toString());
 
-		List<DtsDataTransferUnit> dataTransferUnits = mJobStep.getDataTransferUnits();
-		FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
+		final List<DtsDataTransferUnit> dataTransferUnits = mJobStep.getDataTransferUnits();
+		final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
 
 		// TODO reimplement this with threadpool
-		for (DtsDataTransferUnit dataTransferUnit : dataTransferUnits) {
+		for (final DtsDataTransferUnit dataTransferUnit : dataTransferUnits) {
 
 			// TODO when we start to run this by threads.. we'll need to get
 			// each thread to use one ThreadLocal
@@ -101,14 +101,15 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
 
 		// TODO handle failures by returning ...
 
+		mFileSystemManagerDispenser.closeFileSystemManager();
 		return RepeatStatus.FINISHED;
 	}
 
-	public void setJobStep(DtsJobStep jobStep) {
+	public void setJobStep(final DtsJobStep jobStep) {
 		mJobStep = jobStep;
 	}
 
-	public void setFileSystemManagerDispenser(FileSystemManagerDispenser fileSystemManagerDispenser) {
+	public void setFileSystemManagerDispenser(final FileSystemManagerDispenser fileSystemManagerDispenser) {
 		mFileSystemManagerDispenser = fileSystemManagerDispenser;
 	}
 

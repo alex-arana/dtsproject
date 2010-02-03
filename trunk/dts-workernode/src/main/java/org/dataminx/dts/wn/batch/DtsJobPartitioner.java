@@ -42,65 +42,69 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of {@link Partitioner} that can split a {@link SubmitJobRequest} into smaller units
- * of work that can subsequently be be either parallelised or delegated to remote chunk processors.
+ * Implementation of {@link Partitioner} that can split a
+ * {@link SubmitJobRequest} into smaller units of work that can subsequently be
+ * be either parallelised or delegated to remote chunk processors.
  * <p>
- * Put in another way, it is the responsibility of this class to generate instances of {@link ExecutionContext}
- * that can act as input parameters to new {@link org.springframework.batch.core.Step} executions.
+ * Put in another way, it is the responsibility of this class to generate
+ * instances of {@link ExecutionContext} that can act as input parameters to new
+ * {@link org.springframework.batch.core.Step} executions.
  * <p>
- * It is a requirement that the {@link SubmitJobRequest} input to this class be either injected or set manually
- * prior to its {@link #partition(int)} method being called.
- *
+ * It is a requirement that the {@link SubmitJobRequest} input to this class be
+ * either injected or set manually prior to its {@link #partition(int)} method
+ * being called.
+ * 
  * @author Alex Arana
  */
 public class DtsJobPartitioner implements Partitioner {
-    /** Internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(DtsJobPartitioner.class);
+	/** Internal logger object. */
+	private static final Logger LOG = LoggerFactory.getLogger(DtsJobPartitioner.class);
 
-    /** A reference to the input DTS job request. */
-    private SubmitJobRequest mSubmitJobRequest;
-    
-    private JobScoper mJobScoper;
-    
-    private FileSystemManagerDispenser mFileSystemManagerDispenser;
+	/** A reference to the input DTS job request. */
+	private SubmitJobRequest mSubmitJobRequest;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<String, ExecutionContext> partition(final int gridSize) {
-        Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
-        
-        FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
-        mJobScoper.setFileSystemManager(fileSystemManager);
-        
-        DtsJobDetails jobDetails = mJobScoper.scopeTheJob(mSubmitJobRequest.getJobDefinition());
-        
-        // TODO: we'll probably need to close the fileSystemManager..
-        
-        List<DtsJobStep> jobSteps = jobDetails.getJobSteps();
-        int i = 0;
-        
-        Map<String, ExecutionContext> map = new HashMap<String, ExecutionContext>(gridSize);
-        for (DtsJobStep jobStep : jobSteps) {
-        	ExecutionContext context = new ExecutionContext();
-        	context.put(DTS_DATA_TRANSFER_STEP_KEY, jobStep);
-        	map.put(String.format("%s:%03d", DTS_DATA_TRANSFER_STEP_KEY, i), context);
-        	i++;
-        }
-        
-        return map;
-    }
+	private JobScoper mJobScoper;
 
-    public void setSubmitJobRequest(final SubmitJobRequest submitJobRequest) {
-        mSubmitJobRequest = submitJobRequest;
-    }
-    
-    public void setJobScoper(JobScoper jobScoper) {
-    	mJobScoper = jobScoper;
-    }
-     
-    public void setFileSystemManagerDispenser(FileSystemManagerDispenser fileSystemManagerDispenser) {
-    	mFileSystemManagerDispenser = fileSystemManagerDispenser;
-    }
+	private FileSystemManagerDispenser mFileSystemManagerDispenser;
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Map<String, ExecutionContext> partition(final int gridSize) {
+		Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
+
+		final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
+		mJobScoper.setFileSystemManager(fileSystemManager);
+
+		final DtsJobDetails jobDetails = mJobScoper.scopeTheJob(mSubmitJobRequest.getJobDefinition());
+
+		// TODO: we'll probably need to close the fileSystemManager..
+
+		final List<DtsJobStep> jobSteps = jobDetails.getJobSteps();
+		int i = 0;
+
+		final Map<String, ExecutionContext> map = new HashMap<String, ExecutionContext>(gridSize);
+		for (final DtsJobStep jobStep : jobSteps) {
+			final ExecutionContext context = new ExecutionContext();
+			context.put(DTS_DATA_TRANSFER_STEP_KEY, jobStep);
+			map.put(String.format("%s:%03d", DTS_DATA_TRANSFER_STEP_KEY, i), context);
+			i++;
+		}
+
+		mFileSystemManagerDispenser.closeFileSystemManager();
+		return map;
+	}
+
+	public void setSubmitJobRequest(final SubmitJobRequest submitJobRequest) {
+		mSubmitJobRequest = submitJobRequest;
+	}
+
+	public void setJobScoper(final JobScoper jobScoper) {
+		mJobScoper = jobScoper;
+	}
+
+	public void setFileSystemManagerDispenser(final FileSystemManagerDispenser fileSystemManagerDispenser) {
+		mFileSystemManagerDispenser = fileSystemManagerDispenser;
+	}
 }

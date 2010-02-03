@@ -21,7 +21,7 @@ import org.springframework.util.Assert;
 
 public class JobScoperImpl implements JobScoper {
 
-	private boolean mCancelled = false;
+	private final boolean mCancelled = false;
 	private String mFailureMessage = "";
 
 	private int mTotalSize = 0;
@@ -38,7 +38,7 @@ public class JobScoperImpl implements JobScoper {
 
 	public static final int BATCH_SIZE_LIMIT = 2;
 
-	public void setFileSystemManager(FileSystemManager fileSystemManager) {
+	public void setFileSystemManager(final FileSystemManager fileSystemManager) {
 
 		// jobScoper only needs access to a fileSystemManager that has to be
 		// handed to it by its caller.
@@ -47,11 +47,11 @@ public class JobScoperImpl implements JobScoper {
 		mFileSystemManager = fileSystemManager;
 	}
 
-	public DtsJobDetails scopeTheJob(JobDefinitionType jobDefinition) {
+	public DtsJobDetails scopeTheJob(final JobDefinitionType jobDefinition) {
 
 		Assert.notNull(jobDefinition);
 
-		DtsJobDetails jobDetails = new DtsJobDetails();
+		final DtsJobDetails jobDetails = new DtsJobDetails();
 		jobDetails.setJobDefinition(jobDefinition);
 		jobDetails.setJobId(jobDefinition.getId());
 
@@ -71,7 +71,7 @@ public class JobScoperImpl implements JobScoper {
 			throw new DtsJobExecutionException("DTS job request contains no data transfer elements.");
 		}
 
-		for (DataTransferType dataTransfer : dataTransfers) {
+		for (final DataTransferType dataTransfer : dataTransfers) {
 			mDtsJobStepAllocator.initNewDataTransfer();
 
 			try {
@@ -79,10 +79,10 @@ public class JobScoperImpl implements JobScoper {
 				        .createFileSystemOptions(dataTransfer.getSource())), mFileSystemManager.resolveFile(
 				        dataTransfer.getTarget().getURI(), mDtsVfsUtil
 				                .createFileSystemOptions(dataTransfer.getTarget())), dataTransfer);
-			} catch (DtsJobCancelledException e) {
+			} catch (final DtsJobCancelledException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (FileSystemException e) {
+			} catch (final FileSystemException e) {
 				throw new DtsException(e);
 			}
 
@@ -91,7 +91,7 @@ public class JobScoperImpl implements JobScoper {
 		}
 		LOGGER.debug("total size of files to be transferred: " + mTotalSize + " bytes");
 		LOGGER.debug("list of excluded files: ");
-		for (String excluded : mExcluded) {
+		for (final String excluded : mExcluded) {
 			LOGGER.debug(" - " + excluded);
 		}
 
@@ -105,10 +105,11 @@ public class JobScoperImpl implements JobScoper {
 		return jobDetails;
 	}
 
-	private void prepare(FileObject sourceParent, FileObject destinationParent, DataTransferType dataTransfer)
-	        throws DtsJobCancelledException {
-		if (mCancelled)
+	private void prepare(final FileObject sourceParent, final FileObject destinationParent,
+	        final DataTransferType dataTransfer) throws DtsJobCancelledException {
+		if (mCancelled) {
 			throw new DtsJobCancelledException();
+		}
 
 		try {
 			// Handle the following cases...
@@ -122,8 +123,8 @@ public class JobScoperImpl implements JobScoper {
 			// destination directory that exists: /tmp
 
 			if (sourceParent.getType().equals(FileType.FILE) && !mCancelled) {
-
-				CreationFlagEnumeration.Enum creationFlag = dataTransfer.getTransferRequirements().getCreationFlag();
+				final CreationFlagEnumeration.Enum creationFlag = dataTransfer.getTransferRequirements()
+				        .getCreationFlag();
 
 				if (!destinationParent.exists()) {
 					// Note that we are not supporting a single file transfer to
@@ -150,10 +151,10 @@ public class JobScoperImpl implements JobScoper {
 					// ... File to Dir
 
 					// create the new object
-					String newFilePath = destinationParent.getURL() + FileName.SEPARATOR
+					final String newFilePath = destinationParent.getURL() + FileName.SEPARATOR
 					        + sourceParent.getName().getBaseName();
-					FileObject destinationChild = destinationParent.getFileSystem().getFileSystemManager().resolveFile(
-					        newFilePath, destinationParent.getFileSystem().getFileSystemOptions());
+					final FileObject destinationChild = destinationParent.getFileSystem().getFileSystemManager()
+					        .resolveFile(newFilePath, destinationParent.getFileSystem().getFileSystemOptions());
 					// destinationChild.createFile();
 
 					if (destinationChild.exists()) {
@@ -176,51 +177,52 @@ public class JobScoperImpl implements JobScoper {
 				// .. Dir to Dir
 
 				// create the new object
-				String newFolderPath = destinationParent.getURL() + FileName.SEPARATOR
+				final String newFolderPath = destinationParent.getURL() + FileName.SEPARATOR
 				        + sourceParent.getName().getBaseName();
-				FileObject destinationChild = destinationParent.getFileSystem().getFileSystemManager().resolveFile(
-				        newFolderPath, destinationParent.getFileSystem().getFileSystemOptions());
+				final FileObject destinationChild = destinationParent.getFileSystem().getFileSystemManager()
+				        .resolveFile(newFolderPath, destinationParent.getFileSystem().getFileSystemOptions());
 
-				if (!destinationChild.exists())
+				if (!destinationChild.exists()) {
 					destinationChild.createFolder();
+				}
 
 				// get the children
-				FileObject[] sourceChildren = sourceParent.getChildren();
+				final FileObject[] sourceChildren = sourceParent.getChildren();
 
 				// iterate through the children
-				for (FileObject sourceChild : sourceChildren) {
+				for (final FileObject sourceChild : sourceChildren) {
 					// recurse into the directory, or copy the file
 					prepare(sourceChild, destinationChild, dataTransfer);
 				}
 			}
-		} catch (DtsJobCancelledException e) {
+		} catch (final DtsJobCancelledException e) {
 			throw e;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			handleError(e);
 		}
 	}
 
-	private void addFilesToTransfer(FileObject source, FileObject destination, DataTransferType dataTransfer)
-	        throws FileSystemException {
+	private void addFilesToTransfer(final FileObject source, final FileObject destination,
+	        final DataTransferType dataTransfer) throws FileSystemException {
 		LOGGER.debug("addFilesToTransfer(\"" + source.getURL() + "\", \"" + destination.getURL() + "\", dataTransfer)");
 		mTotalSize += source.getContent().getSize();
 		mDtsJobStepAllocator.addDataTransferUnit(new DtsDataTransferUnit(source.getURL().toString(), destination
 		        .getURL().toString(), dataTransfer));
 	}
 
-	private void handleError(Exception e) {
+	private void handleError(final Exception e) {
 		mFailureMessage = e.getMessage();
 		LOGGER.error(e);
 
 		// invokeTransferFailedListeners();
 	}
 
-	public void setDtsVfsUtil(DtsVfsUtil dtsVfsUtil) {
+	public void setDtsVfsUtil(final DtsVfsUtil dtsVfsUtil) {
 		mDtsVfsUtil = dtsVfsUtil;
 	}
 
 	private class DtsJobStepAllocator {
-		private List<DtsJobStep> mSteps;
+		private final List<DtsJobStep> mSteps;
 		private DtsJobStep mTmpDtsJobStep = null;
 
 		public DtsJobStepAllocator() {
@@ -238,7 +240,7 @@ public class JobScoperImpl implements JobScoper {
 
 		}
 
-		public void addDataTransferUnit(DtsDataTransferUnit dataTransferUnit) {
+		public void addDataTransferUnit(final DtsDataTransferUnit dataTransferUnit) {
 			if ((mTmpDtsJobStep != null && mTmpDtsJobStep.isFull())) {
 				mSteps.add(mTmpDtsJobStep);
 				mTmpDtsJobStep = new DtsJobStep(mSteps.size() + 1, BATCH_SIZE_LIMIT);

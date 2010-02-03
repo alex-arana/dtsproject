@@ -50,7 +50,7 @@
     <property name="partitionHandler">
       <bean class="org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler">
         <property name="taskExecutor">
-          <bean class="org.springframework.core.task.SyncTaskExecutor"/>
+          <bean class="org.springframework.core.task.SimpleAsyncTaskExecutor"/>
         </property>
         <property name="step" ref="taskOrientedStep"/>
         <property name="gridSize" value="1"/>
@@ -70,7 +70,7 @@
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
   </bean>
   
-  <!-- TODO...
+  
   <batch:step id="maxStreamCountingStep">
        <batch:tasklet ref="maxStreamCounterTask"/>
   </batch:step>  
@@ -78,6 +78,8 @@
   <bean id="maxStreamCounterTask" class="org.dataminx.dts.wn.batch.MaxStreamCounterTask" scope="step">
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
     <property name="maxConnectionsToTry" value="${default.max.parallel.connections}"/>
+    <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
+    <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
   </bean>
-  -->
+  
 </beans>
