@@ -157,20 +157,8 @@
       <artifactId>jms</artifactId>
     </dependency>
 
-    <!-- commons-vfs -->
-    <!--
-    <dependency>
-      <groupId>commons-vfs</groupId>
-      <artifactId>commons-vfs</artifactId>
-    </dependency>
-     -->
-
     <!-- commons-vfs-grid -->
     <dependency>
-      <!-- 
-      <groupId>external.grisu-core</groupId>
-      <artifactId>commons-vfs-grid</artifactId>
-      -->
       <groupId>commons-vfs-grid</groupId>
       <artifactId>commons-vfs-grid</artifactId>
     </dependency>

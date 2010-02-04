@@ -24,10 +24,10 @@ import org.springframework.stereotype.Component;
 /**
  * This class is a dual-purpose messaging converter:
  * <ul>
- *   <li>Converts an incoming JMS message into a DTS Job definition.
- *   <li>Converts a supported JAXB2 entity into an outgoing JMS message.
+ * <li>Converts an incoming JMS message into a DTS Job definition.
+ * <li>Converts a supported JAXB2 entity into an outgoing JMS message.
  * </ul>
- *
+ * 
  * @author Alex Arana
  * @author Gerson Galang
  */
@@ -35,7 +35,6 @@ import org.springframework.stereotype.Component;
 public class DtsWsMessageConverter extends SimpleMessageConverter {
     /** Internal logger object. */
     private static final Logger LOG = LoggerFactory.getLogger(DtsWsMessageConverter.class);
-
 
     /** Component used to marshall Java object graphs into XML. */
     @Autowired
@@ -68,10 +67,11 @@ public class DtsWsMessageConverter extends SimpleMessageConverter {
 
     /**
      * Extracts the given JMS Message payload and returns it as an object.
-     *
+     * 
      * @param message the incoming JMS message
      * @return the message payload as an {@link Object}
-     * @throws JMSException if the incoming message is not of a supported message type
+     * @throws JMSException if the incoming message is not of a supported
+     *         message type
      */
     private Object extractMessagePayload(final Message message) throws JMSException {
         final Object payload;

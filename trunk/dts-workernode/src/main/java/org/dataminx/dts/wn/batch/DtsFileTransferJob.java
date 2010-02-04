@@ -58,142 +58,140 @@ import org.springframework.util.ObjectUtils;
 @Component("dtsFileTransferJob")
 @Scope("prototype")
 public class DtsFileTransferJob extends DtsJob {
-	/** Holds the information about the job request. */
-	private final SubmitJobRequest mJobRequest;
+    /** Holds the information about the job request. */
+    private final SubmitJobRequest mJobRequest;
 
-	/** The master step in this job. */
-	@Autowired
-	@Qualifier("partitioningStep")
-	private Step mPartitioningStep;
+    /** The master step in this job. */
+    @Autowired
+    @Qualifier("partitioningStep")
+    private Step mPartitioningStep;
 
-	@Autowired
-	@Qualifier("maxStreamCountingStep")
-	private Step mMaxStreamCountingStep;
+    @Autowired
+    @Qualifier("maxStreamCountingStep")
+    private Step mMaxStreamCountingStep;
 
-	/**
-	 * Constructs a new instance of <code>DtsSubmitJob</code> using the
-	 * specified job request details.
-	 * 
-	 * @param jobId
-	 *            Unique job identifier
-	 * @param jobRequest
-	 *            Job request details
-	 * @param jobRepository
-	 *            Job repository
-	 */
-	public DtsFileTransferJob(final String jobId, final SubmitJobRequestDocument jobRequest,
-	        final JobRepository jobRepository) {
+    /**
+     * Constructs a new instance of <code>DtsSubmitJob</code> using the
+     * specified job request details.
+     * 
+     * @param jobId Unique job identifier
+     * @param jobRequest Job request details
+     * @param jobRepository Job repository
+     */
+    public DtsFileTransferJob(final String jobId, final SubmitJobRequestDocument jobRequest,
+            final JobRepository jobRepository) {
 
-		super(jobId);
-		Assert.notNull(jobRequest, "Cannot construct a DTS submit job without the required job details.");
-		mJobRequest = jobRequest.getSubmitJobRequest();
-		setJobRepository(jobRepository);
-	}
+        super(jobId);
+        Assert.notNull(jobRequest, "Cannot construct a DTS submit job without the required job details.");
+        mJobRequest = jobRequest.getSubmitJobRequest();
+        setJobRepository(jobRepository);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getName() {
-		return getJobId();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getName() {
+        return getJobId();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getDescription() {
-		String description = null;
-		final JobIdentificationType jobIdentification = getJobIdentification();
-		if (jobIdentification != null) {
-			description = jobIdentification.getDescription();
-		}
-		return description;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDescription() {
+        String description = null;
+        final JobIdentificationType jobIdentification = getJobIdentification();
+        if (jobIdentification != null) {
+            description = jobIdentification.getDescription();
+        }
+        return description;
+    }
 
-	/**
-	 * Returns the job description, containing all details about the underlying
-	 * job.
-	 * 
-	 * @return Job request details
-	 */
-	protected JobDescriptionType getJobDescription() {
-		JobDescriptionType result = null;
-		final JobDefinitionType jobDefinition = mJobRequest.getJobDefinition();
-		if (jobDefinition != null) {
-			result = jobDefinition.getJobDescription();
-		}
-		return result;
-	}
+    /**
+     * Returns the job description, containing all details about the underlying
+     * job.
+     * 
+     * @return Job request details
+     */
+    protected JobDescriptionType getJobDescription() {
+        JobDescriptionType result = null;
+        final JobDefinitionType jobDefinition = mJobRequest.getJobDefinition();
+        if (jobDefinition != null) {
+            result = jobDefinition.getJobDescription();
+        }
+        return result;
+    }
 
-	/**
-	 * Returns the job identification, containing all details about the
-	 * underlying job.
-	 * 
-	 * @return Job identification details
-	 */
-	protected JobIdentificationType getJobIdentification() {
-		JobIdentificationType result = null;
-		final JobDescriptionType jobDescription = getJobDescription();
-		if (jobDescription != null) {
-			result = jobDescription.getJobIdentification();
-		}
-		return result;
-	}
+    /**
+     * Returns the job identification, containing all details about the
+     * underlying job.
+     * 
+     * @return Job identification details
+     */
+    protected JobIdentificationType getJobIdentification() {
+        JobIdentificationType result = null;
+        final JobDescriptionType jobDescription = getJobDescription();
+        if (jobDescription != null) {
+            result = jobDescription.getJobIdentification();
+        }
+        return result;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void doExecute(final JobExecution execution) throws JobInterruptedException, JobRestartException,
-	        StartLimitExceededException {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void doExecute(final JobExecution execution) throws JobInterruptedException, JobRestartException,
+            StartLimitExceededException {
 
-		// first set the job start time
-		registerStartTime();
+        // first set the job start time
+        registerStartTime();
 
-		// TODO determine exactly what job notifications we need to return and
-		// when
-		getJobNotificationService().notifyJobStatus(this, JobStatus.TRANSFERRING);
+        // TODO determine exactly what job notifications we need to return and
+        // when
+        getJobNotificationService().notifyJobStatus(this, JobStatus.TRANSFERRING);
 
-		// first, store the DTS job request object in the job execution context
-		final ExecutionContext context = execution.getExecutionContext();
-		context.put(DTS_SUBMIT_JOB_REQUEST_KEY, mJobRequest);
+        // first, store the DTS job request object in the job execution context
+        final ExecutionContext context = execution.getExecutionContext();
+        context.put(DTS_SUBMIT_JOB_REQUEST_KEY, mJobRequest);
+        context.put("jobResourceKey", getJobId());
 
-		// TODO convert to application exceptions
-		StepExecution stepExecution;// = handleStep(mMaxStreamCountingStep,
-		// execution);
+        // TODO convert to application exceptions
+        StepExecution stepExecution;// = handleStep(mMaxStreamCountingStep,
+        // execution);
 
-		// TODO handle repeat of steps if failure occurs
+        // TODO handle repeat of steps if failure occurs
 
-		stepExecution = handleStep(mPartitioningStep, execution);
+        stepExecution = handleStep(mPartitioningStep, execution);
 
-		// update the job status to have the same status as the master step
-		if (stepExecution != null) {
-			logger.debug("Upgrading JobExecution status: " + stepExecution);
-			execution.upgradeStatus(stepExecution.getStatus());
-			execution.setExitStatus(stepExecution.getExitStatus());
-		}
+        // update the job status to have the same status as the master step
+        if (stepExecution != null) {
+            logger.debug("Upgrading JobExecution status: " + stepExecution);
+            execution.upgradeStatus(stepExecution.getStatus());
+            execution.setExitStatus(stepExecution.getExitStatus());
+        }
 
-		if (stepExecution.getStatus().isUnsuccessful()) {
-			getJobNotificationService().notifyJobError(getJobId(), execution);
+        if (stepExecution.getStatus().isUnsuccessful()) {
+            getJobNotificationService().notifyJobError(getJobId(), execution);
 
-			return;
-		}
+            return;
+        }
 
-		// TODO move this somewhere it always gets called
-		registerCompletedTime();
-		getJobNotificationService().notifyJobStatus(this, JobStatus.DONE);
-	}
+        // TODO move this somewhere it always gets called
+        registerCompletedTime();
+        getJobNotificationService().notifyJobStatus(this, JobStatus.DONE);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String toString() {
-		final StringBuilder buffer = new StringBuilder();
-		buffer.append(ObjectUtils.identityToString(this));
-		buffer.append(" [jobId").append("='").append(getJobId()).append("' ");
-		buffer.append("jobDescription").append("='").append(getDescription()).append("']");
-		return buffer.toString();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        final StringBuilder buffer = new StringBuilder();
+        buffer.append(ObjectUtils.identityToString(this));
+        buffer.append(" [jobId").append("='").append(getJobId()).append("' ");
+        buffer.append("jobDescription").append("='").append(getDescription()).append("']");
+        return buffer.toString();
+    }
 }

@@ -8,61 +8,61 @@ import java.io.Serializable;
  * @author Gerson Galang
  */
 public class MaxConnectionKey implements Serializable {
-	
-	private String mSourceURI;
-	private String mTargetURI;
-	
-	public MaxConnectionKey() {
-		mSourceURI = null;
-		mTargetURI = null;
-	}
-	
-	public MaxConnectionKey(String sourceURI, String targetURI) {
-		mSourceURI = sourceURI;
-		mTargetURI = targetURI;
-	}
-	
-	public String getSourceURI() {
-    	return mSourceURI;
+
+    private String mSourceURI;
+    private String mTargetURI;
+
+    public MaxConnectionKey() {
+        mSourceURI = null;
+        mTargetURI = null;
     }
-	
-	public void setSourceURI(String sourceURI) {
-    	mSourceURI = sourceURI;
+
+    public MaxConnectionKey(final String sourceURI, final String targetURI) {
+        mSourceURI = sourceURI;
+        mTargetURI = targetURI;
     }
-	
-	public String getTargetURI() {
-    	return mTargetURI;
+
+    public String getSourceURI() {
+        return mSourceURI;
     }
-	
-	public void setTargetURI(String targetURI) {
-    	mTargetURI = targetURI;
+
+    public void setSourceURI(final String sourceURI) {
+        mSourceURI = sourceURI;
     }
-	
-	@Override
-	public boolean equals(Object obj) {
-		
-		if (this == obj) {
-			return true;
-		}
-		
-		if (!(obj instanceof MaxConnectionKey)) {
-			return false;
-		}
-	
-		MaxConnectionKey otherMaxConnectionKey = (MaxConnectionKey)obj;
-		if ((mSourceURI.equals(otherMaxConnectionKey.getSourceURI()) 
-					&& mTargetURI.equals(otherMaxConnectionKey.getTargetURI())) || 
-				(mSourceURI.equals(otherMaxConnectionKey.getTargetURI()) 
-					&& mTargetURI.equals(otherMaxConnectionKey.getSourceURI()))) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	@Override
-	public int hashCode() {
-		return mSourceURI.hashCode() + mTargetURI.hashCode();
-	}	
+
+    public String getTargetURI() {
+        return mTargetURI;
+    }
+
+    public void setTargetURI(final String targetURI) {
+        mTargetURI = targetURI;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof MaxConnectionKey)) {
+            return false;
+        }
+
+        final MaxConnectionKey otherMaxConnectionKey = (MaxConnectionKey) obj;
+        if ((mSourceURI.equals(otherMaxConnectionKey.getSourceURI()) && mTargetURI.equals(otherMaxConnectionKey
+                .getTargetURI()))
+                || (mSourceURI.equals(otherMaxConnectionKey.getTargetURI()) && mTargetURI.equals(otherMaxConnectionKey
+                        .getSourceURI()))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return mSourceURI.hashCode() + mTargetURI.hashCode();
+    }
 
 }

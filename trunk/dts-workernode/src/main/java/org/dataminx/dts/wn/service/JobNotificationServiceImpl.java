@@ -29,6 +29,7 @@ package org.dataminx.dts.wn.service;
 
 import static org.dataminx.dts.wn.common.util.DateUtils.toCalendar;
 
+import java.math.BigInteger;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.dataminx.dts.domain.model.JobStatus;
 import org.dataminx.dts.wn.batch.DtsJob;
@@ -53,9 +54,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the DTS Worker Node's {@link JobNotificationService}.
- *
+ * Default implementation of the DTS Worker Node's
+ * {@link JobNotificationService}.
+ * 
  * @author Alex Arana
+ * @author Gerson Galang
  */
 @Service("jobNotificationService")
 @Scope("singleton")
@@ -67,9 +70,7 @@ public class JobNotificationServiceImpl implements JobNotificationService {
     @Autowired
     private DtsWorkerNodeInformationService mdtsWorkerNodeInformationService;
 
-    /**
-     * A reference to the Job Event Queue sender object.
-     */
+    /** A reference to the Job Event Queue sender object. */
     @Autowired
     private JobEventQueueSender mJobEventQueueSender;
 
@@ -121,7 +122,7 @@ public class JobNotificationServiceImpl implements JobNotificationService {
             errorDetails.setWorkerNodeHost(mdtsWorkerNodeInformationService.getInstanceId());
             errorDetails.setTimeOfOccurrence(toCalendar(stepExecution.getStartTime()));
             errorDetails.setErrorMessage(String.format("An error has occurred during the execution of"
-                + " DTS Job step '%s': %s", stepExecution.getStepName(), exitStatus.getExitDescription()));
+                    + " DTS Job step '%s': %s", stepExecution.getStepName(), exitStatus.getExitDescription()));
 
             for (final Throwable failure : stepExecution.getFailureExceptions()) {
                 errorDetails.setClassExceptionName(failure.getClass().getName());
@@ -137,7 +138,7 @@ public class JobNotificationServiceImpl implements JobNotificationService {
      */
     @Override
     public void notifyJobProgress(final DtsJob dtsJob, final String message) {
-        // TODO Implement this method
+        // TODO Implement this method or get rid of it
         throw new UnsupportedOperationException("Method notifyJobProgress() not yet implemented");
     }
 
@@ -158,20 +159,55 @@ public class JobNotificationServiceImpl implements JobNotificationService {
         jobEventDetail.setWorkerNodeHost(mdtsWorkerNodeInformationService.getInstanceId());
         jobEventDetail.setActiveTime(toCalendar(dtsJob.getStartTime()));
         switch (jobStatus) {
-            case TRANSFERRING:
-                jobEventDetail.setStatus(StatusValueType.TRANSFERRING);
-                break;
-            case DONE:
-                jobEventDetail.setFinishedFlag(true);
-                jobEventDetail.setWorkerTerminatedTime(toCalendar(dtsJob.getCompletedTime()));
-                jobEventDetail.setStatus(StatusValueType.DONE);
-                //TODO use the job's ExitStatus flag
-                //jobEventDetail.setSuccessFlag(dtsJob.getXXX());
-                break;
-            default:
-                break;
+        case TRANSFERRING:
+            jobEventDetail.setStatus(StatusValueType.TRANSFERRING);
+            break;
+        case DONE:
+            jobEventDetail.setFinishedFlag(true);
+            jobEventDetail.setWorkerTerminatedTime(toCalendar(dtsJob.getCompletedTime()));
+            jobEventDetail.setStatus(StatusValueType.DONE);
+            //TODO use the job's ExitStatus flag
+            //jobEventDetail.setSuccessFlag(dtsJob.getXXX());
+            break;
+        default:
+            break;
         }
 
+        mJobEventQueueSender.doSend(jobId, document);
+    }
+
+    @Override
+    public void notifyJobProgress(final String jobId, final int filesTransferred, final long volumeTransferred) {
+        Assert.notNull(jobId);
+        LOG.info(String.format("DTS Job '%s' progress notification", jobId));
+
+        // convert to the relevant schema entity
+        final JobEventUpdateRequestDocument document = JobEventUpdateRequestDocument.Factory.newInstance();
+        final JobEventUpdateRequest jobEventUpdate = document.addNewJobEventUpdateRequest();
+        final JobEventDetailType jobEventDetail = jobEventUpdate.addNewJobEventDetail();
+        jobEventUpdate.setJobResourceKey(jobId);
+        jobEventDetail.setWorkerNodeHost(mdtsWorkerNodeInformationService.getInstanceId());
+        jobEventDetail.setFilesTransferred(BigInteger.valueOf(filesTransferred));
+        jobEventDetail.setVolumeTransferred(BigInteger.valueOf(volumeTransferred));
+        jobEventDetail.setStatus(StatusValueType.TRANSFERRING);
+        mJobEventQueueSender.doSend(jobId, document);
+
+    }
+
+    @Override
+    public void notifyJobScope(final String jobId, final int filesTotal, final long volumeTotal) {
+        Assert.notNull(jobId);
+        LOG.info(String.format("DTS Job '%s' job scope notification", jobId));
+
+        // convert to the relevant schema entity
+        final JobEventUpdateRequestDocument document = JobEventUpdateRequestDocument.Factory.newInstance();
+        final JobEventUpdateRequest jobEventUpdate = document.addNewJobEventUpdateRequest();
+        final JobEventDetailType jobEventDetail = jobEventUpdate.addNewJobEventDetail();
+        jobEventUpdate.setJobResourceKey(jobId);
+        jobEventDetail.setWorkerNodeHost(mdtsWorkerNodeInformationService.getInstanceId());
+        jobEventDetail.setFilesTotal(BigInteger.valueOf(filesTotal));
+        jobEventDetail.setVolumeTotal(BigInteger.valueOf(volumeTotal));
+        jobEventDetail.setStatus(StatusValueType.TRANSFERRING);
         mJobEventQueueSender.doSend(jobId, document);
     }
 }

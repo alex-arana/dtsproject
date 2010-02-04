@@ -21,248 +21,258 @@ import org.springframework.util.Assert;
 
 public class JobScoperImpl implements JobScoper {
 
-	private final boolean mCancelled = false;
-	private String mFailureMessage = "";
+    private final boolean mCancelled = false;
+    private String mFailureMessage = "";
 
-	private int mTotalSize = 0;
-	private ArrayList<String> mExcluded = new ArrayList<String>();
+    private long mTotalSize = 0;
+    private int mTotalFiles = 0;
 
-	// @Autowired
-	private FileSystemManager mFileSystemManager;
+    private ArrayList<String> mExcluded = new ArrayList<String>();
 
-	private DtsVfsUtil mDtsVfsUtil;
+    private FileSystemManager mFileSystemManager;
 
-	private static final Log LOGGER = LogFactory.getLog(JobScoperImpl.class);
+    private DtsVfsUtil mDtsVfsUtil;
 
-	private DtsJobStepAllocator mDtsJobStepAllocator;
+    private static final Log LOGGER = LogFactory.getLog(JobScoperImpl.class);
 
-	public static final int BATCH_SIZE_LIMIT = 2;
+    private DtsJobStepAllocator mDtsJobStepAllocator;
 
-	public void setFileSystemManager(final FileSystemManager fileSystemManager) {
+    private String mJobResourceKey;
 
-		// jobScoper only needs access to a fileSystemManager that has to be
-		// handed to it by its caller.
-		// a FileSystemManagerDispenser is only needed if the scoping task will
-		// be run more than one thread.
-		mFileSystemManager = fileSystemManager;
-	}
+    public static final int BATCH_SIZE_LIMIT = 2;
 
-	public DtsJobDetails scopeTheJob(final JobDefinitionType jobDefinition) {
+    public void setFileSystemManager(final FileSystemManager fileSystemManager) {
 
-		Assert.notNull(jobDefinition);
+        // jobScoper only needs access to a fileSystemManager that has to be
+        // handed to it by its caller.
+        // a FileSystemManagerDispenser is only needed if the scoping task will
+        // be run more than one thread.
+        mFileSystemManager = fileSystemManager;
+    }
 
-		final DtsJobDetails jobDetails = new DtsJobDetails();
-		jobDetails.setJobDefinition(jobDefinition);
-		jobDetails.setJobId(jobDefinition.getId());
+    public DtsJobDetails scopeTheJob(final JobDefinitionType jobDefinition) {
 
-		mDtsJobStepAllocator = new DtsJobStepAllocator();
-		mExcluded = new ArrayList<String>();
-		mTotalSize = 0;
+        Assert.notNull(jobDefinition);
 
-		final List<DataTransferType> dataTransfers = new ArrayList<DataTransferType>();
+        final DtsJobDetails jobDetails = new DtsJobDetails();
+        jobDetails.setJobDefinition(jobDefinition);
+        jobDetails.setJobId(mJobResourceKey);
 
-		final JobDescriptionType jobDescription = jobDefinition.getJobDescription();
-		if (jobDescription instanceof MinxJobDescriptionType) {
-			final MinxJobDescriptionType minxJobDescription = (MinxJobDescriptionType) jobDescription;
-			CollectionUtils.addAll(dataTransfers, minxJobDescription.getDataTransferArray());
-		}
-		if (CollectionUtils.isEmpty(dataTransfers)) {
-			LOGGER.warn("DTS job request is incomplete as it does not contain any data transfer elements.");
-			throw new DtsJobExecutionException("DTS job request contains no data transfer elements.");
-		}
+        mDtsJobStepAllocator = new DtsJobStepAllocator();
+        mExcluded = new ArrayList<String>();
+        mTotalSize = 0;
+        mTotalFiles = 0;
 
-		for (final DataTransferType dataTransfer : dataTransfers) {
-			mDtsJobStepAllocator.initNewDataTransfer();
+        final List<DataTransferType> dataTransfers = new ArrayList<DataTransferType>();
 
-			try {
-				prepare(mFileSystemManager.resolveFile(dataTransfer.getSource().getURI(), mDtsVfsUtil
-				        .createFileSystemOptions(dataTransfer.getSource())), mFileSystemManager.resolveFile(
-				        dataTransfer.getTarget().getURI(), mDtsVfsUtil
-				                .createFileSystemOptions(dataTransfer.getTarget())), dataTransfer);
-			} catch (final DtsJobCancelledException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (final FileSystemException e) {
-				throw new DtsException(e);
-			}
+        final JobDescriptionType jobDescription = jobDefinition.getJobDescription();
+        if (jobDescription instanceof MinxJobDescriptionType) {
+            final MinxJobDescriptionType minxJobDescription = (MinxJobDescriptionType) jobDescription;
+            CollectionUtils.addAll(dataTransfers, minxJobDescription.getDataTransferArray());
+        }
+        if (CollectionUtils.isEmpty(dataTransfers)) {
+            LOGGER.warn("DTS job request is incomplete as it does not contain any data transfer elements.");
+            throw new DtsJobExecutionException("DTS job request contains no data transfer elements.");
+        }
 
-			mDtsJobStepAllocator.closeNewDataTransfer();
+        for (final DataTransferType dataTransfer : dataTransfers) {
+            mDtsJobStepAllocator.initNewDataTransfer();
 
-		}
-		LOGGER.debug("total size of files to be transferred: " + mTotalSize + " bytes");
-		LOGGER.debug("list of excluded files: ");
-		for (final String excluded : mExcluded) {
-			LOGGER.debug(" - " + excluded);
-		}
+            try {
+                prepare(mFileSystemManager.resolveFile(dataTransfer.getSource().getURI(), mDtsVfsUtil
+                        .createFileSystemOptions(dataTransfer.getSource())), mFileSystemManager.resolveFile(
+                        dataTransfer.getTarget().getURI(), mDtsVfsUtil
+                                .createFileSystemOptions(dataTransfer.getTarget())), dataTransfer);
+            } catch (final DtsJobCancelledException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (final FileSystemException e) {
+                throw new DtsException(e);
+            }
 
-		jobDetails.setExcludedFiles(mExcluded);
-		jobDetails.setTotalBytes(mTotalSize);
-		jobDetails.setJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps());
+            mDtsJobStepAllocator.closeNewDataTransfer();
 
-		// mDtsJobStepAllocator.printDebugStepContents();
-		// let's try to put the steps in the step execution context
+        }
+        LOGGER.debug("total size of files to be transferred: " + mTotalSize + " bytes");
+        LOGGER.debug("list of excluded files: ");
+        for (final String excluded : mExcluded) {
+            LOGGER.debug(" - " + excluded);
+        }
 
-		return jobDetails;
-	}
+        jobDetails.setExcludedFiles(mExcluded);
+        jobDetails.setTotalBytes(mTotalSize);
+        jobDetails.setTotalFiles(mTotalFiles);
+        jobDetails.setJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps());
 
-	private void prepare(final FileObject sourceParent, final FileObject destinationParent,
-	        final DataTransferType dataTransfer) throws DtsJobCancelledException {
-		if (mCancelled) {
-			throw new DtsJobCancelledException();
-		}
+        // mDtsJobStepAllocator.printDebugStepContents();
+        // let's try to put the steps in the step execution context
 
-		try {
-			// Handle the following cases...
-			// source: /tmp/passwd
-			// copy to:
-			// destination that does not exists: /tmp/passwd
-			// destination directory that does not exists: /tmp/hello/
-			//			
-			// destination file that exists: /tmp/passwd
-			//			
-			// destination directory that exists: /tmp
+        return jobDetails;
+    }
 
-			if (sourceParent.getType().equals(FileType.FILE) && !mCancelled) {
-				final CreationFlagEnumeration.Enum creationFlag = dataTransfer.getTransferRequirements()
-				        .getCreationFlag();
+    private void prepare(final FileObject sourceParent, final FileObject destinationParent,
+            final DataTransferType dataTransfer) throws DtsJobCancelledException {
+        if (mCancelled) {
+            throw new DtsJobCancelledException();
+        }
 
-				if (!destinationParent.exists()) {
-					// Note that we are not supporting a single file transfer to
-					// a non-existent directory
-					// Any destinationParent which had a "/" at the end of it's
-					// URI will not be handled
+        try {
+            // Handle the following cases...
+            // source: /tmp/passwd
+            // copy to:
+            // destination that does not exists: /tmp/passwd
+            // destination directory that does not exists: /tmp/hello/
+            //			
+            // destination file that exists: /tmp/passwd
+            //			
+            // destination directory that exists: /tmp
 
-					// TODO: should we handle the above case?
+            if (sourceParent.getType().equals(FileType.FILE) && !mCancelled) {
+                final CreationFlagEnumeration.Enum creationFlag = dataTransfer.getTransferRequirements()
+                        .getCreationFlag();
 
-					addFilesToTransfer(sourceParent, destinationParent, dataTransfer);
+                if (!destinationParent.exists()) {
+                    // Note that we are not supporting a single file transfer to
+                    // a non-existent directory
+                    // Any destinationParent which had a "/" at the end of it's
+                    // URI will not be handled
 
-				}
-				else if (destinationParent.exists() && destinationParent.getType().equals(FileType.FILE)) {
-					// File to File
+                    // TODO: should we handle the above case?
 
-					if (creationFlag.equals(CreationFlagEnumeration.OVERWRITE)) {
-						addFilesToTransfer(sourceParent, destinationParent, dataTransfer);
-					}
-					else {
-						mExcluded.add(sourceParent.getName().getFriendlyURI());
-					}
-				}
-				else {
-					// ... File to Dir
+                    addFilesToTransfer(sourceParent, destinationParent, dataTransfer);
 
-					// create the new object
-					final String newFilePath = destinationParent.getURL() + FileName.SEPARATOR
-					        + sourceParent.getName().getBaseName();
-					final FileObject destinationChild = destinationParent.getFileSystem().getFileSystemManager()
-					        .resolveFile(newFilePath, destinationParent.getFileSystem().getFileSystemOptions());
-					// destinationChild.createFile();
+                }
+                else if (destinationParent.exists() && destinationParent.getType().equals(FileType.FILE)) {
+                    // File to File
 
-					if (destinationChild.exists()) {
-						LOGGER.debug("creationFlag: " + creationFlag);
-						if (creationFlag.equals(CreationFlagEnumeration.OVERWRITE)) {
-							addFilesToTransfer(sourceParent, destinationChild, dataTransfer);
-						}
-						else {
-							mExcluded.add(sourceParent.getName().getFriendlyURI());
-						}
+                    if (creationFlag.equals(CreationFlagEnumeration.OVERWRITE)) {
+                        addFilesToTransfer(sourceParent, destinationParent, dataTransfer);
+                    }
+                    else {
+                        mExcluded.add(sourceParent.getName().getFriendlyURI());
+                    }
+                }
+                else {
+                    // ... File to Dir
 
-					}
-					else {
-						addFilesToTransfer(sourceParent, destinationChild, dataTransfer);
-					}
-				}
+                    // create the new object
+                    final String newFilePath = destinationParent.getURL() + FileName.SEPARATOR
+                            + sourceParent.getName().getBaseName();
+                    final FileObject destinationChild = destinationParent.getFileSystem().getFileSystemManager()
+                            .resolveFile(newFilePath, destinationParent.getFileSystem().getFileSystemOptions());
+                    // destinationChild.createFile();
 
-			}
-			else if (sourceParent.getType().equals(FileType.FOLDER) && !mCancelled) {
-				// .. Dir to Dir
+                    if (destinationChild.exists()) {
+                        LOGGER.debug("creationFlag: " + creationFlag);
+                        if (creationFlag.equals(CreationFlagEnumeration.OVERWRITE)) {
+                            addFilesToTransfer(sourceParent, destinationChild, dataTransfer);
+                        }
+                        else {
+                            mExcluded.add(sourceParent.getName().getFriendlyURI());
+                        }
 
-				// create the new object
-				final String newFolderPath = destinationParent.getURL() + FileName.SEPARATOR
-				        + sourceParent.getName().getBaseName();
-				final FileObject destinationChild = destinationParent.getFileSystem().getFileSystemManager()
-				        .resolveFile(newFolderPath, destinationParent.getFileSystem().getFileSystemOptions());
+                    }
+                    else {
+                        addFilesToTransfer(sourceParent, destinationChild, dataTransfer);
+                    }
+                }
 
-				if (!destinationChild.exists()) {
-					destinationChild.createFolder();
-				}
+            }
+            else if (sourceParent.getType().equals(FileType.FOLDER) && !mCancelled) {
+                // .. Dir to Dir
 
-				// get the children
-				final FileObject[] sourceChildren = sourceParent.getChildren();
+                // create the new object
+                final String newFolderPath = destinationParent.getURL() + FileName.SEPARATOR
+                        + sourceParent.getName().getBaseName();
+                final FileObject destinationChild = destinationParent.getFileSystem().getFileSystemManager()
+                        .resolveFile(newFolderPath, destinationParent.getFileSystem().getFileSystemOptions());
 
-				// iterate through the children
-				for (final FileObject sourceChild : sourceChildren) {
-					// recurse into the directory, or copy the file
-					prepare(sourceChild, destinationChild, dataTransfer);
-				}
-			}
-		} catch (final DtsJobCancelledException e) {
-			throw e;
-		} catch (final Exception e) {
-			handleError(e);
-		}
-	}
+                if (!destinationChild.exists()) {
+                    destinationChild.createFolder();
+                }
 
-	private void addFilesToTransfer(final FileObject source, final FileObject destination,
-	        final DataTransferType dataTransfer) throws FileSystemException {
-		LOGGER.debug("addFilesToTransfer(\"" + source.getURL() + "\", \"" + destination.getURL() + "\", dataTransfer)");
-		mTotalSize += source.getContent().getSize();
-		mDtsJobStepAllocator.addDataTransferUnit(new DtsDataTransferUnit(source.getURL().toString(), destination
-		        .getURL().toString(), dataTransfer));
-	}
+                // get the children
+                final FileObject[] sourceChildren = sourceParent.getChildren();
 
-	private void handleError(final Exception e) {
-		mFailureMessage = e.getMessage();
-		LOGGER.error(e);
+                // iterate through the children
+                for (final FileObject sourceChild : sourceChildren) {
+                    // recurse into the directory, or copy the file
+                    prepare(sourceChild, destinationChild, dataTransfer);
+                }
+            }
+        } catch (final DtsJobCancelledException e) {
+            throw e;
+        } catch (final Exception e) {
+            handleError(e);
+        }
+    }
 
-		// invokeTransferFailedListeners();
-	}
+    private void addFilesToTransfer(final FileObject source, final FileObject destination,
+            final DataTransferType dataTransfer) throws FileSystemException {
+        LOGGER.debug("addFilesToTransfer(\"" + source.getURL() + "\", \"" + destination.getURL() + "\", dataTransfer)");
+        mTotalSize += source.getContent().getSize();
+        mTotalFiles++;
+        mDtsJobStepAllocator.addDataTransferUnit(new DtsDataTransferUnit(source.getURL().toString(), destination
+                .getURL().toString(), dataTransfer));
+    }
 
-	public void setDtsVfsUtil(final DtsVfsUtil dtsVfsUtil) {
-		mDtsVfsUtil = dtsVfsUtil;
-	}
+    private void handleError(final Exception e) {
+        mFailureMessage = e.getMessage();
+        LOGGER.error(e);
 
-	private class DtsJobStepAllocator {
-		private final List<DtsJobStep> mSteps;
-		private DtsJobStep mTmpDtsJobStep = null;
+        // invokeTransferFailedListeners();
+    }
 
-		public DtsJobStepAllocator() {
-			mSteps = new ArrayList<DtsJobStep>();
-		}
+    public void setDtsVfsUtil(final DtsVfsUtil dtsVfsUtil) {
+        mDtsVfsUtil = dtsVfsUtil;
+    }
 
-		/**
-		 * This method needs to be called before a new DataTransferType instance
-		 * gets processed by
-		 * {@link org.dataminx.dts.wn.batch.JobScoper#prepare()}. This will make
-		 * sure that new DataTransferUnits get added to a new DtsJobStep.
-		 */
-		public void initNewDataTransfer() {
-			mTmpDtsJobStep = new DtsJobStep(mSteps.size() + 1, BATCH_SIZE_LIMIT);
+    public void setJobResourceKey(final String jobResourceKey) {
+        mJobResourceKey = jobResourceKey;
+    }
 
-		}
+    private class DtsJobStepAllocator {
+        private final List<DtsJobStep> mSteps;
+        private DtsJobStep mTmpDtsJobStep = null;
 
-		public void addDataTransferUnit(final DtsDataTransferUnit dataTransferUnit) {
-			if ((mTmpDtsJobStep != null && mTmpDtsJobStep.isFull())) {
-				mSteps.add(mTmpDtsJobStep);
-				mTmpDtsJobStep = new DtsJobStep(mSteps.size() + 1, BATCH_SIZE_LIMIT);
-				mTmpDtsJobStep.addDataTransferUnit(dataTransferUnit);
+        public DtsJobStepAllocator() {
+            mSteps = new ArrayList<DtsJobStep>();
+        }
 
-			}
-			else {
-				// if (!tmpDtsJobStep.isFull())
-				mTmpDtsJobStep.addDataTransferUnit(dataTransferUnit);
-			}
-		}
+        /**
+         * This method needs to be called before a new DataTransferType instance
+         * gets processed by
+         * {@link org.dataminx.dts.wn.batch.JobScoper#prepare()}. This will make
+         * sure that new DataTransferUnits get added to a new DtsJobStep.
+         */
+        public void initNewDataTransfer() {
+            mTmpDtsJobStep = new DtsJobStep(mSteps.size() + 1, BATCH_SIZE_LIMIT);
 
-		public void closeNewDataTransfer() {
-			if (mTmpDtsJobStep.getDataTransferUnits().size() > 0) {
-				mSteps.add(mTmpDtsJobStep);
-			}
-		}
+        }
 
-		public List<DtsJobStep> getAllocatedJobSteps() {
-			return mSteps;
-		}
+        public void addDataTransferUnit(final DtsDataTransferUnit dataTransferUnit) {
+            if ((mTmpDtsJobStep != null && mTmpDtsJobStep.isFull())) {
+                mSteps.add(mTmpDtsJobStep);
+                mTmpDtsJobStep = new DtsJobStep(mSteps.size() + 1, BATCH_SIZE_LIMIT);
+                mTmpDtsJobStep.addDataTransferUnit(dataTransferUnit);
 
-	}
+            }
+            else {
+                // if (!tmpDtsJobStep.isFull())
+                mTmpDtsJobStep.addDataTransferUnit(dataTransferUnit);
+            }
+        }
+
+        public void closeNewDataTransfer() {
+            if (mTmpDtsJobStep.getDataTransferUnits().size() > 0) {
+                mSteps.add(mTmpDtsJobStep);
+            }
+        }
+
+        public List<DtsJobStep> getAllocatedJobSteps() {
+            return mSteps;
+        }
+
+    }
 
 }

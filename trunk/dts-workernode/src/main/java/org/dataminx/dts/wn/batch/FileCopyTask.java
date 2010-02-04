@@ -29,6 +29,7 @@ package org.dataminx.dts.wn.batch;
 
 import java.util.List;
 import org.apache.commons.vfs.FileSystemManager;
+import org.dataminx.dts.vfs.DtsVfsUtil;
 import org.dataminx.dts.vfs.FileSystemManagerDispenser;
 import org.dataminx.dts.wn.service.FileCopyingService;
 import org.dataminx.dts.wn.service.JobNotificationService;
@@ -58,92 +59,114 @@ import org.springframework.util.Assert;
  * @author Alex Arana
  */
 public class FileCopyTask implements Tasklet, StepExecutionListener {
-	/** A reference to the internal logger object. */
-	private static final Logger LOG = LoggerFactory.getLogger(FileCopyTask.class);
+    /** A reference to the internal logger object. */
+    private static final Logger LOG = LoggerFactory.getLogger(FileCopyTask.class);
 
-	/** A reference to the application's file copying service. */
-	@Autowired
-	private FileCopyingService mFileCopyingService;
+    /** A reference to the application's file copying service. */
+    @Autowired
+    private FileCopyingService mFileCopyingService;
 
-	/** A reference to the application's job notification service. */
-	@Autowired
-	private JobNotificationService mJobNotificationService;
+    /** A reference to the application's job notification service. */
+    @Autowired
+    private JobNotificationService mJobNotificationService;
 
-	private FileSystemManagerDispenser mFileSystemManagerDispenser;
+    @Autowired
+    private DtsVfsUtil mDtsVfsUtil;
 
-	private DtsJobStep mJobStep;
+    private FileSystemManagerDispenser mFileSystemManagerDispenser;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public RepeatStatus execute(final StepContribution contribution, final ChunkContext chunkContext) throws Exception {
-		final StepContext stepContext = chunkContext.getStepContext();
-		LOG.info("Executing copy step: " + stepContext.getStepName());
+    private DtsJobStep mJobStep;
 
-		Assert.state(mJobStep != null, "Unable to find data transfer input data in step context.");
-		LOG.info(mJobStep.toString());
+    private long mBatchVolumeSize = 0;
+    private int mBatchTotalFiles = 0;
 
-		final List<DtsDataTransferUnit> dataTransferUnits = mJobStep.getDataTransferUnits();
-		final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public RepeatStatus execute(final StepContribution contribution, final ChunkContext chunkContext) throws Exception {
+        final StepContext stepContext = chunkContext.getStepContext();
+        LOG.info("Executing copy step: " + stepContext.getStepName());
+        mBatchVolumeSize = 0;
 
-		// TODO reimplement this with threadpool
-		for (final DtsDataTransferUnit dataTransferUnit : dataTransferUnits) {
+        Assert.state(mJobStep != null, "Unable to find data transfer input data in step context.");
+        LOG.info(mJobStep.toString());
 
-			// TODO when we start to run this by threads.. we'll need to get
-			// each thread to use one ThreadLocal
-			// instance of the FileSystemManager
-			mFileCopyingService.copyFiles(dataTransferUnit.getSourceFileURI(),
-			        dataTransferUnit.getDestinationFileURI(), dataTransferUnit.getDataTransfer(), fileSystemManager);
-		}
+        final List<DtsDataTransferUnit> dataTransferUnits = mJobStep.getDataTransferUnits();
+        final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
 
-		// TODO figure out when we should close fileSystemManager
+        // shortcut! as we don't really need to send updates everytime a new dataTransferUnit is processed
+        mBatchTotalFiles = dataTransferUnits.size();
 
-		// TODO handle failures by returning ...
+        // TODO reimplement this with threadpool
+        for (final DtsDataTransferUnit dataTransferUnit : dataTransferUnits) {
 
-		mFileSystemManagerDispenser.closeFileSystemManager();
-		return RepeatStatus.FINISHED;
-	}
+            // TODO when we start to run this by threads.. we'll need to get
+            // each thread to use one ThreadLocal
+            // instance of the FileSystemManager
+            mFileCopyingService.copyFiles(dataTransferUnit.getSourceFileURI(),
+                    dataTransferUnit.getDestinationFileURI(), dataTransferUnit.getDataTransfer(), fileSystemManager);
 
-	public void setJobStep(final DtsJobStep jobStep) {
-		mJobStep = jobStep;
-	}
+            mBatchVolumeSize += fileSystemManager.resolveFile(dataTransferUnit.getSourceFileURI(),
+                    mDtsVfsUtil.createFileSystemOptions(dataTransferUnit.getDataTransfer().getSource())).getContent()
+                    .getSize();
+        }
 
-	public void setFileSystemManagerDispenser(final FileSystemManagerDispenser fileSystemManagerDispenser) {
-		mFileSystemManagerDispenser = fileSystemManagerDispenser;
-	}
+        // TODO figure out when we should close fileSystemManager
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void beforeStep(final StepExecution stepExecution) {
-		// perform any preliminary steps here
-	}
+        // TODO handle failures by returning ...
 
-	/**
-	 * Extracts the ID of this Step's parent DTS Job from the specifiec Step
-	 * execution context.
-	 * 
-	 * @param stepExecution
-	 *            A reference to this Step's execution context
-	 * @return The parent DTS Job identifier
-	 */
-	private String extractDtsJobId(final StepExecution stepExecution) {
-		Assert.state(stepExecution != null);
-		return stepExecution.getJobExecution().getJobInstance().getJobName();
-	}
+        mFileSystemManagerDispenser.closeFileSystemManager();
+        return RepeatStatus.FINISHED;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public ExitStatus afterStep(final StepExecution stepExecution) {
-		final ExitStatus exitStatus = stepExecution.getExitStatus();
-		if (stepExecution.getStatus().isUnsuccessful()) {
-			final String dtsJobId = extractDtsJobId(stepExecution);
-			mJobNotificationService.notifyStepFailures(dtsJobId, stepExecution);
-		}
-		return exitStatus;
-	}
+    public void setJobStep(final DtsJobStep jobStep) {
+        mJobStep = jobStep;
+    }
+
+    public void setFileSystemManagerDispenser(final FileSystemManagerDispenser fileSystemManagerDispenser) {
+        mFileSystemManagerDispenser = fileSystemManagerDispenser;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void beforeStep(final StepExecution stepExecution) {
+        // perform any preliminary steps here
+    }
+
+    /**
+     * Extracts the ID of this Step's parent DTS Job from the specifiec Step
+     * execution context.
+     * 
+     * @param stepExecution A reference to this Step's execution context
+     * @return The parent DTS Job identifier
+     */
+    private String extractDtsJobId(final StepExecution stepExecution) {
+        Assert.state(stepExecution != null);
+        return stepExecution.getJobExecution().getJobInstance().getJobName();
+    }
+
+    public void setDtsVfsUtil(final DtsVfsUtil dtsVfsUtil) {
+        mDtsVfsUtil = dtsVfsUtil;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ExitStatus afterStep(final StepExecution stepExecution) {
+        final ExitStatus exitStatus = stepExecution.getExitStatus();
+        final String dtsJobId = extractDtsJobId(stepExecution);
+        if (stepExecution.getStatus().isUnsuccessful()) {
+            // if unsuccessful, we won't report about the files we might have successfully transferred during this step
+            mJobNotificationService.notifyStepFailures(dtsJobId, stepExecution);
+        }
+        else {
+            LOG.debug("********** jjob id: " + dtsJobId);
+            mJobNotificationService.notifyJobProgress(dtsJobId, mBatchTotalFiles, mBatchVolumeSize);
+        }
+        return exitStatus;
+    }
 }

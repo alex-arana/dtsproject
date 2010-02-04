@@ -60,9 +60,10 @@ import org.springframework.ws.transport.http.HttpServletConnection;
 import org.springframework.xml.transform.StringResult;
 
 /**
- * The Data Transfer Service Implementation. This class interacts with the DTS domain layer and hands over
- * the submitted jobs to the DTS Messaging System which then forwards them to the DTS Worker Nodes.
- *
+ * The Data Transfer Service Implementation. This class interacts with the DTS
+ * domain layer and hands over the submitted jobs to the DTS Messaging System
+ * which then forwards them to the DTS Worker Nodes.
+ * 
  * @author Gerson Galang
  */
 public class DataTransferServiceImpl implements DataTransferService, InitializingBean {
@@ -70,7 +71,9 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     /** The logger. */
     private static final Log LOGGER = LogFactory.getLog(DataTransferServiceImpl.class);
 
-    /** the constant variable to be used in finding the value of the common name. */
+    /**
+     * the constant variable to be used in finding the value of the common name.
+     */
     private static final String CN_EQUALS = "CN=";
 
     /** The submit job message sender. */
@@ -92,20 +95,19 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     /**
      * {@inheritDoc}
      */
-    public String submitJob(SubmitJobRequestDocument submitJobRequest) {
-        String jobName = submitJobRequest.getSubmitJobRequest()
-            .getJobDefinition().getJobDescription().getJobIdentification().getJobName();
+    public String submitJob(final SubmitJobRequestDocument submitJobRequest) {
+        final String jobName = submitJobRequest.getSubmitJobRequest().getJobDefinition().getJobDescription()
+                .getJobIdentification().getJobName();
         String subjectName = "NEW_USER";
 
-        TransportContext txContext = TransportContextHolder.getTransportContext();
-        HttpServletConnection connection = (HttpServletConnection) txContext.getConnection();
-        HttpServletRequest request = connection.getHttpServletRequest();
-        Subject subject = (Subject) request.getSession().getAttribute("subject");
+        final TransportContext txContext = TransportContextHolder.getTransportContext();
+        final HttpServletConnection connection = (HttpServletConnection) txContext.getConnection();
+        final HttpServletRequest request = connection.getHttpServletRequest();
+        final Subject subject = (Subject) request.getSession().getAttribute("subject");
 
         if (subject != null) {
-            String distinguishedName = subject.getPrincipals().toArray()[0].toString();
-            subjectName = distinguishedName.substring(distinguishedName.indexOf(
-                    CN_EQUALS) + CN_EQUALS.length());
+            final String distinguishedName = subject.getPrincipals().toArray()[0].toString();
+            subjectName = distinguishedName.substring(distinguishedName.indexOf(CN_EQUALS) + CN_EQUALS.length());
         }
 
         LOGGER.debug("DataTransferServiceImpl submitJob()");
@@ -116,8 +118,8 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
 
         // we now know that at this point, all the required fields from the job definition has
         // been provided by the user. let's give the job a resource key and save it in the DB
-        Job newJob = new Job();
-        String newJobResourceKey = UUID.randomUUID().toString();
+        final Job newJob = new Job();
+        final String newJobResourceKey = UUID.randomUUID().toString();
         newJob.setName(jobName);
         newJob.setResourceKey(newJobResourceKey);
         newJob.setStatus(JobStatus.CREATED);
@@ -125,8 +127,7 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         newJob.setCreationTime(new Date());
         try {
             newJob.setExecutionHost(InetAddress.getLocalHost().getCanonicalHostName());
-        }
-        catch (UnknownHostException ex) {
+        } catch (final UnknownHostException ex) {
             // TODO: Auto-generated catch block
             LOGGER.error(ex.getMessage());
         }
@@ -136,13 +137,12 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
 
         // After the switch to XMLBeans, the Result object has always been a StreamResult instead
         // of a DomResult. So we'll just hand a StringResult object as a parameter to marshal()
-        Result result = new StringResult();
+        final Result result = new StringResult();
 
         // TODO: consider rework on this try-catch block
         try {
             mMarshaller.marshal(submitJobRequest, result);
-        }
-        catch (IOException e) {
+        } catch (final IOException e) {
             throw new InvalidJobDefinitionException(e.fillInStackTrace());
         }
 
@@ -150,14 +150,20 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         LOGGER.debug(result.toString());
         mMessageSender.doSend(newJobResourceKey, result.toString());
 
+        // let's also set the status and queued time if we reach this point as we can safely assume that 
+        // no fault was sent back to the client at this point
+        newJob.setStatus(JobStatus.SCHEDULED);
+        newJob.setQueuedTime(new Date());
+        mJobRepository.saveOrUpdate(newJob);
+
         return newJobResourceKey;
     }
 
     /**
      * {@inheritDoc}
      */
-    public void cancelJob(CancelJobRequestDocument cancelJobRequest) {
-        String jobResourceKey = cancelJobRequest.getCancelJobRequest().getJobResourceKey();
+    public void cancelJob(final CancelJobRequestDocument cancelJobRequest) {
+        final String jobResourceKey = cancelJobRequest.getCancelJobRequest().getJobResourceKey();
 
         LOGGER.debug("DataTransferServiceImpl cancelJob()");
         LOGGER.debug("Cancelling job: " + jobResourceKey);
@@ -168,12 +174,12 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         Job foundJob = null;
         try {
             foundJob = mJobRepository.findByResourceKey(jobResourceKey);
-        }
-        catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error(e.getClass().getName() + " was thrown. " + e.getMessage());
         }
-        if (foundJob == null)
+        if (foundJob == null) {
             throw new NonExistentJobException("Job doesn't exist.");
+        }
 
         foundJob.setStatus(JobStatus.DONE);
         mJobRepository.saveOrUpdate(foundJob);
@@ -183,8 +189,8 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     /**
      * {@inheritDoc}
      */
-    public void suspendJob(SuspendJobRequestDocument suspendJobRequest) {
-        String jobResourceKey = suspendJobRequest.getSuspendJobRequest().getJobResourceKey();
+    public void suspendJob(final SuspendJobRequestDocument suspendJobRequest) {
+        final String jobResourceKey = suspendJobRequest.getSuspendJobRequest().getJobResourceKey();
 
         LOGGER.debug("DataTransferServiceImpl suspendJob()");
         LOGGER.debug("Suspending job: " + jobResourceKey);
@@ -193,12 +199,12 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         Job foundJob = null;
         try {
             foundJob = mJobRepository.findByResourceKey(jobResourceKey);
-        }
-        catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error(e.getClass().getName() + " was thrown. " + e.getMessage());
         }
-        if (foundJob == null)
+        if (foundJob == null) {
             throw new NonExistentJobException("Job doesn't exist.");
+        }
 
         foundJob.setStatus(JobStatus.SUSPENDED);
         mJobRepository.saveOrUpdate(foundJob);
@@ -209,8 +215,8 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     /**
      * {@inheritDoc}
      */
-    public void resumeJob(ResumeJobRequestDocument resumeJobRequest) {
-        String jobResourceKey = resumeJobRequest.getResumeJobRequest().getJobResourceKey();
+    public void resumeJob(final ResumeJobRequestDocument resumeJobRequest) {
+        final String jobResourceKey = resumeJobRequest.getResumeJobRequest().getJobResourceKey();
 
         LOGGER.debug("DataTransferServiceImpl resumeJob()");
         LOGGER.debug("Resuming job " + jobResourceKey);
@@ -219,12 +225,12 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         Job foundJob = null;
         try {
             foundJob = mJobRepository.findByResourceKey(jobResourceKey);
-        }
-        catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error(e.getClass().getName() + " was thrown. " + e.getMessage());
         }
-        if (foundJob == null)
+        if (foundJob == null) {
             throw new NonExistentJobException("Job doesn't exist.");
+        }
 
         foundJob.setStatus(JobStatus.TRANSFERRING);
         mJobRepository.saveOrUpdate(foundJob);
@@ -235,8 +241,8 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
     /**
      * {@inheritDoc}
      */
-    public String getJobStatus(GetJobStatusRequestDocument getJobStatusRequest) {
-        String jobResourceKey = getJobStatusRequest.getGetJobStatusRequest().getJobResourceKey();
+    public String getJobStatus(final GetJobStatusRequestDocument getJobStatusRequest) {
+        final String jobResourceKey = getJobStatusRequest.getGetJobStatusRequest().getJobResourceKey();
         LOGGER.debug("DataTransferServiceImpl getJobStatus()");
         LOGGER.debug("Getting job status of job " + jobResourceKey);
 
@@ -248,12 +254,12 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
         Job foundJob = null;
         try {
             foundJob = mJobRepository.findByResourceKey(jobResourceKey);
-        }
-        catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error(e.getClass().getName() + " was thrown. " + e.getMessage());
         }
-        if (foundJob == null)
+        if (foundJob == null) {
             throw new NonExistentJobException("Job doesn't exist.");
+        }
         return foundJob.getStatus().getStringValue();
     }
 
