@@ -28,8 +28,6 @@
 package org.dataminx.dts.jms;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.domain.model.Job;
 import org.dataminx.dts.domain.model.JobStatus;
 import org.dataminx.dts.domain.repo.JobDao;
@@ -41,20 +39,21 @@ import org.dataminx.schemas.dts.x2009.x07.jms.JobEventUpdateRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument.FireUpJobErrorEvent;
 import org.dataminx.schemas.dts.x2009.x07.jms.JobEventUpdateRequestDocument.JobEventUpdateRequest;
 import org.ogf.schemas.dmi.x2008.x05.dmi.StatusValueType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.core.Message;
 
-
 /**
- * The Handler for all the Job Event Update messages coming from the Worker Node.
- *
+ * The Handler for all the Job Event Update messages coming from the Worker
+ * Node.
+ * 
  * @author Gerson Galang
- *
  */
 public class DtsJobEventUpdateHandler {
 
     /** The logger. */
-    private static final Log LOGGER = LogFactory.getLog(DtsJobEventUpdateHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DtsWsMessagePayloadTransformer.class);
 
     /** The job repository for this DTS implementation. */
     @Autowired
@@ -62,14 +61,14 @@ public class DtsJobEventUpdateHandler {
 
     /**
      * Updates the job entity based on the details provided by the worker node.
-     *
+     * 
      * @param message the event update message
      */
-    public void handleEvent(Message<?> message) {
-        Object payload = message.getPayload();
+    public void handleEvent(final Message<?> message) {
+        final Object payload = message.getPayload();
 
         if (payload instanceof JobEventUpdateRequestDocument) {
-            JobEventUpdateRequest request = ((JobEventUpdateRequestDocument) payload).getJobEventUpdateRequest();
+            final JobEventUpdateRequest request = ((JobEventUpdateRequestDocument) payload).getJobEventUpdateRequest();
 
             // TODO: probably need to look at making the resourcekey to WN job ID mapping clear (same names?)
             // later on
@@ -77,58 +76,95 @@ public class DtsJobEventUpdateHandler {
             // TODO: need to sync this with whatever is supported by the WN
 
             // get the details of the job entry to be updated
-            String updatedJobResourceKey = request.getJobResourceKey();
-            JobEventDetailType updatedJobDetail = request.getJobEventDetail();
+            final String updatedJobResourceKey = request.getJobResourceKey();
+            final JobEventDetailType updatedJobDetail = request.getJobEventDetail();
 
             // job to update
-            Job job = mJobRepository.findByResourceKey(updatedJobResourceKey);
+            final Job job = mJobRepository.findByResourceKey(updatedJobResourceKey);
 
-            switch(updatedJobDetail.getStatus().intValue()) {
-                case StatusValueType.INT_TRANSFERRING:
-                    job.setWorkerNodeHost(updatedJobDetail.getWorkerNodeHost());
+            switch (updatedJobDetail.getStatus().intValue()) {
+            case StatusValueType.INT_TRANSFERRING:
+                job.setWorkerNodeHost(updatedJobDetail.getWorkerNodeHost());
+
+                if (updatedJobDetail.getActiveTime() != null) {
                     job.setActiveTime(updatedJobDetail.getActiveTime().getTime());
-                    job.setStatus(JobStatus.TRANSFERRING);
-                    break;
-                case StatusValueType.INT_DONE:
-                    job.setFinishedFlag(updatedJobDetail.getFinishedFlag());
-                    job.setWorkerTerminatedTime(
-                        updatedJobDetail.getWorkerTerminatedTime().getTime());
-                    job.setStatus(JobStatus.DONE);
+                }
+                LOG.debug("getFilesTotal: " + updatedJobDetail.getFilesTotal());
+                LOG.debug("getVolumeTotal: " + updatedJobDetail.getVolumeTotal());
 
-                    // also set the WS specific fields..
-                    job.setJobAllDoneTime(new Date());
+                // fields that need to be updated after scoping is done
+                if (updatedJobDetail.getFilesTotal() != null) {
+                    job.setFilesTotal(updatedJobDetail.getFilesTotal().intValue());
+                }
 
-                    // TODO: need to think of how to handle error messages from WN so the success flag
-                    // can be set
+                if (updatedJobDetail.getVolumeTotal() != null) {
+                    job.setVolumeTotal(updatedJobDetail.getVolumeTotal().longValue());
+                }
 
-                    break;
-                default:
-                    break;
+                // fields that need to be updated after every step is finished
+                if (updatedJobDetail.getFilesTransferred() != null) {
+                    if (job.getFilesTransferred() != null) {
+                        job.setFilesTransferred(job.getFilesTransferred()
+                                + updatedJobDetail.getFilesTransferred().intValue());
+                    }
+                    else {
+                        job.setFilesTransferred(updatedJobDetail.getFilesTransferred().intValue());
+                    }
+                }
+
+                if (updatedJobDetail.getVolumeTransferred() != null) {
+                    if (job.getVolumeTransferred() != null) {
+                        job.setVolumeTransferred(job.getVolumeTransferred()
+                                + updatedJobDetail.getVolumeTransferred().longValue());
+                    }
+                    else {
+                        job.setVolumeTransferred(updatedJobDetail.getVolumeTransferred().longValue());
+                    }
+                }
+
+                job.setStatus(JobStatus.TRANSFERRING);
+                break;
+            case StatusValueType.INT_DONE:
+                job.setFinishedFlag(updatedJobDetail.getFinishedFlag());
+                job.setWorkerTerminatedTime(updatedJobDetail.getWorkerTerminatedTime().getTime());
+                job.setSuccessFlag(true);
+                job.setStatus(JobStatus.DONE);
+
+                // also set the WS specific fields..
+                job.setJobAllDoneTime(new Date());
+
+                // TODO: need to think of how to handle error messages from WN so the success flag
+                // can be set
+
+                break;
+            default:
+                break;
             }
             mJobRepository.saveOrUpdate(job);
         }
         else if (payload instanceof FireUpJobErrorEventDocument) {
-            LOGGER.info("DtsJobEventUpdateHandler received a FireUpJobErrorEvent.");
+            LOG.info("DtsJobEventUpdateHandler received a FireUpJobErrorEvent.");
 
-            FireUpJobErrorEvent errorEvent = ((FireUpJobErrorEventDocument) payload).getFireUpJobErrorEvent();
-            String jobWithErrorResourceKey = errorEvent.getJobResourceKey();
-            JobErrorEventDetailType jobErrorDetail = errorEvent.getJobErrorEventDetail();
+            final FireUpJobErrorEvent errorEvent = ((FireUpJobErrorEventDocument) payload).getFireUpJobErrorEvent();
+            final String jobWithErrorResourceKey = errorEvent.getJobResourceKey();
+            final JobErrorEventDetailType jobErrorDetail = errorEvent.getJobErrorEventDetail();
 
             // job to update
-            Job job = mJobRepository.findByResourceKey(jobWithErrorResourceKey);
+            final Job job = mJobRepository.findByResourceKey(jobWithErrorResourceKey);
             job.setStatus(JobStatus.FAILED);
+            job.setSuccessFlag(false);
 
             // TODO: handle other 'Failed' status variations and the jobErrorDetail
 
             mJobRepository.saveOrUpdate(job);
         }
         else if (payload instanceof FireUpStepFailureEventDocument) {
-            LOGGER.info("DtsJobEventUpdateHandler received a FireUpStepFailureEvent.");
+            LOG.info("DtsJobEventUpdateHandler received a FireUpStepFailureEvent.");
 
             // TODO: handle the step failure event
         }
         else {
-            LOGGER.error("DtsJobEventUpdateHandler received an unknown update event from a WN.");
+            LOG.error("DtsJobEventUpdateHandler received an unknown update event from a WN.");
 
             // TODO: provide an implementation
         }

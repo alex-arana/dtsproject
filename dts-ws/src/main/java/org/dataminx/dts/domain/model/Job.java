@@ -43,18 +43,14 @@ import javax.persistence.TemporalType;
 
 /**
  * The Job Entity.
- *
+ * 
  * @author Gerson Galang
  */
 @Entity
-@NamedQueries({
-        @NamedQuery(name = "Job.findJobByResourceKey",
-                    query = "SELECT j FROM Job j WHERE j.resourceKey = :resourceKey"),
-        @NamedQuery(name = "Job.findJobByUser",
-                    query = "SELECT j FROM Job j WHERE j.subjectName = :userDN"),
-        @NamedQuery(name = "Job.findJobByUserAndStatus",
-                    query = "SELECT j FROM Job j WHERE j.subjectName = :userDN AND j.status = :status")
-})
+@NamedQueries( {
+        @NamedQuery(name = "Job.findJobByResourceKey", query = "SELECT j FROM Job j WHERE j.resourceKey = :resourceKey"),
+        @NamedQuery(name = "Job.findJobByUser", query = "SELECT j FROM Job j WHERE j.subjectName = :userDN"),
+        @NamedQuery(name = "Job.findJobByUserAndStatus", query = "SELECT j FROM Job j WHERE j.subjectName = :userDN AND j.status = :status") })
 @Table(name = "job")
 public class Job {
 
@@ -116,14 +112,14 @@ public class Job {
     private Integer mFilesTransferred;
 
     /** The volume total. */
-    private Integer mVolumeTotal;
+    private Long mVolumeTotal;
 
     /** The volume transferred. */
-    private Integer mVolumeTransferred;
+    private Long mVolumeTransferred;
 
     /**
      * Gets the job id.
-     *
+     * 
      * @return the job id
      */
     @Id
@@ -135,16 +131,16 @@ public class Job {
 
     /**
      * Sets the job id.
-     *
+     * 
      * @param jobId the new job id
      */
-    public void setJobId(Integer jobId) {
+    public void setJobId(final Integer jobId) {
         mJobId = jobId;
     }
 
     /**
      * Gets the job resource key.
-     *
+     * 
      * @return the job resource key
      */
     @Column(name = "resource_key")
@@ -154,16 +150,16 @@ public class Job {
 
     /**
      * Sets the job resource key.
-     *
+     * 
      * @param resourceKey the new job resource key
      */
-    public void setResourceKey(String resourceKey) {
+    public void setResourceKey(final String resourceKey) {
         mResourceKey = resourceKey;
     }
 
     /**
      * Gets the job name.
-     *
+     * 
      * @return the job name
      */
     @Column(name = "name")
@@ -173,16 +169,16 @@ public class Job {
 
     /**
      * Sets the job name.
-     *
+     * 
      * @param name the new job name
      */
-    public void setName(String name) {
+    public void setName(final String name) {
         mName = name;
     }
 
     /**
      * Gets the status.
-     *
+     * 
      * @return the status
      */
     @Enumerated(EnumType.ORDINAL)
@@ -193,16 +189,16 @@ public class Job {
 
     /**
      * Sets the status.
-     *
+     * 
      * @param status the new status
      */
-    public void setStatus(JobStatus status) {
+    public void setStatus(final JobStatus status) {
         mStatus = status;
     }
 
     /**
      * Gets the distinguished name of the owner of this job.
-     *
+     * 
      * @return the subject name
      */
     @Column(name = "subject_name")
@@ -212,16 +208,16 @@ public class Job {
 
     /**
      * Sets the distinguished name of the owner of this job.
-     *
+     * 
      * @param subjectName the new subject name
      */
-    public void setSubjectName(String subjectName) {
+    public void setSubjectName(final String subjectName) {
         mSubjectName = subjectName;
     }
 
     /**
      * Gets the job description.
-     *
+     * 
      * @return the job description
      */
     @Column(name = "job_description")
@@ -231,16 +227,16 @@ public class Job {
 
     /**
      * Sets the job description.
-     *
+     * 
      * @param jobDescription the new job description
      */
-    public void setJobDescription(String jobDescription) {
+    public void setJobDescription(final String jobDescription) {
         mDescription = jobDescription;
     }
 
     /**
      * Gets the creation time.
-     *
+     * 
      * @return the creation time
      */
     @Temporal(TemporalType.TIMESTAMP)
@@ -251,16 +247,16 @@ public class Job {
 
     /**
      * Sets the creation time.
-     *
+     * 
      * @param creationTime the new creation time
      */
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(final Date creationTime) {
         mCreationTime = creationTime;
     }
 
     /**
      * Gets the queued time.
-     *
+     * 
      * @return the queued time
      */
     @Temporal(TemporalType.TIMESTAMP)
@@ -271,16 +267,16 @@ public class Job {
 
     /**
      * Sets the queued time.
-     *
+     * 
      * @param queuedTime the new queued time
      */
-    public void setQueuedTime(Date queuedTime) {
+    public void setQueuedTime(final Date queuedTime) {
         mQueuedTime = queuedTime;
     }
 
     /**
      * Checks if is success flag.
-     *
+     * 
      * @return the boolean
      */
     @Column(name = "success_flag")
@@ -290,16 +286,16 @@ public class Job {
 
     /**
      * Sets the success flag.
-     *
+     * 
      * @param successFlag the new success flag
      */
-    public void setSuccessFlag(Boolean successFlag) {
+    public void setSuccessFlag(final Boolean successFlag) {
         mSuccessFlag = successFlag;
     }
 
     /**
      * Checks if is finished flag.
-     *
+     * 
      * @return the boolean
      */
     @Column(name = "finished_flag")
@@ -309,16 +305,16 @@ public class Job {
 
     /**
      * Sets the finished flag.
-     *
+     * 
      * @param finishedFlag the new finished flag
      */
-    public void setFinishedFlag(Boolean finishedFlag) {
+    public void setFinishedFlag(final Boolean finishedFlag) {
         mFinishedFlag = finishedFlag;
     }
 
     /**
      * Gets the active time.
-     *
+     * 
      * @return the active time
      */
     @Temporal(TemporalType.TIMESTAMP)
@@ -329,16 +325,16 @@ public class Job {
 
     /**
      * Sets the active time.
-     *
+     * 
      * @param activeTime the new active time
      */
-    public void setActiveTime(Date activeTime) {
+    public void setActiveTime(final Date activeTime) {
         mActiveTime = activeTime;
     }
 
     /**
      * Gets the worker terminated time.
-     *
+     * 
      * @return the worker terminated time
      */
     @Temporal(TemporalType.TIMESTAMP)
@@ -349,16 +345,16 @@ public class Job {
 
     /**
      * Sets the worker terminated time.
-     *
+     * 
      * @param workerTerminatedTime the new worker terminated time
      */
-    public void setWorkerTerminatedTime(Date workerTerminatedTime) {
+    public void setWorkerTerminatedTime(final Date workerTerminatedTime) {
         mWorkerTerminatedTime = workerTerminatedTime;
     }
 
     /**
      * Gets the job all done time.
-     *
+     * 
      * @return the job all done time
      */
     @Temporal(TemporalType.TIMESTAMP)
@@ -369,16 +365,16 @@ public class Job {
 
     /**
      * Sets the job all done time.
-     *
+     * 
      * @param jobAllDoneTime the new job all done time
      */
-    public void setJobAllDoneTime(Date jobAllDoneTime) {
+    public void setJobAllDoneTime(final Date jobAllDoneTime) {
         mJobAllDoneTime = jobAllDoneTime;
     }
 
     /**
      * Gets the client hostname.
-     *
+     * 
      * @return the client hostname
      */
     @Column(name = "client_hostname")
@@ -388,16 +384,16 @@ public class Job {
 
     /**
      * Sets the client hostname.
-     *
+     * 
      * @param clientHostname the new client hostname
      */
-    public void setClientHostname(String clientHostname) {
+    public void setClientHostname(final String clientHostname) {
         mClientHostname = clientHostname;
     }
 
     /**
      * Gets the execution host.
-     *
+     * 
      * @return the execution host
      */
     @Column(name = "execution_host")
@@ -407,16 +403,16 @@ public class Job {
 
     /**
      * Sets the execution host.
-     *
+     * 
      * @param executionHost the new execution host
      */
-    public void setExecutionHost(String executionHost) {
+    public void setExecutionHost(final String executionHost) {
         mExecutionHost = executionHost;
     }
 
     /**
      * Gets the worker node host.
-     *
+     * 
      * @return the worker node host
      */
     @Column(name = "worker_node_host")
@@ -426,16 +422,16 @@ public class Job {
 
     /**
      * Sets the worker node host.
-     *
+     * 
      * @param workerNodeHost the new worker node host
      */
-    public void setWorkerNodeHost(String workerNodeHost) {
+    public void setWorkerNodeHost(final String workerNodeHost) {
         mWorkerNodeHost = workerNodeHost;
     }
 
     /**
      * Gets the version.
-     *
+     * 
      * @return the version
      */
     @Column(name = "version")
@@ -445,16 +441,16 @@ public class Job {
 
     /**
      * Sets the version.
-     *
+     * 
      * @param version the new version
      */
-    public void setVersion(String version) {
+    public void setVersion(final String version) {
         mVersion = version;
     }
 
     /**
      * Gets the files total.
-     *
+     * 
      * @return the files total
      */
     @Column(name = "files_total")
@@ -464,16 +460,16 @@ public class Job {
 
     /**
      * Sets the files total.
-     *
+     * 
      * @param filesTotal the new files total
      */
-    public void setFilesTotal(Integer filesTotal) {
+    public void setFilesTotal(final Integer filesTotal) {
         mFilesTotal = filesTotal;
     }
 
     /**
      * Gets the files transferred.
-     *
+     * 
      * @return the files transferred
      */
     @Column(name = "files_transferred")
@@ -483,48 +479,48 @@ public class Job {
 
     /**
      * Sets the files transferred.
-     *
+     * 
      * @param filesTransferred the new files transferred
      */
-    public void setFilesTransferred(Integer filesTransferred) {
+    public void setFilesTransferred(final Integer filesTransferred) {
         mFilesTransferred = filesTransferred;
     }
 
     /**
      * Gets the volume total.
-     *
+     * 
      * @return the volume total
      */
     @Column(name = "volume_total")
-    public Integer getVolumeTotal() {
+    public Long getVolumeTotal() {
         return mVolumeTotal;
     }
 
     /**
      * Sets the volume total.
-     *
+     * 
      * @param volumeTotal the new volume total
      */
-    public void setVolumeTotal(Integer volumeTotal) {
+    public void setVolumeTotal(final Long volumeTotal) {
         mVolumeTotal = volumeTotal;
     }
 
     /**
      * Gets the volume transferred.
-     *
+     * 
      * @return the volume transferred
      */
     @Column(name = "volume_transferred")
-    public Integer getVolumeTransferred() {
+    public Long getVolumeTransferred() {
         return mVolumeTransferred;
     }
 
     /**
      * Sets the volume transferred.
-     *
+     * 
      * @param volumeTransferred the new volume transferred
      */
-    public void setVolumeTransferred(Integer volumeTransferred) {
+    public void setVolumeTransferred(final Long volumeTransferred) {
         mVolumeTransferred = volumeTransferred;
     }
 
@@ -533,8 +529,8 @@ public class Job {
      */
     @Override
     public String toString() {
-        return "JobName: " + mName + "\n" + "JobResourceKey: " + mResourceKey + "\n"
-            + "JobStatusId: " + mStatus + "\n" + "JobSubjectName: " + mSubjectName + "\n";
+        return "JobName: " + mName + "\n" + "JobResourceKey: " + mResourceKey + "\n" + "JobStatusId: " + mStatus + "\n"
+                + "JobSubjectName: " + mSubjectName + "\n";
         /*
         private Integer mJobId;
         private String jobResourceKey;

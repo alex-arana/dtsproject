@@ -12,37 +12,37 @@ import org.apache.commons.vfs.impl.DefaultFileSystemManager;
  */
 public class FileSystemManagerDispenser {
 
-	private static final Log LOGGER = LogFactory.getLog(FileSystemManagerDispenser.class);
+    private static final Log LOGGER = LogFactory.getLog(FileSystemManagerDispenser.class);
 
-	private DtsVfsUtil mDtsVfsUtil;
+    private DtsVfsUtil mDtsVfsUtil;
 
-	private ThreadLocal<DefaultFileSystemManager> mThreadLocalFsManager = new ThreadLocal<DefaultFileSystemManager>() {
-		@Override
-		protected DefaultFileSystemManager initialValue() {
-			try {
-				return mDtsVfsUtil.createNewFsManager();
-			} catch (FileSystemException e) {
-				LOGGER.error("FileSystemException was thrown while creating a new FileSystemManager", e);
-			}
-			return null;
-		}
+    private final ThreadLocal<DefaultFileSystemManager> mThreadLocalFsManager = new ThreadLocal<DefaultFileSystemManager>() {
+        @Override
+        protected DefaultFileSystemManager initialValue() {
+            try {
+                return mDtsVfsUtil.createNewFsManager();
+            } catch (final FileSystemException e) {
+                LOGGER.error("FileSystemException was thrown while creating a new FileSystemManager", e);
+            }
+            return null;
+        }
 
-		@Override
-		public void remove() {
-			((DefaultFileSystemManager) get()).close();
-		}
-	};
+        @Override
+        public void remove() {
+            (get()).close();
+        }
+    };
 
-	public DefaultFileSystemManager getFileSystemManager() {
-		return mThreadLocalFsManager.get();
-	}
+    public DefaultFileSystemManager getFileSystemManager() {
+        return mThreadLocalFsManager.get();
+    }
 
-	public void closeFileSystemManager() {
-		mThreadLocalFsManager.remove();
-	}
+    public void closeFileSystemManager() {
+        mThreadLocalFsManager.remove();
+    }
 
-	public void setDtsVfsUtil(DtsVfsUtil dtsVfsUtil) {
-		mDtsVfsUtil = dtsVfsUtil;
-	}
+    public void setDtsVfsUtil(final DtsVfsUtil dtsVfsUtil) {
+        mDtsVfsUtil = dtsVfsUtil;
+    }
 
 }
