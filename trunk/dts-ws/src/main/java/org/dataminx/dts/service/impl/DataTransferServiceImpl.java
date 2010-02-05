@@ -46,6 +46,7 @@ import org.dataminx.dts.service.DataTransferService;
 import org.dataminx.dts.ws.InvalidJobDefinitionException;
 import org.dataminx.dts.ws.NonExistentJobException;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.GetJobDetailsRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
@@ -261,6 +262,28 @@ public class DataTransferServiceImpl implements DataTransferService, Initializin
             throw new NonExistentJobException("Job doesn't exist.");
         }
         return foundJob.getStatus().getStringValue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Job getJobDetails(final GetJobDetailsRequestDocument getJobDetailsRequest) {
+        final String jobResourceKey = getJobDetailsRequest.getGetJobDetailsRequest().getJobResourceKey();
+        LOGGER.debug("DataTransferServiceImpl getJobDetails()");
+        LOGGER.debug("Getting job details of job " + jobResourceKey);
+
+        Job foundJob = null;
+        try {
+            foundJob = mJobRepository.findByResourceKey(jobResourceKey);
+        } catch (final Exception e) {
+            LOGGER.error(e.getClass().getName() + " was thrown. " + e.getMessage());
+        }
+        if (foundJob == null) {
+            throw new NonExistentJobException("Job doesn't exist.");
+        }
+
+        return foundJob;
+
     }
 
     /**

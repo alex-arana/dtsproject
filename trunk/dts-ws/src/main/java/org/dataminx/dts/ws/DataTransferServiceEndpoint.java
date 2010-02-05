@@ -27,16 +27,22 @@
  */
 package org.dataminx.dts.ws;
 
+import java.math.BigInteger;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataminx.dts.domain.model.Job;
 import org.dataminx.dts.service.DataTransferService;
 import org.dataminx.dts.ws.validator.DtsJobDefinitionValidator;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.GetJobDetailsRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.GetJobDetailsResponseDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusResponseDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.JobDetailsType;
 import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobResponseDocument;
@@ -50,9 +56,9 @@ import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 
 /**
- * The DataTransferServiceEndpoint processes the incoming XML messages and produces a response from/to
- * the DTS client.
- *
+ * The DataTransferServiceEndpoint processes the incoming XML messages and
+ * produces a response from/to the DTS client.
+ * 
  * @author Gerson Galang
  */
 @Endpoint
@@ -65,10 +71,16 @@ public class DataTransferServiceEndpoint {
     @Autowired
     private DataTransferService mDataTransferService;
 
-    /** The validator to be used in checking for the validity of the submitted DTS job. */
+    /**
+     * The validator to be used in checking for the validity of the submitted
+     * DTS job.
+     */
     private DtsJobDefinitionValidator mDtsJobDefinitionValidator;
 
-    /** The reference to the message resolver so that validation error messages are taken from a ResourceBundle. */
+    /**
+     * The reference to the message resolver so that validation error messages
+     * are taken from a ResourceBundle.
+     */
     private MessageSource mMessageSource;
 
     /** The DTS Messages namespace. */
@@ -79,109 +91,190 @@ public class DataTransferServiceEndpoint {
     private static final String SUSPEND_JOB_REQUEST_LOCAL_NAME = "suspendJobRequest";
     private static final String RESUME_JOB_REQUEST_LOCAL_NAME = "resumeJobRequest";
     private static final String GET_JOB_STATUS_REQUEST_LOCAL_NAME = "getJobStatusRequest";
-
+    private static final String GET_JOB_DETAILS_REQUEST_LOCAL_NAME = "getJobDetailsRequest";
 
     /**
      * Handles the submit job request.
-     *
+     * 
      * @param request the submit job request
-     *
+     * 
      * @return the response to the submit job call
      */
     @PayloadRoot(localPart = SUBMIT_JOB_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
-    public SubmitJobResponseDocument doit(SubmitJobRequestDocument request) {
+    public SubmitJobResponseDocument doit(final SubmitJobRequestDocument request) {
         LOGGER.debug("DataTransferServiceEndpoint doit(SubmitJobRequest)");
 
-        MapBindingResult errors = new MapBindingResult(new HashMap(), "jobDefinitionErrors");
+        final MapBindingResult errors = new MapBindingResult(new HashMap(), "jobDefinitionErrors");
 
-        mDtsJobDefinitionValidator.validate(
-                request.getSubmitJobRequest().getJobDefinition(), errors);
+        mDtsJobDefinitionValidator.validate(request.getSubmitJobRequest().getJobDefinition(), errors);
 
         if (errors.hasErrors()) {
             //FieldError error = errors.getFieldError("jobIdentification.jobName");
-            List<FieldError> fieldErrors = errors.getFieldErrors();
-            StringBuffer validationErrors = new StringBuffer();
+            final List<FieldError> fieldErrors = errors.getFieldErrors();
+            final StringBuffer validationErrors = new StringBuffer();
             String validationErrorMessage = "";
-            for (FieldError fieldError : fieldErrors) {
+            for (final FieldError fieldError : fieldErrors) {
                 validationErrorMessage = mMessageSource.getMessage(fieldError, Locale.getDefault());
                 validationErrors.append(validationErrorMessage).append("\n");
             }
             throw new InvalidJobDefinitionException("Invalid job request\n" + validationErrors);
         }
 
-        String jobResourceKey = mDataTransferService.submitJob(request);
+        final String jobResourceKey = mDataTransferService.submitJob(request);
         LOGGER.info("New job '" + jobResourceKey + "' created.");
 
-        SubmitJobResponseDocument response = SubmitJobResponseDocument.Factory.newInstance();
+        final SubmitJobResponseDocument response = SubmitJobResponseDocument.Factory.newInstance();
         response.addNewSubmitJobResponse().setJobResourceKey(jobResourceKey);
         return response;
     }
 
     /**
      * Handles the cancel job request.
-     *
+     * 
      * @param request the cancel job request
      */
     @PayloadRoot(localPart = CANCEL_JOB_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
-    public void doit(CancelJobRequestDocument request) {
+    public void doit(final CancelJobRequestDocument request) {
         LOGGER.debug("DataTransferServiceEndpoint doit(CancelJobRequest)");
         mDataTransferService.cancelJob(request);
     }
 
     /**
      * Handles the suspend job request.
-     *
+     * 
      * @param request the suspend job request
      */
     @PayloadRoot(localPart = SUSPEND_JOB_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
-    public void doit(SuspendJobRequestDocument request) {
+    public void doit(final SuspendJobRequestDocument request) {
         LOGGER.debug("DataTransferServiceEndpoint doit(SuspendJobRequest)");
         mDataTransferService.suspendJob(request);
     }
 
     /**
      * Handles the resume job request.
-     *
+     * 
      * @param request the resume job request
      */
     @PayloadRoot(localPart = RESUME_JOB_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
-    public void doit(ResumeJobRequestDocument request) {
+    public void doit(final ResumeJobRequestDocument request) {
         LOGGER.debug("DataTransferServiceEndpoint doit(ResumeJobRequest)");
         mDataTransferService.resumeJob(request);
     }
 
     /**
      * Handles the get job status request.
-     *
+     * 
      * @param request the get job status request
-     *
+     * 
      * @return the response to the get job status call
      */
     @PayloadRoot(localPart = GET_JOB_STATUS_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
-    public GetJobStatusResponseDocument doit(GetJobStatusRequestDocument request) {
+    public GetJobStatusResponseDocument doit(final GetJobStatusRequestDocument request) {
         LOGGER.debug("DataTransferServiceEndpoint doit(GetJobStatusRequest)");
-        String status = mDataTransferService.getJobStatus(request);
-        GetJobStatusResponseDocument response = GetJobStatusResponseDocument.Factory.newInstance();
+        final String status = mDataTransferService.getJobStatus(request);
+        final GetJobStatusResponseDocument response = GetJobStatusResponseDocument.Factory.newInstance();
         response.addNewGetJobStatusResponse().addNewState().setValue(StatusValueType.Enum.forString(status));
         return response;
     }
 
     /**
-     * Sets the {@link DtsJobDefinitionValidator}.
-     *
-     * @param dtsJobDefinitionValidator the {@link DtsJobDefinitionValidator} to use
+     * Handles the get job details request.
+     * 
+     * @param request the get job status request
+     * 
+     * @return the response to the get job status call
      */
-    public void setDtsJobDefinitionValidator(DtsJobDefinitionValidator dtsJobDefinitionValidator) {
+    @PayloadRoot(localPart = GET_JOB_DETAILS_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
+    public GetJobDetailsResponseDocument doit(final GetJobDetailsRequestDocument request) {
+        LOGGER.debug("DataTransferServiceEndpoint doit(GetJobDetailsRequest)");
+        final Job foundJob = mDataTransferService.getJobDetails(request);
+
+        final GetJobDetailsResponseDocument response = GetJobDetailsResponseDocument.Factory.newInstance();
+
+        final JobDetailsType jobDetails = response.addNewGetJobDetailsResponse().addNewJobDetails();
+        fillInJobDetails(foundJob, jobDetails);
+
+        return response;
+    }
+
+    /**
+     * Sets the {@link DtsJobDefinitionValidator}.
+     * 
+     * @param dtsJobDefinitionValidator the {@link DtsJobDefinitionValidator} to
+     *        use
+     */
+    public void setDtsJobDefinitionValidator(final DtsJobDefinitionValidator dtsJobDefinitionValidator) {
         mDtsJobDefinitionValidator = dtsJobDefinitionValidator;
     }
 
     /**
      * Sets the {@link MessageSource}.
-     *
+     * 
      * @param messageSource the {@link MessageSource} to use
      */
-    public void setMessageSource(MessageSource messageSource) {
+    public void setMessageSource(final MessageSource messageSource) {
         mMessageSource = messageSource;
+    }
+
+    /**
+     * Fills in the JobDetails object with information about the job taken from
+     * the WS DB.
+     * 
+     * @param job
+     * @param jobDetails
+     */
+    private void fillInJobDetails(final Job job, final JobDetailsType jobDetails) {
+        jobDetails.setJobResourceKey(job.getResourceKey());
+        if (job.getName() != null) {
+            jobDetails.setJobName(job.getName());
+        }
+        jobDetails.setStatus(StatusValueType.Enum.forString(job.getStatus().getStringValue()));
+        if (job.getSubjectName() != null) {
+            jobDetails.setOwner(job.getSubjectName());
+        }
+        if (job.getCreationTime() != null) {
+            final Calendar cal = Calendar.getInstance();
+            cal.setTime(job.getCreationTime());
+            jobDetails.setCreationTime(cal);
+        }
+        if (job.getQueuedTime() != null) {
+            final Calendar cal = Calendar.getInstance();
+            cal.setTime(job.getCreationTime());
+            jobDetails.setQueuedTime(cal);
+        }
+        if (job.getActiveTime() != null) {
+            final Calendar cal = Calendar.getInstance();
+            cal.setTime(job.getActiveTime());
+            jobDetails.setQueuedTime(cal);
+        }
+        if (job.getSuccessFlag() != null) {
+            jobDetails.setSuccessFlag(job.getSuccessFlag());
+        }
+        if (job.getFinishedFlag() != null) {
+            jobDetails.setFinishedFlag(job.getFinishedFlag());
+        }
+        if (job.getWorkerTerminatedTime() != null) {
+            final Calendar cal = Calendar.getInstance();
+            cal.setTime(job.getWorkerTerminatedTime());
+            jobDetails.setWorkerTerminatedTime(cal);
+        }
+        if (job.getJobAllDoneTime() != null) {
+            final Calendar cal = Calendar.getInstance();
+            cal.setTime(job.getJobAllDoneTime());
+            jobDetails.setJobAllDoneTime(cal);
+        }
+        if (job.getFilesTotal() != null) {
+            jobDetails.setFilesTotal(BigInteger.valueOf(job.getFilesTotal()));
+        }
+        if (job.getFilesTransferred() != null) {
+            jobDetails.setFilesTransferred(BigInteger.valueOf(job.getFilesTransferred()));
+        }
+        if (job.getVolumeTotal() != null) {
+            jobDetails.setVolumeTotal(BigInteger.valueOf(job.getVolumeTotal()));
+        }
+        if (job.getVolumeTransferred() != null) {
+            jobDetails.setVolumeTransferred(BigInteger.valueOf(job.getVolumeTransferred()));
+        }
     }
 
 }
