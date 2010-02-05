@@ -114,7 +114,72 @@
         </xsd:sequence>
       </xsd:complexType>
     </xsd:element>
-
+    
+    <!--
+      Operation "getJobDetailsDocument"
+      Input:  <mjsdl:JobResourceKey />
+      Output: <dmi:State />
+      Faults: <mdts-msgs:AuthenticationFaultType />  TODO: Not sure if this one's needed here
+              <mdts-msgs:AuthorisationFaultType />
+              <mdts-msgs:NonExistentJobFaultType />
+    -->
+    <xsd:element name="getJobDetailsRequest">
+      <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element ref="mjsdl:JobResourceKey" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="getJobDetailsResponse">
+      <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element ref="mdts-msgs:JobDetails" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:element>
+    
+    <xsd:complexType name="JobDetailsType">
+      <xsd:annotation>
+        <xsd:documentation>
+          The job detail holds detailed information about the state the job is in. It holds
+          timed information on when the job was created, queued, status, etc if they are 
+          available.
+        </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+        <xsd:element ref="mjsdl:JobResourceKey" minOccurs="0" />
+        <xsd:element ref="jsdl:JobName" minOccurs="0"/>        
+        <xsd:element name="Status" type="dmi:StatusValueType"
+            minOccurs="0" />
+        <xsd:element name="Owner" type="xsd:string"
+            minOccurs="0" />
+        <xsd:element name="CreationTime" type="xsd:dateTime"
+            minOccurs="0" />
+        <xsd:element name="QueuedTime" type="xsd:dateTime"
+            minOccurs="0" />
+        <xsd:element name="ActiveTime" type="xsd:dateTime"
+            minOccurs="0" />
+        <xsd:element name="SuccessFlag" type="xsd:boolean"
+            minOccurs="0" />
+        <xsd:element name="FinishedFlag" type="xsd:boolean"
+            minOccurs="0" />
+        <xsd:element name="WorkerTerminatedTime" type="xsd:dateTime"
+            minOccurs="0" />
+        <xsd:element name="JobAllDoneTime" type="xsd:dateTime"
+            minOccurs="0" />
+        <xsd:element name="FilesTotal" type="xsd:integer"
+            minOccurs="0" />
+        <xsd:element name="FilesTransferred" type="xsd:integer"
+            minOccurs="0" />
+        <xsd:element name="VolumeTotal" type="xsd:integer"
+            minOccurs="0" />
+        <xsd:element name="VolumeTransferred" type="xsd:integer"
+            minOccurs="0" />
+      </xsd:sequence>
+      <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+    <xsd:element name="JobDetails" type="mdts-msgs:JobDetailsType"/>
+    
     <!--
     Type of faults that could be thrown by DTS...
 
