@@ -27,6 +27,7 @@
  */
 package org.dataminx.dts.wn.batch;
 
+import static org.dataminx.dts.wn.common.DtsWorkerNodeConstants.DTS_JOB_RESOURCE_KEY;
 import static org.dataminx.dts.wn.common.DtsWorkerNodeConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
 
 import org.dataminx.dts.domain.model.JobStatus;
@@ -155,7 +156,7 @@ public class DtsFileTransferJob extends DtsJob {
         // first, store the DTS job request object in the job execution context
         final ExecutionContext context = execution.getExecutionContext();
         context.put(DTS_SUBMIT_JOB_REQUEST_KEY, mJobRequest);
-        context.put("jobResourceKey", getJobId());
+        context.put(DTS_JOB_RESOURCE_KEY, getJobId());
 
         // TODO convert to application exceptions
         StepExecution stepExecution;// = handleStep(mMaxStreamCountingStep,
