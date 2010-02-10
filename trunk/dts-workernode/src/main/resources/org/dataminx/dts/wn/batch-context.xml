@@ -34,7 +34,7 @@
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
     <property name="jobScoper" ref="jobScoper" />
     <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
-    <property name="jobResourceKey" value="#{jobExecutionContext[jobResourceKey]}"/> 
+    <property name="jobResourceKey" value="#{jobExecutionContext[JOB_RESOURCE_KEY]}"/> 
   </bean>
 
   <bean id="fileCopyTask" class="org.dataminx.dts.wn.batch.FileCopyTask" scope="step">

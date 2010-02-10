@@ -164,7 +164,6 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
             mJobNotificationService.notifyStepFailures(dtsJobId, stepExecution);
         }
         else {
-            LOG.debug("********** jjob id: " + dtsJobId);
             mJobNotificationService.notifyJobProgress(dtsJobId, mBatchTotalFiles, mBatchVolumeSize);
         }
         return exitStatus;
