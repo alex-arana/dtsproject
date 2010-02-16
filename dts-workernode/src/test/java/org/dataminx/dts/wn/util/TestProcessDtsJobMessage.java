@@ -55,8 +55,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.w3c.dom.Document;
 
 /**
- * Test that a DTS job is launched when a JMS message is posted on the DTS Job Submission queue.
- *
+ * Test that a DTS job is launched when a JMS message is posted on the DTS Job
+ * Submission queue.
+ * 
  * @author Alex Arana
  */
 @ContextConfiguration
@@ -105,7 +106,7 @@ public class TestProcessDtsJobMessage {
         jobIdentification.setJobName(dtsJobId);
         jobIdentification.setDescription("Copies the DataMINX Logo from a HTTP source to a local folder");
         jobDescription.setJobIdentification(jobIdentification);
-        jobDescription.setDataTransferArray(new DataTransferType[] {dataTransfer});
+        jobDescription.setDataTransferArray(new DataTransferType[] { dataTransfer });
         jobDefinition.setJobDescription(jobDescription);
 
         final Logger logger = LoggerFactory.getLogger(getClass());

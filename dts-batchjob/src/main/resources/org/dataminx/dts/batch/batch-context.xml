@@ -14,24 +14,15 @@
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
-        
-  <!-- Enable Spring beans annotation support -->
-  <context:annotation-config />
 
-  <!-- Enable automatic classpath scanning -->
-  <context:component-scan base-package="org.dataminx.dts" />
-
-  <!-- Initialise the logging subsystem -->
-  <bean id="log4jConfigurator" class="org.dataminx.dts.common.Log4jConfiguratorBean">
-    <property name="configuration" value="file:///${dataminx.dir}/log4j.xml" />
-    <property name="refreshInterval" value="5000" />
+<!-- 
+  <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource">
+    <property name="driverClassName" value="${batch.jdbc.driver}" />
+    <property name="url" value="${batch.jdbc.url}" />
+    <property name="username" value="${batch.jdbc.user}" />
+    <property name="password" value="${batch.jdbc.password}" />
   </bean>
-
-  <!--
-    <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource"> <property
-    name="driverClassName" value="${batch.jdbc.driver}"/> <property name="url" value="${batch.jdbc.url}"/> <property
-    name="username" value="${batch.jdbc.user}"/> <property name="password" value="${batch.jdbc.password}"/> </bean>
-  -->
+-->  
 
   <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
     <property name="jdbcUrl" value="${batch.jdbc.url}" />
@@ -51,17 +42,6 @@
     <property name="dtsVfsUtil" ref="dtsVfsUtil" />
   </bean>
 
-  <bean id="applicationProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    <property name="locations">
-      <list>
-        <value>file:///${dataminx.dir}/dts-workernode.properties</value>
-      </list>
-    </property>
-    <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
-    <property name="ignoreUnresolvablePlaceholders" value="false" />
-    <property name="order" value="1" />
-  </bean>
-
   <bean id="dtsVfsUtil" class="org.dataminx.dts.vfs.DtsVfsUtil">
     <property name="ftpSupported" value="true" />
     <property name="sftpSupported" value="true" />
@@ -72,15 +52,6 @@
     <property name="irodsSupported" value="true" />
     <property name="myProxyCredentialLifetime" value="${default.myproxy.lifetime}" />
   </bean>
-
-
-
-
-
-
-
-
-
 
   <bean id="jobRepository"
         class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
@@ -95,7 +66,7 @@
     <property name="maxPoolSize" value="10"/>
   </bean>
 
-  <bean id="dtsJobLauncher" class="org.dataminx.dts.wn.DtsWorkerNodeJobLauncher">
+  <bean id="dtsJobLauncher" class="org.dataminx.dts.batch.DtsJobLauncher">
     <property name="jobRepository" ref="jobRepository" />
     <property name="taskExecutor" ref="taskExecutor"/>
   </bean>
@@ -142,7 +113,6 @@
   <bean id="jobScoper" class="org.dataminx.dts.batch.JobScoperImpl">
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
   </bean>
-  
   
   <batch:step id="maxStreamCountingStep">
        <batch:tasklet ref="maxStreamCounterTask"/>
