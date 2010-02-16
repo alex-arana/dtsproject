@@ -36,114 +36,118 @@ import uk.ac.dl.escience.vfs.util.VFSUtil;
  * @author Gerson Galang
  */
 public class DtsVfsUtil extends VFSUtil {
-	
-	/** Qualified name of the XML element containing a password within a credentials element. */
-    private static final QName PASSWORD_STRING_QNAME =
-        new QName(WS_SECURITY_NAMESPACE_URI, "PasswordString");
-	
-	/** Internal logger object. */
+
+    /**
+     * Qualified name of the XML element containing a password within a
+     * credentials element.
+     */
+    private static final QName PASSWORD_STRING_QNAME = new QName(WS_SECURITY_NAMESPACE_URI, "PasswordString");
+
+    /** Internal logger object. */
     private static final Logger LOG = LoggerFactory.getLogger(DtsVfsUtil.class);
-	
-	private boolean mFtpSupported = true;
-	
-	private boolean mSftpSupported = true;
-	
-	private boolean mHttpSupported = true;
-	
-	private boolean mGsiftpSupported = true;
-	
-	private boolean mSrbSupported = true;
-	
-	private boolean mFileSupported = true;
-	
-	private boolean mIrodsSupported = true;
-	
-	private String mTmpDirPath = null;
-	
-	/**
-     * Specifies the lifetime of the MyProxy credentials managed by this class.  If this setting is not
-     * specifically configured, it will hold a default value of <code>0</code> which means use the maximum
-     * possible lifetime for the credential.
+
+    private boolean mFtpSupported = true;
+
+    private boolean mSftpSupported = true;
+
+    private boolean mHttpSupported = true;
+
+    private boolean mGsiftpSupported = true;
+
+    private boolean mSrbSupported = true;
+
+    private boolean mFileSupported = true;
+
+    private boolean mIrodsSupported = true;
+
+    private String mTmpDirPath = null;
+
+    /**
+     * Specifies the lifetime of the MyProxy credentials managed by this class.
+     * If this setting is not specifically configured, it will hold a default
+     * value of <code>0</code> which means use the maximum possible lifetime for
+     * the credential.
      */
     private int mMyProxyCredentialLifetime;
 
-	public boolean isFtpSupported() {
-    	return mFtpSupported;
+    public boolean isFtpSupported() {
+        return mFtpSupported;
     }
 
-	public void setFtpSupported(boolean ftpSupported) {
-    	mFtpSupported = ftpSupported;
+    public void setFtpSupported(final boolean ftpSupported) {
+        mFtpSupported = ftpSupported;
     }
 
-	public boolean isSftpSupported() {
-    	return mSftpSupported;
+    public boolean isSftpSupported() {
+        return mSftpSupported;
     }
 
-	public void setSftpSupported(boolean sftpSupported) {
-    	mSftpSupported = sftpSupported;
+    public void setSftpSupported(final boolean sftpSupported) {
+        mSftpSupported = sftpSupported;
     }
 
-	public boolean isHttpSupported() {
-    	return mHttpSupported;
+    public boolean isHttpSupported() {
+        return mHttpSupported;
     }
 
-	public void setHttpSupported(boolean httpSupported) {
-    	mHttpSupported = httpSupported;
+    public void setHttpSupported(final boolean httpSupported) {
+        mHttpSupported = httpSupported;
     }
 
-	public boolean isGsiftpSupported() {
-    	return mGsiftpSupported;
+    public boolean isGsiftpSupported() {
+        return mGsiftpSupported;
     }
 
-	public void setGsiftpSupported(boolean gsiftpSupported) {
-    	mGsiftpSupported = gsiftpSupported;
+    public void setGsiftpSupported(final boolean gsiftpSupported) {
+        mGsiftpSupported = gsiftpSupported;
     }
 
-	public boolean isSrbSupported() {
-    	return mSrbSupported;
+    public boolean isSrbSupported() {
+        return mSrbSupported;
     }
 
-	public void setSrbSupported(boolean srbSupported) {
-    	mSrbSupported = srbSupported;
+    public void setSrbSupported(final boolean srbSupported) {
+        mSrbSupported = srbSupported;
     }
 
-	public boolean isFileSupported() {
-    	return mFileSupported;
+    public boolean isFileSupported() {
+        return mFileSupported;
     }
 
-	public void setFileSupported(boolean fileSupported) {
-    	mFileSupported = fileSupported;
+    public void setFileSupported(final boolean fileSupported) {
+        mFileSupported = fileSupported;
     }
 
-	public boolean isIrodsSupported() {
-    	return mIrodsSupported;
+    public boolean isIrodsSupported() {
+        return mIrodsSupported;
     }
 
-	public void setIrodsSupported(boolean irodsSupported) {
-    	mIrodsSupported = irodsSupported;
+    public void setIrodsSupported(final boolean irodsSupported) {
+        mIrodsSupported = irodsSupported;
     }
-	
-	public String getTmpDirPath() {
-		return mTmpDirPath;
-	}
-	
-	public void setTmpDirPath(String tmpDirPath) {
-		mTmpDirPath = tmpDirPath;
-	}
 
-	public DefaultFileSystemManager createNewFsManager() throws FileSystemException {		
-		return VFSUtil.createNewFsManager(
-				mFtpSupported, mSftpSupported, mHttpSupported, mGsiftpSupported, mSrbSupported, 
-				mFileSupported, mIrodsSupported, mTmpDirPath);
-	}
-	
-	/**
-     * Create a new set of file system options, as an instance of {@link FileSystemOptions}, based on the provided
-     * source or target entity.
-     *
+    public String getTmpDirPath() {
+        return mTmpDirPath;
+    }
+
+    public void setTmpDirPath(final String tmpDirPath) {
+        mTmpDirPath = tmpDirPath;
+    }
+
+    public DefaultFileSystemManager createNewFsManager() throws FileSystemException {
+        return VFSUtil.createNewFsManager(mFtpSupported, mSftpSupported, mHttpSupported, mGsiftpSupported,
+                mSrbSupported, mFileSupported, mIrodsSupported, mTmpDirPath);
+    }
+
+    /**
+     * Create a new set of file system options, as an instance of
+     * {@link FileSystemOptions}, based on the provided source or target entity.
+     * 
      * @param sourceOrTarget the source or target entity
-     * @return the set of file system options for the given source or target entity
-     * @throws FileSystemException when an error occurs during a VFS file copy operation.
+     * @return the set of file system options for the given source or target
+     *         entity
+     * @throws FileSystemException when an error occurs during a VFS file copy
+     *         operation.
      */
     public FileSystemOptions createFileSystemOptions(final SourceTargetType sourceOrTarget) throws FileSystemException {
         final FileSystemOptions options = new DtsFileSystemOptions();
@@ -156,22 +160,19 @@ public class DtsVfsUtil extends VFSUtil {
                 // at the moment we're only supporting MyProxy credentials
                 if (credentialType.getMyProxyToken() != null) {
                     final MyProxyTokenType myProxyDetails = credentialType.getMyProxyToken();
-                    final MyProxy myproxy = new MyProxy(
-                        myProxyDetails.getMyProxyServer(), myProxyDetails.getMyProxyPort());
+                    final MyProxy myproxy = new MyProxy(myProxyDetails.getMyProxyServer(), myProxyDetails
+                            .getMyProxyPort());
 
                     GSSCredential credential = null;
                     try {
-                        credential = myproxy.get(myProxyDetails.getMyProxyUsername(),
-                            myProxyDetails.getMyProxyPassword(), mMyProxyCredentialLifetime);
+                        credential = myproxy.get(myProxyDetails.getMyProxyUsername(), myProxyDetails
+                                .getMyProxyPassword(), mMyProxyCredentialLifetime);
                         GridFtpFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
                         SRBFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
                         IRODSFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
-                    }
-                    catch (final MyProxyException ex) {
-                        LOG.error(String.format("Could not get delegated proxy from server '%s:%s'\n%s",
-                            myProxyDetails.getMyProxyServer(),
-                            myProxyDetails.getMyProxyPort(),
-                            ex.getMessage()));
+                    } catch (final MyProxyException ex) {
+                        LOG.error(String.format("Could not get delegated proxy from server '%s:%s'\n%s", myProxyDetails
+                                .getMyProxyServer(), myProxyDetails.getMyProxyPort(), ex.getMessage()));
                         throw new DtsFileSystemAuthenticationException(ex.getMessage());
                     }
                 }
@@ -190,24 +191,24 @@ public class DtsVfsUtil extends VFSUtil {
             }
             if (uriPropertiesXML != null) {
                 if (uriPropertiesXML instanceof GridFtpURIPropertiesType) {
-                    GridFtpURIPropertiesType gridFtpUriProperties = (GridFtpURIPropertiesType) uriPropertiesXML;
+                    final GridFtpURIPropertiesType gridFtpUriProperties = (GridFtpURIPropertiesType) uriPropertiesXML;
 
                     // TODO: need to check with the Commons VFS Grid guys if there's a way of setting
                     // other GridFTP URI related properties through GridFtpFileSystemConfigBuilder
                 }
                 else if (uriPropertiesXML instanceof SrbURIPropertiesType) {
-                    SrbURIPropertiesType srbUriProperties = (SrbURIPropertiesType) uriPropertiesXML;
-                    String defaultStorageResource = srbUriProperties.getDefaultResource();
+                    final SrbURIPropertiesType srbUriProperties = (SrbURIPropertiesType) uriPropertiesXML;
+                    final String defaultStorageResource = srbUriProperties.getDefaultResource();
                     //int firewallPortMax = srbUriProperties.
                     //int firewallPortMin = srbUriProperties.
-                    String homeDirectory = srbUriProperties.getMdasCollectionHome();
-                    String mcatZone = srbUriProperties.getMcatZone();
-                    String mdasDomainName = srbUriProperties.getMdasDomainHome();
-
+                    final String homeDirectory = srbUriProperties.getMdasCollectionHome();
+                    final String mcatZone = srbUriProperties.getMcatZone();
+                    final String mdasDomainName = srbUriProperties.getMdasDomainHome();
 
                     if (defaultStorageResource != null && !defaultStorageResource.trim().equals("")) {
                         LOG.debug("Setting SRB.defaultStorageResource to " + defaultStorageResource);
-                        SRBFileSystemConfigBuilder.getInstance().setDefaultStorageResource(options, defaultStorageResource);
+                        SRBFileSystemConfigBuilder.getInstance().setDefaultStorageResource(options,
+                                defaultStorageResource);
                     }
 
                     //SRBFileSystemConfigBuilder.getInstance().setFileWallPortMax(options, max);
@@ -232,10 +233,10 @@ public class DtsVfsUtil extends VFSUtil {
 
                 }
                 else if (uriPropertiesXML instanceof IrodsURIPropertiesType) {
-                    IrodsURIPropertiesType irodsUriProperties = (IrodsURIPropertiesType) uriPropertiesXML;
-                    String defaultStorageResource = irodsUriProperties.getIrodsDefaultResource();
-                    String homeDirectory = irodsUriProperties.getIrodsHome();
-                    String zone = irodsUriProperties.getIrodsZone();
+                    final IrodsURIPropertiesType irodsUriProperties = (IrodsURIPropertiesType) uriPropertiesXML;
+                    final String defaultStorageResource = irodsUriProperties.getIrodsDefaultResource();
+                    final String homeDirectory = irodsUriProperties.getIrodsHome();
+                    final String zone = irodsUriProperties.getIrodsZone();
 
                     if (defaultStorageResource != null && !defaultStorageResource.trim().equals("")) {
                         LOG.debug("Setting IRODS.defaultStorageResource to " + defaultStorageResource);
@@ -261,7 +262,7 @@ public class DtsVfsUtil extends VFSUtil {
 
         return options;
     }
-    
+
     public int getMyProxyCredentialLifetime() {
         return mMyProxyCredentialLifetime;
     }
@@ -269,7 +270,5 @@ public class DtsVfsUtil extends VFSUtil {
     public void setMyProxyCredentialLifetime(final int myProxyCredentialLifetime) {
         mMyProxyCredentialLifetime = myProxyCredentialLifetime;
     }
-	
-	
 
 }
