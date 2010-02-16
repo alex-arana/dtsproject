@@ -1,5 +1,5 @@
 =Thoughts on performing parallel transfers - Implications for VFS=
-(note, VFS is not the issue here, rather its the VFS protocol implementations that required improvement/fine tuning and the subsequent copy operations). 
+*(note, VFS is not the issue here, rather its the VFS protocol implementations that required improvement/fine tuning and the subsequent copy operations)* 
 
 = Parallel transfer considerations =
 _(i.e. don't share a single session context/connection over multiple threads)_ 
@@ -41,12 +41,13 @@ Also, not sure if the input and output streams that are returned by the VFS impl
 }}}
 For the gridftp VFS implementation, the returned streams are the following objects from jglobus (http://dev.globus.org/wiki/CoG_jglobus): 
 {{{
-org.globus.ftp.extended.GridFTPInputStream
+  org.globus.ftp.extended.GridFTPInputStream
 }}} 
 and 
 {{{
-org.globus.ftp.extended.GridFTPOutputStream
-}}}. 
+  org.globus.ftp.extended.GridFTPOutputStream
+}}}
+ 
 The question is do these input streams perform any protocol native optimizations ? 
 
 === Useful/good links ===
