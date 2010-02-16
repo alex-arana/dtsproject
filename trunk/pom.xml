@@ -127,7 +127,7 @@
     </repository>
     <repository>
       <id>arcs-external</id>
-      <url>https://code.arcs.org.au/nexus/content/groups/public</url>
+      <url>http://code.arcs.org.au/nexus/content/groups/public</url>
     </repository>
   </repositories>
 

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:batch="http://www.springframework.org/schema/batch"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+        http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-2.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+        
+  <!-- Enable Spring beans annotation support -->
+  <context:annotation-config />
+
+  <!-- Enable automatic classpath scanning -->
+  <context:component-scan base-package="org.dataminx.dts" />
+
+  <!-- Initialise the logging subsystem -->
+  <bean id="log4jConfigurator" class="org.dataminx.dts.common.Log4jConfiguratorBean">
+    <property name="configuration" value="file:///${dataminx.dir}/log4j.xml" />
+    <property name="refreshInterval" value="5000" />
+  </bean>
+
+  <!--
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource"> <property
+    name="driverClassName" value="${batch.jdbc.driver}"/> <property name="url" value="${batch.jdbc.url}"/> <property
+    name="username" value="${batch.jdbc.user}"/> <property name="password" value="${batch.jdbc.password}"/> </bean>
+  -->
+
+  <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+    <property name="jdbcUrl" value="${batch.jdbc.url}" />
+    <property name="user" value="${batch.jdbc.user}" />
+    <property name="password" value="${batch.jdbc.password}" />
+    <property name="driverClass" value="${batch.jdbc.driver}" />
+    <property name="autoCommitOnClose" value="false" />
+    <property name="initialPoolSize" value="5" />
+    <property name="maxIdleTime" value="300" />
+  </bean>
+
+  <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" lazy-init="true">
+    <property name="dataSource" ref="dataSource" />
+  </bean>
+
+  <bean id="fileSystemManagerDispenser" class="org.dataminx.dts.vfs.FileSystemManagerDispenser">
+    <property name="dtsVfsUtil" ref="dtsVfsUtil" />
+  </bean>
+
+  <bean id="applicationProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="locations">
+      <list>
+        <value>file:///${dataminx.dir}/dts-workernode.properties</value>
+      </list>
+    </property>
+    <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+    <property name="ignoreUnresolvablePlaceholders" value="false" />
+    <property name="order" value="1" />
+  </bean>
+
+  <bean id="dtsVfsUtil" class="org.dataminx.dts.vfs.DtsVfsUtil">
+    <property name="ftpSupported" value="true" />
+    <property name="sftpSupported" value="true" />
+    <property name="httpSupported" value="true" />
+    <property name="gsiftpSupported" value="true" />
+    <property name="srbSupported" value="true" />
+    <property name="fileSupported" value="true" />
+    <property name="irodsSupported" value="true" />
+    <property name="myProxyCredentialLifetime" value="${default.myproxy.lifetime}" />
+  </bean>
+
+
+
+
+
+
+
+
+
+
+  <bean id="jobRepository"
+        class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
+    <property name="dataSource" ref="dataSource"/>
+    <property name="transactionManager" ref="transactionManager"/>
+  </bean>
+
+
+  <bean id="taskExecutor"
+        class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+    <property name="corePoolSize" value="10"/>
+    <property name="maxPoolSize" value="10"/>
+  </bean>
+
+  <bean id="dtsJobLauncher" class="org.dataminx.dts.wn.DtsWorkerNodeJobLauncher">
+    <property name="jobRepository" ref="jobRepository" />
+    <property name="taskExecutor" ref="taskExecutor"/>
+  </bean>
+
+  <bean id="dtsJobPartitioner" scope="step" class="org.dataminx.dts.batch.DtsJobPartitioner">
+    <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
+    <property name="jobScoper" ref="jobScoper" />
+    <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
+    <!-- job_resource_key == jobId == messageID == correlationID == same value -->
+    <property name="jobResourceKey" value="#{jobExecutionContext[JOB_RESOURCE_KEY]}"/> 
+  </bean>
+
+  <bean id="fileCopyTask" class="org.dataminx.dts.batch.FileCopyTask" scope="step">
+    <property name="jobStep" value="#{stepExecutionContext[DATA_TRANSFER_STEP]}"/>
+    <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
+    <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
+  </bean>
+
+  <batch:step id="taskOrientedStep">
+    <batch:tasklet ref="fileCopyTask"/>
+  </batch:step>
+
+  <bean id="partitioningStep"
+        class="org.springframework.batch.core.partition.support.PartitionStep">
+    <property name="partitionHandler">
+      <bean class="org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler">
+        <property name="taskExecutor">
+          <bean class="org.springframework.core.task.SimpleAsyncTaskExecutor"/>
+        </property>
+        <property name="step" ref="taskOrientedStep"/>
+        <property name="gridSize" value="1"/>
+      </bean>
+    </property>
+    <property name="stepExecutionSplitter">
+      <bean class="org.springframework.batch.core.partition.support.SimpleStepExecutionSplitter">
+        <constructor-arg ref="jobRepository"/>
+        <constructor-arg ref="taskOrientedStep"/>
+        <constructor-arg ref="dtsJobPartitioner"/>
+      </bean>
+    </property>
+    <property name="jobRepository" ref="jobRepository"/>
+  </bean>
+  
+  <bean id="jobScoper" class="org.dataminx.dts.batch.JobScoperImpl">
+    <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
+  </bean>
+  
+  
+  <batch:step id="maxStreamCountingStep">
+       <batch:tasklet ref="maxStreamCounterTask"/>
+  </batch:step>  
+  
+  <bean id="maxStreamCounterTask" class="org.dataminx.dts.batch.MaxStreamCounterTask" scope="step">
+    <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
+    <property name="maxConnectionsToTry" value="${default.max.parallel.connections}"/>
+    <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
+    <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
+  </bean>
+  
+</beans>

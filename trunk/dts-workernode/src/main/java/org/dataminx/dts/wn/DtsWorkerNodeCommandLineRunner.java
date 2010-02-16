@@ -35,40 +35,42 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.dataminx.dts.DtsException;
-import org.dataminx.dts.wn.service.DtsWorkerNodeInformationService;
+import org.dataminx.dts.batch.service.DtsWorkerNodeInformationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Command-line launcher for the DTS Worker Node application.
- *
+ * 
  * @author Alex Arana
  */
 public class DtsWorkerNodeCommandLineRunner {
     /** Default Spring classpath definition. */
-    public static final String[] DEFAULT_SPRING_CLASSPATH = {
-        "/org/dataminx/dts/wn/application-context.xml",
-        "/org/dataminx/dts/wn/batch-context.xml",
-        "/org/dataminx/dts/wn/integration-context.xml",
-        "/org/dataminx/dts/wn/activemq/jms-context.xml"
-    };
+    public static final String[] DEFAULT_SPRING_CLASSPATH = { "/org/dataminx/dts/wn/application-context.xml",
+            "/org/dataminx/dts/batch/batch-context.xml", "/org/dataminx/dts/wn/integration-context.xml",
+            "/org/dataminx/dts/wn/activemq/jms-context.xml" };
 
     /** Internal application logger. */
     private static final Logger LOG = LoggerFactory.getLogger(DtsWorkerNodeCommandLineRunner.class);
 
-    /** Holds the location of the configuration directory used to initialise the application. */
+    /**
+     * Holds the location of the configuration directory used to initialise the
+     * application.
+     */
     private final File mConfigDir;
 
     /**
-     * Constructs a new instance of <code>DtsWorkerNodeCommandLineRunner</code> using the specified DataMINX
-     * configuration folder.
+     * Constructs a new instance of <code>DtsWorkerNodeCommandLineRunner</code>
+     * using the specified DataMINX configuration folder.
      * <p>
-     * If the input string is either <code>null</code> or points to a non-existent directory, the application
-     * will attempt to access the default configuration folder, represented by the symbolic constant:
-     * {@link org.dataminx.dts.wn.common.DtsWorkerNodeConstants#DEFAULT_DATAMINX_CONFIGURATION_DIR}.
-     *
-     * @param configDir String holding the fully qualified path to the DataMINX configuration folder (or null).
+     * If the input string is either <code>null</code> or points to a
+     * non-existent directory, the application will attempt to access the
+     * default configuration folder, represented by the symbolic constant:
+     * {@link org.dataminx.dts.batch.common.DtsBatchJobConstants#DEFAULT_DATAMINX_CONFIGURATION_DIR}.
+     * 
+     * @param configDir String holding the fully qualified path to the DataMINX
+     *        configuration folder (or null).
      * @throws DtsException When an error occurs ...
      */
     public DtsWorkerNodeCommandLineRunner(final String configDir) throws DtsException {
@@ -81,14 +83,14 @@ public class DtsWorkerNodeCommandLineRunner {
 
         if (!mConfigDir.exists()) {
             throw new DtsException(String.format("An error occurred launching the DTS Worker Node."
-                + " Invalid DataMINX configuration folder: '%s'.  Check your configuration",
-                mConfigDir.getAbsolutePath()));
+                    + " Invalid DataMINX configuration folder: '%s'.  Check your configuration", mConfigDir
+                    .getAbsolutePath()));
         }
 
         if (!mConfigDir.canRead()) {
             throw new DtsException(String.format(
-                "An error occurred accessing the configuration folder for the DTS Worker Node: '%s'."
-                + " Check your access permissions.", mConfigDir.getAbsolutePath()));
+                    "An error occurred accessing the configuration folder for the DTS Worker Node: '%s'."
+                            + " Check your access permissions.", mConfigDir.getAbsolutePath()));
         }
 
         // set the system property globally
@@ -99,7 +101,7 @@ public class DtsWorkerNodeCommandLineRunner {
 
     /**
      * Returns the Spring application classpath for this application.
-     *
+     * 
      * @return Spring application classpath as an array of {@link String}s
      */
     public String[] getSpringClasspath() {
@@ -111,22 +113,22 @@ public class DtsWorkerNodeCommandLineRunner {
      */
     public void run() {
         final String[] classpath = getSpringClasspath();
-        final ClassPathXmlApplicationContext context =
-            new ClassPathXmlApplicationContext(classpath, DtsWorkerNodeCommandLineRunner.class);
+        final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(classpath,
+                DtsWorkerNodeCommandLineRunner.class);
         LOG.debug("Spring context loaded from classpath: " + ArrayUtils.toString(classpath));
 
         // since our messaging container beans are lifecycle aware the application
         // will immediately start processing
         context.start();
 
-        final DtsWorkerNodeInformationService service =
-            (DtsWorkerNodeInformationService) context.getBean("dtsWorkerNodeInformationService");
+        final DtsWorkerNodeInformationService service = (DtsWorkerNodeInformationService) context
+                .getBean("dtsWorkerNodeInformationService");
         LOG.info(String.format("DTS Worker Node has started: %s", service.getInstanceId()));
     }
 
     /**
      * DTS Worker Node application command-line launcher.
-     *
+     * 
      * @param args Command-line arguments
      * @throws DtsException if an error occurs initialising the application
      */

@@ -56,6 +56,10 @@
       <artifactId>dts-common</artifactId>
       <groupId>${dataminx.group}</groupId>
     </dependency>
+    <dependency>
+      <artifactId>dts-batchjob</artifactId>
+      <groupId>${dataminx.group}</groupId>
+    </dependency>
 
     <dependency>
       <artifactId>dts-schema</artifactId>
@@ -140,16 +144,20 @@
     </dependency>
 
     <!-- Spring Batch -->
+    <!-- 
     <dependency>
       <groupId>org.springframework.batch</groupId>
       <artifactId>org.springframework.batch.core</artifactId>
     </dependency>
+    -->
 
     <!-- Spring Batch Integration -->
+    <!-- 
     <dependency>
       <groupId>org.springframework.batch</groupId>
       <artifactId>spring-batch-integration</artifactId>
     </dependency>
+    -->
 
     <!-- JMS -->
     <dependency>
@@ -158,10 +166,12 @@
     </dependency>
 
     <!-- commons-vfs-grid -->
+    <!--
     <dependency>
       <groupId>commons-vfs-grid</groupId>
       <artifactId>commons-vfs-grid</artifactId>
     </dependency>
+    -->
 
     <dependency>
       <groupId>org.apache.xmlbeans</groupId>
@@ -213,32 +223,40 @@
     </dependency>
 
     <!-- Oracle JDBC driver -->
+    <!--
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>ojdbc14</artifactId>
       <scope>runtime</scope>
     </dependency>
+    -->
 
     <!-- MySQL JDBC driver -->
+    <!--
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <scope>runtime</scope>
     </dependency>
+    -->
 
     <!-- HSQLDB JDBC Driver -->
+    <!--
     <dependency>
       <groupId>hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
       <scope>runtime</scope>
     </dependency>
+    -->
 
     <!-- C3P0 -->
+    <!-- 
     <dependency>
       <groupId>c3p0</groupId>
       <artifactId>c3p0</artifactId>
       <scope>runtime</scope>
     </dependency>
+    -->
 
     <!-- commons-httpclient -->
     <dependency>
