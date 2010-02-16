@@ -48,7 +48,7 @@ and
   org.globus.ftp.extended.GridFTPOutputStream
 }}}
  
-The question is do these input streams perform any protocol native optimizations ? 
+The question is do these input/output streams perform any protocol native optimizations ? 
 
 === Useful/good links ===
 http://fasterdata.es.net/ 
