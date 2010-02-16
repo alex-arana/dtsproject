@@ -34,18 +34,18 @@ import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 
 /**
  * Describes the File Copying service behaviour.
- *
+ * 
  * @author Alex Arana
  * @author Gerson Galang
  */
 public interface FileCopyingService {
 
     /**
-     * Copies the content from a source file to a destination file. This method has a 
-     * limitation of not being able to apply user provided URI properties and credentials. 
-     * This method should only be used for transferring normal files ie. the ones that 
-     * use "file://" protocol.
-     *
+     * Copies the content from a source file to a destination file. This method
+     * has a limitation of not being able to apply user provided URI properties
+     * and credentials. This method should only be used for transferring normal
+     * files ie. the ones that use "file://" protocol.
+     * 
      * @param sourceURI Source URI string
      * @param targetURI Target URI string
      * @param fileSystemManager the FileSystemManager
@@ -53,29 +53,31 @@ public interface FileCopyingService {
     void copyFiles(String sourceURI, String targetURI, FileSystemManager fileSystemManager);
 
     /**
-     * Copies the source to the destination. This method provides more flexibility
-     * in cases where Source and Target URIs come with their own URI Properties.
-     *
+     * Copies the source to the destination. This method provides more
+     * flexibility in cases where Source and Target URIs come with their own URI
+     * Properties.
+     * 
      * @param source the source
      * @param target the target
      * @param fileSystemManager the FileSystemManager
      */
     void copyFiles(SourceTargetType source, SourceTargetType target, FileSystemManager fileSystemManager);
-    
+
     /**
-     * Copies the source to the destination. This method is used if a file inside a
-     * directory specified in the Source element needs to be transfered and there's no
-     * way for the user to get the extra details that only the dataTransferType will be
-     * able to provide.
+     * Copies the source to the destination. This method is used if a file
+     * inside a directory specified in the Source element needs to be transfered
+     * and there's no way for the user to get the extra details that only the
+     * dataTransferType will be able to provide.
+     * 
      * @param sourceURI Source URI string
      * @param targetURI Target URI string
-     * @param dataTransferType dataTransferType which will provide the URI properties of 
-     * the source and target and the user credentials.
+     * @param dataTransferType dataTransferType which will provide the URI
+     *        properties of the source and target and the user credentials.
      * @param fileSystemManager the FileSystemManager
      */
-    void copyFiles(String sourceURI, String targetURI, DataTransferType dataTransferType, 
-    		FileSystemManager fileSystemManager);
-    
+    void copyFiles(String sourceURI, String targetURI, DataTransferType dataTransferType,
+            FileSystemManager fileSystemManager);
+
     void setDtsVfsUtil(DtsVfsUtil dtsVfsUtil);
 
 }

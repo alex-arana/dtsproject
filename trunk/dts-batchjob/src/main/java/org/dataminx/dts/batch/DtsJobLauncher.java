@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dataminx.dts.wn;
+package org.dataminx.dts.batch;
 
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 
@@ -34,12 +34,12 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
  *
  * @author Alex Arana
  */
-public class DtsWorkerNodeJobLauncher extends SimpleJobLauncher {
+public class DtsJobLauncher extends SimpleJobLauncher {
 
     /**
-     * Constructs a new instance of {@link DtsWorkerNodeJobLauncher}.
+     * Constructs a new instance of {@link DtsJobLauncher}.
      */
-    public DtsWorkerNodeJobLauncher() {
+    public DtsJobLauncher() {
 
     }
 }
