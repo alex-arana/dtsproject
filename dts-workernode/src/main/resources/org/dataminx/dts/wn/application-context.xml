@@ -29,5 +29,14 @@
     <property name="ignoreUnresolvablePlaceholders" value="false" />
     <property name="order" value="1" />
   </bean>
+  
+  <!-- The task executor used by the Job Launcher specific to this module -->
+  <bean id="jobLauncherTaskExecutor"
+        class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+    <property name="corePoolSize" value="10"/>
+    <property name="maxPoolSize" value="10"/>
+  </bean>
+  
+  <bean id="jobNotificationService" class="org.dataminx.dts.wn.service.WorkerNodeJobNotificationService" />
 
 </beans>

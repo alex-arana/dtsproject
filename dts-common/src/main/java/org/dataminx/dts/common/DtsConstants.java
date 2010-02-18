@@ -29,16 +29,18 @@ package org.dataminx.dts.common;
 
 /**
  * Defines all the constants for the DTS application.
- *
+ * 
  * @author Alex Arana
  */
 public class DtsConstants {
 
     /**
-     * Name of the configuration property that points to the directory holding configuration artifacts for the
-     * application.
+     * Name of the configuration property that points to the directory holding
+     * configuration artifacts for the application.
      * <p>
-     * Normally, this parameter would be passed to the application at startup using the following:
+     * Normally, this parameter would be passed to the application at startup
+     * using the following:
+     * 
      * <pre>
      *   java <b>-Ddataminx.dir=</b><i>/home/username/.dataminx</i> ...  &lt;runner_class&gt;
      * </pre>
@@ -52,19 +54,11 @@ public class DtsConstants {
     public static final String DEFAULT_LOG4J_CONFIGURATION_FILE = "log4j.xml";
 
     /** Default Spring classpath. */
-    public static final String DEFAULT_SPRING_CLASSPATH =
-        "au/org/dataminx/dts/applicationContext.xml";
+    public static final String DEFAULT_SPRING_CLASSPATH = "au/org/dataminx/dts/applicationContext.xml";
 
     /** Default JVM property used to override the log4j configuration source. */
     public static final String DEFAULT_LOG4J_CONFIGURATION_KEY = "log4j.configuration";
 
-    /**
-     * Name of the configuration property that holds the value of the default default lifetime of a proxy
-     * credential.
-     */
-    public static final String DEFAULT_MYPROXY_CREDENTIAL_LIFETIME_KEY = "default.myproxy.lifetime";
-
     /** Holds the namespace URI of the WS-Security namespace. */
-    public static final String WS_SECURITY_NAMESPACE_URI =
-        "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
+    public static final String WS_SECURITY_NAMESPACE_URI = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
 }

@@ -27,6 +27,8 @@ public class JobScoperImpl implements JobScoper {
     private long mTotalSize = 0;
     private int mTotalFiles = 0;
 
+    private int mMaxParallelConnections = 1;
+
     private ArrayList<String> mExcluded = new ArrayList<String>();
 
     private FileSystemManager mFileSystemManager;
@@ -39,7 +41,7 @@ public class JobScoperImpl implements JobScoper {
 
     private String mJobResourceKey;
 
-    public static final int BATCH_SIZE_LIMIT = 2;
+    public static final int BATCH_SIZE_LIMIT = 3;
 
     public void setFileSystemManager(final FileSystemManager fileSystemManager) {
 
@@ -241,9 +243,9 @@ public class JobScoperImpl implements JobScoper {
 
         /**
          * This method needs to be called before a new DataTransferType instance
-         * gets processed by
-         * {@link org.dataminx.dts.batch.JobScoper#prepare()}. This will make
-         * sure that new DataTransferUnits get added to a new DtsJobStep.
+         * gets processed by {@link org.dataminx.dts.batch.JobScoper#prepare()}.
+         * This will make sure that new DataTransferUnits get added to a new
+         * DtsJobStep.
          */
         public void initNewDataTransfer() {
             mTmpDtsJobStep = new DtsJobStep(mSteps.size() + 1, BATCH_SIZE_LIMIT);
@@ -273,6 +275,11 @@ public class JobScoperImpl implements JobScoper {
             return mSteps;
         }
 
+    }
+
+    @Override
+    public void setMaxParallelConnections(final int maxParallelConnections) {
+        mMaxParallelConnections = maxParallelConnections;
     }
 
 }
