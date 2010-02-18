@@ -27,19 +27,56 @@
  */
 package org.dataminx.dts.batch;
 
+import java.util.Properties;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.dataminx.dts.wn.common.util.SchemaUtils;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.converter.DefaultJobParametersConverter;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This is the Spring Batch Launcher for the DTS Worker Node.
- *
+ * 
  * @author Alex Arana
+ * @author Gerson Galang
  */
 public class DtsJobLauncher extends SimpleJobLauncher {
+
+    private static final Log LOGGER = LogFactory.getLog(DtsJobLauncher.class);
+
+    @Autowired
+    private DtsJobFactory mJobFactory;
 
     /**
      * Constructs a new instance of {@link DtsJobLauncher}.
      */
     public DtsJobLauncher() {
 
+    }
+
+    public JobExecution run(final String jobId, final JobDefinitionDocument job)
+            throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+        final SubmitJobRequestDocument dtsJobRequest = SubmitJobRequestDocument.Factory.newInstance();
+        //SubmitJobRequest submitJobRequest =
+        dtsJobRequest.addNewSubmitJobRequest();
+
+        // replace JobDefinition with the one read from the input file
+        dtsJobRequest.getSubmitJobRequest().setJobDefinition(job.getJobDefinition());
+
+        // TODO: filter out the credential info from the logs using the one that WN uses
+        final String auditableRequest = SchemaUtils.getAuditableString(dtsJobRequest);
+        LOGGER.debug("request payload:\n" + auditableRequest);
+
+        // invoke the job factory to create a new job instance
+        final DtsJob dtsJob = mJobFactory.createJob(jobId, dtsJobRequest);
+
+        return run(dtsJob, new DefaultJobParametersConverter().getJobParameters(new Properties()));
     }
 }

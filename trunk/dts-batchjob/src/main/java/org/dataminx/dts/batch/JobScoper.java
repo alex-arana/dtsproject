@@ -12,4 +12,6 @@ public interface JobScoper {
     void setDtsVfsUtil(DtsVfsUtil dtsVfsUtil);
 
     void setJobResourceKey(final String jobResourceKey);
+
+    void setMaxParallelConnections(int maxParallelConnections);
 }

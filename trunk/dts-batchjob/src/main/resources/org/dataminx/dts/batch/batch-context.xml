@@ -6,10 +6,8 @@
     xmlns:p="http://www.springframework.org/schema/p"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:util="http://www.springframework.org/schema/util"
-    xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
         http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-2.0.xsd
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
@@ -59,16 +57,10 @@
     <property name="transactionManager" ref="transactionManager"/>
   </bean>
 
-
-  <bean id="taskExecutor"
-        class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
-    <property name="corePoolSize" value="10"/>
-    <property name="maxPoolSize" value="10"/>
-  </bean>
-
+  <!-- the task executor below will have to be provided by the calling application  -->
   <bean id="dtsJobLauncher" class="org.dataminx.dts.batch.DtsJobLauncher">
     <property name="jobRepository" ref="jobRepository" />
-    <property name="taskExecutor" ref="taskExecutor"/>
+    <property name="taskExecutor" ref="jobLauncherTaskExecutor"/>
   </bean>
 
   <bean id="dtsJobPartitioner" scope="step" class="org.dataminx.dts.batch.DtsJobPartitioner">
@@ -112,6 +104,7 @@
   
   <bean id="jobScoper" class="org.dataminx.dts.batch.JobScoperImpl">
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
+    <property name="maxParallelConnections" value="${default.max.parallel.connections}" />
   </bean>
   
   <batch:step id="maxStreamCountingStep">

@@ -29,14 +29,11 @@ package org.dataminx.dts.wn.service;
 
 import static org.dataminx.dts.wn.common.util.DateUtils.toCalendar;
 
-import org.dataminx.dts.batch.service.JobNotificationService;
-
-import org.dataminx.dts.batch.service.DtsWorkerNodeInformationService;
-
-import org.dataminx.dts.batch.DtsJob;
-
 import java.math.BigInteger;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.dataminx.dts.batch.DtsJob;
+import org.dataminx.dts.batch.service.DtsWorkerNodeInformationService;
+import org.dataminx.dts.batch.service.JobNotificationService;
 import org.dataminx.dts.domain.model.JobStatus;
 import org.dataminx.dts.wn.jms.JobEventQueueSender;
 import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument;
@@ -54,8 +51,6 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 /**
@@ -65,11 +60,9 @@ import org.springframework.util.Assert;
  * @author Alex Arana
  * @author Gerson Galang
  */
-@Service("jobNotificationService")
-@Scope("singleton")
-public class JobNotificationServiceImpl implements JobNotificationService {
+public class WorkerNodeJobNotificationService implements JobNotificationService {
     /** Internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(JobNotificationServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WorkerNodeJobNotificationService.class);
 
     /** A reference to the DTS Worker Node information service. */
     @Autowired
