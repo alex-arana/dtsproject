@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+  <!-- Enable Spring beans annotation support -->
+  <context:annotation-config/>
+
+  <bean id="mQueueSender" class="org.dataminx.dts.broker.util.JobQueueSender">
+    <property name="mQueue" ref="jmsBrokerEntryQueue"/>
+    <property name="mJmsTemplate" ref="jmsTemplate"/>
+  </bean>
+  
+  <bean id="dtsJobScheduler" class="org.dataminx.dts.broker.si.DtsJobScheduler">
+    <property name="delayHeaderName" value="${broker.delay.headerName}"/>
+  </bean>
+  
+  <bean id="xmlPayloadDelayExtractor" class="org.dataminx.dts.broker.si.XmlPayloadDelayExtractor">
+    <constructor-arg index="0" value="${broker.xml.mQueryStr}"/>
+  </bean>
+  
+  <bean id="dtsMarshaller"
+              class="org.springframework.oxm.xmlbeans.XmlBeansMarshaller">
+    <property name="validating" value="true"/>
+    <property name="xmlOptions">
+      <bean class="org.apache.xmlbeans.XmlOptionsBean">
+        <property name="savePrettyPrint" value="true"/>
+        <property name="saveNamespacesFirst" value="true"/>
+      </bean>
+    </property>
+  </bean>
+
+  <bean id="dtsMessagePayloadTransformer"
+              class="org.springframework.integration.xml.transformer.XmlPayloadUnmarshallingTransformer">
+    <constructor-arg index="0" ref="dtsMarshaller"/>
+  </bean>
+
+  <bean id="applicationProperties"
+        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="locations">
+      <list>
+        <value>file:///F:/java/minx-dts/config/dts-broker.properties</value>
+      </list>
+    </property>
+    <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+    <property name="ignoreUnresolvablePlaceholders" value="false"/>
+    <property name="order" value="1"/>
+  </bean>
+
+</beans>
