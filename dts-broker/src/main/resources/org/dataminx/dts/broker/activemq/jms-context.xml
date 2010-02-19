@@ -19,18 +19,23 @@
     <property name="connectionFactory" ref="jmsConnectionFactory" />
   </bean>
 
-  <bean id="jmsBrokerFrontQueue" class="org.apache.activemq.command.ActiveMQQueue">
-    <constructor-arg index="0" value="${si.jms.jmsBrokerFrontQueue}"/>
+  <bean id="brokerJobSubmissionQueue" class="org.apache.activemq.command.ActiveMQQueue">
+    <constructor-arg index="0" value="${si.jms.brokerJobSubmissionQueue}"/>
   </bean>
 
-  <bean id="jmsBrokerSchedulingQueue" class="org.apache.activemq.command.ActiveMQQueue">
-    <constructor-arg index="0" value="${si.jms.jmsBrokerSchedulingQueue}"/>
-  </bean>
-  
-  <!-- 
+  <bean id="brokerDefaultOutputQueue" class="org.apache.activemq.command.ActiveMQQueue">
+    <constructor-arg index="0" value="${si.jms.brokerDefaultOutputQueue}"/>
+  </bean>  
+    
   <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
     <property name="connectionFactory" ref="jmsConnectionFactory"/>
-    <property name="defaultDestination" ref="jmsJobEventQueue"/>
+    <property name="defaultDestination" ref="brokerJobSubmissionQueue"/>
   </bean>
-   -->
+  
+  <!-- declaration of institution wide group queues -->
+  <bean id="brokerANSTOGroupQueue" class="org.apache.activemq.command.ActiveMQQueue">
+    <constructor-arg index="0" value="broker.ansto.group.queue"/>
+  </bean>    
+  <!-- end of declaration -->
+  
 </beans>

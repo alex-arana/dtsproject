@@ -11,7 +11,7 @@
   <context:annotation-config/>
 
   <!-- Enable automatic classpath scanning -->
-  <context:component-scan base-package="org.dataminx.dts"/>
+  <context:component-scan base-package="org.dataminx.dts.broker"/>
 
   <!-- Initialise the logging subsystem -->
   <bean id="log4jConfigurator"
@@ -20,26 +20,10 @@
     <property name="refreshInterval" value="5000"/>
   </bean>
 
-  <!--
-  <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource">
-    <property name="driverClassName" value="${batch.jdbc.driver}"/>
-    <property name="url" value="${batch.jdbc.url}"/>
-    <property name="username" value="${batch.jdbc.user}"/>
-    <property name="password" value="${batch.jdbc.password}"/>
-  </bean>
-  -->
-
   <bean id="transactionManager"
         class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
         lazy-init="true">
     <property name="dataSource" ref="dataSource"/>
-  </bean>
-
-  <bean id="dtsFileSystemManager"
-        init-method="init"
-        class="org.dataminx.dts.vfs.DtsFileSystemManager">
-    <property name="configurationResource" value="vfs/providers.xml"/>
-    <property name="myProxyCredentialLifetime" value="${default.myproxy.lifetime}"/>
   </bean>
 
   <bean id="applicationProperties"
