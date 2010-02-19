@@ -1,71 +1,124 @@
-<beans:beans xmlns="http://www.springframework.org/schema/integration"
+<beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:beans="http://www.springframework.org/schema/beans"
-    xmlns:jms="http://www.springframework.org/schema/integration/jms"
+    xmlns:si="http://www.springframework.org/schema/integration"
     xmlns:si-xml="http://www.springframework.org/schema/integration/xml"
+    xmlns:si-jms="http://www.springframework.org/schema/integration/jms"
     xmlns:util="http://www.springframework.org/schema/util"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-           http://www.springframework.org/schema/integration
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/integration
            http://www.springframework.org/schema/integration/spring-integration-1.0.xsd
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
            http://www.springframework.org/schema/integration/xml
            http://www.springframework.org/schema/integration/xml/spring-integration-xml-1.0.xsd
            http://www.springframework.org/schema/integration/jms
            http://www.springframework.org/schema/integration/jms/spring-integration-jms-1.0.xsd
            http://www.springframework.org/schema/util
-           http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+           http://www.springframework.org/schema/util/spring-util-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
-  <annotation-config/>
-
-  <!-- Defines a point-to-point channel for receiving DTS job requests. -->
-  <channel id="dtsSchedulingChannel" />
-  <channel id="dtsRoutingChannel"/>
+  <context:annotation-config/>
+  <context:component-scan base-package="org.dataminx.dts.broker"/>
   
+  <!-- Defines a point-to-point channel for receiving DTS job requests. -->
+  <si:channel id="brokerJobSubmissionChannel"/>
+  <si:channel id="brokerSchedulingChannel" />
+  <si:channel id="brokerRoutingChannel"/>
+  <si:channel id="brokerDefaultOutputChannel"/>
+  
+<!-- 
+  <bean class="org.dataminx.dts.broker.si.DtsSourcePollingChannelAdapter">
+    <property name="trigger" ref="trigger"/>
+    <property name="source" ref="jmsMessageSource"/>
+    <property name="outputChannel" ref="brokerEntryChannel"/>
+  </bean>
+  
+  <bean id="jmsMessageSource" class="org.springframework.integration.jms.JmsDestinationPollingSource">
+    <constructor-arg index="0" ref="jmsTemplate"/>
+  </bean>
+  
+  <bean id="trigger" class="org.springframework.integration.scheduling.IntervalTrigger">
+    <constructor-arg value="10000"/>
+  </bean>
+ -->
+ 
+ <!-- 
+<jms:inbound-channel-adapter id="jmsIn" destination="inQueue" channel="exampleChannel"> 
+    <integration:poller>
+        <integration:interval-trigger interval="30" time-unit="SECONDS"/> 
+    </integration:poller> 
+</jms:inbound-channel-adapter>
+ -->
+   
+  <si-jms:message-driven-channel-adapter
+      channel="brokerJobSubmissionChannel"
+      connection-factory="jmsConnectionFactory"
+      destination="brokerJobSubmissionQueue"
+      transaction-manager="jmsTransactionManager"/>
+ 
+  <si-jms:outbound-channel-adapter
+      channel="brokerDefaultOutputChannel"
+      connection-factory="jmsConnectionFactory"
+      destination="brokerDefaultOutputQueue"/>
+            
+
+        
   <!--
     Defines an inbound JMS channel adapter for the DTS job submission queue.
     The inbound adapter means we are receiving from JMS and placing an instance of
     org.springframework.integration.core.Message on the configured channel.
   -->
-  <jms:message-driven-channel-adapter
-      channel="dtsSchedulingChannel"
-      connection-factory="jmsConnectionFactory"
-      destination="jmsBrokerFrontQueue"
-      transaction-manager="jmsTransactionManager"
-      />
 
-  <!--
-    Defines an outbound JMS channel adapter for DTS job events and progress
-    notifications.
-  -->
-  <jms:outbound-channel-adapter
-      channel="dtsRoutingChannel"
-      connection-factory="jmsConnectionFactory"
-      destination="jmsJobEventQueue"
-      />
-
-  <beans:bean id="dtsJobSchedulingHandler"
-              class="org.dataminx.dts.broker.si.JobSchedulingHandler"/>
+  <bean id="dtsJobScheduler" class="org.dataminx.dts.broker.si.DtsJobScheduler">
+    <property name="delayHeaderName" value="${broker.delay.headerName}"/>
+  </bean>
   
-  <service-activator input-channel="dtsSchedulingChannel" ref="dtsJobSchedulingHandler"/>
+  <bean id="xmlPayloadDelayExtractor" class="org.dataminx.dts.broker.si.XmlPayloadDelayExtractor">
+    <constructor-arg index="0" value="${broker.xml.queryStr}"/>
+  </bean>
+  
+  <si:service-activator input-channel="brokerJobSubmissionChannel" 
+                        ref="dtsJobScheduler"
+                        output-channel="brokerSchedulingChannel"/>
 
-  <logging-channel-adapter channel="dtsJobExecutions"/>
-
-  <beans:bean id="dtsMarshaller"
+  <si:delayer default-delay="0" 
+              delay-header-name="${broker.delay.headerName}"
+              input-channel="brokerSchedulingChannel"
+              output-channel="brokerRoutingChannel"/>  
+  
+  <si:header-value-router 
+    input-channel="brokerRoutingChannel" 
+    default-output-channel="brokerDefaultOutputChannel"
+    header-name="${si.jms.routingHeader}">
+    
+    <!-- Custom routing mapping for each group -->
+    <si:mapping value="ANSTO" channel="brokerANSTOChannel" />
+    <!-- end custom definition -->
+    
+  </si:header-value-router>
+  
+  <bean id="dtsMarshaller"
               class="org.springframework.oxm.xmlbeans.XmlBeansMarshaller">
-    <beans:property name="validating" value="true"/>
-    <beans:property name="xmlOptions">
-      <beans:bean class="org.apache.xmlbeans.XmlOptionsBean">
-        <beans:property name="savePrettyPrint" value="true"/>
-        <beans:property name="saveNamespacesFirst" value="true"/>
-      </beans:bean>
-    </beans:property>
-  </beans:bean>
-
-<!-- 
-  <beans:bean id="dtsMessagePayloadTransformer"
-              class="org.dataminx.dts.wn.jms.DtsMessagePayloadTransformer">
-    <beans:constructor-arg index="0" ref="dtsMarshaller"/>
-  </beans:bean>
- -->
- 
-</beans:beans>
+    <property name="validating" value="true"/>
+    <property name="xmlOptions">
+      <bean class="org.apache.xmlbeans.XmlOptionsBean">
+        <property name="savePrettyPrint" value="true"/>
+        <property name="saveNamespacesFirst" value="true"/>
+      </bean>
+    </property>
+  </bean>
+  
+  <bean id="dtsMessagePayloadTransformer"
+              class="org.springframework.integration.xml.transformer.XmlPayloadUnmarshallingTransformer">
+    <constructor-arg index="0" ref="dtsMarshaller"/>
+  </bean>
+  
+    <!-- Custom declaration for individual group -->
+  <si:channel id="brokerANSTOChannel"/>
+  <si-jms:outbound-channel-adapter
+      channel="brokerANSTOChannel"
+      connection-factory="jmsConnectionFactory"
+      destination="brokerANSTOGroupQueue"/>
+      
+</beans>
