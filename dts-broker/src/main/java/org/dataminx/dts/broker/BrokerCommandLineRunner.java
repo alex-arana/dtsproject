@@ -17,6 +17,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author hnguyen
  */
 public class BrokerCommandLineRunner {
+
     /** Default Spring config file location */
     public static final String[] DEFAULT_SPRING_CLASSPATH = {
         "/org/dataminx/dts/broker/broker-context.xml",
@@ -65,6 +66,7 @@ public class BrokerCommandLineRunner {
         // since our messaging container beans are lifecycle aware the application
         // will immediately start processing
         context.start();
+
     }
 
     private String[] getSpringClasspath() {
