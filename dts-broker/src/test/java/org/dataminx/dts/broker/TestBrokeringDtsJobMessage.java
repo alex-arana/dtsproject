@@ -15,6 +15,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
+/**
+ * Integration tests of brokering a job submission message.
+ * @author hnguyen
+ */
 @ContextConfiguration
 public class TestBrokeringDtsJobMessage extends AbstractTestNGSpringContextTests{
 

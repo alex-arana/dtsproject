@@ -13,8 +13,9 @@ import org.unitils.UnitilsTestNG;
 import org.unitils.inject.annotation.TestedObject;
 
 /**
- * @author hnguyen
+ * Tests for {@link XmlPayloadDelayExtractor} implementation.
  *
+ * @author hnguyen
  */
 @Test(groups="testng-unit-tests")
 public class XmlPayloadDelayExtractorTest extends UnitilsTestNG {

@@ -4,8 +4,10 @@
 package org.dataminx.dts.broker.si;
 
 /**
- * @author hnguyen
+ * Strategy interface for extracting delay transfer requirements from a job submission
+ * message.
  *
+ * @author hnguyen
  */
 public interface DelayExtractor {
 
