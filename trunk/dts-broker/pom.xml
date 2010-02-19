@@ -20,8 +20,8 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <configuration>
-          <mainClass>org.dataminx.dts.wn.DtsWorkerNodeCommandLineRunner</mainClass>
-          <classpathScope>runtime</classpathScope>
+          <mainClass>org.dataminx.dts.broker.BrokerCommandLineRunner</mainClass>
+          <classpathScope>test</classpathScope>
         </configuration>
       </plugin>
 
@@ -108,18 +108,21 @@
     <dependency>
       <groupId>org.springframework.integration</groupId>
       <artifactId>spring-integration-core</artifactId>
+      <version>1.0.3.RELEASE</version>
     </dependency>
 
     <!-- Spring Integration JMS -->
     <dependency>
       <groupId>org.springframework.integration</groupId>
       <artifactId>spring-integration-jms</artifactId>
+      <version>1.0.3.RELEASE</version>
     </dependency>
 
     <!-- Spring Integration XML -->
     <dependency>
       <groupId>org.springframework.integration</groupId>
       <artifactId>spring-integration-xml</artifactId>
+      <version>1.0.3.RELEASE</version>
     </dependency>
 
     <!-- Spring OXM -->
@@ -167,16 +170,14 @@
     <dependency>
       <groupId>org.apache.xmlbeans</groupId>
       <artifactId>xmlbeans</artifactId>
+      <version>2.4.0</version>
     </dependency>
 
-    <!-- JUnit -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-
-    <!-- TestNG -->
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
@@ -184,86 +185,36 @@
       <scope>test</scope>
       <classifier>jdk15</classifier>
     </dependency>
-
-    <!-- Java Secure Channel JSCh -->
     <dependency>
       <groupId>com.jcraft</groupId>
       <artifactId>jsch</artifactId>
       <scope>runtime</scope>
     </dependency>
-
-    <!-- ActiveMQ -->
     <dependency>
       <artifactId>activemq-all</artifactId>
       <groupId>org.apache.activemq</groupId>
       <scope>runtime</scope>
     </dependency>
-
-    <!-- Jettison -->
     <dependency>
       <groupId>org.codehaus.jettison</groupId>
       <artifactId>jettison</artifactId>
       <scope>runtime</scope>
     </dependency>
-
-    <!-- XStream -->
-    <dependency>
-      <groupId>com.thoughtworks.xstream</groupId>
-      <artifactId>xstream</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-
-    <!-- Oracle JDBC driver -->
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>ojdbc14</artifactId>
       <scope>runtime</scope>
     </dependency>
-
-    <!-- MySQL JDBC driver -->
-    <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-
-    <!-- HSQLDB JDBC Driver -->
     <dependency>
       <groupId>hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
       <scope>runtime</scope>
     </dependency>
-
-    <!-- C3P0 -->
     <dependency>
       <groupId>c3p0</groupId>
       <artifactId>c3p0</artifactId>
       <scope>runtime</scope>
     </dependency>
-
-    <!-- commons-httpclient -->
-    <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-
-    <!-- commons-io -->
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <!--
-        The following security libraries will need to be commented out from the
-        respective DTS module pom files if we are to deploy the following DTS
-        modules (ws, workernode, portal) on a single web container
-
-        TODO: decide on how shared/unshared security libraries can be dealt with
-        if we are going to support deployment of the DTS modules in a single or
-        multiple web containers.
-    -->
     <dependency>
       <groupId>external.jglobus</groupId>
       <artifactId>cryptix32</artifactId>
@@ -284,14 +235,10 @@
       <groupId>bouncycastle</groupId>
       <artifactId>bcprov-jdk16</artifactId>
     </dependency>
-
-    <!-- Proxy Light -->
     <dependency>
         <groupId>au.org.arcs.auth</groupId>
         <artifactId>simpleProxyLib</artifactId>
     </dependency>
-
-    <!-- Unitils -->
     <dependency>
       <groupId>org.unitils</groupId>
       <artifactId>unitils</artifactId>
@@ -338,6 +285,45 @@
       <version>${servlet.version}</version>
       <scope>provided</scope>
     </dependency>
+    
+
+    <!-- JUnit -->
+
+    <!-- TestNG -->
+
+    <!-- Java Secure Channel JSCh -->
+
+    <!-- ActiveMQ -->
+
+    <!-- Jettison -->
+
+    <!-- XStream -->
+
+    <!-- Oracle JDBC driver -->
+
+    <!-- MySQL JDBC driver -->
+
+    <!-- HSQLDB JDBC Driver -->
+
+    <!-- C3P0 -->
+
+    <!-- commons-httpclient -->
+
+    <!-- commons-io -->
+
+    <!--
+        The following security libraries will need to be commented out from the
+        respective DTS module pom files if we are to deploy the following DTS
+        modules (ws, workernode, portal) on a single web container
+
+        TODO: decide on how shared/unshared security libraries can be dealt with
+        if we are going to support deployment of the DTS modules in a single or
+        multiple web containers.
+    -->
+
+    <!-- Proxy Light -->
+
+    <!-- Unitils -->
   </dependencies>
   
 </project>
