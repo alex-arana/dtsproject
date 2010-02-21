@@ -17,9 +17,10 @@ import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.CreationFlagEnumeration;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
-public class JobScoperImpl implements JobScoper {
+public class MixedFilesJobPartitioningStrategy implements JobPartitioningStrategy, InitializingBean {
 
     private final boolean mCancelled = false;
     private String mFailureMessage = "";
@@ -27,40 +28,30 @@ public class JobScoperImpl implements JobScoper {
     private long mTotalSize = 0;
     private int mTotalFiles = 0;
 
-    private int mMaxParallelConnections = 1;
+    private long mMaxTotalByteSizePerStepLimit = 0;
+
+    private int mMaxTotalFileNumPerStepLimit = 0;
 
     private ArrayList<String> mExcluded = new ArrayList<String>();
 
-    private FileSystemManager mFileSystemManager;
-
     private DtsVfsUtil mDtsVfsUtil;
 
-    private static final Log LOGGER = LogFactory.getLog(JobScoperImpl.class);
+    private static final Log LOGGER = LogFactory.getLog(MixedFilesJobPartitioningStrategy.class);
 
-    private DtsJobStepAllocator mDtsJobStepAllocator;
-
-    private String mJobResourceKey;
+    private MixedFilesJobStepAllocator mDtsJobStepAllocator;
 
     public static final int BATCH_SIZE_LIMIT = 3;
 
-    public void setFileSystemManager(final FileSystemManager fileSystemManager) {
-
-        // jobScoper only needs access to a fileSystemManager that has to be
-        // handed to it by its caller.
-        // a FileSystemManagerDispenser is only needed if the scoping task will
-        // be run more than one thread.
-        mFileSystemManager = fileSystemManager;
-    }
-
-    public DtsJobDetails scopeTheJob(final JobDefinitionType jobDefinition) {
+    public DtsJobDetails partitionTheJob(final JobDefinitionType jobDefinition,
+            final FileSystemManager fileSystemManager, final String jobResourceKey) {
 
         Assert.notNull(jobDefinition);
 
         final DtsJobDetails jobDetails = new DtsJobDetails();
         jobDetails.setJobDefinition(jobDefinition);
-        jobDetails.setJobId(mJobResourceKey);
+        jobDetails.setJobId(jobResourceKey);
 
-        mDtsJobStepAllocator = new DtsJobStepAllocator();
+        mDtsJobStepAllocator = new MixedFilesJobStepAllocator();
         mExcluded = new ArrayList<String>();
         mTotalSize = 0;
         mTotalFiles = 0;
@@ -78,15 +69,15 @@ public class JobScoperImpl implements JobScoper {
         }
 
         for (final DataTransferType dataTransfer : dataTransfers) {
-            mDtsJobStepAllocator.initNewDataTransfer();
+            mDtsJobStepAllocator.createNewDataTransfer();
 
             try {
-                prepare(mFileSystemManager.resolveFile(dataTransfer.getSource().getURI(), mDtsVfsUtil
-                        .createFileSystemOptions(dataTransfer.getSource())), mFileSystemManager.resolveFile(
-                        dataTransfer.getTarget().getURI(), mDtsVfsUtil
-                                .createFileSystemOptions(dataTransfer.getTarget())), dataTransfer);
+                prepare(fileSystemManager.resolveFile(dataTransfer.getSource().getURI(), mDtsVfsUtil
+                        .createFileSystemOptions(dataTransfer.getSource())), fileSystemManager.resolveFile(dataTransfer
+                        .getTarget().getURI(), mDtsVfsUtil.createFileSystemOptions(dataTransfer.getTarget())),
+                        dataTransfer);
             } catch (final DtsJobCancelledException e) {
-                // TODO Auto-generated catch block
+                // TODO: handle DTS Job Cancel event
                 e.printStackTrace();
             } catch (final FileSystemException e) {
                 throw new DtsException(e);
@@ -120,7 +111,7 @@ public class JobScoperImpl implements JobScoper {
 
         try {
             // Handle the following cases...
-            // source: /tmp/passwd
+            // source: /tmp/passwdDtsJobStepAllocator
             // copy to:
             // destination that does not exists: /tmp/passwd
             // destination directory that does not exists: /tmp/hello/
@@ -215,7 +206,7 @@ public class JobScoperImpl implements JobScoper {
         mTotalSize += source.getContent().getSize();
         mTotalFiles++;
         mDtsJobStepAllocator.addDataTransferUnit(new DtsDataTransferUnit(source.getURL().toString(), destination
-                .getURL().toString(), dataTransfer));
+                .getURL().toString(), dataTransfer, source.getContent().getSize()));
     }
 
     private void handleError(final Exception e) {
@@ -229,35 +220,43 @@ public class JobScoperImpl implements JobScoper {
         mDtsVfsUtil = dtsVfsUtil;
     }
 
-    public void setJobResourceKey(final String jobResourceKey) {
-        mJobResourceKey = jobResourceKey;
+    public void setMaxTotalByteSizePerStepLimit(final long maxTotalByteSizePerStepLimit) {
+        mMaxTotalByteSizePerStepLimit = maxTotalByteSizePerStepLimit;
     }
 
-    private class DtsJobStepAllocator {
+    public void setMaxTotalFileNumPerStepLimit(final int maxTotalFileNumPerStepLimit) {
+        mMaxTotalFileNumPerStepLimit = maxTotalFileNumPerStepLimit;
+
+    }
+
+    private class MixedFilesJobStepAllocator implements DtsJobStepAllocator {
         private final List<DtsJobStep> mSteps;
         private DtsJobStep mTmpDtsJobStep = null;
 
-        public DtsJobStepAllocator() {
+        public MixedFilesJobStepAllocator() {
             mSteps = new ArrayList<DtsJobStep>();
         }
 
         /**
          * This method needs to be called before a new DataTransferType instance
-         * gets processed by {@link org.dataminx.dts.batch.JobScoper#prepare()}.
+         * gets processed by
+         * {@link org.dataminx.dts.batch.JobPartitioningStrategy#prepare()}.
          * This will make sure that new DataTransferUnits get added to a new
          * DtsJobStep.
          */
-        public void initNewDataTransfer() {
-            mTmpDtsJobStep = new DtsJobStep(mSteps.size() + 1, BATCH_SIZE_LIMIT);
-
+        public void createNewDataTransfer() {
+            mTmpDtsJobStep = new TransferMixedFilesStep(mSteps.size() + 1, mMaxTotalFileNumPerStepLimit,
+                    mMaxTotalByteSizePerStepLimit);
         }
 
         public void addDataTransferUnit(final DtsDataTransferUnit dataTransferUnit) {
-            if ((mTmpDtsJobStep != null && mTmpDtsJobStep.isFull())) {
+            if ((mTmpDtsJobStep != null && ((mTmpDtsJobStep.getCurrentTotalFileNum() >= mMaxTotalFileNumPerStepLimit) || (mTmpDtsJobStep
+                    .getCurrentTotalByteSize()
+                    + dataTransferUnit.getSize() >= mMaxTotalByteSizePerStepLimit)))) {
                 mSteps.add(mTmpDtsJobStep);
-                mTmpDtsJobStep = new DtsJobStep(mSteps.size() + 1, BATCH_SIZE_LIMIT);
+                mTmpDtsJobStep = new TransferMixedFilesStep(mSteps.size() + 1, mMaxTotalFileNumPerStepLimit,
+                        mMaxTotalByteSizePerStepLimit);
                 mTmpDtsJobStep.addDataTransferUnit(dataTransferUnit);
-
             }
             else {
                 // if (!tmpDtsJobStep.isFull())
@@ -278,8 +277,13 @@ public class JobScoperImpl implements JobScoper {
     }
 
     @Override
-    public void setMaxParallelConnections(final int maxParallelConnections) {
-        mMaxParallelConnections = maxParallelConnections;
-    }
+    public void afterPropertiesSet() throws Exception {
+        if (mMaxTotalByteSizePerStepLimit == 0) {
+            mMaxTotalByteSizePerStepLimit = Long.MAX_VALUE;
+        }
+        if (mMaxTotalFileNumPerStepLimit == 0) {
+            mMaxTotalFileNumPerStepLimit = Integer.MAX_VALUE;
+        }
 
+    }
 }

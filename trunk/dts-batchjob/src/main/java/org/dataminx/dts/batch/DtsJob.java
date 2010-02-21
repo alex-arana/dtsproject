@@ -63,7 +63,7 @@ public abstract class DtsJob extends SimpleJob {
     private JobNotificationService mJobNotificationService;
 
     @Autowired
-    private JobScoper mJobScoper;
+    private JobPartitioningStrategy mJobPartitioningStrategy;
 
     /**
      * Constructs a new instance of {@link DtsJob} using the specified job
@@ -141,7 +141,7 @@ public abstract class DtsJob extends SimpleJob {
      */
     @Override
     public boolean isRestartable() {
-        return false;
+        return true;
     }
 
     /**
@@ -160,7 +160,7 @@ public abstract class DtsJob extends SimpleJob {
         return mJobNotificationService;
     }
 
-    public JobScoper getJobScoper() {
-        return mJobScoper;
+    public JobPartitioningStrategy getJobPartitioningStrategy() {
+        return mJobPartitioningStrategy;
     }
 }
