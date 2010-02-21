@@ -29,12 +29,11 @@ package org.dataminx.dts.batch;
 
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_DATA_TRANSFER_STEP_KEY;
 
-import org.dataminx.dts.batch.service.JobNotificationService;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.vfs.FileSystemManager;
+import org.dataminx.dts.batch.service.JobNotificationService;
 import org.dataminx.dts.vfs.FileSystemManagerDispenser;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.slf4j.Logger;
@@ -66,7 +65,7 @@ public class DtsJobPartitioner implements Partitioner {
     /** A reference to the input DTS job request. */
     private SubmitJobRequest mSubmitJobRequest;
 
-    private JobScoper mJobScoper;
+    private JobPartitioningStrategy mJobPartitioningStrategy;
 
     private FileSystemManagerDispenser mFileSystemManagerDispenser;
 
@@ -84,20 +83,16 @@ public class DtsJobPartitioner implements Partitioner {
         Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
 
         final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
-        mJobScoper.setFileSystemManager(fileSystemManager);
-        mJobScoper.setJobResourceKey(mJobResourceKey);
-        final DtsJobDetails jobDetails = mJobScoper.scopeTheJob(mSubmitJobRequest.getJobDefinition());
+        final DtsJobDetails jobDetails = mJobPartitioningStrategy.partitionTheJob(mSubmitJobRequest.getJobDefinition(),
+                fileSystemManager, mJobResourceKey);
 
+        // update the WS with the details gathered by the job scoping process
         mJobNotificationService.notifyJobScope(jobDetails.getJobId(), jobDetails.getTotalFiles(), jobDetails
                 .getTotalBytes());
 
         // immediately close the file system manager so FileCopyTask will be able to use all of the 
         // available connections
         mFileSystemManagerDispenser.closeFileSystemManager();
-
-        // update the WS with the details gathered by the job scoping process
-        //mJobNotificationService.notifyJobScope(jobDetails.getJobId(), jobDetails.getTotalFiles(), jobDetails
-        //        .getTotalBytes());
 
         final List<DtsJobStep> jobSteps = jobDetails.getJobSteps();
         int i = 0;
@@ -117,8 +112,8 @@ public class DtsJobPartitioner implements Partitioner {
         mSubmitJobRequest = submitJobRequest;
     }
 
-    public void setJobScoper(final JobScoper jobScoper) {
-        mJobScoper = jobScoper;
+    public void setJobPartitioningStrategy(final JobPartitioningStrategy jobPartitioningStrategy) {
+        mJobPartitioningStrategy = jobPartitioningStrategy;
     }
 
     public void setFileSystemManagerDispenser(final FileSystemManagerDispenser fileSystemManagerDispenser) {
@@ -127,5 +122,10 @@ public class DtsJobPartitioner implements Partitioner {
 
     public void setJobResourceKey(final String jobResourceKey) {
         mJobResourceKey = jobResourceKey;
+    }
+
+    public void setDtsJobDetails(final DtsJobDetails dtsJobDetails) {
+        // TODO: have the JobDetails get passed in as a late bound parameter as we wouldn't want the scoping of the job
+        // be done everytime a job is restarted if one of its steps failed at the last run.        
     }
 }

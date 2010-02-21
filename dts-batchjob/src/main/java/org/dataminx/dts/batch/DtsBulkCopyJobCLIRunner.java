@@ -21,19 +21,38 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 
+/**
+ * The command line runner for submitting a DTS job directly to Spring Batch.
+ * 
+ * @author Gerson Galang
+ */
 public class DtsBulkCopyJobCLIRunner {
 
     /** Default Spring classpath definition. */
     public static final String[] DEFAULT_SPRING_CLASSPATH = { "/org/dataminx/dts/batch/application-context.xml",
             "/org/dataminx/dts/batch/batch-context.xml" };
 
+    /** The logger. */
     private static final Log LOGGER = LogFactory.getLog(DtsBulkCopyJobCLIRunner.class);
 
+    /** The spring batch job launcher. */
     @Autowired
     private DtsJobLauncher mJobLauncher;
 
+    /** The dataminx config directory. */
     private final File mConfigDir;
 
+    /**
+     * Constructs a new instance of the DtsBulkCopyJobCLIRunner.
+     * <p>
+     * If the input string is either <code>null</code> or points to a
+     * non-existent directory, the application will attempt to access the
+     * default configuration folder, represented by the symbolic constant:
+     * {@link org.dataminx.dts.common.DtsConstants#DEFAULT_DATAMINX_CONFIGURATION_DIR}.
+     * 
+     * @param configDir String holding the fully qualified path to the DataMINX
+     *        configuration folder (or null).
+     */
     public DtsBulkCopyJobCLIRunner(final String configDir) {
         if (StringUtils.isNotBlank(configDir)) {
             mConfigDir = new File(configDir);
@@ -60,14 +79,25 @@ public class DtsBulkCopyJobCLIRunner {
         }
     }
 
+    /**
+     * Returns the Spring application classpath for this application.
+     * 
+     * @return Spring application classpath as an array of {@link String}s
+     */
     public String[] getSpringClasspath() {
         return DEFAULT_SPRING_CLASSPATH;
     }
 
+    /**
+     * The DtsBulkCopyJob Command Line Runner launcher.
+     * 
+     * @param args command line arguments.
+     */
     public static void main(final String[] args) {
 
         if (args.length != 1) {
-            throw new IllegalArgumentException("Missing or too many input files.");
+            System.err.println("DtsBulkCopyJobCLIRunner: missing input file");
+            System.err.println("Try DtsBulkCopyJobCLIRunner <path-to-dts-job-definition-document>");
         }
 
         final String configDir = System.getProperty(DATAMINX_CONFIGURATION_KEY);
@@ -99,6 +129,9 @@ public class DtsBulkCopyJobCLIRunner {
 
     }
 
+    /**
+     * Initialise the application context.
+     */
     public void initAppContext() {
         final String[] classpath = getSpringClasspath();
         final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(classpath,
@@ -112,6 +145,17 @@ public class DtsBulkCopyJobCLIRunner {
         mJobLauncher = (DtsJobLauncher) context.getBean("dtsJobLauncher");
     }
 
+    /**
+     * Runs the DTS job.
+     * 
+     * @param jobId the jobResourceKey or the job's name or ID provided by the
+     *        calling application
+     * @param job the DTS Job
+     * @throws JobExecutionAlreadyRunningException if the job is already running
+     * @throws JobRestartException if an error occurs when a job is restarted
+     * @throws JobInstanceAlreadyCompleteException if the job has already
+     *         successfully finished
+     */
     public void runJob(final String jobId, final JobDefinitionDocument job) throws JobExecutionAlreadyRunningException,
             JobRestartException, JobInstanceAlreadyCompleteException {
         mJobLauncher.run(jobId, job);

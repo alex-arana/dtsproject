@@ -51,7 +51,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
 
     private final Map<String, FileObject> mFileObjectMap = new HashMap<String, FileObject>();
 
-    private static final Log LOGGER = LogFactory.getLog(JobScoperImpl.class);
+    private static final Log LOGGER = LogFactory.getLog(MaxStreamCounterTask.class);
 
     private static final Log LOGGER_RC = LogFactory.getLog(RemoteConnection.class);
 

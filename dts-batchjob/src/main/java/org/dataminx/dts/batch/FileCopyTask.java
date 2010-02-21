@@ -87,6 +87,12 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
     public RepeatStatus execute(final StepContribution contribution, final ChunkContext chunkContext) throws Exception {
         final StepContext stepContext = chunkContext.getStepContext();
         LOG.info("Executing copy step: " + stepContext.getStepName());
+
+        // TODO: remove this block of code later on once testing is done
+        //if (stepContext.getStepName().equals("fileCopyStep:DATA_TRANSFER_STEP:001")) {
+        //    throw new Exception("test");
+        //}
+
         mBatchVolumeSize = 0;
 
         Assert.state(mJobStep != null, "Unable to find data transfer input data in step context.");

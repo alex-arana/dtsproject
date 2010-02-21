@@ -65,7 +65,7 @@
 
   <bean id="dtsJobPartitioner" scope="step" class="org.dataminx.dts.batch.DtsJobPartitioner">
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
-    <property name="jobScoper" ref="jobScoper" />
+    <property name="jobPartitioningStrategy" ref="jobPartitioningStrategy" />
     <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
     <!-- job_resource_key == jobId == messageID == correlationID == same value -->
     <property name="jobResourceKey" value="#{jobExecutionContext[JOB_RESOURCE_KEY]}"/> 
@@ -77,8 +77,8 @@
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
   </bean>
 
-  <batch:step id="taskOrientedStep">
-    <batch:tasklet ref="fileCopyTask"/>
+  <batch:step id="fileCopyStep">
+    <batch:tasklet ref="fileCopyTask" allow-start-if-complete="false"/>
   </batch:step>
 
   <bean id="partitioningStep"
@@ -88,23 +88,29 @@
         <property name="taskExecutor">
           <bean class="org.springframework.core.task.SimpleAsyncTaskExecutor"/>
         </property>
-        <property name="step" ref="taskOrientedStep"/>
+        <property name="step" ref="fileCopyStep"/>
         <property name="gridSize" value="1"/>
       </bean>
     </property>
     <property name="stepExecutionSplitter">
       <bean class="org.springframework.batch.core.partition.support.SimpleStepExecutionSplitter">
         <constructor-arg ref="jobRepository"/>
-        <constructor-arg ref="taskOrientedStep"/>
+        <constructor-arg ref="fileCopyStep"/>
         <constructor-arg ref="dtsJobPartitioner"/>
       </bean>
     </property>
     <property name="jobRepository" ref="jobRepository"/>
   </bean>
   
-  <bean id="jobScoper" class="org.dataminx.dts.batch.JobScoperImpl">
+  <!-- TODO: put these values into the dts-bulkcopyjob.properties file later on -->
+  <bean id="jobPartitioningStrategy" class="org.dataminx.dts.batch.MixedFilesJobPartitioningStrategy">
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
-    <property name="maxParallelConnections" value="${default.max.parallel.connections}" />
+    <!-- limit the size of each step to not be more than 10MB -->
+    <!-- 
+    <property name="maxTotalByteSizePerStepLimit" value="10485760" />
+    -->
+    <!-- process 3 files per step -->
+    <property name="maxTotalFileNumPerStepLimit" value="3" />
   </bean>
   
   <batch:step id="maxStreamCountingStep">
