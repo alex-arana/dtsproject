@@ -40,7 +40,6 @@ import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -69,7 +68,6 @@ public class FileCopyingServiceImpl implements FileCopyingService {
      */
     private final boolean mPreserveLastModified = true;
 
-    @Autowired
     private DtsVfsUtil mDtsVfsUtil;
 
     /**

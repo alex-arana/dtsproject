@@ -137,9 +137,10 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.state(mSubmitJobRequest != null);
-        Assert.state(mFileSystemManagerDispenser != null);
-        Assert.state(mDtsVfsUtil != null);
+        Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
+        Assert.state(mFileSystemManagerDispenser != null, "FileSystemManagerDispenser has not been set.");
+        Assert.state(mDtsVfsUtil != null, "DtsVfsUtil has not been set.");
+        Assert.state(mMaxConnectionsToTry != 0, "MaxConnectionsToTry has not been set.");
     }
 
     public void setMaxConnectionsToTry(final int maxConnectionsToTry) {

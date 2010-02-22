@@ -38,23 +38,19 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * This is the factory class for all Spring Batch jobs included with the DTS implementation.
+ * This is the factory class for all Spring Batch jobs included with the DTS
+ * implementation.
  * <p>
- * All DTS Jobs designed to handle client requests are to be created via this class.  A list of all known
- * jobs and their corresponding Spring components are maintained within its internal registry.  Add new
- * ones as required.
- *
+ * All DTS Jobs designed to handle client requests are to be created via this
+ * class. A list of all known jobs and their corresponding Spring components are
+ * maintained within its internal registry. Add new ones as required.
+ * 
  * @author Alex Arana
  */
-@Component("dtsJobFactory")
-@Scope("singleton")
 public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
     /** Internal logger object. */
     private static final Logger LOG = LoggerFactory.getLogger(DtsJobFactoryImpl.class);
@@ -63,12 +59,10 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
      * Maps DTS job request types to DTS jobs (by their ID).
      */
     @SuppressWarnings("unchecked")
-    private static final Map<String, String> DTS_JOB_REGISTRY = MapUtils.putAll(new HashMap(), new String[][] {
-        {SubmitJobRequestDocument.class.getName(), "dtsFileTransferJob"}
-    });
+    private static final Map<String, String> DTS_JOB_REGISTRY = MapUtils.putAll(new HashMap(), new String[][] { {
+            SubmitJobRequestDocument.class.getName(), "dtsFileTransferJob" } });
 
     /** A reference to the Spring Batch Job repository. */
-    @Autowired
     private JobRepository mJobRepository;
 
     /** A reference to the Spring bean factory. */
@@ -82,12 +76,18 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
         mBeanFactory = beanFactory;
     }
 
+    public void setJobRepository(final JobRepository jobRepository) {
+        mJobRepository = jobRepository;
+    }
+
     /**
-     * Returns the DTS Job name corresponding to the given request object instance.
-     *
+     * Returns the DTS Job name corresponding to the given request object
+     * instance.
+     * 
      * @param instance DTS Job input request object
-     * @return A fully-qualified class name of the corresponding DTS Job to handle the input request or
-     *         <code>null</code> if one has not yet been defined.
+     * @return A fully-qualified class name of the corresponding DTS Job to
+     *         handle the input request or <code>null</code> if one has not yet
+     *         been defined.
      */
     private String lookupJobName(final Object instance) {
         for (final Class<?> definition : ClassUtils.getAllInterfaces(instance)) {
@@ -111,12 +111,12 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
         // if we don't have a job capable of handling this type of request raise an exception
         if (StringUtils.isEmpty(dtsJobName)) {
             final String message = String.format("Unsupported DTS job request type.  A DTS Worker Node job capable"
-                + " of handling requests of type '%s' is not yet registered.", criteria.getClass().getName());
+                    + " of handling requests of type '%s' is not yet registered.", criteria.getClass().getName());
             LOG.error(message);
             throw new DtsJobCreationException(message);
         }
 
         // create a new instance of the job using the spring bean factory
-        return (DtsJob) mBeanFactory.getBean(dtsJobName, new Object[] {jobId, criteria, mJobRepository});
+        return (DtsJob) mBeanFactory.getBean(dtsJobName, new Object[] { jobId, criteria, mJobRepository });
     }
 }

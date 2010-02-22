@@ -36,14 +36,12 @@ import org.springframework.batch.core.StartLimitExceededException;
 import org.springframework.batch.core.job.SimpleJob;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Base class implementation of the DTS worker node job.
  * 
  * @author Alex Arana
  */
-@Component
 public abstract class DtsJob extends SimpleJob {
     /** The unique DTS job identifier. */
     private final String mJobId;

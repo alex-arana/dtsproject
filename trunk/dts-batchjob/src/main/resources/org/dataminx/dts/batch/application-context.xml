@@ -33,4 +33,8 @@
   </bean>
   
   <bean id="jobNotificationService" class="org.dataminx.dts.batch.service.LoggingJobNotificationService" />
+  
+  <bean id="dtsBulkCopyJobCLIRunner" class="org.dataminx.dts.batch.DtsBulkCopyJobCLIRunner">
+    <property name="dtsJobLauncher" ref="dtsJobLauncher"/>
+  </bean>
 </beans>

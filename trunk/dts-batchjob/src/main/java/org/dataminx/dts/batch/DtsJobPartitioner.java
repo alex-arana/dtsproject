@@ -32,16 +32,12 @@ import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_DATA_TRANSF
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.vfs.FileSystemManager;
-import org.dataminx.dts.batch.service.JobNotificationService;
-import org.dataminx.dts.vfs.FileSystemManagerDispenser;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Implementation of {@link Partitioner} that can split a
@@ -58,43 +54,18 @@ import org.springframework.util.Assert;
  * 
  * @author Alex Arana
  */
-public class DtsJobPartitioner implements Partitioner {
+public class DtsJobPartitioner implements Partitioner, InitializingBean {
     /** Internal logger object. */
     private static final Logger LOG = LoggerFactory.getLogger(DtsJobPartitioner.class);
 
-    /** A reference to the input DTS job request. */
-    private SubmitJobRequest mSubmitJobRequest;
-
-    private JobPartitioningStrategy mJobPartitioningStrategy;
-
-    private FileSystemManagerDispenser mFileSystemManagerDispenser;
-
-    /** A reference to the application's job notification service. */
-    @Autowired
-    private JobNotificationService mJobNotificationService;
-
-    private String mJobResourceKey;
+    private DtsJobDetails mDtsJobDetails;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public Map<String, ExecutionContext> partition(final int gridSize) {
-        Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
-
-        final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
-        final DtsJobDetails jobDetails = mJobPartitioningStrategy.partitionTheJob(mSubmitJobRequest.getJobDefinition(),
-                fileSystemManager, mJobResourceKey);
-
-        // update the WS with the details gathered by the job scoping process
-        mJobNotificationService.notifyJobScope(jobDetails.getJobId(), jobDetails.getTotalFiles(), jobDetails
-                .getTotalBytes());
-
-        // immediately close the file system manager so FileCopyTask will be able to use all of the 
-        // available connections
-        mFileSystemManagerDispenser.closeFileSystemManager();
-
-        final List<DtsJobStep> jobSteps = jobDetails.getJobSteps();
+        final List<DtsJobStep> jobSteps = mDtsJobDetails.getJobSteps();
         int i = 0;
 
         final Map<String, ExecutionContext> map = new HashMap<String, ExecutionContext>(gridSize);
@@ -108,24 +79,15 @@ public class DtsJobPartitioner implements Partitioner {
         return map;
     }
 
-    public void setSubmitJobRequest(final SubmitJobRequest submitJobRequest) {
-        mSubmitJobRequest = submitJobRequest;
-    }
-
-    public void setJobPartitioningStrategy(final JobPartitioningStrategy jobPartitioningStrategy) {
-        mJobPartitioningStrategy = jobPartitioningStrategy;
-    }
-
-    public void setFileSystemManagerDispenser(final FileSystemManagerDispenser fileSystemManagerDispenser) {
-        mFileSystemManagerDispenser = fileSystemManagerDispenser;
-    }
-
-    public void setJobResourceKey(final String jobResourceKey) {
-        mJobResourceKey = jobResourceKey;
-    }
-
     public void setDtsJobDetails(final DtsJobDetails dtsJobDetails) {
         // TODO: have the JobDetails get passed in as a late bound parameter as we wouldn't want the scoping of the job
-        // be done everytime a job is restarted if one of its steps failed at the last run.        
+        // be done everytime a job is restarted if one of its steps failed at the last run.
+        mDtsJobDetails = dtsJobDetails;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        //Assert.state(mDtsJobDetails != null, "Unable to find DtsJobDetails in execution context.");
+
     }
 }

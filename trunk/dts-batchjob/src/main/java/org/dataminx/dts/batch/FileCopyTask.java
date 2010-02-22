@@ -44,7 +44,6 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.scope.context.StepContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 /**
@@ -63,14 +62,11 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
     private static final Logger LOG = LoggerFactory.getLogger(FileCopyTask.class);
 
     /** A reference to the application's file copying service. */
-    @Autowired
     private FileCopyingService mFileCopyingService;
 
     /** A reference to the application's job notification service. */
-    @Autowired
     private JobNotificationService mJobNotificationService;
 
-    @Autowired
     private DtsVfsUtil mDtsVfsUtil;
 
     private FileSystemManagerDispenser mFileSystemManagerDispenser;
@@ -90,7 +86,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
 
         // TODO: remove this block of code later on once testing is done
         //if (stepContext.getStepName().equals("fileCopyStep:DATA_TRANSFER_STEP:001")) {
-        //    throw new Exception("test");
+        //    throw new Exception("throw test error in step");
         //}
 
         mBatchVolumeSize = 0;
@@ -156,6 +152,14 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
 
     public void setDtsVfsUtil(final DtsVfsUtil dtsVfsUtil) {
         mDtsVfsUtil = dtsVfsUtil;
+    }
+
+    public void setFileCopyingService(final FileCopyingService fileCopyingService) {
+        mFileCopyingService = fileCopyingService;
+    }
+
+    public void setJobNotificationService(final JobNotificationService jobNotificationService) {
+        mJobNotificationService = jobNotificationService;
     }
 
     /**
