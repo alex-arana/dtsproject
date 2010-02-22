@@ -22,11 +22,31 @@
   <channel id="dtsJobEvents"/>
   <channel id="dtsJobExecutions"/>
 
+ 
+  <beans:bean class="org.dataminx.dts.wn.jms.DtsSourcePollingChannelAdapter">
+    <beans:property name="trigger" ref="trigger"/>
+    <beans:property name="source" ref="jmsMessageSource"/>
+    <beans:property name="outputChannel" ref="dtsJobRequests"/>
+    <beans:property name="transactionManager" ref="jmsTransactionManager"/>
+    <beans:property name="mWorkerNodeManager" ref="workerNodeManager"/>
+  </beans:bean>
+  
+  <beans:bean id="jmsMessageSource" class="org.springframework.integration.jms.JmsDestinationPollingSource">
+    <beans:constructor-arg index="0" ref="convertableJmsTemplate"/>
+  </beans:bean>
+  
+  <beans:bean id="trigger" class="org.springframework.integration.scheduling.IntervalTrigger">
+    <beans:constructor-arg value="10000"/>
+  </beans:bean>
+
+  <beans:bean id="workerNodeManager" class="org.dataminx.dts.wn.WorkerNodeManager">
+  </beans:bean>
+  
   <!--
     Defines an inbound JMS channel adapter for the DTS job submission queue.
     The inbound adapter means we are receiving from JMS and placing an instance of
     org.springframework.integration.core.Message on the configured channel.
-  -->
+  
   <jms:message-driven-channel-adapter
       channel="dtsJobRequests"
       connection-factory="jmsConnectionFactory"
@@ -34,7 +54,7 @@
       message-converter="dtsMessageConverter"
       transaction-manager="jmsTransactionManager"
       />
-
+  -->
   <!--
     Defines an outbound JMS channel adapter for DTS job events and progress
     notifications.

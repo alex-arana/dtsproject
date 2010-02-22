@@ -31,4 +31,10 @@
     <property name="connectionFactory" ref="jmsConnectionFactory"/>
     <property name="defaultDestination" ref="jmsJobEventQueue"/>
   </bean>
+  
+  <bean id="convertableJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="defaultDestination" ref="jmsJobSubmitQueue"/>
+    <property name="messageConverter" ref="dtsMessageConverter"/>
+  </bean>
 </beans>
