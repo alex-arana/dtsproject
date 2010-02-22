@@ -27,21 +27,7 @@
   <si:channel id="brokerRoutingChannel"/>
   <si:channel id="brokerDefaultOutputChannel"/>
   
-<!-- 
-  <bean class="org.dataminx.dts.broker.si.DtsSourcePollingChannelAdapter">
-    <property name="trigger" ref="trigger"/>
-    <property name="source" ref="jmsMessageSource"/>
-    <property name="outputChannel" ref="brokerEntryChannel"/>
-  </bean>
-  
-  <bean id="jmsMessageSource" class="org.springframework.integration.jms.JmsDestinationPollingSource">
-    <constructor-arg index="0" ref="jmsTemplate"/>
-  </bean>
-  
-  <bean id="trigger" class="org.springframework.integration.scheduling.IntervalTrigger">
-    <constructor-arg value="10000"/>
-  </bean>
- -->
+
  
  <!-- 
 <jms:inbound-channel-adapter id="jmsIn" destination="inQueue" channel="exampleChannel"> 
