@@ -121,6 +121,13 @@ public class MixedFilesJobPartitioningStrategy implements JobPartitioningStrateg
             // destination directory that exists: /tmp
 
             if (sourceParent.getType().equals(FileType.FILE) && !mCancelled) {
+
+                if (sourceParent.getContent().getSize() > mMaxTotalByteSizePerStepLimit) {
+                    throw new JobScopingException("file: " + sourceParent.getName()
+                            + " too big. Try transferring files smaller than " + mMaxTotalByteSizePerStepLimit
+                            + " bytes.");
+                }
+
                 final CreationFlagEnumeration.Enum creationFlag = dataTransfer.getTransferRequirements()
                         .getCreationFlag();
 
@@ -197,6 +204,8 @@ public class MixedFilesJobPartitioningStrategy implements JobPartitioningStrateg
             throw e;
         } catch (final Exception e) {
             handleError(e);
+            // throw everything else that's not DtsJobCancelledException as DtsException
+            throw new DtsException(e);
         }
     }
 

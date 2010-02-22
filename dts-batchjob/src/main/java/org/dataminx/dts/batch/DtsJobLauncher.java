@@ -39,7 +39,6 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This is the Spring Batch Launcher for the DTS Worker Node.
@@ -51,7 +50,6 @@ public class DtsJobLauncher extends SimpleJobLauncher {
 
     private static final Log LOGGER = LogFactory.getLog(DtsJobLauncher.class);
 
-    @Autowired
     private DtsJobFactory mJobFactory;
 
     /**
@@ -78,5 +76,9 @@ public class DtsJobLauncher extends SimpleJobLauncher {
         final DtsJob dtsJob = mJobFactory.createJob(jobId, dtsJobRequest);
 
         return run(dtsJob, new DefaultJobParametersConverter().getJobParameters(new Properties()));
+    }
+
+    public void setDtsJobFactory(final DtsJobFactory jobFactory) {
+        mJobFactory = jobFactory;
     }
 }

@@ -44,10 +44,6 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -56,20 +52,19 @@ import org.springframework.util.ObjectUtils;
  * 
  * @author Alex Arana
  */
-@Component("dtsFileTransferJob")
-@Scope("prototype")
 public class DtsFileTransferJob extends DtsJob {
     /** Holds the information about the job request. */
     private final SubmitJobRequest mJobRequest;
 
-    /** The master step in this job. */
-    @Autowired
-    @Qualifier("partitioningStep")
+    /**
+     * The partitioning step acts as the master step over all of the
+     * fileCopyingSteps.
+     */
     private Step mPartitioningStep;
 
-    @Autowired
-    @Qualifier("maxStreamCountingStep")
     private Step mMaxStreamCountingStep;
+
+    private Step mJobScopingStep;
 
     /**
      * Constructs a new instance of <code>DtsSubmitJob</code> using the
@@ -159,8 +154,9 @@ public class DtsFileTransferJob extends DtsJob {
         context.put(DTS_JOB_RESOURCE_KEY, getJobId());
 
         // TODO convert to application exceptions
-        StepExecution stepExecution;// = handleStep(mMaxStreamCountingStep,
-        // execution);
+        StepExecution stepExecution = handleStep(mJobScopingStep, execution);
+
+        //stepExecution = handleStep(mMaxStreamCountingStep, execution);
 
         // TODO handle repeat of steps if failure occurs
 
@@ -182,6 +178,18 @@ public class DtsFileTransferJob extends DtsJob {
         // TODO move this somewhere it always gets called
         registerCompletedTime();
         getJobNotificationService().notifyJobStatus(this, JobStatus.DONE);
+    }
+
+    public void setPartitioningStep(final Step partitioningStep) {
+        mPartitioningStep = partitioningStep;
+    }
+
+    public void setMaxStreamCountingStep(final Step maxStreamCountingStep) {
+        mMaxStreamCountingStep = maxStreamCountingStep;
+    }
+
+    public void setJobScopingStep(final Step jobScopingStep) {
+        mJobScopingStep = jobScopingStep;
     }
 
     /**

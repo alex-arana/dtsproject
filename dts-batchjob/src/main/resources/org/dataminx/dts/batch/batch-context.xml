@@ -56,29 +56,63 @@
     <property name="dataSource" ref="dataSource"/>
     <property name="transactionManager" ref="transactionManager"/>
   </bean>
+  
+  <bean id="dtsJobFactory" class="org.dataminx.dts.batch.DtsJobFactoryImpl">
+    <property name="jobRepository" ref="jobRepository"/>
+  </bean>
 
   <!-- the task executor below will have to be provided by the calling application  -->
   <bean id="dtsJobLauncher" class="org.dataminx.dts.batch.DtsJobLauncher">
     <property name="jobRepository" ref="jobRepository" />
     <property name="taskExecutor" ref="jobLauncherTaskExecutor"/>
+    <property name="dtsJobFactory" ref="dtsJobFactory"/>
   </bean>
 
   <bean id="dtsJobPartitioner" scope="step" class="org.dataminx.dts.batch.DtsJobPartitioner">
+    <property name="dtsJobDetails" value="#{jobExecutionContext[JOB_DETAILS]}"/>
+  </bean>
+  
+  <bean id="jobScopingTask" class="org.dataminx.dts.batch.JobScopingTask" scope="step">
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
     <property name="jobPartitioningStrategy" ref="jobPartitioningStrategy" />
     <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
     <!-- job_resource_key == jobId == messageID == correlationID == same value -->
-    <property name="jobResourceKey" value="#{jobExecutionContext[JOB_RESOURCE_KEY]}"/> 
+    <property name="jobResourceKey" value="#{jobExecutionContext[JOB_RESOURCE_KEY]}"/>
+    <property name="jobNotificationService" ref="jobNotificationService"/>
+  </bean>
+  
+  <bean id="promotionListener" class="org.springframework.batch.core.listener.ExecutionContextPromotionListener">
+    <property name="keys" value="JOB_DETAILS"/>
   </bean>
 
   <bean id="fileCopyTask" class="org.dataminx.dts.batch.FileCopyTask" scope="step">
     <property name="jobStep" value="#{stepExecutionContext[DATA_TRANSFER_STEP]}"/>
     <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
+    <property name="jobNotificationService" ref="jobNotificationService"/>
+    <property name="fileCopyingService" ref="fileCopyingService"/>
   </bean>
+  
+  <bean id="fileCopyingService" class="org.dataminx.dts.batch.service.FileCopyingServiceImpl">
+    <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
+  </bean>
+  
+  <bean id="dtsFileTransferJob" scope="prototype" class="org.dataminx.dts.batch.DtsFileTransferJob">
+    <property name="jobScopingStep" ref="jobScopingStep"/>
+    <property name="maxStreamCountingStep" ref="maxStreamCountingStep"/>
+    <property name="partitioningStep" ref="partitioningStep"/>
+  </bean>
+  
+  <batch:step id="jobScopingStep">
+    <batch:tasklet ref="jobScopingTask">
+      <batch:listeners>
+          <batch:listener ref="promotionListener"/>
+      </batch:listeners>    
+    </batch:tasklet>
+  </batch:step>
 
   <batch:step id="fileCopyStep">
-    <batch:tasklet ref="fileCopyTask" allow-start-if-complete="false"/>
+    <batch:tasklet ref="fileCopyTask"/>
   </batch:step>
 
   <bean id="partitioningStep"

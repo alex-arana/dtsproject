@@ -67,7 +67,7 @@ public class DtsWorkerNodeCommandLineRunner {
      * If the input string is either <code>null</code> or points to a
      * non-existent directory, the application will attempt to access the
      * default configuration folder, represented by the symbolic constant:
-     * {@link org.dataminx.dts.batch.common.DtsBatchJobConstants#DEFAULT_DATAMINX_CONFIGURATION_DIR}.
+     * {@link org.dataminx.dts.common.DtsConstants#DEFAULT_DATAMINX_CONFIGURATION_DIR}.
      * 
      * @param configDir String holding the fully qualified path to the DataMINX
      *        configuration folder (or null).

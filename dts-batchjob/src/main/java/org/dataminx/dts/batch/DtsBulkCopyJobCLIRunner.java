@@ -17,7 +17,6 @@ import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 
@@ -36,11 +35,18 @@ public class DtsBulkCopyJobCLIRunner {
     private static final Log LOGGER = LogFactory.getLog(DtsBulkCopyJobCLIRunner.class);
 
     /** The spring batch job launcher. */
-    @Autowired
     private DtsJobLauncher mJobLauncher;
 
     /** The dataminx config directory. */
     private final File mConfigDir;
+
+    /**
+     * Constructs a new instance of the DtsBulkCopyJobCLIRunner using the
+     * default configuration folder.
+     */
+    public DtsBulkCopyJobCLIRunner() {
+        this("");
+    }
 
     /**
      * Constructs a new instance of the DtsBulkCopyJobCLIRunner.
@@ -159,6 +165,15 @@ public class DtsBulkCopyJobCLIRunner {
     public void runJob(final String jobId, final JobDefinitionDocument job) throws JobExecutionAlreadyRunningException,
             JobRestartException, JobInstanceAlreadyCompleteException {
         mJobLauncher.run(jobId, job);
+    }
+
+    /**
+     * Sets the job launcher.
+     * 
+     * @param jobLauncher the DtsJobLauncher
+     */
+    public void setDtsJobLauncher(final DtsJobLauncher jobLauncher) {
+        mJobLauncher = jobLauncher;
     }
 
 }
