@@ -57,6 +57,7 @@ public class JobEventQueueSender implements InitializingBean {
 
     /** Spring helper class to provide JMS support. */
     @Autowired
+    @Qualifier("jmsTemplate")
     private JmsTemplate mJmsTemplate;
 
     /** A reference to the DTS JMS message converter. */

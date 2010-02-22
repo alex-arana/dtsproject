@@ -57,6 +57,7 @@ public class JobSubmitQueueSender implements InitializingBean {
 
     /** Spring helper class to provide JMS support. */
     @Autowired
+    @Qualifier("jmsTemplate")
     private JmsTemplate mJmsTemplate;
 
     /**
