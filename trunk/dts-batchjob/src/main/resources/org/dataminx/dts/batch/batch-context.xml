@@ -50,6 +50,10 @@
     <property name="irodsSupported" value="true" />
     <property name="myProxyCredentialLifetime" value="${default.myproxy.lifetime}" />
   </bean>
+  
+  <bean id="jobExplorer" class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">
+    <property name="dataSource" ref="dataSource"/>
+  </bean>
 
   <bean id="jobRepository"
         class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
@@ -79,6 +83,7 @@
     <!-- job_resource_key == jobId == messageID == correlationID == same value -->
     <property name="jobResourceKey" value="#{jobExecutionContext[JOB_RESOURCE_KEY]}"/>
     <property name="jobNotificationService" ref="jobNotificationService"/>
+    <property name="executionContextCleaner" ref="executionContextCleaner"/>
   </bean>
   
   <bean id="promotionListener" class="org.springframework.batch.core.listener.ExecutionContextPromotionListener">
@@ -91,6 +96,8 @@
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
     <property name="jobNotificationService" ref="jobNotificationService"/>
     <property name="fileCopyingService" ref="fileCopyingService"/>
+    <property name="executionContextCleaner" ref="executionContextCleaner"/>
+    <property name="fileSystemManagerCache" ref="fileSystemManagerCache"/>
   </bean>
   
   <bean id="fileCopyingService" class="org.dataminx.dts.batch.service.FileCopyingServiceImpl">
@@ -101,8 +108,19 @@
     <property name="jobScopingStep" ref="jobScopingStep"/>
     <property name="maxStreamCountingStep" ref="maxStreamCountingStep"/>
     <property name="partitioningStep" ref="partitioningStep"/>
+    <property name="jobExecutionListeners">
+      <list>
+        <ref bean="dtsFileTransferJobListener"/>
+      </list>
+    </property>
   </bean>
   
+  <bean id="dtsFileTransferJobListener" class="org.dataminx.dts.batch.DtsFileTransferJobListener">
+    <property name="fileSystemManagerCache" ref="fileSystemManagerCache"/>
+    <property name="executionContextCleaner" ref="executionContextCleaner"/>
+    <property name="jobExplorer" ref="jobExplorer"/>
+  </bean>
+    
   <batch:step id="jobScopingStep">
     <batch:tasklet ref="jobScopingTask">
       <batch:listeners>
@@ -148,14 +166,23 @@
   </bean>
   
   <batch:step id="maxStreamCountingStep">
-       <batch:tasklet ref="maxStreamCounterTask"/>
-  </batch:step>  
+    <batch:tasklet ref="maxStreamCounterTask" allow-start-if-complete="true"/>
+  </batch:step>
   
   <bean id="maxStreamCounterTask" class="org.dataminx.dts.batch.MaxStreamCounterTask" scope="step">
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
     <property name="maxConnectionsToTry" value="${default.max.parallel.connections}"/>
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
-    <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
+    <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>  
+    <property name="fileSystemManagerCache" ref="fileSystemManagerCache"/>
+    <property name="jobRepository" ref="jobRepository"/>
+  </bean>
+  
+  <bean id="fileSystemManagerCache" class="org.dataminx.dts.vfs.FileSystemManagerCache"/>
+  
+  <bean id="executionContextCleaner" class="org.dataminx.dts.batch.common.util.ExecutionContextCleaner">
+    <property name="jobRepository" ref="jobRepository"/>
+    <property name="jobExplorer" ref="jobExplorer"/>
   </bean>
   
 </beans>

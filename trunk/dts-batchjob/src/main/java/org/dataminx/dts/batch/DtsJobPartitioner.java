@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link Partitioner} that can split a
@@ -53,6 +54,7 @@ import org.springframework.beans.factory.InitializingBean;
  * being called.
  * 
  * @author Alex Arana
+ * @author Gerson Galang
  */
 public class DtsJobPartitioner implements Partitioner, InitializingBean {
     /** Internal logger object. */
@@ -80,14 +82,11 @@ public class DtsJobPartitioner implements Partitioner, InitializingBean {
     }
 
     public void setDtsJobDetails(final DtsJobDetails dtsJobDetails) {
-        // TODO: have the JobDetails get passed in as a late bound parameter as we wouldn't want the scoping of the job
-        // be done everytime a job is restarted if one of its steps failed at the last run.
         mDtsJobDetails = dtsJobDetails;
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        //Assert.state(mDtsJobDetails != null, "Unable to find DtsJobDetails in execution context.");
-
+        Assert.state(mDtsJobDetails != null, "Unable to find DtsJobDetails in execution context.");
     }
 }
