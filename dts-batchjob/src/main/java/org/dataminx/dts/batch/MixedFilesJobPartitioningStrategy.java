@@ -163,7 +163,6 @@ public class MixedFilesJobPartitioningStrategy implements JobPartitioningStrateg
                     // destinationChild.createFile();
 
                     if (destinationChild.exists()) {
-                        LOGGER.debug("creationFlag: " + creationFlag);
                         if (creationFlag.equals(CreationFlagEnumeration.OVERWRITE)) {
                             addFilesToTransfer(sourceParent, destinationChild, dataTransfer);
                         }

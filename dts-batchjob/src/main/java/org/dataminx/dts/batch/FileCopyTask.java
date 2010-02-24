@@ -27,11 +27,15 @@
  */
 package org.dataminx.dts.batch;
 
+import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_DATA_TRANSFER_STEP_KEY;
+
 import java.util.List;
 import org.apache.commons.vfs.FileSystemManager;
+import org.dataminx.dts.batch.common.util.ExecutionContextCleaner;
 import org.dataminx.dts.batch.service.FileCopyingService;
 import org.dataminx.dts.batch.service.JobNotificationService;
 import org.dataminx.dts.vfs.DtsVfsUtil;
+import org.dataminx.dts.vfs.FileSystemManagerCache;
 import org.dataminx.dts.vfs.FileSystemManagerDispenser;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.slf4j.Logger;
@@ -44,6 +48,7 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.scope.context.StepContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
@@ -57,7 +62,7 @@ import org.springframework.util.Assert;
  * 
  * @author Alex Arana
  */
-public class FileCopyTask implements Tasklet, StepExecutionListener {
+public class FileCopyTask implements Tasklet, StepExecutionListener, InitializingBean {
     /** A reference to the internal logger object. */
     private static final Logger LOG = LoggerFactory.getLogger(FileCopyTask.class);
 
@@ -67,9 +72,13 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
     /** A reference to the application's job notification service. */
     private JobNotificationService mJobNotificationService;
 
+    private ExecutionContextCleaner mExecutionContextCleaner;
+
     private DtsVfsUtil mDtsVfsUtil;
 
     private FileSystemManagerDispenser mFileSystemManagerDispenser;
+
+    private FileSystemManagerCache mFileSystemManagerCache;
 
     private DtsJobStep mJobStep;
 
@@ -88,6 +97,10 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
         //if (stepContext.getStepName().equals("fileCopyStep:DATA_TRANSFER_STEP:001")) {
         //    throw new Exception("throw test error in step");
         //}
+
+        // TODO: remove this later on..
+        LOG.info("Simulating a FileCopy step that uses " + mFileSystemManagerCache.getSize()
+                + " concurrent connections to the remote destination.");
 
         mBatchVolumeSize = 0;
 
@@ -162,6 +175,24 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
         mJobNotificationService = jobNotificationService;
     }
 
+    public void setExecutionContextCleaner(final ExecutionContextCleaner executionContextCleaner) {
+        mExecutionContextCleaner = executionContextCleaner;
+    }
+
+    public void setFileSystemManagerCache(final FileSystemManagerCache fileSystemManagerCache) {
+        mFileSystemManagerCache = fileSystemManagerCache;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Assert.state(mJobStep != null, "Unable to find DtsJobStep in execution context.");
+        Assert.state(mDtsVfsUtil != null, "DtsVfsUtil has not been set.");
+        Assert.state(mFileSystemManagerDispenser != null, "FileSystemManagerDispenser has not been set.");
+        Assert.state(mJobNotificationService != null, "JobNotificationService has not been set.");
+        Assert.state(mExecutionContextCleaner != null, "ExecutionContextCleaner has not been set.");
+        Assert.state(mFileSystemManagerCache != null, "FileSystemManagerCache has not been set.");
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -175,7 +206,10 @@ public class FileCopyTask implements Tasklet, StepExecutionListener {
         }
         else {
             mJobNotificationService.notifyJobProgress(dtsJobId, mBatchTotalFiles, mBatchVolumeSize);
+
+            mExecutionContextCleaner.removeStepExecutionContextEntry(stepExecution, DTS_DATA_TRANSFER_STEP_KEY);
         }
+
         return exitStatus;
     }
 }

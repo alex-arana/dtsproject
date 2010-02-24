@@ -30,6 +30,7 @@ package org.dataminx.dts.batch;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_RESOURCE_KEY;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
 
+import java.util.List;
 import org.dataminx.dts.domain.model.JobStatus;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
@@ -37,6 +38,7 @@ import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.JobInterruptedException;
 import org.springframework.batch.core.StartLimitExceededException;
 import org.springframework.batch.core.Step;
@@ -44,6 +46,7 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -51,8 +54,9 @@ import org.springframework.util.ObjectUtils;
  * DTS Job that performs a file copy operation.
  * 
  * @author Alex Arana
+ * @author Gerson Galang
  */
-public class DtsFileTransferJob extends DtsJob {
+public class DtsFileTransferJob extends DtsJob implements InitializingBean {
     /** Holds the information about the job request. */
     private final SubmitJobRequest mJobRequest;
 
@@ -156,9 +160,7 @@ public class DtsFileTransferJob extends DtsJob {
         // TODO convert to application exceptions
         StepExecution stepExecution = handleStep(mJobScopingStep, execution);
 
-        //stepExecution = handleStep(mMaxStreamCountingStep, execution);
-
-        // TODO handle repeat of steps if failure occurs
+        stepExecution = handleStep(mMaxStreamCountingStep, execution);
 
         stepExecution = handleStep(mPartitioningStep, execution);
 
@@ -190,6 +192,18 @@ public class DtsFileTransferJob extends DtsJob {
 
     public void setJobScopingStep(final Step jobScopingStep) {
         mJobScopingStep = jobScopingStep;
+    }
+
+    public void setJobExecutionListeners(final List<JobExecutionListener> jobExecutionListeners) {
+        setJobExecutionListeners(jobExecutionListeners.toArray(new JobExecutionListener[0]));
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Assert.state(mPartitioningStep != null, "PartitioningStep has not been set.");
+        Assert.state(mMaxStreamCountingStep != null, "MaxStreamCountingStep has not been set.");
+        Assert.state(mJobScopingStep != null, "JobScopingStep has not been set");
+        super.afterPropertiesSet();
     }
 
     /**
