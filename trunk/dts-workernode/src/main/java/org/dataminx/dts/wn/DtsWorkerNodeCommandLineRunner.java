@@ -42,7 +42,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Command-line launcher for the DTS Worker Node application.
- * 
+ *
  * @author Alex Arana
  */
 public class DtsWorkerNodeCommandLineRunner {
@@ -68,7 +68,7 @@ public class DtsWorkerNodeCommandLineRunner {
      * non-existent directory, the application will attempt to access the
      * default configuration folder, represented by the symbolic constant:
      * {@link org.dataminx.dts.common.DtsConstants#DEFAULT_DATAMINX_CONFIGURATION_DIR}.
-     * 
+     *
      * @param configDir String holding the fully qualified path to the DataMINX
      *        configuration folder (or null).
      * @throws DtsException When an error occurs ...
@@ -101,7 +101,7 @@ public class DtsWorkerNodeCommandLineRunner {
 
     /**
      * Returns the Spring application classpath for this application.
-     * 
+     *
      * @return Spring application classpath as an array of {@link String}s
      */
     public String[] getSpringClasspath() {
@@ -117,6 +117,7 @@ public class DtsWorkerNodeCommandLineRunner {
                 DtsWorkerNodeCommandLineRunner.class);
         LOG.debug("Spring context loaded from classpath: " + ArrayUtils.toString(classpath));
 
+        context.registerShutdownHook();
         // since our messaging container beans are lifecycle aware the application
         // will immediately start processing
         context.start();
@@ -128,7 +129,7 @@ public class DtsWorkerNodeCommandLineRunner {
 
     /**
      * DTS Worker Node application command-line launcher.
-     * 
+     *
      * @param args Command-line arguments
      * @throws DtsException if an error occurs initialising the application
      */

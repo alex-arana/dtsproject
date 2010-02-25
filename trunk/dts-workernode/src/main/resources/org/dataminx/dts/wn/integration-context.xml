@@ -40,8 +40,25 @@
   </beans:bean>
 
   <beans:bean id="workerNodeManager" class="org.dataminx.dts.wn.WorkerNodeManager">
+    <beans:property name="mOperator" ref="jobOperator"/>
+    <beans:property name="maxBatchJobNumer" value="${wn.manager.maxBatchJobNumber}"/>
   </beans:bean>
   
+  <beans:bean id="jobOperator" class="org.springframework.batch.core.launch.support.SimpleJobOperator">
+    <beans:property name="jobExplorer">
+        <beans:bean class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">
+            <beans:property name="dataSource" ref="dataSource" />
+        </beans:bean>
+    </beans:property>
+    <beans:property name="jobRegistry" ref="jobRegistry"/>
+    <beans:property name="jobRepository" ref="jobRepository" />
+    <beans:property name="jobLauncher" ref="dtsJobLauncher" />
+  </beans:bean>
+  
+  <beans:bean id="jobRegistry" class="org.springframework.batch.core.configuration.support.MapJobRegistry"/>
+  <beans:bean id="jobRegistryBeanPostProcessor" class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">
+    <beans:property name="jobRegistry" ref="jobRegistry"/>
+  </beans:bean>
   <!--
     Defines an inbound JMS channel adapter for the DTS job submission queue.
     The inbound adapter means we are receiving from JMS and placing an instance of
