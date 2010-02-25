@@ -12,6 +12,7 @@ import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.FileType;
 import org.dataminx.dts.DtsException;
 import org.dataminx.dts.vfs.DtsVfsUtil;
+import org.dataminx.dts.vfs.FileSystemManagerDispenser;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.CreationFlagEnumeration;
@@ -20,13 +21,15 @@ import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
-public class MixedFilesJobPartitioningStrategy implements JobPartitioningStrategy, InitializingBean {
+public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStrategy, InitializingBean {
 
     private final boolean mCancelled = false;
     private String mFailureMessage = "";
 
     private long mTotalSize = 0;
     private int mTotalFiles = 0;
+
+    private FileSystemManagerDispenser mFileSystemManagerDispenser;
 
     private long mMaxTotalByteSizePerStepLimit = 0;
 
@@ -36,16 +39,16 @@ public class MixedFilesJobPartitioningStrategy implements JobPartitioningStrateg
 
     private DtsVfsUtil mDtsVfsUtil;
 
-    private static final Log LOGGER = LogFactory.getLog(MixedFilesJobPartitioningStrategy.class);
+    private static final Log LOGGER = LogFactory.getLog(VfsMixedFilesJobPartitioningStrategy.class);
 
     private MixedFilesJobStepAllocator mDtsJobStepAllocator;
 
     public static final int BATCH_SIZE_LIMIT = 3;
 
-    public DtsJobDetails partitionTheJob(final JobDefinitionType jobDefinition,
-            final FileSystemManager fileSystemManager, final String jobResourceKey) {
+    public DtsJobDetails partitionTheJob(final JobDefinitionType jobDefinition, final String jobResourceKey) {
 
         Assert.notNull(jobDefinition);
+        final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
 
         final DtsJobDetails jobDetails = new DtsJobDetails();
         jobDetails.setJobDefinition(jobDefinition);
@@ -228,6 +231,10 @@ public class MixedFilesJobPartitioningStrategy implements JobPartitioningStrateg
         mDtsVfsUtil = dtsVfsUtil;
     }
 
+    public void setFileSystemManagerDispenser(final FileSystemManagerDispenser fileSystemManagerDispenser) {
+        mFileSystemManagerDispenser = fileSystemManagerDispenser;
+    }
+
     public void setMaxTotalByteSizePerStepLimit(final long maxTotalByteSizePerStepLimit) {
         mMaxTotalByteSizePerStepLimit = maxTotalByteSizePerStepLimit;
     }
@@ -292,6 +299,6 @@ public class MixedFilesJobPartitioningStrategy implements JobPartitioningStrateg
         if (mMaxTotalFileNumPerStepLimit == 0) {
             mMaxTotalFileNumPerStepLimit = Integer.MAX_VALUE;
         }
-
+        Assert.state(mFileSystemManagerDispenser != null, "FileSystemManagerDispenser has not been set.");
     }
 }

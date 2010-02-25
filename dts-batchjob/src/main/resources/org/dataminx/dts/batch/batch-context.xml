@@ -155,7 +155,7 @@
   </bean>
   
   <!-- TODO: put these values into the dts-bulkcopyjob.properties file later on -->
-  <bean id="jobPartitioningStrategy" class="org.dataminx.dts.batch.MixedFilesJobPartitioningStrategy">
+  <bean id="jobPartitioningStrategy" class="org.dataminx.dts.batch.VfsMixedFilesJobPartitioningStrategy">
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
     <!-- limit the size of each step to not be more than 10MB -->
     <!-- 
@@ -163,6 +163,7 @@
     -->
     <!-- process 3 files per step -->
     <property name="maxTotalFileNumPerStepLimit" value="${max.total.num.files.perstep}" />
+    <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
   </bean>
   
   <batch:step id="maxStreamCountingStep">

@@ -28,7 +28,6 @@
 package org.dataminx.dts.batch.service;
 
 import org.apache.commons.vfs.FileSystemManager;
-import org.dataminx.dts.vfs.DtsVfsUtil;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 
@@ -77,7 +76,5 @@ public interface FileCopyingService {
      */
     void copyFiles(String sourceURI, String targetURI, DataTransferType dataTransferType,
             FileSystemManager fileSystemManager);
-
-    void setDtsVfsUtil(DtsVfsUtil dtsVfsUtil);
 
 }
