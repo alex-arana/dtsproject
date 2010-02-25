@@ -48,7 +48,7 @@ public class JobScopingTask implements Tasklet, StepExecutionListener, Initializ
 
         final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
         final DtsJobDetails jobDetails = mJobPartitioningStrategy.partitionTheJob(mSubmitJobRequest.getJobDefinition(),
-                fileSystemManager, mJobResourceKey);
+                mJobResourceKey);
 
         // update the WS with the details gathered by the job scoping process
         mJobNotificationService.notifyJobScope(jobDetails.getJobId(), jobDetails.getTotalFiles(), jobDetails
