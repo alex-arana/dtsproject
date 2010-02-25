@@ -3,9 +3,11 @@
  */
 package org.dataminx.dts.wn;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang.SystemUtils;
 import org.dataminx.dts.wn.service.WorkerNodeJobPollable;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.JobInstanceAlreadyExistsException;
@@ -18,6 +20,8 @@ import org.springframework.batch.core.launch.support.SimpleJobOperator;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * An {@link JobOperator} implementation that decorates {@link SimpleJobOperator} with
@@ -25,13 +29,17 @@ import org.springframework.batch.core.repository.JobRestartException;
  *
  * @author hnguyen
  */
-public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable {
+public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, InitializingBean, DisposableBean {
 
     /** an JobOperator implementation such as {link SimpleJobOperator} */
     private JobOperator mOperator;
 
     /** max number of batch job that can be run by this WorkNodeManager */
     private int maxBatchJobNumer;
+
+    private static final String LOCK_FILE_NAME=".lock";
+
+    private static final String WORKER_NODE_DIR_NAME="dts-workernode";
 
 
     public void setmOperator(JobOperator mOperator) {
@@ -143,8 +151,61 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable {
      */
     @Override
     public boolean canPoll() {
-        //TODO: add implementation
-        return true;
+        final int runningJobs = runningJobs();
+        if (runningJobs < maxBatchJobNumer) {
+            return true;
+        }
+        return false;
     }
 
+    private synchronized int runningJobs() {
+        int runningJobs=0;
+        for (String jobName:mOperator.getJobNames()) {
+            try {
+                if (mOperator.getRunningExecutions(jobName).size()<1) {
+                    runningJobs++;
+                }
+            }
+            catch (NoSuchJobException ex) {
+                // TODO Auto-generated catch block
+            }
+        }
+        return runningJobs;
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        File userHomeLockFile = new File(SystemUtils.USER_HOME + File.pathSeparator + WORKER_NODE_DIR_NAME +
+                                                                File.pathSeparator+ LOCK_FILE_NAME);
+        if (userHomeLockFile.exists()) {
+            // not graceful shudown
+            for (String jobName:mOperator.getJobNames()) {
+                for (Long execId:mOperator.getRunningExecutions(jobName)) {
+                    mOperator.stop(execId); // because the job status still be STARTED
+                    mOperator.restart(execId);
+                }
+            }
+        }
+        else {
+            userHomeLockFile.createNewFile(); // this is safe as the check is done by OS and it is atomic operation
+        }
+    }
+
+    /**
+     * Manages graceful shutdown of the workernode by attempting to remove the lock file. The absence
+     * of lock file indicates a graceful,managed shutdown.
+     */
+    @Override
+    public void destroy() throws Exception {
+        // TODO: a graceful shutdown should stop all the running jobs cleanly as well.
+        // remove lock file if graceful shutdown
+        File userHomeLockFile = new File(SystemUtils.USER_HOME + File.pathSeparator + WORKER_NODE_DIR_NAME +
+            File.pathSeparator+ LOCK_FILE_NAME);
+        if (!userHomeLockFile.delete()) {
+            userHomeLockFile.deleteOnExit();
+        }
+    }
 }
