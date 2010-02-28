@@ -46,8 +46,15 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
     public static final int BATCH_SIZE_LIMIT = 3;
 
     public DtsJobDetails partitionTheJob(final JobDefinitionType jobDefinition, final String jobResourceKey) {
+        Assert.hasText(jobResourceKey, "JobResourceKey should not be null or empty.");
+        Assert.notNull(jobDefinition, "JobDefinitionType should not be null.");
+        if (mMaxTotalByteSizePerStepLimit < 0) {
+            throw new JobScopingException("MaxTotalByteSizePerLimit should be a positive number.");
+        }
+        if (mMaxTotalFileNumPerStepLimit < 0) {
+            throw new JobScopingException("MaxTotalFileNumPerStepLimit should be a positive number.");
+        }
 
-        Assert.notNull(jobDefinition);
         final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
 
         final DtsJobDetails jobDetails = new DtsJobDetails();
@@ -100,8 +107,16 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
         jobDetails.setTotalFiles(mTotalFiles);
         jobDetails.setJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps());
 
-        // mDtsJobStepAllocator.printDebugStepContents();
+        for (final DtsJobStep jobStep : mDtsJobStepAllocator.getAllocatedJobSteps()) {
+            LOGGER.debug(jobStep);
+        }
         // let's try to put the steps in the step execution context
+
+        // TODO: now that job scoping is run on its own step and by the master thread, we can't close 
+        // the file system manager here
+        // immediately close the file system manager so FileCopyTask will be able to use all of the 
+        // available connections
+        //mFileSystemManagerDispenser.closeFileSystemManager();
 
         return jobDetails;
     }
@@ -204,7 +219,10 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
             }
         } catch (final DtsJobCancelledException e) {
             throw e;
+        } catch (final JobScopingException e) {
+            throw e;
         } catch (final Exception e) {
+
             handleError(e);
             // throw everything else that's not DtsJobCancelledException as DtsException
             throw new DtsException(e);
@@ -265,6 +283,10 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
         }
 
         public void addDataTransferUnit(final DtsDataTransferUnit dataTransferUnit) {
+
+            // if mTmpDtsJobStep has already been initialised and (number of DataTransferUnits in the step 
+            // has reached the max total number of files per step limit OR the size of the file we are going 
+            // to add will exceed the max size in bytes of all the files per step limit)
             if ((mTmpDtsJobStep != null && ((mTmpDtsJobStep.getCurrentTotalFileNum() >= mMaxTotalFileNumPerStepLimit) || (mTmpDtsJobStep
                     .getCurrentTotalByteSize()
                     + dataTransferUnit.getSize() >= mMaxTotalByteSizePerStepLimit)))) {
@@ -296,9 +318,16 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
         if (mMaxTotalByteSizePerStepLimit == 0) {
             mMaxTotalByteSizePerStepLimit = Long.MAX_VALUE;
         }
+        else if (mMaxTotalByteSizePerStepLimit < 0) {
+            throw new JobScopingException("MaxTotalByteSizePerLimit should be a positive number.");
+        }
         if (mMaxTotalFileNumPerStepLimit == 0) {
             mMaxTotalFileNumPerStepLimit = Integer.MAX_VALUE;
         }
+        else if (mMaxTotalFileNumPerStepLimit < 0) {
+            throw new JobScopingException("MaxTotalFileNumPerStepLimit should be a positive number.");
+        }
+
         Assert.state(mFileSystemManagerDispenser != null, "FileSystemManagerDispenser has not been set.");
     }
 }

@@ -79,7 +79,6 @@
   <bean id="jobScopingTask" class="org.dataminx.dts.batch.JobScopingTask" scope="step">
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
     <property name="jobPartitioningStrategy" ref="jobPartitioningStrategy" />
-    <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
     <!-- job_resource_key == jobId == messageID == correlationID == same value -->
     <property name="jobResourceKey" value="#{jobExecutionContext[JOB_RESOURCE_KEY]}"/>
     <property name="jobNotificationService" ref="jobNotificationService"/>

@@ -3,17 +3,21 @@ package org.dataminx.dts.batch;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 
 public class TransferMixedFilesStep implements DtsJobStep, Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private static final Log LOGGER = LogFactory.getLog(TransferMixedFilesStep.class);
+
     private List<DtsDataTransferUnit> mDataTransferUnits = null;
     private int mStepId = 0;
     private final int mMaxTotalFileNumLimit;
     private final long mMaxTotalByteSizeLimit;
-    private final long mCurrentTotalByteSize = 0;
+    private long mCurrentTotalByteSize = 0;
 
     public TransferMixedFilesStep(final int stepId, final int maxTotalFileNumLimit, final long maxTotalByteSizeLimit) {
         // TODO: add jobId as one of the parameters
@@ -34,11 +38,12 @@ public class TransferMixedFilesStep implements DtsJobStep, Serializable {
     public boolean addDataTransferUnit(final DtsDataTransferUnit dataTransferUnit) {
         Assert.isTrue(mDataTransferUnits.size() < mMaxTotalFileNumLimit,
                 "The new DataTransferUnit has reached the max total file number limit.");
-        Assert.isTrue(dataTransferUnit.getSize() + mCurrentTotalByteSize < mMaxTotalByteSizeLimit,
+        Assert.isTrue(dataTransferUnit.getSize() + mCurrentTotalByteSize <= mMaxTotalByteSizeLimit,
                 "The new DataTransferUnit has exceeded the max total byte size limit.");
         if (mDataTransferUnits.size() < mMaxTotalFileNumLimit
-                && dataTransferUnit.getSize() + mCurrentTotalByteSize < mMaxTotalByteSizeLimit) {
+                && dataTransferUnit.getSize() + mCurrentTotalByteSize <= mMaxTotalByteSizeLimit) {
             mDataTransferUnits.add(dataTransferUnit);
+            mCurrentTotalByteSize += dataTransferUnit.getSize();
             return true;
         }
         return false;
