@@ -64,7 +64,7 @@ import org.springframework.util.Assert;
  */
 public class FileCopyTask implements Tasklet, StepExecutionListener, InitializingBean {
     /** A reference to the internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(FileCopyTask.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileCopyTask.class);
 
     /** A reference to the application's file copying service. */
     private FileCopyingService mFileCopyingService;
@@ -91,7 +91,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
     @Override
     public RepeatStatus execute(final StepContribution contribution, final ChunkContext chunkContext) throws Exception {
         final StepContext stepContext = chunkContext.getStepContext();
-        LOG.info("Executing copy step: " + stepContext.getStepName());
+        LOGGER.info("Executing copy step: " + stepContext.getStepName());
 
         // TODO: remove this block of code later on once testing is done
         //if (stepContext.getStepName().equals("fileCopyStep:DATA_TRANSFER_STEP:001")) {
@@ -99,13 +99,13 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
         //}
 
         // TODO: remove this later on..
-        LOG.info("Simulating a FileCopy step that uses " + mFileSystemManagerCache.getSize()
+        LOGGER.info("Simulating a FileCopy step that uses " + mFileSystemManagerCache.getSize()
                 + " concurrent connections to the remote destination.");
 
         mBatchVolumeSize = 0;
 
         Assert.state(mJobStep != null, "Unable to find data transfer input data in step context.");
-        LOG.info(mJobStep.toString());
+        LOGGER.info(mJobStep.toString());
 
         final List<DtsDataTransferUnit> dataTransferUnits = mJobStep.getDataTransferUnits();
         final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();

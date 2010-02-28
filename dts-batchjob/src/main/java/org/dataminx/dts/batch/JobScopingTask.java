@@ -3,10 +3,8 @@ package org.dataminx.dts.batch;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_DETAILS;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
 
-import org.apache.commons.vfs.FileSystemManager;
 import org.dataminx.dts.batch.common.util.ExecutionContextCleaner;
 import org.dataminx.dts.batch.service.JobNotificationService;
-import org.dataminx.dts.vfs.FileSystemManagerDispenser;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +32,6 @@ public class JobScopingTask implements Tasklet, StepExecutionListener, Initializ
 
     private JobPartitioningStrategy mJobPartitioningStrategy;
 
-    private FileSystemManagerDispenser mFileSystemManagerDispenser;
-
     /** A reference to the application's job notification service. */
     private JobNotificationService mJobNotificationService;
 
@@ -46,19 +42,12 @@ public class JobScopingTask implements Tasklet, StepExecutionListener, Initializ
 
         Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
 
-        final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
         final DtsJobDetails jobDetails = mJobPartitioningStrategy.partitionTheJob(mSubmitJobRequest.getJobDefinition(),
                 mJobResourceKey);
 
         // update the WS with the details gathered by the job scoping process
         mJobNotificationService.notifyJobScope(jobDetails.getJobId(), jobDetails.getTotalFiles(), jobDetails
                 .getTotalBytes());
-
-        // TODO: now that job scoping is run on its own step and by the master thread, we can't close 
-        // the file system manager here
-        // immediately close the file system manager so FileCopyTask will be able to use all of the 
-        // available connections
-        //mFileSystemManagerDispenser.closeFileSystemManager();
 
         final ExecutionContext stepContext = chunkContext.getStepContext().getStepExecution().getExecutionContext();
         stepContext.put(DTS_JOB_DETAILS, jobDetails);
@@ -72,10 +61,6 @@ public class JobScopingTask implements Tasklet, StepExecutionListener, Initializ
 
     public void setJobPartitioningStrategy(final JobPartitioningStrategy jobPartitioningStrategy) {
         mJobPartitioningStrategy = jobPartitioningStrategy;
-    }
-
-    public void setFileSystemManagerDispenser(final FileSystemManagerDispenser fileSystemManagerDispenser) {
-        mFileSystemManagerDispenser = fileSystemManagerDispenser;
     }
 
     public void setJobResourceKey(final String jobResourceKey) {
@@ -94,7 +79,6 @@ public class JobScopingTask implements Tasklet, StepExecutionListener, Initializ
     public void afterPropertiesSet() throws Exception {
         Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
         Assert.state(mJobPartitioningStrategy != null, "JobPartitioningStrategy has not been set.");
-        Assert.state(mFileSystemManagerDispenser != null, "FileSystemManagerDispenser has not been set.");
         Assert.state(mJobResourceKey != null, "Unable to find the Job Resource Key in the execution context.");
         Assert.state(mJobNotificationService != null, "JobNotificationService has not been set.");
         Assert.state(mExecutionContextCleaner != null, "ExecutionContextCleaner has not been set.");

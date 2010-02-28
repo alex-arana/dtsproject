@@ -24,7 +24,6 @@ import org.dataminx.dts.vfs.FileSystemManagerDispenser;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.repository.JobRepository;
@@ -35,10 +34,16 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
+ * The <code>MaxStreamCounterTask</code> is
+ * {@link org.springframework.batch.core.step.tasklet.Tasklet} that checks the
+ * maximum number of connections the job can have to the sources and sinks it is
+ * going to connect to while processing the data transfer job. This Tasklet will
+ * also cache the connections (ie {@link FileSystemManager}s to a
+ * {@link FileSystemManagerCache} that the {@link FileCopyTask} steps can share.
+ * 
  * @author Gerson Galang
  */
 public class MaxStreamCounterTask implements Tasklet, InitializingBean {
-    private JobDefinitionType mJobDefinition;
 
     private SubmitJobRequest mSubmitJobRequest;
 
@@ -170,7 +175,8 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
 
         try {
             // let's use the maximum parallel streams limit if it's a file
-            if (fileObjectRoot.getURL().toString().startsWith("file://")) {
+            if (fileObjectRoot.getURL().toString().startsWith("file://")
+                    || fileObjectRoot.getURL().toString().startsWith("tmp://")) {
                 return maxTry;
             }
         } catch (final FileSystemException e1) {

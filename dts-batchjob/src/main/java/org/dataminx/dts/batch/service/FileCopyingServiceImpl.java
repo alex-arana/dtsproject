@@ -40,8 +40,6 @@ import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import uk.ac.dl.escience.vfs.util.MarkerListenerImpl;
 import uk.ac.dl.escience.vfs.util.VFSUtil;
@@ -52,11 +50,9 @@ import uk.ac.dl.escience.vfs.util.VFSUtil;
  * @author Alex Arana
  * @author Gerson Galang
  */
-@Service("fileCopyingService")
-@Scope("singleton")
 public class FileCopyingServiceImpl implements FileCopyingService {
     /** A reference to the internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(FileCopyingServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileCopyingServiceImpl.class);
 
     /** Default file selector to be used during file copy operations. */
     private static final FileSelector DEFAULT_FILE_SELECTOR = Selectors.SELECT_ALL;
@@ -75,14 +71,14 @@ public class FileCopyingServiceImpl implements FileCopyingService {
      */
     @Override
     public void copyFiles(final String sourceURI, final String targetURI, final FileSystemManager fileSystemManager) {
-        LOG.info(String.format("Copying source '%s' to target '%s'...", sourceURI, targetURI));
+        LOGGER.info(String.format("Copying source '%s' to target '%s'...", sourceURI, targetURI));
         try {
             final StopwatchTimer timer = new StopwatchTimer();
             copyFiles(fileSystemManager.resolveFile(sourceURI), fileSystemManager.resolveFile(targetURI));
-            LOG.info(String.format("Finished copying source '%s' to target '%s' in %s.", sourceURI, targetURI, timer
+            LOGGER.info(String.format("Finished copying source '%s' to target '%s' in %s.", sourceURI, targetURI, timer
                     .getFormattedElapsedTime()));
         } catch (final FileSystemException ex) {
-            LOG.error("An error has occurred during a file copy operation: " + ex, ex);
+            LOGGER.error("An error has occurred during a file copy operation: " + ex, ex);
             throw new DtsFileCopyOperationException(ex);
         }
     }
@@ -92,15 +88,15 @@ public class FileCopyingServiceImpl implements FileCopyingService {
      */
     public void copyFiles(final SourceTargetType source, final SourceTargetType target,
             final FileSystemManager fileSystemManager) {
-        LOG.info(String.format("Copying source '%s' to target '%s'...", source.getURI(), target.getURI()));
+        LOGGER.info(String.format("Copying source '%s' to target '%s'...", source.getURI(), target.getURI()));
         try {
             final StopwatchTimer timer = new StopwatchTimer();
             copyFiles(fileSystemManager.resolveFile(source.getURI(), mDtsVfsUtil.createFileSystemOptions(source)),
                     fileSystemManager.resolveFile(target.getURI(), mDtsVfsUtil.createFileSystemOptions(target)));
-            LOG.info(String.format("Finished copying source '%s' to target '%s' in %s.", source.getURI(), target
+            LOGGER.info(String.format("Finished copying source '%s' to target '%s' in %s.", source.getURI(), target
                     .getURI(), timer.getFormattedElapsedTime()));
         } catch (final FileSystemException ex) {
-            LOG.error("An error has occurred during a file copy operation: " + ex, ex);
+            LOGGER.error("An error has occurred during a file copy operation: " + ex, ex);
             throw new DtsFileCopyOperationException(ex);
         }
     }
@@ -120,7 +116,7 @@ public class FileCopyingServiceImpl implements FileCopyingService {
             targetFO = fileSystemManager.resolveFile(targetURI, mDtsVfsUtil.createFileSystemOptions(target));
             copyFiles(sourceFO, targetFO);
         } catch (final FileSystemException e) {
-            LOG.error("An error has occurred during a file copy operation: " + e, e);
+            LOGGER.error("An error has occurred during a file copy operation: " + e, e);
             throw new DtsFileCopyOperationException(e);
         }
     }
@@ -150,7 +146,7 @@ public class FileCopyingServiceImpl implements FileCopyingService {
             VFSUtil.copy(sourceFile, destinationFile, new MarkerListenerImpl(), true);
 
         } catch (final IOException e) {
-            LOG.error(String.format("IOException was thrown while trying to copy source '%s' to target '%s\n%s",
+            LOGGER.error(String.format("IOException was thrown while trying to copy source '%s' to target '%s\n%s",
                     sourceFile.getURL().toString(), destinationFile.getURL().toString(), e.getMessage()));
             throw new FileSystemException(e.getMessage(), e.getCause());
         }

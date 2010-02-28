@@ -53,7 +53,7 @@ import org.springframework.util.ClassUtils;
  */
 public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
     /** Internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(DtsJobFactoryImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DtsJobFactoryImpl.class);
 
     /**
      * Maps DTS job request types to DTS jobs (by their ID).
@@ -112,7 +112,7 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
         if (StringUtils.isEmpty(dtsJobName)) {
             final String message = String.format("Unsupported DTS job request type.  A DTS Worker Node job capable"
                     + " of handling requests of type '%s' is not yet registered.", criteria.getClass().getName());
-            LOG.error(message);
+            LOGGER.error(message);
             throw new DtsJobCreationException(message);
         }
 
