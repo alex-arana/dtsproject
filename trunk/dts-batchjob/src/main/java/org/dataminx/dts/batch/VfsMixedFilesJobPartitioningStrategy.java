@@ -45,14 +45,15 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
 
     public static final int BATCH_SIZE_LIMIT = 3;
 
-    public DtsJobDetails partitionTheJob(final JobDefinitionType jobDefinition, final String jobResourceKey) {
+    public DtsJobDetails partitionTheJob(final JobDefinitionType jobDefinition, final String jobResourceKey)
+            throws JobScopingException {
         Assert.hasText(jobResourceKey, "JobResourceKey should not be null or empty.");
         Assert.notNull(jobDefinition, "JobDefinitionType should not be null.");
         if (mMaxTotalByteSizePerStepLimit < 0) {
-            throw new JobScopingException("MaxTotalByteSizePerLimit should be a positive number.");
+            throw new DtsException("MaxTotalByteSizePerLimit should be a positive number.");
         }
         if (mMaxTotalFileNumPerStepLimit < 0) {
-            throw new JobScopingException("MaxTotalFileNumPerStepLimit should be a positive number.");
+            throw new DtsException("MaxTotalFileNumPerStepLimit should be a positive number.");
         }
 
         final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
@@ -91,6 +92,9 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
                 e.printStackTrace();
             } catch (final FileSystemException e) {
                 throw new DtsException(e);
+            } catch (final JobScopingException e) {
+                // TODO Auto-generated catch block
+                throw e;
             }
 
             mDtsJobStepAllocator.closeNewDataTransfer();
@@ -122,7 +126,7 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
     }
 
     private void prepare(final FileObject sourceParent, final FileObject destinationParent,
-            final DataTransferType dataTransfer) throws DtsJobCancelledException {
+            final DataTransferType dataTransfer) throws DtsJobCancelledException, JobScopingException {
         if (mCancelled) {
             throw new DtsJobCancelledException();
         }

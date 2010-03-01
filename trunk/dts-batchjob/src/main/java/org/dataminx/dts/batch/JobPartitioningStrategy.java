@@ -4,7 +4,7 @@ import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 
 public interface JobPartitioningStrategy {
 
-    DtsJobDetails partitionTheJob(JobDefinitionType jobDefinition, String jobResourceKey);
+    DtsJobDetails partitionTheJob(JobDefinitionType jobDefinition, String jobResourceKey) throws JobScopingException;
 
     void setMaxTotalFileNumPerStepLimit(int maxTotalFileNumPerStepLimit);
 
