@@ -2,6 +2,8 @@ package org.dataminx.dts.batch;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,12 +11,12 @@ import java.util.UUID;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.apache.xmlbeans.XmlException;
+import org.dataminx.dts.DtsException;
 import org.dataminx.dts.vfs.DtsVfsUtil;
 import org.dataminx.dts.vfs.FileSystemManagerDispenser;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.core.io.ClassPathResource;
-import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -31,7 +33,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest {
 
     private static final long FILE_SIZE_10MB = 10485760;
 
-    @BeforeTest
+    @BeforeClass
     public void init() {
         mFileSystemManagerDispenser = mock(FileSystemManagerDispenser.class);
         mDtsVfsUtil = mock(DtsVfsUtil.class);
@@ -40,7 +42,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest {
     }
 
     @Test(groups = { "local-file-transfer-test" })
-    public void testPartitionWith1File() throws IOException, XmlException {
+    public void testPartitionWith1File() throws IOException, XmlException, JobScopingException {
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
         final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
         mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
@@ -57,13 +59,13 @@ public class VfsMixedFilesJobPartitioningStrategyTest {
         final DtsJobDetails jobDetails = mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), UUID
                 .randomUUID().toString());
 
-        Assert.assertNotNull(jobDetails);
-        Assert.assertEquals(jobDetails.getJobSteps().size(), 1);
-        Assert.assertEquals(jobDetails.getTotalFiles(), 1);
+        assertNotNull(jobDetails);
+        assertEquals(jobDetails.getJobSteps().size(), 1);
+        assertEquals(jobDetails.getTotalFiles(), 1);
     }
 
-    @Test(groups = { "local-file-transfer-test" }, expectedExceptions = JobScopingException.class)
-    public void testNegativeMaxTotalFileNumPerStepLimit() throws IOException, XmlException {
+    @Test(groups = { "local-file-transfer-test" }, expectedExceptions = DtsException.class)
+    public void testNegativeMaxTotalFileNumPerStepLimit() throws IOException, XmlException, JobScopingException {
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
         final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
         mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
@@ -73,8 +75,8 @@ public class VfsMixedFilesJobPartitioningStrategyTest {
         mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), UUID.randomUUID().toString());
     }
 
-    @Test(groups = { "local-file-transfer-test" }, expectedExceptions = JobScopingException.class)
-    public void testNegativeMaxTotalByteSizePerStepLimit() throws IOException, XmlException {
+    @Test(groups = { "local-file-transfer-test" }, expectedExceptions = DtsException.class)
+    public void testNegativeMaxTotalByteSizePerStepLimit() throws IOException, XmlException, JobScopingException {
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
         final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
         mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
@@ -85,13 +87,13 @@ public class VfsMixedFilesJobPartitioningStrategyTest {
     }
 
     @Test(groups = { "local-file-transfer-test" }, expectedExceptions = IllegalArgumentException.class)
-    public void testNullJobDefinitionParameter() {
+    public void testNullJobDefinitionParameter() throws JobScopingException {
         mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
         mPartitioningStrategy.partitionTheJob(null, UUID.randomUUID().toString());
     }
 
     @Test(groups = { "local-file-transfer-test" }, expectedExceptions = IllegalArgumentException.class)
-    public void testNullJobResourceKeyParameter() throws IOException, XmlException {
+    public void testNullJobResourceKeyParameter() throws IOException, XmlException, JobScopingException {
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
         final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
         mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();

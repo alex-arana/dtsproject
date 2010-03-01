@@ -1,8 +1,6 @@
 package org.dataminx.dts.batch;
 
-import org.dataminx.dts.DtsException;
-
-public class JobScopingException extends DtsException {
+public class JobScopingException extends Exception {
 
     /**
      * Constructs an instance of {@link DtsJobCreationException}.
