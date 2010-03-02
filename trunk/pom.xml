@@ -90,6 +90,7 @@
     <gxt.version>2.0.1</gxt.version>
     <gwt.version>1.7.0</gwt.version>
     <jaas.version>1.0.01</jaas.version>
+    <mockito.version>1.8.2</mockito.version>
   </properties>
 
   <repositories>
@@ -685,6 +686,14 @@
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
       </dependency>
+      
+      <!-- Mockito -->
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${mockito.version}</version>
+      </dependency>
+      
 
       <!-- TestNG -->
       <dependency>
@@ -698,6 +707,8 @@
           </exclusion>
         </exclusions>
       </dependency>
+      
+      
 
       <!-- ActiveMQ -->
       <dependency>
