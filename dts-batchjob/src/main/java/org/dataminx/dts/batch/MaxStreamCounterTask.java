@@ -173,17 +173,17 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
     private int getMaxConnection(final FileObject fileObjectRoot, final int maxTry) {
         isLastTry = false;
 
+        int threadCounter = 1;
+
         try {
             // let's use the maximum parallel streams limit if it's a file
             if (fileObjectRoot.getURL().toString().startsWith("file://")
                     || fileObjectRoot.getURL().toString().startsWith("tmp://")) {
-                return maxTry;
+                threadCounter = maxTry;
             }
         } catch (final FileSystemException e1) {
             throw new DtsException("Error occurred while getting the file object root's URL");
         }
-
-        int threadCounter = 1;
 
         while (threadCounter <= maxTry) {
             if (threadCounter == maxTry) {
