@@ -137,10 +137,9 @@
     <property name="partitionHandler">
       <bean class="org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler">
         <property name="taskExecutor">
-          <bean class="org.springframework.core.task.SimpleAsyncTaskExecutor"/>
+          <bean class="org.springframework.core.task.SyncTaskExecutor"/>
         </property>
         <property name="step" ref="fileCopyStep"/>
-        <property name="gridSize" value="1"/>
       </bean>
     </property>
     <property name="stepExecutionSplitter">

@@ -29,7 +29,12 @@ package org.dataminx.dts.batch;
 
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_DATA_TRANSFER_STEP_KEY;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemManager;
 import org.dataminx.dts.batch.common.util.ExecutionContextCleaner;
 import org.dataminx.dts.batch.service.FileCopyingService;
@@ -37,6 +42,7 @@ import org.dataminx.dts.batch.service.JobNotificationService;
 import org.dataminx.dts.vfs.DtsVfsUtil;
 import org.dataminx.dts.vfs.FileSystemManagerCache;
 import org.dataminx.dts.vfs.FileSystemManagerDispenser;
+import org.dataminx.dts.vfs.UnknownFileSystemManagerException;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,10 +67,12 @@ import org.springframework.util.Assert;
  * {@link #execute(StepContribution, ChunkContext)} method being called.
  * 
  * @author Alex Arana
+ * @author Gerson Galang
  */
 public class FileCopyTask implements Tasklet, StepExecutionListener, InitializingBean {
     /** A reference to the internal logger object. */
     private static final Logger LOGGER = LoggerFactory.getLogger(FileCopyTask.class);
+    private static final Logger LOGGER_FC = LoggerFactory.getLogger(FileCopier.class);
 
     /** A reference to the application's file copying service. */
     private FileCopyingService mFileCopyingService;
@@ -98,8 +106,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
         //    throw new Exception("throw test error in step");
         //}
 
-        // TODO: remove this later on..
-        LOGGER.info("Simulating a FileCopy step that uses " + mFileSystemManagerCache.getSize()
+        LOGGER.info("Processing a FileCopyStep that uses " + mFileSystemManagerCache.getSize()
                 + " concurrent connections to the remote destination.");
 
         mBatchVolumeSize = 0;
@@ -108,30 +115,34 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
         LOGGER.info(mJobStep.toString());
 
         final List<DtsDataTransferUnit> dataTransferUnits = mJobStep.getDataTransferUnits();
-        final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
 
         // shortcut! as we don't really need to send updates everytime a new dataTransferUnit is processed
         mBatchTotalFiles = dataTransferUnits.size();
 
-        // TODO reimplement this with threadpool
-        for (final DtsDataTransferUnit dataTransferUnit : dataTransferUnits) {
+        // TODO: replace this with the maxconnections value from ExecutionContext
+        final int numConnections = 4;
 
-            // TODO when we start to run this by threads.. we'll need to get
-            // each thread to use one ThreadLocal
-            // instance of the FileSystemManager
-            mFileCopyingService.copyFiles(dataTransferUnit.getSourceFileURI(),
-                    dataTransferUnit.getDestinationFileURI(), dataTransferUnit.getDataTransfer(), fileSystemManager);
+        final ThreadPoolExecutor executor = new ThreadPoolExecutor(numConnections, numConnections, 10,
+                TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(20));
 
-            mBatchVolumeSize += fileSystemManager.resolveFile(dataTransferUnit.getSourceFileURI(),
-                    mDtsVfsUtil.createFileSystemOptions(dataTransferUnit.getDataTransfer().getSource())).getContent()
-                    .getSize();
+        final Iterator<DtsDataTransferUnit> dataTransferUnitIterator = dataTransferUnits.iterator();
+        for (int i = 0; i < numConnections; i++) {
+            final FileCopier fileCopier = new FileCopier(dataTransferUnitIterator, "copier" + (i + 1));
+            executor.execute(fileCopier);
         }
 
-        // TODO figure out when we should close fileSystemManager
+        while (executor.getCompletedTaskCount() != numConnections) {
+            try {
+                Thread.sleep(100);
+            } catch (final InterruptedException e) {
+                LOGGER.warn("InterruptedException thrown while sleeping", e);
+            }
+        }
+
+        executor.shutdown();
 
         // TODO handle failures by returning ...
 
-        mFileSystemManagerDispenser.closeFileSystemManager();
         return RepeatStatus.FINISHED;
     }
 
@@ -211,5 +222,63 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
         }
 
         return exitStatus;
+    }
+
+    private class FileCopier implements Runnable {
+
+        private final Iterator<DtsDataTransferUnit> mDataTransferUnitIterator;
+        private final FileSystemManager mFileSystemManager;
+        private final String mCopierName;
+
+        public FileCopier(final Iterator<DtsDataTransferUnit> dataTransferUnitIterator, final String copierName) {
+            mDataTransferUnitIterator = dataTransferUnitIterator;
+            mFileSystemManager = mFileSystemManagerCache.borrowOne();
+            mCopierName = copierName;
+            LOGGER_FC.debug(mCopierName + " started.");
+        }
+
+        @Override
+        public void run() {
+
+            // we won't use hasNext() in testing for the contents of the mDataTransferUnitIterator
+            // as there might be issues with race conditions.
+
+            DtsDataTransferUnit dataTransferUnit = getNextDataTransferUnit();
+            while (dataTransferUnit != null) {//&& !stopped) {
+
+                LOGGER_FC.debug(mCopierName + " is doing a transfer from " + dataTransferUnit.getSourceFileURI()
+                        + " to " + dataTransferUnit.getDestinationFileURI());
+
+                mFileCopyingService.copyFiles(dataTransferUnit.getSourceFileURI(), dataTransferUnit
+                        .getDestinationFileURI(), dataTransferUnit.getDataTransfer(), mFileSystemManager);
+
+                try {
+                    mBatchVolumeSize += mFileSystemManager.resolveFile(dataTransferUnit.getSourceFileURI(),
+                            mDtsVfsUtil.createFileSystemOptions(dataTransferUnit.getDataTransfer().getSource()))
+                            .getContent().getSize();
+                } catch (final FileSystemException e) {
+                    LOGGER_FC.debug("FileSystemException was thrown while getting the size of the "
+                            + "file that was recently copied.", e);
+                }
+
+                dataTransferUnit = getNextDataTransferUnit();
+            }
+            try {
+                mFileSystemManagerCache.returnOne(mFileSystemManager);
+            } catch (final UnknownFileSystemManagerException e) {
+                LOGGER_FC.error("UnknownFileSystemManagerException was thrown by " + mCopierName);
+
+            }
+        }
+
+        public synchronized DtsDataTransferUnit getNextDataTransferUnit() {
+            if (mDataTransferUnitIterator.hasNext()) {
+                return mDataTransferUnitIterator.next();
+            }
+            else {
+                LOGGER_FC.debug(mCopierName + " has nothing left to process.");
+                return null;
+            }
+        }
     }
 }

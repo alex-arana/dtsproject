@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
+import org.springframework.util.Assert;
 
 public class FileSystemManagerCache {
 
@@ -25,9 +26,11 @@ public class FileSystemManagerCache {
         return mSize;
     }
 
-    public void returnOne(final FileSystemManager fileSystemManager) throws UnknownFileSystemManagerException {
+    public synchronized void returnOne(final FileSystemManager fileSystemManager)
+            throws UnknownFileSystemManagerException {
         // we'll only allow the return of a file system manager if it's in the cache
         if (fsmOnLoanList.contains(fileSystemManager)) {
+            LOGGER.debug("Returning a FileSystemManager to the cache.");
             if (fsmOnLoanList.remove(fileSystemManager)) {
                 fsmAvailableStack.push(fileSystemManager);
             }
@@ -37,10 +40,15 @@ public class FileSystemManagerCache {
         }
     }
 
-    public FileSystemManager borrowOne() {
-        final FileSystemManager borrowedFileSystemManager = fsmAvailableStack.pop();
-        fsmOnLoanList.add(borrowedFileSystemManager);
-        return borrowedFileSystemManager;
+    public synchronized FileSystemManager borrowOne() {
+        if (!fsmAvailableStack.isEmpty()) {
+            LOGGER.debug("Borrowing a FileSystemManager from the cache.");
+            final FileSystemManager borrowedFileSystemManager = fsmAvailableStack.pop();
+            Assert.notNull(borrowedFileSystemManager);
+            fsmOnLoanList.add(borrowedFileSystemManager);
+            return borrowedFileSystemManager;
+        }
+        return null;
     }
 
     public void initFileSystemManagerCache(final List<FileSystemManager> fileSystemManagers)
