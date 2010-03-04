@@ -70,11 +70,12 @@ public class FileCopyingServiceImpl implements FileCopyingService {
      * {@inheritDoc}
      */
     @Override
-    public void copyFiles(final String sourceURI, final String targetURI, final FileSystemManager fileSystemManager) {
+    public void copyFiles(final String sourceURI, final String targetURI,
+            final FileSystemManager sourceFileSystemManager, final FileSystemManager targetFileSystemManager) {
         LOGGER.info(String.format("Copying source '%s' to target '%s'...", sourceURI, targetURI));
         try {
             final StopwatchTimer timer = new StopwatchTimer();
-            copyFiles(fileSystemManager.resolveFile(sourceURI), fileSystemManager.resolveFile(targetURI));
+            copyFiles(sourceFileSystemManager.resolveFile(sourceURI), targetFileSystemManager.resolveFile(targetURI));
             LOGGER.info(String.format("Finished copying source '%s' to target '%s' in %s.", sourceURI, targetURI, timer
                     .getFormattedElapsedTime()));
         } catch (final FileSystemException ex) {
@@ -87,12 +88,13 @@ public class FileCopyingServiceImpl implements FileCopyingService {
      * {@inheritDoc}
      */
     public void copyFiles(final SourceTargetType source, final SourceTargetType target,
-            final FileSystemManager fileSystemManager) {
+            final FileSystemManager sourceFileSystemManager, final FileSystemManager targetFileSystemManager) {
         LOGGER.info(String.format("Copying source '%s' to target '%s'...", source.getURI(), target.getURI()));
         try {
             final StopwatchTimer timer = new StopwatchTimer();
-            copyFiles(fileSystemManager.resolveFile(source.getURI(), mDtsVfsUtil.createFileSystemOptions(source)),
-                    fileSystemManager.resolveFile(target.getURI(), mDtsVfsUtil.createFileSystemOptions(target)));
+            copyFiles(
+                    sourceFileSystemManager.resolveFile(source.getURI(), mDtsVfsUtil.createFileSystemOptions(source)),
+                    targetFileSystemManager.resolveFile(target.getURI(), mDtsVfsUtil.createFileSystemOptions(target)));
             LOGGER.info(String.format("Finished copying source '%s' to target '%s' in %s.", source.getURI(), target
                     .getURI(), timer.getFormattedElapsedTime()));
         } catch (final FileSystemException ex) {
@@ -105,20 +107,46 @@ public class FileCopyingServiceImpl implements FileCopyingService {
      * {@inheritDoc}
      */
     public void copyFiles(final String sourceURI, final String targetURI, final DataTransferType dataTransferType,
-            final FileSystemManager fileSystemManager) {
+            final FileSystemManager sourceFileSystemManager, final FileSystemManager targetFileSystemManager) {
         final SourceTargetType source = dataTransferType.getSource();
         final SourceTargetType target = dataTransferType.getTarget();
         FileObject sourceFO = null;
         FileObject targetFO = null;
 
         try {
-            sourceFO = fileSystemManager.resolveFile(sourceURI, mDtsVfsUtil.createFileSystemOptions(source));
-            targetFO = fileSystemManager.resolveFile(targetURI, mDtsVfsUtil.createFileSystemOptions(target));
+            sourceFO = sourceFileSystemManager.resolveFile(sourceURI, mDtsVfsUtil.createFileSystemOptions(source));
+            targetFO = targetFileSystemManager.resolveFile(targetURI, mDtsVfsUtil.createFileSystemOptions(target));
             copyFiles(sourceFO, targetFO);
         } catch (final FileSystemException e) {
             LOGGER.error("An error has occurred during a file copy operation: " + e, e);
             throw new DtsFileCopyOperationException(e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void copyFiles(final String sourceURI, final String targetURI, final FileSystemManager fileSystemManager) {
+        copyFiles(sourceURI, targetURI, fileSystemManager, fileSystemManager);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void copyFiles(final SourceTargetType source, final SourceTargetType target,
+            final FileSystemManager fileSystemManager) {
+        copyFiles(source, target, fileSystemManager, fileSystemManager);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void copyFiles(final String sourceURI, final String targetURI, final DataTransferType dataTransferType,
+            final FileSystemManager fileSystemManager) {
+        copyFiles(sourceURI, targetURI, dataTransferType, fileSystemManager, fileSystemManager);
     }
 
     /**
@@ -161,4 +189,5 @@ public class FileCopyingServiceImpl implements FileCopyingService {
     public void setDtsVfsUtil(final DtsVfsUtil dtsVfsUtil) {
         mDtsVfsUtil = dtsVfsUtil;
     }
+
 }

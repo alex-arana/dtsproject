@@ -35,4 +35,16 @@ public class TransferSmallFilesStep implements DtsJobStep, Serializable {
         return 0;
     }
 
+    @Override
+    public String getSourceRootFileObjectString() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getTargetRootFileObjectString() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

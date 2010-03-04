@@ -4,7 +4,7 @@ import java.util.List;
 
 interface DtsJobStepAllocator {
 
-    void createNewDataTransfer();
+    void createNewDataTransfer(final String sourceRootFileObject, final String targetRootFileObject);
 
     void addDataTransferUnit(final DtsDataTransferUnit dataTransferUnit);
 

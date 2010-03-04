@@ -1,6 +1,6 @@
 package org.dataminx.dts.batch;
 
-import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,7 +63,7 @@ public class MaxStreamCounterTaskTest {
 
         final RepeatStatus taskStatus = maxStreamCounterTask.execute(null, null);
 
-        verify(mFileSystemManagerCache).initFileSystemManagerCache(anyList());
+        verify(mFileSystemManagerCache).initFileSystemManagerCache(anyMap());
 
         assertEquals(taskStatus, RepeatStatus.FINISHED);
 

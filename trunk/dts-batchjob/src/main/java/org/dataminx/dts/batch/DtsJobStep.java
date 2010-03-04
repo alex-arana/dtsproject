@@ -14,4 +14,8 @@ public interface DtsJobStep {
 
     long getCurrentTotalByteSize();
 
+    String getSourceRootFileObjectString();
+
+    String getTargetRootFileObjectString();
+
 }

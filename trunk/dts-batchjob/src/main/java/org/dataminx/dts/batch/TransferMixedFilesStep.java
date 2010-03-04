@@ -18,13 +18,18 @@ public class TransferMixedFilesStep implements DtsJobStep, Serializable {
     private final int mMaxTotalFileNumLimit;
     private final long mMaxTotalByteSizeLimit;
     private long mCurrentTotalByteSize = 0;
+    private final String mSourceRootFileObject;
+    private final String mTargetRootFileObject;
 
-    public TransferMixedFilesStep(final int stepId, final int maxTotalFileNumLimit, final long maxTotalByteSizeLimit) {
+    public TransferMixedFilesStep(final String sourceRootFileObject, final String targetRootFileObject,
+            final int stepId, final int maxTotalFileNumLimit, final long maxTotalByteSizeLimit) {
         // TODO: add jobId as one of the parameters
         mDataTransferUnits = new ArrayList<DtsDataTransferUnit>();
         mMaxTotalFileNumLimit = maxTotalFileNumLimit;
         mMaxTotalByteSizeLimit = maxTotalByteSizeLimit;
         mStepId = stepId;
+        mSourceRootFileObject = sourceRootFileObject;
+        mTargetRootFileObject = targetRootFileObject;
     }
 
     public List<DtsDataTransferUnit> getDataTransferUnits() {
@@ -65,6 +70,16 @@ public class TransferMixedFilesStep implements DtsJobStep, Serializable {
             strBuff.append("  * " + dataTransferUnit + "\n");
         }
         return strBuff.toString();
+    }
+
+    @Override
+    public String getSourceRootFileObjectString() {
+        return mSourceRootFileObject;
+    }
+
+    @Override
+    public String getTargetRootFileObjectString() {
+        return mTargetRootFileObject;
     }
 
 }
