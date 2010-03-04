@@ -71,4 +71,14 @@ public class MaxStreamCounterTaskTest {
         // to the ExecutionContext
 
     }
+
+    @Test
+    public void testContentsOfTheFileSystemManagerCache() {
+        // TODO: check and see if max connections really is provided by a file transfer
+    }
+
+    @Test
+    public void testNonExistenceOfPropertiesFromExecutionContextAfterJobFinishedSuccessfully() {
+        // TODO:
+    }
 }

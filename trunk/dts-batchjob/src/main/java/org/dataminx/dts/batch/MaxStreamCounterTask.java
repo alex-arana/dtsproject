@@ -256,6 +256,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
         private final String mFoRootURI;
         private final FileSystemOptions mOptions;
         private final List<FileSystemManager> mWorkingConnectionsList;
+        private boolean successfulConnection = true;
 
         public RemoteConnection(final String foRootURI, final FileSystemOptions options,
                 final MaxStreamCounterTask parent, final String connectionName, final CyclicBarrier barrier,
@@ -298,6 +299,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
                         .error("FileSystemException thrown during the login process of the max parallel connection test task.");
 
                 mParent.setHasConnectionErrorArised(true);
+                successfulConnection = false;
             }
 
             try {
@@ -312,7 +314,8 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
             } finally {
                 // having this here will help us avoid old connections not being
                 // let go
-                if (!mParent.getHasConnectionErrorArised() && !mParent.isLastTry() && fileSystemManager != null) {
+                if (!successfulConnection
+                        || (!mParent.getHasConnectionErrorArised() && !mParent.isLastTry() && fileSystemManager != null)) {
                     mFileSystemManagerDispenser.closeFileSystemManager();
                 }
                 else {

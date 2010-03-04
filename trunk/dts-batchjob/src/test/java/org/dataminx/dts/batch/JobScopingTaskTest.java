@@ -73,4 +73,9 @@ public class JobScopingTaskTest {
         assertNotNull(stepContext.getStepExecution().getExecutionContext().get(DTS_JOB_DETAILS));
         assertEquals(taskStatus, RepeatStatus.FINISHED);
     }
+
+    @Test
+    public void testNonExistenceOfPropertiesFromExecutionContextAfterJobFinishedSuccessfully() {
+        // TODO:
+    }
 }
