@@ -16,7 +16,7 @@
   <bean id="applicationProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="locations">
       <list>
-        <value>dts-bulkcopyjob.properties</value>
+        <value>file:///${dataminx.dir}/dts-bulkcopyjob.properties</value>
       </list>
     </property>
     <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />

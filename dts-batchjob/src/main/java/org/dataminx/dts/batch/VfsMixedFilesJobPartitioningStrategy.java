@@ -80,13 +80,16 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
         }
 
         for (final DataTransferType dataTransfer : dataTransfers) {
-            mDtsJobStepAllocator.createNewDataTransfer();
 
             try {
-                prepare(fileSystemManager.resolveFile(dataTransfer.getSource().getURI(), mDtsVfsUtil
-                        .createFileSystemOptions(dataTransfer.getSource())), fileSystemManager.resolveFile(dataTransfer
-                        .getTarget().getURI(), mDtsVfsUtil.createFileSystemOptions(dataTransfer.getTarget())),
-                        dataTransfer);
+                final FileObject sourceParent = fileSystemManager.resolveFile(dataTransfer.getSource().getURI(),
+                        mDtsVfsUtil.createFileSystemOptions(dataTransfer.getSource()));
+                final FileObject targetParent = fileSystemManager.resolveFile(dataTransfer.getTarget().getURI(),
+                        mDtsVfsUtil.createFileSystemOptions(dataTransfer.getTarget()));
+
+                mDtsJobStepAllocator.createNewDataTransfer(sourceParent.getFileSystem().getRoot().getURL().toString(),
+                        targetParent.getFileSystem().getRoot().getURL().toString());
+                prepare(sourceParent, targetParent, dataTransfer);
             } catch (final DtsJobCancelledException e) {
                 // TODO: handle DTS Job Cancel event
                 e.printStackTrace();
@@ -269,6 +272,8 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
     private class MixedFilesJobStepAllocator implements DtsJobStepAllocator {
         private final List<DtsJobStep> mSteps;
         private DtsJobStep mTmpDtsJobStep = null;
+        private String mSourceRootFileObject;
+        private String mTargetRootFileObject;
 
         public MixedFilesJobStepAllocator() {
             mSteps = new ArrayList<DtsJobStep>();
@@ -281,9 +286,11 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
          * This will make sure that new DataTransferUnits get added to a new
          * DtsJobStep.
          */
-        public void createNewDataTransfer() {
-            mTmpDtsJobStep = new TransferMixedFilesStep(mSteps.size() + 1, mMaxTotalFileNumPerStepLimit,
-                    mMaxTotalByteSizePerStepLimit);
+        public void createNewDataTransfer(final String sourceRootFileObject, final String targetRootFileObject) {
+            mTmpDtsJobStep = new TransferMixedFilesStep(sourceRootFileObject, targetRootFileObject, mSteps.size() + 1,
+                    mMaxTotalFileNumPerStepLimit, mMaxTotalByteSizePerStepLimit);
+            mSourceRootFileObject = sourceRootFileObject;
+            mTargetRootFileObject = targetRootFileObject;
         }
 
         public void addDataTransferUnit(final DtsDataTransferUnit dataTransferUnit) {
@@ -295,8 +302,8 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
                     .getCurrentTotalByteSize()
                     + dataTransferUnit.getSize() >= mMaxTotalByteSizePerStepLimit)))) {
                 mSteps.add(mTmpDtsJobStep);
-                mTmpDtsJobStep = new TransferMixedFilesStep(mSteps.size() + 1, mMaxTotalFileNumPerStepLimit,
-                        mMaxTotalByteSizePerStepLimit);
+                mTmpDtsJobStep = new TransferMixedFilesStep(mSourceRootFileObject, mTargetRootFileObject,
+                        mSteps.size() + 1, mMaxTotalFileNumPerStepLimit, mMaxTotalByteSizePerStepLimit);
                 mTmpDtsJobStep.addDataTransferUnit(dataTransferUnit);
             }
             else {
