@@ -52,4 +52,9 @@ public class BulkCopyJobIntegrationTest extends AbstractTestNGSpringContextTests
         assertEquals(jobId, jobExecution.getJobInstance().getJobName());
     }
 
+    @Test
+    public void testNonExistenceOfPropertiesFromExecutionContextAfterJobFinishedSuccessfully() {
+        // TODO:
+    }
+
 }

@@ -94,7 +94,8 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
                 // TODO: handle DTS Job Cancel event
                 e.printStackTrace();
             } catch (final FileSystemException e) {
-                throw new DtsException(e);
+                throw new JobScopingException(
+                        "FileSystemException was thrown while accessing the remote files in the job scoping task.", e);
             } catch (final JobScopingException e) {
                 // TODO Auto-generated catch block
                 throw e;

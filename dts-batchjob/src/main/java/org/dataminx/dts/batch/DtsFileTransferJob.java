@@ -31,12 +31,15 @@ import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_RESOURC
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
 
 import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.domain.model.JobStatus;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.JobInterruptedException;
@@ -59,6 +62,8 @@ import org.springframework.util.ObjectUtils;
 public class DtsFileTransferJob extends DtsJob implements InitializingBean {
     /** Holds the information about the job request. */
     private final SubmitJobRequest mJobRequest;
+
+    private static final Log LOGGER = LogFactory.getLog(DtsFileTransferJob.class);
 
     /**
      * The partitioning step acts as the master step over all of the
@@ -160,26 +165,34 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
         // TODO convert to application exceptions
         StepExecution stepExecution = handleStep(mJobScopingStep, execution);
 
-        stepExecution = handleStep(mMaxStreamCountingStep, execution);
+        // we'll skip the other steps if the job scoping task step fails
+        if (!stepExecution.getStatus().equals(BatchStatus.FAILED)) {
 
-        stepExecution = handleStep(mPartitioningStep, execution);
+            stepExecution = handleStep(mMaxStreamCountingStep, execution);
 
-        // update the job status to have the same status as the master step
-        if (stepExecution != null) {
-            logger.debug("Upgrading JobExecution status: " + stepExecution);
-            execution.upgradeStatus(stepExecution.getStatus());
-            execution.setExitStatus(stepExecution.getExitStatus());
+            stepExecution = handleStep(mPartitioningStep, execution);
+
+            // update the job status to have the same status as the master step
+            if (stepExecution != null) {
+                logger.debug("Upgrading JobExecution status: " + stepExecution);
+                execution.upgradeStatus(stepExecution.getStatus());
+                execution.setExitStatus(stepExecution.getExitStatus());
+            }
+
+            if (stepExecution.getStatus().isUnsuccessful()) {
+                getJobNotificationService().notifyJobError(getJobId(), execution);
+
+                return;
+            }
+
+            // TODO move this somewhere it always gets called
+            registerCompletedTime();
+            getJobNotificationService().notifyJobStatus(this, JobStatus.DONE);
         }
-
-        if (stepExecution.getStatus().isUnsuccessful()) {
+        else {
+            execution.setStatus(BatchStatus.FAILED);
             getJobNotificationService().notifyJobError(getJobId(), execution);
-
-            return;
         }
-
-        // TODO move this somewhere it always gets called
-        registerCompletedTime();
-        getJobNotificationService().notifyJobStatus(this, JobStatus.DONE);
     }
 
     public void setPartitioningStep(final Step partitioningStep) {

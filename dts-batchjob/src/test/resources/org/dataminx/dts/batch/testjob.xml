@@ -15,7 +15,43 @@
       <jsdl:JobAnnotation>Gerson's Job Annotation</jsdl:JobAnnotation>
       <jsdl:JobProject>apollo33</jsdl:JobProject>
     </jsdl:JobIdentification>
-<!-- 
+
+    <mjsdl:DataTransfer>
+      <mjsdl:Source>
+        <jsdl:URI>ftp://mirror.tw/pub/apache/camel/apache-camel/2.0-M1/</jsdl:URI>
+      </mjsdl:Source>
+      <mjsdl:Target>
+        <jsdl:URI>tmp://</jsdl:URI>
+      </mjsdl:Target>
+      <mjsdl:TransferRequirements>
+        <dmi:MaxAttempts>0</dmi:MaxAttempts>
+        <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+      </mjsdl:TransferRequirements>
+    </mjsdl:DataTransfer>
+
+    <!-- 
+    <mjsdl:DataTransfer>
+      <mjsdl:Source>        
+        <jsdl:URI>file://etc/cron.daily</jsdl:URI>
+      </mjsdl:Source>
+      <mjsdl:Target>
+        <jsdl:URI>srb://srb.versi.unimelb.edu.au:5544/versi.melbourne/home/gerson.versi.melbourne/mydir</jsdl:URI>
+        <mjsdl:Credential>
+          <wsse:UsernameToken>
+            <wsse:Username>${srb.username}</wsse:Username>
+            <wsse:PasswordString>${srb.password}</wsse:PasswordString>
+          </wsse:UsernameToken>
+        </mjsdl:Credential>
+        <mjsdl:SrbURIProperties>
+            <mjsdl:MdasDomainHome>versi.melbourne</mjsdl:MdasDomainHome>
+            <mjsdl:MdasCollectionHome>/versi.melbourne/home/gerson.versi.melbourne</mjsdl:MdasCollectionHome>
+            <mjsdl:DefaultResource>disk-vbl-mu</mjsdl:DefaultResource>
+            <mjsdl:McatZone>versi.melbourne</mjsdl:McatZone>
+        </mjsdl:SrbURIProperties>
+      </mjsdl:Target>
+    </mjsdl:DataTransfer>
+    -->
+    <!-- 
     <mjsdl:DataTransfer>
       <mjsdl:Source>
         <jsdl:URI>ftp://dataminx.chem.usyd.edu.au/home/gerson/hi.xml</jsdl:URI>
@@ -27,14 +63,14 @@
         </mjsdl:Credential>
       </mjsdl:Source>
       <mjsdl:Target>
-        <jsdl:URI>file:///tmp/passwd.copy</jsdl:URI>
+        <jsdl:URI>tmp://passwd.copy</jsdl:URI>
       </mjsdl:Target>
       <mjsdl:TransferRequirements>
         <dmi:MaxAttempts>0</dmi:MaxAttempts>
         <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
       </mjsdl:TransferRequirements>
     </mjsdl:DataTransfer>
--->
+
     <mjsdl:DataTransfer>
       <mjsdl:Source>        
         <jsdl:URI>file://etc/cron.daily</jsdl:URI>
@@ -47,5 +83,6 @@
         <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
       </mjsdl:TransferRequirements>
     </mjsdl:DataTransfer>
+    -->
   </jsdl:JobDescription>
 </jsdl:JobDefinition>
