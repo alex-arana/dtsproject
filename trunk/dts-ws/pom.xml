@@ -120,13 +120,6 @@
       <artifactId>spring</artifactId>
     </dependency>
 
-    <!-- Oracle -->
-    <dependency>
-      <groupId>com.oracle</groupId>
-      <artifactId>ojdbc14</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-
     <!-- MySQL -->
     <dependency>
       <groupId>mysql</groupId>
