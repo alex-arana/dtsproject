@@ -224,13 +224,6 @@
       <scope>runtime</scope>
     </dependency>
 
-    <!-- Oracle JDBC driver -->
-    <dependency>
-      <groupId>com.oracle</groupId>
-      <artifactId>ojdbc14</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-
     <!-- MySQL JDBC driver -->
     <dependency>
       <groupId>mysql</groupId>
