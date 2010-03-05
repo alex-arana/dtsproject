@@ -97,6 +97,7 @@
     <property name="fileCopyingService" ref="fileCopyingService"/>
     <property name="executionContextCleaner" ref="executionContextCleaner"/>
     <property name="fileSystemManagerCache" ref="fileSystemManagerCache"/>
+    <property name="stopwatchTimer" ref="stopwatchTimer"/>
   </bean>
   
   <bean id="fileCopyingService" class="org.dataminx.dts.batch.service.FileCopyingServiceImpl">
@@ -112,7 +113,10 @@
         <ref bean="dtsFileTransferJobListener"/>
       </list>
     </property>
+    <property name="stopwatchTimer" ref="stopwatchTimer"/>
   </bean>
+  
+  <bean id="stopwatchTimer" class="org.dataminx.dts.wn.common.util.StopwatchTimer"/>
   
   <bean id="dtsFileTransferJobListener" class="org.dataminx.dts.batch.DtsFileTransferJobListener">
     <property name="fileSystemManagerCache" ref="fileSystemManagerCache"/>

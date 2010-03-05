@@ -45,6 +45,7 @@ import org.dataminx.dts.vfs.FileSystemManagerCache;
 import org.dataminx.dts.vfs.FileSystemManagerDispenser;
 import org.dataminx.dts.vfs.UnknownFileSystemManagerException;
 import org.dataminx.dts.vfs.UnknownRootFileObjectException;
+import org.dataminx.dts.wn.common.util.StopwatchTimer;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +91,8 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
 
     private FileSystemManagerCache mFileSystemManagerCache;
 
+    private StopwatchTimer mStopwatchTimer;
+
     private DtsJobStep mJobStep;
 
     private long mBatchVolumeSize = 0;
@@ -105,6 +108,8 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
         final StepContext stepContext = chunkContext.getStepContext();
         LOGGER.info("Executing copy step: " + stepContext.getStepName());
 
+        LOGGER.debug("Started up the FileCopyTask at " + mStopwatchTimer.getFormattedElapsedTime());
+
         // TODO: remove this block of code later on once testing is done
         //if (stepContext.getStepName().equals("fileCopyStep:DATA_TRANSFER_STEP:001")) {
         //    throw new Exception("throw test error in step");
@@ -113,7 +118,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
         mBatchVolumeSize = 0;
 
         Assert.state(mJobStep != null, "Unable to find data transfer input data in step context.");
-        LOGGER.info(mJobStep.toString());
+        LOGGER.debug(mJobStep.toString());
 
         final List<DtsDataTransferUnit> dataTransferUnits = mJobStep.getDataTransferUnits();
 
@@ -169,6 +174,8 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
 
         executor.shutdown();
 
+        LOGGER.debug("Finished up the FileCopyTask at " + mStopwatchTimer.getFormattedElapsedTime());
+
         // TODO handle failures by returning ...
 
         return RepeatStatus.FINISHED;
@@ -220,6 +227,10 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
 
     public void setFileSystemManagerCache(final FileSystemManagerCache fileSystemManagerCache) {
         mFileSystemManagerCache = fileSystemManagerCache;
+    }
+
+    public void setStopwatchTimer(final StopwatchTimer stopwatchTimer) {
+        mStopwatchTimer = stopwatchTimer;
     }
 
     @Override

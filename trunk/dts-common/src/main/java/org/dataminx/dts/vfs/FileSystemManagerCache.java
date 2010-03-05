@@ -79,6 +79,8 @@ public class FileSystemManagerCache {
             final List<FileSystemManager> fileSystemManagers = fileSystemManagersPerRootFileObject
                     .get(rootFileObjectString);
 
+            LOGGER.debug("Caching " + fileSystemManagers.size() + " concurrent connections for \""
+                    + rootFileObjectString + "\"");
             for (final FileSystemManager fsm : fileSystemManagers) {
                 fsmAvailableStack.push(fsm);
             }

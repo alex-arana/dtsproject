@@ -34,6 +34,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.domain.model.JobStatus;
+import org.dataminx.dts.wn.common.util.StopwatchTimer;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
@@ -74,6 +75,8 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
     private Step mMaxStreamCountingStep;
 
     private Step mJobScopingStep;
+
+    private StopwatchTimer mStopwatchTimer;
 
     /**
      * Constructs a new instance of <code>DtsSubmitJob</code> using the
@@ -162,15 +165,23 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
         context.put(DTS_SUBMIT_JOB_REQUEST_KEY, mJobRequest);
         context.put(DTS_JOB_RESOURCE_KEY, getJobId());
 
+        LOGGER.info("Started the JobScopingTask step at " + mStopwatchTimer.getFormattedElapsedTime());
+
         // TODO convert to application exceptions
         StepExecution stepExecution = handleStep(mJobScopingStep, execution);
 
+        LOGGER.info("Finished the JobScopingTask step at " + mStopwatchTimer.getFormattedElapsedTime());
+
         // we'll skip the other steps if the job scoping task step fails
-        if (!stepExecution.getStatus().equals(BatchStatus.FAILED)) {
+        if (stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
 
+            LOGGER.info("Started the MaxStreamCounting step at " + mStopwatchTimer.getFormattedElapsedTime());
             stepExecution = handleStep(mMaxStreamCountingStep, execution);
+            LOGGER.info("Finished the MaxStreamCounting step at " + mStopwatchTimer.getFormattedElapsedTime());
 
+            LOGGER.info("Started the FileCopying process at " + mStopwatchTimer.getFormattedElapsedTime());
             stepExecution = handleStep(mPartitioningStep, execution);
+            LOGGER.info("Finished the FileCopying process at " + mStopwatchTimer.getFormattedElapsedTime());
 
             // update the job status to have the same status as the master step
             if (stepExecution != null) {
@@ -181,7 +192,6 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
 
             if (stepExecution.getStatus().isUnsuccessful()) {
                 getJobNotificationService().notifyJobError(getJobId(), execution);
-
                 return;
             }
 
@@ -209,6 +219,10 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
 
     public void setJobExecutionListeners(final List<JobExecutionListener> jobExecutionListeners) {
         setJobExecutionListeners(jobExecutionListeners.toArray(new JobExecutionListener[0]));
+    }
+
+    public void setStopwatchTimer(final StopwatchTimer stopwatchTimer) {
+        mStopwatchTimer = stopwatchTimer;
     }
 
     @Override

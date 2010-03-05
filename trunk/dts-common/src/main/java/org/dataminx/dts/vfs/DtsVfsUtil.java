@@ -44,7 +44,7 @@ public class DtsVfsUtil extends VFSUtil {
     private static final QName PASSWORD_STRING_QNAME = new QName(WS_SECURITY_NAMESPACE_URI, "PasswordString");
 
     /** Internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(DtsVfsUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DtsVfsUtil.class);
 
     private boolean mFtpSupported = true;
 
@@ -171,8 +171,8 @@ public class DtsVfsUtil extends VFSUtil {
                         SRBFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
                         IRODSFileSystemConfigBuilder.getInstance().setGSSCredential(options, credential);
                     } catch (final MyProxyException ex) {
-                        LOG.error(String.format("Could not get delegated proxy from server '%s:%s'\n%s", myProxyDetails
-                                .getMyProxyServer(), myProxyDetails.getMyProxyPort(), ex.getMessage()));
+                        LOGGER.error(String.format("Could not get delegated proxy from server '%s:%s'\n%s",
+                                myProxyDetails.getMyProxyServer(), myProxyDetails.getMyProxyPort(), ex.getMessage()));
                         throw new DtsFileSystemAuthenticationException(ex.getMessage());
                     }
                 }
@@ -206,7 +206,7 @@ public class DtsVfsUtil extends VFSUtil {
                     final String mdasDomainName = srbUriProperties.getMdasDomainHome();
 
                     if (defaultStorageResource != null && !defaultStorageResource.trim().equals("")) {
-                        LOG.debug("Setting SRB.defaultStorageResource to " + defaultStorageResource);
+                        LOGGER.debug("Setting SRB.defaultStorageResource to " + defaultStorageResource);
                         SRBFileSystemConfigBuilder.getInstance().setDefaultStorageResource(options,
                                 defaultStorageResource);
                     }
@@ -215,17 +215,17 @@ public class DtsVfsUtil extends VFSUtil {
                     //SRBFileSystemConfigBuilder.getInstance().setFileWallPortMin(options, min);
 
                     if (homeDirectory != null && !homeDirectory.trim().equals("")) {
-                        LOG.debug("Setting SRB.homeDirectory to " + homeDirectory);
+                        LOGGER.debug("Setting SRB.homeDirectory to " + homeDirectory);
                         SRBFileSystemConfigBuilder.getInstance().setHomeDirectory(options, homeDirectory);
                     }
 
                     if (mcatZone != null && !mcatZone.trim().equals("")) {
-                        LOG.debug("Setting SRB.mcatZone to " + mcatZone);
+                        LOGGER.debug("Setting SRB.mcatZone to " + mcatZone);
                         SRBFileSystemConfigBuilder.getInstance().setMcatZone(options, mcatZone);
                     }
 
                     if (mdasDomainName != null && !mdasDomainName.trim().equals("")) {
-                        LOG.debug("Setting SRB.mdasDomainName to " + mdasDomainName);
+                        LOGGER.debug("Setting SRB.mdasDomainName to " + mdasDomainName);
                         SRBFileSystemConfigBuilder.getInstance().setMdasDomainName(options, mdasDomainName);
                     }
 
@@ -239,16 +239,16 @@ public class DtsVfsUtil extends VFSUtil {
                     final String zone = irodsUriProperties.getIrodsZone();
 
                     if (defaultStorageResource != null && !defaultStorageResource.trim().equals("")) {
-                        LOG.debug("Setting IRODS.defaultStorageResource to " + defaultStorageResource);
+                        LOGGER.debug("Setting IRODS.defaultStorageResource to " + defaultStorageResource);
                         IRODSFileSystemConfigBuilder.getInstance().setDefaultStorageResource(options,
                                 defaultStorageResource);
                     }
                     if (homeDirectory != null && !homeDirectory.trim().equals("")) {
-                        LOG.debug("Setting IRODS.homeDirectory to " + homeDirectory);
+                        LOGGER.debug("Setting IRODS.homeDirectory to " + homeDirectory);
                         IRODSFileSystemConfigBuilder.getInstance().setHomeDirectory(options, homeDirectory);
                     }
                     if (zone != null && !zone.trim().equals("")) {
-                        LOG.debug("Setting IRODS.zone to " + zone);
+                        LOGGER.debug("Setting IRODS.zone to " + zone);
                         IRODSFileSystemConfigBuilder.getInstance().setZone(options, zone);
                     }
 

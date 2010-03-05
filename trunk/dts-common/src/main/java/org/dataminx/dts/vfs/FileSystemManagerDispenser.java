@@ -34,10 +34,12 @@ public class FileSystemManagerDispenser {
     };
 
     public DefaultFileSystemManager getFileSystemManager() {
+        LOGGER.debug("Instantiating a new FileSystemManager");
         return mThreadLocalFsManager.get();
     }
 
     public void closeFileSystemManager() {
+        LOGGER.debug("Closing FileSystemManager");
         mThreadLocalFsManager.remove();
     }
 
