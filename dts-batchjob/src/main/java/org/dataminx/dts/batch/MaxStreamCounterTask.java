@@ -117,6 +117,12 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
             }
         }
 
+        // TODO:
+        // we'll force the closing of the main thread's connection here.. not sure if
+        // it will still be used by other tasks/steps being executed by the main thread
+        // later on. we'll see..
+        mFileSystemManagerDispenser.closeFileSystemManager();
+
         // go through each FO in the map and check for max connections we can
         // make on each one and put in map<URI in String, Integer of max connections>
         for (final FileObject foRoot : mFileObjectMap.values()) {

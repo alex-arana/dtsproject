@@ -104,7 +104,7 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
             mDtsJobStepAllocator.closeNewDataTransfer();
 
         }
-        LOGGER.debug("total size of files to be transferred: " + mTotalSize + " bytes");
+        LOGGER.info("Total size of files to be transferred: " + mTotalSize + " bytes");
         LOGGER.debug("list of excluded files: ");
         for (final String excluded : mExcluded) {
             LOGGER.debug(" - " + excluded);

@@ -3,3 +3,5 @@ ftp.username=changeme
 ftp.password=changeme
 srb.username=changeme
 srb.password=changeme
+myproxy.username=changeme
+myproxy.password=changeme

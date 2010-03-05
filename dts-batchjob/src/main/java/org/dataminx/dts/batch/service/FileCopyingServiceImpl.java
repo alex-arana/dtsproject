@@ -35,7 +35,6 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.Selectors;
 import org.dataminx.dts.vfs.DtsVfsUtil;
-import org.dataminx.dts.wn.common.util.StopwatchTimer;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 import org.slf4j.Logger;
@@ -74,10 +73,7 @@ public class FileCopyingServiceImpl implements FileCopyingService {
             final FileSystemManager sourceFileSystemManager, final FileSystemManager targetFileSystemManager) {
         LOGGER.info(String.format("Copying source '%s' to target '%s'...", sourceURI, targetURI));
         try {
-            final StopwatchTimer timer = new StopwatchTimer();
             copyFiles(sourceFileSystemManager.resolveFile(sourceURI), targetFileSystemManager.resolveFile(targetURI));
-            LOGGER.info(String.format("Finished copying source '%s' to target '%s' in %s.", sourceURI, targetURI, timer
-                    .getFormattedElapsedTime()));
         } catch (final FileSystemException ex) {
             LOGGER.error("An error has occurred during a file copy operation: " + ex, ex);
             throw new DtsFileCopyOperationException(ex);
@@ -91,12 +87,9 @@ public class FileCopyingServiceImpl implements FileCopyingService {
             final FileSystemManager sourceFileSystemManager, final FileSystemManager targetFileSystemManager) {
         LOGGER.info(String.format("Copying source '%s' to target '%s'...", source.getURI(), target.getURI()));
         try {
-            final StopwatchTimer timer = new StopwatchTimer();
             copyFiles(
                     sourceFileSystemManager.resolveFile(source.getURI(), mDtsVfsUtil.createFileSystemOptions(source)),
                     targetFileSystemManager.resolveFile(target.getURI(), mDtsVfsUtil.createFileSystemOptions(target)));
-            LOGGER.info(String.format("Finished copying source '%s' to target '%s' in %s.", source.getURI(), target
-                    .getURI(), timer.getFormattedElapsedTime()));
         } catch (final FileSystemException ex) {
             LOGGER.error("An error has occurred during a file copy operation: " + ex, ex);
             throw new DtsFileCopyOperationException(ex);
