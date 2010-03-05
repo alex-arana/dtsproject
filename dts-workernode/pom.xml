@@ -222,33 +222,6 @@
       <scope>runtime</scope>
     </dependency>
 
-    <!-- Oracle JDBC driver -->
-    <!--
-    <dependency>
-      <groupId>com.oracle</groupId>
-      <artifactId>ojdbc14</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    -->
-
-    <!-- MySQL JDBC driver -->
-    <!--
-    <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    -->
-
-    <!-- HSQLDB JDBC Driver -->
-    <!--
-    <dependency>
-      <groupId>hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    -->
-
     <!-- C3P0 -->
     <!-- 
     <dependency>
