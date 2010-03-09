@@ -3,12 +3,12 @@
  */
 package org.dataminx.dts.wn;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang.SystemUtils;
 import org.dataminx.dts.wn.service.WorkerNodeJobPollable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.JobInstanceAlreadyExistsException;
 import org.springframework.batch.core.launch.JobOperator;
@@ -30,6 +30,9 @@ import org.springframework.beans.factory.InitializingBean;
  * @author hnguyen
  */
 public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, InitializingBean, DisposableBean {
+
+    /** Internal application logger. */
+    private static final Logger LOG = LoggerFactory.getLogger(WorkerNodeManager.class);
 
     /** an JobOperator implementation such as {link SimpleJobOperator} */
     private JobOperator mOperator;
@@ -150,7 +153,7 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
      * determine whether this manager can poll more message from the JMS Queue.
      */
     @Override
-    public boolean canPoll() {
+    public synchronized boolean canPoll() {
         final int runningJobs = runningJobs();
         if (runningJobs < maxBatchJobNumer) {
             return true;
@@ -162,12 +165,12 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
         int runningJobs=0;
         for (String jobName:mOperator.getJobNames()) {
             try {
-                if (mOperator.getRunningExecutions(jobName).size()<1) {
+                if (mOperator.getRunningExecutions(jobName).size()>=1) {
                     runningJobs++;
                 }
             }
             catch (NoSuchJobException ex) {
-                // TODO Auto-generated catch block
+                LOG.debug("Ignore job " + jobName,ex);
             }
         }
         return runningJobs;
@@ -178,20 +181,15 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
      */
     @Override
     public void afterPropertiesSet() throws Exception {
-        File userHomeLockFile = new File(SystemUtils.USER_HOME + File.pathSeparator + WORKER_NODE_DIR_NAME +
-                                                                File.pathSeparator+ LOCK_FILE_NAME);
-        if (userHomeLockFile.exists()) {
-            // not graceful shudown
-            for (String jobName:mOperator.getJobNames()) {
-                for (Long execId:mOperator.getRunningExecutions(jobName)) {
-                    mOperator.stop(execId); // because the job status still be STARTED
-                    mOperator.restart(execId);
-                }
-            }
-        }
-        else {
-            userHomeLockFile.createNewFile(); // this is safe as the check is done by OS and it is atomic operation
-        }
+//        File userHomeLockFile = new File(SystemUtils.USER_HOME + File.pathSeparator + WORKER_NODE_DIR_NAME +
+//                                            File.pathSeparator+ LOCK_FILE_NAME);
+//        for (String jobName:mOperator.getJobNames()) {
+//            for (Long execId:mOperator.getExecutions(jobName)) {
+//                mOperator.stop(execId); // because the job status still be STARTED
+//                mOperator.restart(execId);
+//            }
+//        }
+        LOG.debug("afterPropertiesSet()");
     }
 
     /**
@@ -202,10 +200,11 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     public void destroy() throws Exception {
         // TODO: a graceful shutdown should stop all the running jobs cleanly as well.
         // remove lock file if graceful shutdown
-        File userHomeLockFile = new File(SystemUtils.USER_HOME + File.pathSeparator + WORKER_NODE_DIR_NAME +
-            File.pathSeparator+ LOCK_FILE_NAME);
-        if (!userHomeLockFile.delete()) {
-            userHomeLockFile.deleteOnExit();
-        }
+//        File userHomeLockFile = new File(SystemUtils.USER_HOME + File.pathSeparator + WORKER_NODE_DIR_NAME +
+//            File.pathSeparator+ LOCK_FILE_NAME);
+//        if (!userHomeLockFile.delete()) {
+//            userHomeLockFile.deleteOnExit();
+//        }
+        LOG.debug("destroy()");
     }
 }
