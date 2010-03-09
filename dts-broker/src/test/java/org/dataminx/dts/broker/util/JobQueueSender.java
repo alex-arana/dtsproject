@@ -43,6 +43,7 @@ public class JobQueueSender {
                 final MessageConverter messageConverter = mJmsTemplate.getMessageConverter();
                 final Message jmsMessage = messageConverter.toMessage(message, session);
                 jmsMessage.setJMSCorrelationID(jobId);
+                jmsMessage.setStringProperty("routingHeader", "ANSTO");
                 return jmsMessage;
             }
         });

@@ -70,6 +70,7 @@ public class DtsJobScheduler {
 
         if (LOG.isDebugEnabled()){
             LOG.debug("Found delay transfer requirement: " + delay);
+            LOG.debug("All headers: " + message.getHeaders().toString());
         }
         try {
             Calendar cal = DatatypeConverter.parseDateTime(delay);
