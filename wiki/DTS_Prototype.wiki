@@ -35,6 +35,11 @@ The DTS codebase is currently hosted in the DTS Google Code SVN repository. You 
 ==== Building the project ====
 Open a command prompt and change to the directory containing the working copy of the DTS checked out in the previous step. You can build the entire project using Maven with the following:
 {{{
+  > mvn -Dmaven.test.skip=true clean install
+}}}
+
+If your site uses a web proxy, you'll probably need to add the proxy related properties before you start the JVM..
+{{{
   > mvn -Dmaven.test.skip=true -DproxyHost=hostname -DproxyPort=8080 clean install
 }}}
 
