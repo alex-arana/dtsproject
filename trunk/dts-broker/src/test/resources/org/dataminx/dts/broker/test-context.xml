@@ -11,7 +11,7 @@
   <context:annotation-config/>
 
   <bean id="mQueueSender" class="org.dataminx.dts.broker.util.JobQueueSender">
-    <property name="mQueue" ref="jmsBrokerEntryQueue"/>
+    <property name="mQueue" ref="brokerJobSubmissionQueue"/>
     <property name="mJmsTemplate" ref="jmsTemplate"/>
   </bean>
   
@@ -20,7 +20,7 @@
   </bean>
   
   <bean id="xmlPayloadDelayExtractor" class="org.dataminx.dts.broker.si.XmlPayloadDelayExtractor">
-    <constructor-arg index="0" value="${broker.xml.mQueryStr}"/>
+    <constructor-arg index="0" value="${broker.xml.queryStr}"/>
   </bean>
   
   <bean id="dtsMarshaller"
