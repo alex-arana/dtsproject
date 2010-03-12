@@ -32,6 +32,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 
+import org.dataminx.dts.common.xml.XmlUtils;
+
+
 import org.dataminx.dts.batch.DtsJob;
 import org.dataminx.dts.batch.DtsJobFactory;
 
@@ -45,7 +48,6 @@ import javax.jms.TextMessage;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
 import org.apache.xmlbeans.XmlObject;
-import org.dataminx.dts.common.xml.XmlUtils;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.springframework.batch.integration.launch.JobLaunchRequest;
 import org.springframework.core.io.ClassPathResource;

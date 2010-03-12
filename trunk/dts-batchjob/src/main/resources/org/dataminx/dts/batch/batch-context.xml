@@ -36,11 +36,11 @@
     <property name="dataSource" ref="dataSource" />
   </bean>
 
-  <bean id="fileSystemManagerDispenser" class="org.dataminx.dts.vfs.FileSystemManagerDispenser">
+  <bean id="fileSystemManagerDispenser" class="org.dataminx.dts.common.vfs.FileSystemManagerDispenser">
     <property name="dtsVfsUtil" ref="dtsVfsUtil" />
   </bean>
 
-  <bean id="dtsVfsUtil" class="org.dataminx.dts.vfs.DtsVfsUtil">
+  <bean id="dtsVfsUtil" class="org.dataminx.dts.common.vfs.DtsVfsUtil">
     <property name="ftpSupported" value="true" />
     <property name="sftpSupported" value="true" />
     <property name="httpSupported" value="true" />
@@ -116,7 +116,7 @@
     <property name="stopwatchTimer" ref="stopwatchTimer"/>
   </bean>
   
-  <bean id="stopwatchTimer" class="org.dataminx.dts.wn.common.util.StopwatchTimer"/>
+  <bean id="stopwatchTimer" class="org.dataminx.dts.common.util.StopwatchTimer"/>
   
   <bean id="dtsFileTransferJobListener" class="org.dataminx.dts.batch.DtsFileTransferJobListener">
     <property name="fileSystemManagerCache" ref="fileSystemManagerCache"/>
@@ -181,7 +181,7 @@
     <property name="jobRepository" ref="jobRepository"/>
   </bean>
   
-  <bean id="fileSystemManagerCache" class="org.dataminx.dts.vfs.FileSystemManagerCache"/>
+  <bean id="fileSystemManagerCache" class="org.dataminx.dts.common.vfs.FileSystemManagerCache"/>
   
   <bean id="executionContextCleaner" class="org.dataminx.dts.batch.common.util.ExecutionContextCleaner">
     <property name="jobRepository" ref="jobRepository"/>

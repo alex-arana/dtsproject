@@ -27,15 +27,18 @@
  */
 package org.dataminx.dts.domain.jparepo;
 
+import org.dataminx.dts.ws.repo.JobDao;
+
+import org.dataminx.dts.ws.model.Job;
+
+import org.dataminx.dts.common.model.JobStatus;
+
 import java.io.FileInputStream;
 import java.sql.Connection;
 import java.util.List;
 import java.util.UUID;
 import javax.sql.DataSource;
 import junit.framework.Assert;
-import org.dataminx.dts.domain.model.Job;
-import org.dataminx.dts.domain.model.JobStatus;
-import org.dataminx.dts.domain.repo.JobDao;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.IDataSet;

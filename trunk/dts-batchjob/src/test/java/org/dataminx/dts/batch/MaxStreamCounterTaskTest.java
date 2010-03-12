@@ -6,12 +6,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import org.dataminx.dts.common.vfs.DtsVfsUtil;
+import org.dataminx.dts.common.vfs.FileSystemManagerCache;
+import org.dataminx.dts.common.vfs.FileSystemManagerDispenser;
+
 import java.io.File;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
-import org.dataminx.dts.vfs.DtsVfsUtil;
-import org.dataminx.dts.vfs.FileSystemManagerCache;
-import org.dataminx.dts.vfs.FileSystemManagerDispenser;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.batch.repeat.RepeatStatus;

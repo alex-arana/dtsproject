@@ -31,11 +31,13 @@ import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
+import org.dataminx.dts.common.xml.XmlUtils;
+
+
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.xmlbeans.XmlObject;
-import org.dataminx.dts.common.xml.XmlUtils;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;

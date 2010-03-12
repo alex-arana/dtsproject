@@ -28,11 +28,11 @@
       />
 
   <beans:bean id="dtsWsMessageConverter"
-              class="org.dataminx.dts.jms.DtsWsMessageConverter">
+              class="org.dataminx.dts.ws.jms.DtsWsMessageConverter">
   </beans:bean>
 
   <beans:bean id="dtsJobEventUpdateHandler"
-              class="org.dataminx.dts.jms.DtsJobEventUpdateHandler">
+              class="org.dataminx.dts.ws.jms.DtsJobEventUpdateHandler">
   </beans:bean>
 
   <!-- The DTS Job Event Updates Endpoint -->
@@ -41,7 +41,7 @@
                      method="handleEvent"/>
 
   <beans:bean id="dtsWsMessagePayloadTransformer"
-              class="org.dataminx.dts.jms.DtsWsMessagePayloadTransformer">
+              class="org.dataminx.dts.ws.jms.DtsWsMessagePayloadTransformer">
     <beans:constructor-arg index="0" ref="marshaller"/>
   </beans:bean>
 

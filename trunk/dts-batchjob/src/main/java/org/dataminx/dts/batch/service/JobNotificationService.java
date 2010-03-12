@@ -27,9 +27,10 @@
  */
 package org.dataminx.dts.batch.service;
 
+import org.dataminx.dts.common.model.JobStatus;
+
 import org.dataminx.dts.batch.DtsJob;
 
-import org.dataminx.dts.domain.model.JobStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 

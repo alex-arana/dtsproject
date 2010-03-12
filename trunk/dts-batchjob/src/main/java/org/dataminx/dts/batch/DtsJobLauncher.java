@@ -27,10 +27,11 @@
  */
 package org.dataminx.dts.batch;
 
+import org.dataminx.dts.common.util.SchemaUtils;
+
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataminx.dts.wn.common.util.SchemaUtils;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.batch.core.JobExecution;

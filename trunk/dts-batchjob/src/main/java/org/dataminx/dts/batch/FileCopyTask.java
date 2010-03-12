@@ -29,6 +29,16 @@ package org.dataminx.dts.batch;
 
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_DATA_TRANSFER_STEP_KEY;
 
+import org.dataminx.dts.common.batch.util.RootFileObjectComparator;
+
+import org.dataminx.dts.common.vfs.DtsVfsUtil;
+import org.dataminx.dts.common.vfs.FileSystemManagerCache;
+import org.dataminx.dts.common.vfs.FileSystemManagerDispenser;
+import org.dataminx.dts.common.vfs.UnknownFileSystemManagerException;
+import org.dataminx.dts.common.vfs.UnknownRootFileObjectException;
+
+import org.dataminx.dts.common.util.StopwatchTimer;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -37,15 +47,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemManager;
 import org.dataminx.dts.batch.common.util.ExecutionContextCleaner;
-import org.dataminx.dts.batch.common.util.RootFileObjectComparator;
 import org.dataminx.dts.batch.service.FileCopyingService;
 import org.dataminx.dts.batch.service.JobNotificationService;
-import org.dataminx.dts.vfs.DtsVfsUtil;
-import org.dataminx.dts.vfs.FileSystemManagerCache;
-import org.dataminx.dts.vfs.FileSystemManagerDispenser;
-import org.dataminx.dts.vfs.UnknownFileSystemManagerException;
-import org.dataminx.dts.vfs.UnknownRootFileObjectException;
-import org.dataminx.dts.wn.common.util.StopwatchTimer;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

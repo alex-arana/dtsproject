@@ -30,11 +30,13 @@ package org.dataminx.dts.batch;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_RESOURCE_KEY;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
 
+import org.dataminx.dts.common.model.JobStatus;
+
+import org.dataminx.dts.common.util.StopwatchTimer;
+
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataminx.dts.domain.model.JobStatus;
-import org.dataminx.dts.wn.common.util.StopwatchTimer;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
