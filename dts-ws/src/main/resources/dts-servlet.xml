@@ -99,15 +99,12 @@
     <property name="basename" value="validation-errors"/>
   </bean>
 
-  <bean id="dataTransferService" class="org.dataminx.dts.service.impl.DataTransferServiceImpl">
+  <bean id="dataTransferService" class="org.dataminx.dts.ws.service.DataTransferServiceImpl">
     <description>This bean is our "business" service.</description>
   </bean>
 
   <!-- Message Sender -->
   <bean id="messageSender" class="org.dataminx.dts.jms.JobSubmitQueueSender" />
-
-  <!-- Job Content Validator -->
-  <bean id="jobContentValidator" class="org.dataminx.dts.common.util.JobContentValidator" />
 
   <!-- Configure XML Marshaller -->
   <bean class="org.springframework.ws.server.endpoint.adapter.GenericMarshallingMethodEndpointAdapter">

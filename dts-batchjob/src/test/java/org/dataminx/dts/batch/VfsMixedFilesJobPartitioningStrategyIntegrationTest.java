@@ -3,12 +3,13 @@ package org.dataminx.dts.batch;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import org.dataminx.dts.common.vfs.DtsVfsUtil;
+import org.dataminx.dts.common.vfs.FileSystemManagerDispenser;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 import org.apache.xmlbeans.XmlException;
-import org.dataminx.dts.vfs.DtsVfsUtil;
-import org.dataminx.dts.vfs.FileSystemManagerDispenser;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.core.io.ClassPathResource;
 import org.testng.annotations.BeforeClass;

@@ -3,8 +3,9 @@
  */
 package org.dataminx.dts.broker.si;
 
+import org.dataminx.dts.common.util.XmlBeansUtils;
+
 import org.apache.xmlbeans.XmlObject;
-import org.dataminx.dts.wn.common.util.XmlBeansUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

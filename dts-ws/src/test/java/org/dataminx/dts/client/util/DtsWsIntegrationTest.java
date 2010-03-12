@@ -27,9 +27,10 @@
  */
 package org.dataminx.dts.client.util;
 
+import org.dataminx.dts.ws.client.DataTransferServiceClient;
+
 import java.io.File;
 import junit.framework.Assert;
-import org.dataminx.dts.client.sws.DataTransferServiceClient;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.junit.Before;
 import org.junit.Test;

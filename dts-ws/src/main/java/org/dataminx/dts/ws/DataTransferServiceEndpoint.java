@@ -27,6 +27,12 @@
  */
 package org.dataminx.dts.ws;
 
+import org.dataminx.dts.ws.service.DataTransferService;
+
+import org.dataminx.dts.ws.model.Job;
+
+import org.dataminx.dts.common.ws.InvalidJobDefinitionException;
+
 import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -34,8 +40,6 @@ import java.util.List;
 import java.util.Locale;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataminx.dts.domain.model.Job;
-import org.dataminx.dts.service.DataTransferService;
 import org.dataminx.dts.ws.validator.DtsJobDefinitionValidator;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobDetailsRequestDocument;

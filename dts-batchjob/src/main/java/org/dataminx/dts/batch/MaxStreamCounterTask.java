@@ -1,5 +1,12 @@
 package org.dataminx.dts.batch;
 
+import org.dataminx.dts.common.batch.util.FileObjectMap;
+
+import org.dataminx.dts.common.vfs.DtsVfsUtil;
+import org.dataminx.dts.common.vfs.FileSystemManagerCache;
+import org.dataminx.dts.common.vfs.FileSystemManagerCacheAlreadyInitializedException;
+import org.dataminx.dts.common.vfs.FileSystemManagerDispenser;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,11 +23,6 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.FileSystemOptions;
 import org.dataminx.dts.DtsException;
-import org.dataminx.dts.batch.common.util.FileObjectMap;
-import org.dataminx.dts.vfs.DtsVfsUtil;
-import org.dataminx.dts.vfs.FileSystemManagerCache;
-import org.dataminx.dts.vfs.FileSystemManagerCacheAlreadyInitializedException;
-import org.dataminx.dts.vfs.FileSystemManagerDispenser;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;

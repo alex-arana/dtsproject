@@ -27,6 +27,14 @@
  */
 package org.dataminx.dts.ws;
 
+import org.dataminx.dts.common.ws.AuthenticationException;
+import org.dataminx.dts.common.ws.AuthorisationException;
+import org.dataminx.dts.common.ws.CustomException;
+import org.dataminx.dts.common.ws.InvalidJobDefinitionException;
+import org.dataminx.dts.common.ws.JobStatusUpdateException;
+import org.dataminx.dts.common.ws.NonExistentJobException;
+import org.dataminx.dts.common.ws.TransferProtocolNotSupportedException;
+
 import java.util.Calendar;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Transformer;

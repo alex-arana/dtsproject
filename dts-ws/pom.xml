@@ -321,7 +321,7 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <configuration>
-          <mainClass>org.dataminx.dts.main.JettyEmbeddedDtsWebService</mainClass>
+          <mainClass>org.dataminx.dts.ws.JettyEmbeddedDtsWebService</mainClass>
           <classpathScope>runtime</classpathScope>
         </configuration>
       </plugin>

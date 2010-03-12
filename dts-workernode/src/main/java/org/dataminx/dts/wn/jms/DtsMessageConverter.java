@@ -29,6 +29,11 @@ package org.dataminx.dts.wn.jms;
 
 import static org.dataminx.dts.common.xml.XmlUtils.newDocument;
 
+import org.dataminx.dts.common.xml.ByteArrayResult;
+
+import org.dataminx.dts.common.util.SchemaUtils;
+
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Properties;
@@ -44,8 +49,6 @@ import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.lang.StringUtils;
 import org.dataminx.dts.batch.DtsJob;
 import org.dataminx.dts.batch.DtsJobFactory;
-import org.dataminx.dts.common.xml.ByteArrayResult;
-import org.dataminx.dts.wn.common.util.SchemaUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.converter.DefaultJobParametersConverter;

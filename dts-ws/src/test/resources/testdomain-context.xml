@@ -42,7 +42,7 @@
 
 	<tx:annotation-driven transaction-manager="transactionManager" />
 
-	<bean id="jobRepository" class="org.dataminx.dts.domain.jparepo.JobJpaDaoImpl" />
+	<bean id="jobRepository" class="org.dataminx.dts.ws.jparepo.JobJpaDaoImpl" />
   
     <bean id="applicationProperties"
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">

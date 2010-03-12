@@ -17,7 +17,7 @@
     </jsdl:JobIdentification>
     <mjsdl:DataTransfer>
       <mjsdl:Source>
-    <jsdl:URI>file:////etc/passwd</jsdl:URI>
+<!--      <jsdl:URI>file:////etc/passwd</jsdl:URI>-->
 
         <!--
         <jsdl:URI>gsiftp://ng2.vpac.org/etc/yum.repos.d/</jsdl:URI>
@@ -31,15 +31,15 @@
         </mjsdl:Credential>
         -->
 
-        <!--
-        <jsdl:URI>ftp://dm11.intersect.org.au/pub/DataMINX/minx-dts/pom.xml</jsdl:URI>
+        
+        <jsdl:URI>ftp://dataminx.chem.usyd.edu.au/home/gerson/hi.xml</jsdl:URI>
         <mjsdl:Credential>
           <wsse:UsernameToken>
             <wsse:Username>${ftp.username}</wsse:Username>
             <wsse:PasswordString>${ftp.password}</wsse:PasswordString>
           </wsse:UsernameToken>
         </mjsdl:Credential>
-        -->
+        
 
         <!--
         <jsdl:URI>srb://srb.versi.unimelb.edu.au:5544/versi.melbourne/home/gerson.versi.melbourne/mydir</jsdl:URI>
@@ -88,6 +88,18 @@
       </mjsdl:Source>
       <mjsdl:Target>
         <jsdl:URI>file:///tmp/passwd.copy</jsdl:URI>
+      </mjsdl:Target>
+      <mjsdl:TransferRequirements>
+        <dmi:MaxAttempts>0</dmi:MaxAttempts>
+        <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+      </mjsdl:TransferRequirements>
+    </mjsdl:DataTransfer>
+    <mjsdl:DataTransfer>
+      <mjsdl:Source>        
+        <jsdl:URI>file://home/gerson/sandbox/dir-with-3-files</jsdl:URI>
+      </mjsdl:Source>
+      <mjsdl:Target>
+        <jsdl:URI>file://tmp/hello/hi</jsdl:URI>
       </mjsdl:Target>
       <mjsdl:TransferRequirements>
         <dmi:MaxAttempts>0</dmi:MaxAttempts>

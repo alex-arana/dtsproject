@@ -27,6 +27,8 @@
  */
 package org.dataminx.dts.ws.interceptor;
 
+import org.dataminx.dts.common.ws.AuthenticationException;
+
 import java.util.Iterator;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
@@ -41,7 +43,6 @@ import javax.xml.soap.SOAPMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.security.auth.callback.PassiveCallbackHandler;
-import org.dataminx.dts.ws.AuthenticationException;
 import org.springframework.ws.context.MessageContext;
 import org.springframework.ws.server.EndpointInterceptor;
 import org.springframework.ws.soap.saaj.SaajSoapMessage;
