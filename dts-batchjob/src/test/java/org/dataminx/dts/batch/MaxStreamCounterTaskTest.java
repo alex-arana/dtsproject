@@ -6,13 +6,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-import org.dataminx.dts.common.vfs.DtsVfsUtil;
-import org.dataminx.dts.common.vfs.FileSystemManagerCache;
-import org.dataminx.dts.common.vfs.FileSystemManagerDispenser;
-
 import java.io.File;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
+import org.dataminx.dts.common.vfs.DtsVfsUtil;
+import org.dataminx.dts.common.vfs.FileSystemManagerCache;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -28,16 +26,13 @@ import org.testng.annotations.Test;
 @Test(groups = { "unit-test" })
 public class MaxStreamCounterTaskTest {
 
-    private FileSystemManagerDispenser mFileSystemManagerDispenser;
     private DtsVfsUtil mDtsVfsUtil;
     private SubmitJobRequest mSubmitJobRequest;
     private FileSystemManagerCache mFileSystemManagerCache;
 
     @BeforeClass
     public void init() {
-        mFileSystemManagerDispenser = mock(FileSystemManagerDispenser.class);
         mDtsVfsUtil = mock(DtsVfsUtil.class);
-        mFileSystemManagerDispenser.setDtsVfsUtil(mDtsVfsUtil);
         mSubmitJobRequest = mock(SubmitJobRequest.class);
         mFileSystemManagerCache = mock(FileSystemManagerCache.class);
     }
@@ -51,7 +46,6 @@ public class MaxStreamCounterTaskTest {
         final MaxStreamCounterTask maxStreamCounterTask = new MaxStreamCounterTask();
         maxStreamCounterTask.setSubmitJobRequest(mSubmitJobRequest);
         maxStreamCounterTask.setDtsVfsUtil(mDtsVfsUtil);
-        maxStreamCounterTask.setFileSystemManagerDispenser(mFileSystemManagerDispenser);
         maxStreamCounterTask.setFileSystemManagerCache(mFileSystemManagerCache);
         maxStreamCounterTask.setMaxConnectionsToTry(10);
 
@@ -59,8 +53,7 @@ public class MaxStreamCounterTaskTest {
 
         final FileSystemManager fileSystemManager = DtsVfsUtil.createNewFsManager(false, false, false, false, true,
                 true, false, "/tmp");
-        when(mFileSystemManagerDispenser.getFileSystemManager()).thenReturn(
-                (DefaultFileSystemManager) fileSystemManager);
+        when(mDtsVfsUtil.createNewFsManager()).thenReturn((DefaultFileSystemManager) fileSystemManager);
 
         final RepeatStatus taskStatus = maxStreamCounterTask.execute(null, null);
 

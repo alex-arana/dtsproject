@@ -1,8 +1,5 @@
 package org.dataminx.dts.batch;
 
-import org.dataminx.dts.common.vfs.DtsVfsUtil;
-import org.dataminx.dts.common.vfs.FileSystemManagerDispenser;
-
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
@@ -13,7 +10,9 @@ import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.FileType;
+import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.dataminx.dts.DtsException;
+import org.dataminx.dts.common.vfs.DtsVfsUtil;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.CreationFlagEnumeration;
@@ -29,8 +28,6 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
 
     private long mTotalSize = 0;
     private int mTotalFiles = 0;
-
-    private FileSystemManagerDispenser mFileSystemManagerDispenser;
 
     private long mMaxTotalByteSizePerStepLimit = 0;
 
@@ -57,7 +54,13 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
             throw new DtsException("MaxTotalFileNumPerStepLimit should be a positive number.");
         }
 
-        final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
+        FileSystemManager fileSystemManager = null;
+        try {
+            fileSystemManager = mDtsVfsUtil.createNewFsManager();
+        } catch (final FileSystemException e) {
+            throw new JobScopingException(
+                    "FileSystemException was thrown while creating new FileSystemManager in the job scoping task.", e);
+        }
 
         final DtsJobDetails jobDetails = new DtsJobDetails();
         jobDetails.setJobDefinition(jobDefinition);
@@ -121,11 +124,9 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
         }
         // let's try to put the steps in the step execution context
 
-        // TODO: now that job scoping is run on its own step and by the master thread, we can't close 
-        // the file system manager here
         // immediately close the file system manager so FileCopyTask will be able to use all of the 
         // available connections
-        //mFileSystemManagerDispenser.closeFileSystemManager();
+        ((DefaultFileSystemManager) fileSystemManager).close();
 
         return jobDetails;
     }
@@ -258,17 +259,12 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
         mDtsVfsUtil = dtsVfsUtil;
     }
 
-    public void setFileSystemManagerDispenser(final FileSystemManagerDispenser fileSystemManagerDispenser) {
-        mFileSystemManagerDispenser = fileSystemManagerDispenser;
-    }
-
     public void setMaxTotalByteSizePerStepLimit(final long maxTotalByteSizePerStepLimit) {
         mMaxTotalByteSizePerStepLimit = maxTotalByteSizePerStepLimit;
     }
 
     public void setMaxTotalFileNumPerStepLimit(final int maxTotalFileNumPerStepLimit) {
         mMaxTotalFileNumPerStepLimit = maxTotalFileNumPerStepLimit;
-
     }
 
     private class MixedFilesJobStepAllocator implements DtsJobStepAllocator {
@@ -340,7 +336,5 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
         else if (mMaxTotalFileNumPerStepLimit < 0) {
             throw new JobScopingException("MaxTotalFileNumPerStepLimit should be a positive number.");
         }
-
-        Assert.state(mFileSystemManagerDispenser != null, "FileSystemManagerDispenser has not been set.");
     }
 }

@@ -1,12 +1,5 @@
 package org.dataminx.dts.batch;
 
-import org.dataminx.dts.common.batch.util.FileObjectMap;
-
-import org.dataminx.dts.common.vfs.DtsVfsUtil;
-import org.dataminx.dts.common.vfs.FileSystemManagerCache;
-import org.dataminx.dts.common.vfs.FileSystemManagerCacheAlreadyInitializedException;
-import org.dataminx.dts.common.vfs.FileSystemManagerDispenser;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +15,12 @@ import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.FileSystemOptions;
+import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.dataminx.dts.DtsException;
+import org.dataminx.dts.common.batch.util.FileObjectMap;
+import org.dataminx.dts.common.vfs.DtsVfsUtil;
+import org.dataminx.dts.common.vfs.FileSystemManagerCache;
+import org.dataminx.dts.common.vfs.FileSystemManagerCacheAlreadyInitializedException;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
@@ -55,8 +53,6 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
 
     private DtsVfsUtil mDtsVfsUtil;
 
-    private FileSystemManagerDispenser mFileSystemManagerDispenser;
-
     private JobRepository mJobRepository;
 
     private FileSystemManagerCache mFileSystemManagerCache;
@@ -75,7 +71,14 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
     public RepeatStatus execute(final StepContribution contribution, final ChunkContext chunkContext) throws Exception {
         LOGGER.debug("MaxStreamCounterTask execute()");
 
-        final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
+        FileSystemManager fileSystemManager = null;
+        try {
+            fileSystemManager = mDtsVfsUtil.createNewFsManager();
+        } catch (final FileSystemException e) {
+            throw new DtsJobExecutionException(
+                    "FileSystemException was thrown while creating new FileSystemManager in the max stream counter task.",
+                    e);
+        }
 
         // TODO: have this step rerun if it fails... use the user's provided
         // info
@@ -119,11 +122,8 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
             }
         }
 
-        // TODO:
-        // we'll force the closing of the main thread's connection here.. not sure if
-        // it will still be used by other tasks/steps being executed by the main thread
-        // later on. we'll see..
-        mFileSystemManagerDispenser.closeFileSystemManager();
+        // let's close the connection here.. 
+        ((DefaultFileSystemManager) fileSystemManager).close();
 
         // go through each FO in the map and check for max connections we can
         // make on each one and put in map<URI in String, Integer of max connections>
@@ -148,7 +148,6 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
-        Assert.state(mFileSystemManagerDispenser != null, "FileSystemManagerDispenser has not been set.");
         Assert.state(mDtsVfsUtil != null, "DtsVfsUtil has not been set.");
         Assert.state(mMaxConnectionsToTry != 0, "MaxConnectionsToTry has not been set.");
         Assert.state(mJobRepository != null, "JobRepository has not been set.");
@@ -280,9 +279,9 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
 
         public void run() {
 
-            final FileSystemManager fileSystemManager = mFileSystemManagerDispenser.getFileSystemManager();
-
+            FileSystemManager fileSystemManager = null;
             try {
+                fileSystemManager = mDtsVfsUtil.createNewFsManager();
                 final FileObject fileObject = fileSystemManager.resolveFile(mFoRootURI, mOptions);
                 LOGGER_RC.debug(mConnectionName + " successfully connected.");
 
@@ -324,7 +323,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
                 // let go
                 if (!successfulConnection
                         || (!mParent.getHasConnectionErrorArised() && !mParent.isLastTry() && fileSystemManager != null)) {
-                    mFileSystemManagerDispenser.closeFileSystemManager();
+                    ((DefaultFileSystemManager) fileSystemManager).close();
                 }
                 else {
                     // we'll add the working connections in a list that the steps can share later on
@@ -337,10 +336,6 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
 
     public void setDtsVfsUtil(final DtsVfsUtil dtsVfsUtil) {
         mDtsVfsUtil = dtsVfsUtil;
-    }
-
-    public void setFileSystemManagerDispenser(final FileSystemManagerDispenser fileSystemManagerDispenser) {
-        mFileSystemManagerDispenser = fileSystemManagerDispenser;
     }
 
     public void setFileSystemManagerCache(final FileSystemManagerCache fileSystemManagerCache) {

@@ -15,7 +15,7 @@
       <jsdl:JobAnnotation>Gerson's Job Annotation</jsdl:JobAnnotation>
       <jsdl:JobProject>apollo33</jsdl:JobProject>
     </jsdl:JobIdentification>
-    
+    <!--
     <mjsdl:DataTransfer>
       <mjsdl:Source>
         <jsdl:URI>ftp://mirrors.usc.edu/pub/gnu/findutils/</jsdl:URI>
@@ -36,7 +36,7 @@
         <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
       </mjsdl:TransferRequirements>
     </mjsdl:DataTransfer>
-
+    -->
     <mjsdl:DataTransfer>
       <mjsdl:Source>        
         <jsdl:URI>file://etc/cron.daily</jsdl:URI>

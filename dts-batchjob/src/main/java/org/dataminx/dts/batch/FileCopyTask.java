@@ -29,16 +29,6 @@ package org.dataminx.dts.batch;
 
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_DATA_TRANSFER_STEP_KEY;
 
-import org.dataminx.dts.common.batch.util.RootFileObjectComparator;
-
-import org.dataminx.dts.common.vfs.DtsVfsUtil;
-import org.dataminx.dts.common.vfs.FileSystemManagerCache;
-import org.dataminx.dts.common.vfs.FileSystemManagerDispenser;
-import org.dataminx.dts.common.vfs.UnknownFileSystemManagerException;
-import org.dataminx.dts.common.vfs.UnknownRootFileObjectException;
-
-import org.dataminx.dts.common.util.StopwatchTimer;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -49,6 +39,12 @@ import org.apache.commons.vfs.FileSystemManager;
 import org.dataminx.dts.batch.common.util.ExecutionContextCleaner;
 import org.dataminx.dts.batch.service.FileCopyingService;
 import org.dataminx.dts.batch.service.JobNotificationService;
+import org.dataminx.dts.common.batch.util.RootFileObjectComparator;
+import org.dataminx.dts.common.util.StopwatchTimer;
+import org.dataminx.dts.common.vfs.DtsVfsUtil;
+import org.dataminx.dts.common.vfs.FileSystemManagerCache;
+import org.dataminx.dts.common.vfs.UnknownFileSystemManagerException;
+import org.dataminx.dts.common.vfs.UnknownRootFileObjectException;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,8 +85,6 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
     private ExecutionContextCleaner mExecutionContextCleaner;
 
     private DtsVfsUtil mDtsVfsUtil;
-
-    private FileSystemManagerDispenser mFileSystemManagerDispenser;
 
     private FileSystemManagerCache mFileSystemManagerCache;
 
@@ -188,10 +182,6 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
         mJobStep = jobStep;
     }
 
-    public void setFileSystemManagerDispenser(final FileSystemManagerDispenser fileSystemManagerDispenser) {
-        mFileSystemManagerDispenser = fileSystemManagerDispenser;
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -240,7 +230,6 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
     public void afterPropertiesSet() throws Exception {
         Assert.state(mJobStep != null, "Unable to find DtsJobStep in execution context.");
         Assert.state(mDtsVfsUtil != null, "DtsVfsUtil has not been set.");
-        Assert.state(mFileSystemManagerDispenser != null, "FileSystemManagerDispenser has not been set.");
         Assert.state(mJobNotificationService != null, "JobNotificationService has not been set.");
         Assert.state(mExecutionContextCleaner != null, "ExecutionContextCleaner has not been set.");
         Assert.state(mFileSystemManagerCache != null, "FileSystemManagerCache has not been set.");
