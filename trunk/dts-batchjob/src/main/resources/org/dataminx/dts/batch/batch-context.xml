@@ -36,10 +36,6 @@
     <property name="dataSource" ref="dataSource" />
   </bean>
 
-  <bean id="fileSystemManagerDispenser" class="org.dataminx.dts.common.vfs.FileSystemManagerDispenser">
-    <property name="dtsVfsUtil" ref="dtsVfsUtil" />
-  </bean>
-
   <bean id="dtsVfsUtil" class="org.dataminx.dts.common.vfs.DtsVfsUtil">
     <property name="ftpSupported" value="true" />
     <property name="sftpSupported" value="true" />
@@ -91,7 +87,6 @@
 
   <bean id="fileCopyTask" class="org.dataminx.dts.batch.FileCopyTask" scope="step">
     <property name="jobStep" value="#{stepExecutionContext[DATA_TRANSFER_STEP]}"/>
-    <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
     <property name="jobNotificationService" ref="jobNotificationService"/>
     <property name="fileCopyingService" ref="fileCopyingService"/>
@@ -165,7 +160,6 @@
     -->
     <!-- process 3 files per step -->
     <property name="maxTotalFileNumPerStepLimit" value="${max.total.num.files.perstep}" />
-    <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>
   </bean>
   
   <batch:step id="maxStreamCountingStep">
@@ -176,7 +170,6 @@
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
     <property name="maxConnectionsToTry" value="${default.max.parallel.connections}"/>
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
-    <property name="fileSystemManagerDispenser" ref="fileSystemManagerDispenser"/>  
     <property name="fileSystemManagerCache" ref="fileSystemManagerCache"/>
     <property name="jobRepository" ref="jobRepository"/>
   </bean>

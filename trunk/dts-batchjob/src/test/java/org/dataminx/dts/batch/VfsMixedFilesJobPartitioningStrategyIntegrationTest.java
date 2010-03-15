@@ -3,13 +3,11 @@ package org.dataminx.dts.batch;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import org.dataminx.dts.common.vfs.DtsVfsUtil;
-import org.dataminx.dts.common.vfs.FileSystemManagerDispenser;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 import org.apache.xmlbeans.XmlException;
+import org.dataminx.dts.common.vfs.DtsVfsUtil;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.core.io.ClassPathResource;
 import org.testng.annotations.BeforeClass;
@@ -34,10 +32,6 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest {
         mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
         final DtsVfsUtil dtsVfsUtil = new DtsVfsUtil();
         mPartitioningStrategy.setDtsVfsUtil(dtsVfsUtil);
-        final FileSystemManagerDispenser fileSystemManagerDispenser = new FileSystemManagerDispenser();
-        fileSystemManagerDispenser.setDtsVfsUtil(dtsVfsUtil);
-        mPartitioningStrategy.setFileSystemManagerDispenser(fileSystemManagerDispenser);
-
     }
 
     @DataProvider(name = "jobwith9files-provider")

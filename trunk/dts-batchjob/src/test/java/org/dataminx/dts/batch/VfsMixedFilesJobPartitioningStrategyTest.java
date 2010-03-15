@@ -5,9 +5,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import org.dataminx.dts.common.vfs.DtsVfsUtil;
-import org.dataminx.dts.common.vfs.FileSystemManagerDispenser;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
@@ -15,6 +12,7 @@ import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.apache.xmlbeans.XmlException;
 import org.dataminx.dts.DtsException;
+import org.dataminx.dts.common.vfs.DtsVfsUtil;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.core.io.ClassPathResource;
 import org.testng.annotations.BeforeClass;
@@ -29,16 +27,13 @@ import org.testng.annotations.Test;
 public class VfsMixedFilesJobPartitioningStrategyTest {
 
     private VfsMixedFilesJobPartitioningStrategy mPartitioningStrategy;
-    private FileSystemManagerDispenser mFileSystemManagerDispenser;
     private DtsVfsUtil mDtsVfsUtil;
 
     private static final long FILE_SIZE_10MB = 10485760;
 
     @BeforeClass
     public void init() {
-        mFileSystemManagerDispenser = mock(FileSystemManagerDispenser.class);
         mDtsVfsUtil = mock(DtsVfsUtil.class);
-        mFileSystemManagerDispenser.setDtsVfsUtil(mDtsVfsUtil);
 
     }
 
@@ -47,7 +42,6 @@ public class VfsMixedFilesJobPartitioningStrategyTest {
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
         final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
         mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
-        mPartitioningStrategy.setFileSystemManagerDispenser(mFileSystemManagerDispenser);
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(3);
@@ -55,8 +49,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest {
         final FileSystemManager fileSystemManager = DtsVfsUtil.createNewFsManager(false, false, false, false, true,
                 true, false, "/tmp");
 
-        when(mFileSystemManagerDispenser.getFileSystemManager()).thenReturn(
-                (DefaultFileSystemManager) fileSystemManager);
+        when(mDtsVfsUtil.createNewFsManager()).thenReturn((DefaultFileSystemManager) fileSystemManager);
         final DtsJobDetails jobDetails = mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), UUID
                 .randomUUID().toString());
 
@@ -70,7 +63,6 @@ public class VfsMixedFilesJobPartitioningStrategyTest {
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
         final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
         mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
-        mPartitioningStrategy.setFileSystemManagerDispenser(mFileSystemManagerDispenser);
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(-1);
         mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), UUID.randomUUID().toString());
@@ -81,7 +73,6 @@ public class VfsMixedFilesJobPartitioningStrategyTest {
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
         final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
         mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
-        mPartitioningStrategy.setFileSystemManagerDispenser(mFileSystemManagerDispenser);
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(-1);
         mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), UUID.randomUUID().toString());
