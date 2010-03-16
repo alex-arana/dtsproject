@@ -12,9 +12,9 @@ public class DtsDataTransferUnit implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String mSourceFileURI;
-    private String mDestinationFileURI;
-    private int mDataTransferIndex;
+    private String mSrcURI;
+    private String mDestURI;
+    private int mIndex;
     private long mSize = 0;
 
     public DtsDataTransferUnit() {
@@ -23,34 +23,34 @@ public class DtsDataTransferUnit implements Serializable {
 
     public DtsDataTransferUnit(final String sourceFileURI, final String destinationFileURI,
             final int dataTransferIndex, final long size) {
-        mSourceFileURI = sourceFileURI;
-        mDestinationFileURI = destinationFileURI;
-        mDataTransferIndex = dataTransferIndex;
+        mSrcURI = sourceFileURI;
+        mDestURI = destinationFileURI;
+        mIndex = dataTransferIndex;
         mSize = size;
     }
 
     public String getSourceFileURI() {
-        return mSourceFileURI;
+        return mSrcURI;
     }
 
     public void setSourceFileURI(final String sourceFileURI) {
-        mSourceFileURI = sourceFileURI;
+        mSrcURI = sourceFileURI;
     }
 
     public String getDestinationFileURI() {
-        return mDestinationFileURI;
+        return mDestURI;
     }
 
     public void setDestinationFileURI(final String destinationFileURI) {
-        mDestinationFileURI = destinationFileURI;
+        mDestURI = destinationFileURI;
     }
 
     public int getDataTransferIndex() {
-        return mDataTransferIndex;
+        return mIndex;
     }
 
     public void setDataTransferIndex(final int dataTransferIndex) {
-        mDataTransferIndex = dataTransferIndex;
+        mIndex = dataTransferIndex;
     }
 
     public long getSize() {
@@ -63,7 +63,7 @@ public class DtsDataTransferUnit implements Serializable {
 
     @Override
     public String toString() {
-        return mSourceFileURI + " to " + mDestinationFileURI;
+        return mSrcURI + " to " + mDestURI;
     }
 
 }

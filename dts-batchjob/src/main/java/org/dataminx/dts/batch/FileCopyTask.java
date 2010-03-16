@@ -36,6 +36,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemManager;
+import org.dataminx.dts.DtsException;
 import org.dataminx.dts.batch.common.util.ExecutionContextCleaner;
 import org.dataminx.dts.batch.service.FileCopyingService;
 import org.dataminx.dts.batch.service.JobNotificationService;
@@ -306,9 +307,22 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
                 final DataTransferType dataTransfer = ((MinxJobDescriptionType) mSubmitJobRequest.getJobDefinition()
                         .getJobDescription()).getDataTransferArray(dataTransferUnit.getDataTransferIndex());
 
-                mFileCopyingService.copyFiles(dataTransferUnit.getSourceFileURI(), dataTransferUnit
-                        .getDestinationFileURI(), dataTransfer, mSourceFileSystemManager, mTargetFileSystemManager);
+                try {
+                    // once we get to this point, we can safely assume that we have successfully authenticated and are
+                    // authorised to access the files specified in the DTS job definition document.
+                    mFileCopyingService.copyFiles(dataTransferUnit.getSourceFileURI(), dataTransferUnit
+                            .getDestinationFileURI(), dataTransfer, mSourceFileSystemManager, mTargetFileSystemManager);
 
+                    // the only reason why the call to copyFile would fail might be due to a DtsException (a descendent
+                    // of the RuntimeException) being thrown where we couldn't really do anything much (eg. a sudden 
+                    // expiration of the user's credential while doing the transfer). at that point, we shouldn't 
+                    // continue with the transfer anymore.
+                } catch (final DtsException e) {
+                    // no need to continue pro
+                    LOGGER_FC
+                            .error("A DtsException was thrown while copying " + dataTransferUnit.getSourceFileURI(), e);
+                    break;
+                }
                 try {
                     mBatchVolumeSize += mSourceFileSystemManager.resolveFile(dataTransferUnit.getSourceFileURI(),
                             mDtsVfsUtil.createFileSystemOptions(dataTransfer.getSource())).getContent().getSize();
@@ -319,6 +333,8 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
 
                 dataTransferUnit = getNextDataTransferUnit();
             }
+
+            // let's try and return the borrowed FileSystemManager connections...
             try {
                 if (mRootFileObjectComparator.compare(mJobStep.getSourceRootFileObjectString(), mJobStep
                         .getTargetRootFileObjectString()) == 0) {
