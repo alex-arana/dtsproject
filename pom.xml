@@ -40,7 +40,7 @@
     <spring-integration-core.version>1.0.2.SR1</spring-integration-core.version>
     <spring-integration-jms.version>1.0.2.SR1</spring-integration-jms.version>
     <spring-integration-xml.version>1.0.2.SR1</spring-integration-xml.version>
-    <spring-batch-core.version>2.0.1.RELEASE</spring-batch-core.version>
+    <spring-batch-core.version>2.0.4.RELEASE</spring-batch-core.version>
     <spring-batch-integration.version>1.1.4.RELEASE</spring-batch-integration.version>
     <spring-ws.version>1.5.7</spring-ws.version>
     <hibernate-core.version>3.3.1.GA</hibernate-core.version>

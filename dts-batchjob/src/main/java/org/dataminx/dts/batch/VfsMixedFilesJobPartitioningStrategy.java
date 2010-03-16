@@ -41,8 +41,6 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
 
     private MixedFilesJobStepAllocator mDtsJobStepAllocator;
 
-    public static final int BATCH_SIZE_LIMIT = 3;
-
     public DtsJobDetails partitionTheJob(final JobDefinitionType jobDefinition, final String jobResourceKey)
             throws JobScopingException {
         Assert.hasText(jobResourceKey, "JobResourceKey should not be null or empty.");
@@ -83,6 +81,7 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
             throw new DtsJobExecutionException("DTS job request contains no data transfer elements.");
         }
 
+        int dataTransferIndex = 0;
         for (final DataTransferType dataTransfer : dataTransfers) {
 
             try {
@@ -93,7 +92,12 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
 
                 mDtsJobStepAllocator.createNewDataTransfer(sourceParent.getFileSystem().getRoot().getURL().toString(),
                         targetParent.getFileSystem().getRoot().getURL().toString());
-                prepare(sourceParent, targetParent, dataTransfer);
+
+                final CreationFlagEnumeration.Enum creationFlag = dataTransfer.getTransferRequirements()
+                        .getCreationFlag();
+
+                prepare(sourceParent, targetParent, dataTransferIndex, creationFlag);
+                dataTransferIndex++;
             } catch (final DtsJobCancelledException e) {
                 // TODO: handle DTS Job Cancel event
                 e.printStackTrace();
@@ -132,7 +136,8 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
     }
 
     private void prepare(final FileObject sourceParent, final FileObject destinationParent,
-            final DataTransferType dataTransfer) throws DtsJobCancelledException, JobScopingException {
+            final int dataTransferIndex, final CreationFlagEnumeration.Enum creationFlag)
+            throws DtsJobCancelledException, JobScopingException {
         if (mCancelled) {
             throw new DtsJobCancelledException();
         }
@@ -156,9 +161,6 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
                             + " bytes.");
                 }
 
-                final CreationFlagEnumeration.Enum creationFlag = dataTransfer.getTransferRequirements()
-                        .getCreationFlag();
-
                 if (!destinationParent.exists()) {
                     // Note that we are not supporting a single file transfer to
                     // a non-existent directory
@@ -167,14 +169,14 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
 
                     // TODO: should we handle the above case?
 
-                    addFilesToTransfer(sourceParent, destinationParent, dataTransfer);
+                    addFilesToTransfer(sourceParent, destinationParent, dataTransferIndex);
 
                 }
                 else if (destinationParent.exists() && destinationParent.getType().equals(FileType.FILE)) {
                     // File to File
 
                     if (creationFlag.equals(CreationFlagEnumeration.OVERWRITE)) {
-                        addFilesToTransfer(sourceParent, destinationParent, dataTransfer);
+                        addFilesToTransfer(sourceParent, destinationParent, dataTransferIndex);
                     }
                     else {
                         mExcluded.add(sourceParent.getName().getFriendlyURI());
@@ -192,7 +194,7 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
 
                     if (destinationChild.exists()) {
                         if (creationFlag.equals(CreationFlagEnumeration.OVERWRITE)) {
-                            addFilesToTransfer(sourceParent, destinationChild, dataTransfer);
+                            addFilesToTransfer(sourceParent, destinationChild, dataTransferIndex);
                         }
                         else {
                             mExcluded.add(sourceParent.getName().getFriendlyURI());
@@ -200,7 +202,7 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
 
                     }
                     else {
-                        addFilesToTransfer(sourceParent, destinationChild, dataTransfer);
+                        addFilesToTransfer(sourceParent, destinationChild, dataTransferIndex);
                     }
                 }
 
@@ -224,7 +226,7 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
                 // iterate through the children
                 for (final FileObject sourceChild : sourceChildren) {
                     // recurse into the directory, or copy the file
-                    prepare(sourceChild, destinationChild, dataTransfer);
+                    prepare(sourceChild, destinationChild, dataTransferIndex, creationFlag);
                 }
             }
         } catch (final DtsJobCancelledException e) {
@@ -239,13 +241,14 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
         }
     }
 
-    private void addFilesToTransfer(final FileObject source, final FileObject destination,
-            final DataTransferType dataTransfer) throws FileSystemException {
-        LOGGER.debug("addFilesToTransfer(\"" + source.getURL() + "\", \"" + destination.getURL() + "\", dataTransfer)");
+    private void addFilesToTransfer(final FileObject source, final FileObject destination, final int dataTransferIndex)
+            throws FileSystemException {
+        LOGGER.debug("addFilesToTransfer(\"" + source.getURL() + "\", \"" + destination.getURL() + "\", "
+                + dataTransferIndex + ")");
         mTotalSize += source.getContent().getSize();
         mTotalFiles++;
         mDtsJobStepAllocator.addDataTransferUnit(new DtsDataTransferUnit(source.getURL().toString(), destination
-                .getURL().toString(), dataTransfer, source.getContent().getSize()));
+                .getURL().toString(), dataTransferIndex, source.getContent().getSize()));
     }
 
     private void handleError(final Exception e) {

@@ -86,6 +86,7 @@
   </bean>
 
   <bean id="fileCopyTask" class="org.dataminx.dts.batch.FileCopyTask" scope="step">
+    <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
     <property name="jobStep" value="#{stepExecutionContext[DATA_TRANSFER_STEP]}"/>
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
     <property name="jobNotificationService" ref="jobNotificationService"/>
