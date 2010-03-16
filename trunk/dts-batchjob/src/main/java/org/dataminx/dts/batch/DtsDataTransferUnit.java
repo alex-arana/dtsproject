@@ -1,7 +1,6 @@
 package org.dataminx.dts.batch;
 
 import java.io.Serializable;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 
 /**
  * This class represents the smallest unit of the DataTransferType which
@@ -15,7 +14,7 @@ public class DtsDataTransferUnit implements Serializable {
 
     private String mSourceFileURI;
     private String mDestinationFileURI;
-    private DataTransferType mDataTransfer;
+    private int mDataTransferIndex;
     private long mSize = 0;
 
     public DtsDataTransferUnit() {
@@ -23,10 +22,10 @@ public class DtsDataTransferUnit implements Serializable {
     }
 
     public DtsDataTransferUnit(final String sourceFileURI, final String destinationFileURI,
-            final DataTransferType dataTransfer, final long size) {
+            final int dataTransferIndex, final long size) {
         mSourceFileURI = sourceFileURI;
         mDestinationFileURI = destinationFileURI;
-        mDataTransfer = dataTransfer;
+        mDataTransferIndex = dataTransferIndex;
         mSize = size;
     }
 
@@ -46,12 +45,12 @@ public class DtsDataTransferUnit implements Serializable {
         mDestinationFileURI = destinationFileURI;
     }
 
-    public DataTransferType getDataTransfer() {
-        return mDataTransfer;
+    public int getDataTransferIndex() {
+        return mDataTransferIndex;
     }
 
-    public void setDataTransfer(final DataTransferType dataTransfer) {
-        mDataTransfer = dataTransfer;
+    public void setDataTransferIndex(final int dataTransferIndex) {
+        mDataTransferIndex = dataTransferIndex;
     }
 
     public long getSize() {

@@ -46,6 +46,8 @@ import org.dataminx.dts.common.vfs.FileSystemManagerCache;
 import org.dataminx.dts.common.vfs.UnknownFileSystemManagerException;
 import org.dataminx.dts.common.vfs.UnknownRootFileObjectException;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
@@ -85,6 +87,9 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
     private ExecutionContextCleaner mExecutionContextCleaner;
 
     private DtsVfsUtil mDtsVfsUtil;
+
+    /** A reference to the input DTS job request. */
+    private SubmitJobRequest mSubmitJobRequest;
 
     private FileSystemManagerCache mFileSystemManagerCache;
 
@@ -206,6 +211,10 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
         mDtsVfsUtil = dtsVfsUtil;
     }
 
+    public void setSubmitJobRequest(final SubmitJobRequest submitJobRequest) {
+        mSubmitJobRequest = submitJobRequest;
+    }
+
     public void setFileCopyingService(final FileCopyingService fileCopyingService) {
         mFileCopyingService = fileCopyingService;
     }
@@ -233,6 +242,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
         Assert.state(mJobNotificationService != null, "JobNotificationService has not been set.");
         Assert.state(mExecutionContextCleaner != null, "ExecutionContextCleaner has not been set.");
         Assert.state(mFileSystemManagerCache != null, "FileSystemManagerCache has not been set.");
+        Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
     }
 
     /**
@@ -293,14 +303,15 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
                 LOGGER_FC.debug(mCopierName + " is doing a transfer from " + dataTransferUnit.getSourceFileURI()
                         + " to " + dataTransferUnit.getDestinationFileURI());
 
+                final DataTransferType dataTransfer = ((MinxJobDescriptionType) mSubmitJobRequest.getJobDefinition()
+                        .getJobDescription()).getDataTransferArray(dataTransferUnit.getDataTransferIndex());
+
                 mFileCopyingService.copyFiles(dataTransferUnit.getSourceFileURI(), dataTransferUnit
-                        .getDestinationFileURI(), dataTransferUnit.getDataTransfer(), mSourceFileSystemManager,
-                        mTargetFileSystemManager);
+                        .getDestinationFileURI(), dataTransfer, mSourceFileSystemManager, mTargetFileSystemManager);
 
                 try {
                     mBatchVolumeSize += mSourceFileSystemManager.resolveFile(dataTransferUnit.getSourceFileURI(),
-                            mDtsVfsUtil.createFileSystemOptions(dataTransferUnit.getDataTransfer().getSource()))
-                            .getContent().getSize();
+                            mDtsVfsUtil.createFileSystemOptions(dataTransfer.getSource())).getContent().getSize();
                 } catch (final FileSystemException e) {
                     LOGGER_FC.debug("FileSystemException was thrown while getting the size of the "
                             + "file that was recently copied.", e);
