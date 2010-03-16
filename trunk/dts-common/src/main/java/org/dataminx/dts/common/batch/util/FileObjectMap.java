@@ -15,6 +15,9 @@ public class FileObjectMap<K, V> extends HashMap<K, V> {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public V get(final Object key) {
         if (key.toString().startsWith(TMP_ROOT_PROTOCOL)) {
@@ -23,6 +26,9 @@ public class FileObjectMap<K, V> extends HashMap<K, V> {
         return super.get(key);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @SuppressWarnings("unchecked")
     @Override
     public V put(final K key, final V value) {
@@ -32,6 +38,9 @@ public class FileObjectMap<K, V> extends HashMap<K, V> {
         return super.put(key, value);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean containsKey(final Object key) {
         if (key.toString().startsWith(TMP_ROOT_PROTOCOL)) {
@@ -40,6 +49,9 @@ public class FileObjectMap<K, V> extends HashMap<K, V> {
         return super.containsKey(key);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public V remove(final Object key) {
         if (key.toString().startsWith(TMP_ROOT_PROTOCOL)) {
