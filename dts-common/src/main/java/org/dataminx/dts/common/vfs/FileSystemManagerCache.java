@@ -1,7 +1,5 @@
 package org.dataminx.dts.common.vfs;
 
-import org.dataminx.dts.common.batch.util.FileObjectMap;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
+import org.dataminx.dts.common.batch.util.FileObjectMap;
 import org.springframework.util.Assert;
 
 public class FileSystemManagerCache {
@@ -24,8 +23,14 @@ public class FileSystemManagerCache {
         fsmOnLoanListPerRootFileObject = new FileObjectMap<String, List<FileSystemManager>>();
     }
 
-    public synchronized int getSizeOfAvailableFileSystemManagers(final String rootFileObject) {
-        return fsmAvailableStackPerRootFileObject.get(rootFileObject).size();
+    public synchronized int getSizeOfAvailableFileSystemManagers(final String rootFileObject)
+            throws UnknownRootFileObjectException {
+        if (fsmAvailableStackPerRootFileObject.containsKey(rootFileObject)) {
+            return fsmAvailableStackPerRootFileObject.get(rootFileObject).size();
+        }
+        else {
+            throw new UnknownRootFileObjectException(rootFileObject + " is not in the FileSystemManagerCache.");
+        }
     }
 
     public synchronized void returnOne(final String rootFileObject, final FileSystemManager fileSystemManager)
