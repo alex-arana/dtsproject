@@ -87,6 +87,11 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
             try {
                 final FileObject sourceParent = fileSystemManager.resolveFile(dataTransfer.getSource().getURI(),
                         mDtsVfsUtil.createFileSystemOptions(dataTransfer.getSource()));
+
+                if (!sourceParent.getContent().getFile().exists() || !sourceParent.getContent().getFile().isReadable()) {
+                    throw new JobScopingException("The source " + sourceParent
+                            + " provided does not exist or is not readable.");
+                }
                 final FileObject targetParent = fileSystemManager.resolveFile(dataTransfer.getTarget().getURI(),
                         mDtsVfsUtil.createFileSystemOptions(dataTransfer.getTarget()));
 
@@ -153,7 +158,10 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
             //			
             // destination directory that exists: /tmp
 
-            if (sourceParent.getType().equals(FileType.FILE) && !mCancelled) {
+            if (!sourceParent.getContent().getFile().isReadable() && !mCancelled) {
+                mExcluded.add(sourceParent.getName().getFriendlyURI());
+            }
+            else if (sourceParent.getType().equals(FileType.FILE) && !mCancelled) {
 
                 if (sourceParent.getContent().getSize() > mMaxTotalByteSizePerStepLimit) {
                     throw new JobScopingException("file: " + sourceParent.getName()

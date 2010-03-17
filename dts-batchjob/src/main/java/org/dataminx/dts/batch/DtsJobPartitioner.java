@@ -58,7 +58,7 @@ import org.springframework.util.Assert;
  */
 public class DtsJobPartitioner implements Partitioner, InitializingBean {
     /** Internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(DtsJobPartitioner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DtsJobPartitioner.class);
 
     private DtsJobDetails mDtsJobDetails;
 

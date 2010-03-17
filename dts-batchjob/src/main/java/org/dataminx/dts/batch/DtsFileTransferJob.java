@@ -27,16 +27,15 @@
  */
 package org.dataminx.dts.batch;
 
+import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_DETAILS;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_RESOURCE_KEY;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
-
-import org.dataminx.dts.common.model.JobStatus;
-
-import org.dataminx.dts.common.util.StopwatchTimer;
 
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataminx.dts.common.model.JobStatus;
+import org.dataminx.dts.common.util.StopwatchTimer;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
@@ -177,13 +176,19 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
         // we'll skip the other steps if the job scoping task step fails
         if (stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
 
-            LOGGER.info("Started the MaxStreamCounting step at " + mStopwatchTimer.getFormattedElapsedTime());
-            stepExecution = handleStep(mMaxStreamCountingStep, execution);
-            LOGGER.info("Finished the MaxStreamCounting step at " + mStopwatchTimer.getFormattedElapsedTime());
+            // let's check if there's anything to transfer
+            final DtsJobDetails dtsJobDetails = (DtsJobDetails) context.get(DTS_JOB_DETAILS);
+            if (!dtsJobDetails.getJobSteps().isEmpty()) {
 
-            LOGGER.info("Started the FileCopying process at " + mStopwatchTimer.getFormattedElapsedTime());
-            stepExecution = handleStep(mPartitioningStep, execution);
-            LOGGER.info("Finished the FileCopying process at " + mStopwatchTimer.getFormattedElapsedTime());
+                LOGGER.info("Started the MaxStreamCounting step at " + mStopwatchTimer.getFormattedElapsedTime());
+                stepExecution = handleStep(mMaxStreamCountingStep, execution);
+                LOGGER.info("Finished the MaxStreamCounting step at " + mStopwatchTimer.getFormattedElapsedTime());
+
+                LOGGER.info("Started the FileCopying process at " + mStopwatchTimer.getFormattedElapsedTime());
+                stepExecution = handleStep(mPartitioningStep, execution);
+                LOGGER.info("Finished the FileCopying process at " + mStopwatchTimer.getFormattedElapsedTime());
+
+            }
 
             // update the job status to have the same status as the master step
             if (stepExecution != null) {
