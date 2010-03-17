@@ -74,8 +74,4 @@ public class JobScopingTaskTest {
         assertEquals(taskStatus, RepeatStatus.FINISHED);
     }
 
-    @Test
-    public void testNonExistenceOfPropertiesFromExecutionContextAfterJobFinishedSuccessfully() {
-        // TODO:
-    }
 }

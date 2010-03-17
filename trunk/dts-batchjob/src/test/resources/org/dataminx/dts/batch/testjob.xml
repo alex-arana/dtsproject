@@ -18,6 +18,26 @@
     <!--
     <mjsdl:DataTransfer>
       <mjsdl:Source>
+        <jsdl:URI>file://etc/cron.daily</jsdl:URI>
+      </mjsdl:Source>
+      <mjsdl:Target>
+        <jsdl:URI>ftp://dataminx.chem.usyd.edu.au/home/gerson/</jsdl:URI>
+        <mjsdl:Credential>
+          <wsse:UsernameToken>
+            <wsse:Username>${ftp.username}</wsse:Username>
+            <wsse:PasswordString>${ftp.password}</wsse:PasswordString>
+          </wsse:UsernameToken>
+        </mjsdl:Credential>
+      </mjsdl:Target>      
+      <mjsdl:TransferRequirements>
+        <dmi:MaxAttempts>0</dmi:MaxAttempts>
+        <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+      </mjsdl:TransferRequirements>
+    </mjsdl:DataTransfer>
+    -->  
+    <!--
+    <mjsdl:DataTransfer>
+      <mjsdl:Source>
         <jsdl:URI>ftp://mirrors.usc.edu/pub/gnu/findutils/</jsdl:URI>
       </mjsdl:Source>
       <mjsdl:Target>
@@ -37,6 +57,7 @@
       </mjsdl:TransferRequirements>
     </mjsdl:DataTransfer>
     -->
+    
     <mjsdl:DataTransfer>
       <mjsdl:Source>        
         <jsdl:URI>file://etc/cron.daily</jsdl:URI>
