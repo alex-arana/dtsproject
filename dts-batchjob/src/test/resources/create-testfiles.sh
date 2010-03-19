@@ -1,5 +1,6 @@
 #!/bin/bash
 
+rm -rf dir-with-10files dir-with-9files dir-with-mixedfiles sourcefiles testfiles ~/testfiles
 # generate 10MB file
 dd if=/dev/zero of=test10MB.bin bs=10485760 count=1
 
@@ -20,11 +21,11 @@ mkdir dir-with-9files
 mkdir dir-with-mixedfiles
 mkdir sourcefiles
 
-cp test1MB-*.bin dir-with-10files
-cp test1MB-*.bin dir-with-9files
-rm dir-with-9files/test1MB-9.bin
-cp *.bin dir-with-mixedfiles
-mv *.bin sourcefiles
+cp test01MB-*.bin dir-with-10files/
+cp test01MB-*.bin dir-with-9files/
+rm dir-with-9files/test01MB-9.bin
+cp *.bin dir-with-mixedfiles/
+mv *.bin sourcefiles/
 
 mkdir testfiles
 mv dir-with-10files dir-with-9files dir-with-mixedfiles sourcefiles testfiles
