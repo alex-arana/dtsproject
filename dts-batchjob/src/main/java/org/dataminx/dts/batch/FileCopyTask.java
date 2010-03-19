@@ -106,7 +106,6 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
     /**
      * {@inheritDoc}
      */
-    @Override
     public RepeatStatus execute(final StepContribution contribution, final ChunkContext chunkContext) throws Exception {
         final StepContext stepContext = chunkContext.getStepContext();
         LOGGER.info("Executing copy step: " + stepContext.getStepName());
@@ -191,7 +190,6 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
     /**
      * {@inheritDoc}
      */
-    @Override
     public void beforeStep(final StepExecution stepExecution) {
         // perform any preliminary steps here
     }
@@ -236,7 +234,6 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
         mStopwatchTimer = stopwatchTimer;
     }
 
-    @Override
     public void afterPropertiesSet() throws Exception {
         Assert.state(mJobStep != null, "Unable to find DtsJobStep in execution context.");
         Assert.state(mDtsVfsUtil != null, "DtsVfsUtil has not been set.");
@@ -249,7 +246,6 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
     /**
      * {@inheritDoc}
      */
-    @Override
     public ExitStatus afterStep(final StepExecution stepExecution) {
         final ExitStatus exitStatus = stepExecution.getExitStatus();
         final String dtsJobId = extractDtsJobId(stepExecution);
@@ -292,7 +288,6 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
             }
         }
 
-        @Override
         public void run() {
 
             // we won't use hasNext() in testing for the contents of the mDataTransferUnitIterator

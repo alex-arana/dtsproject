@@ -333,7 +333,6 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
 
     }
 
-    @Override
     public void afterPropertiesSet() throws Exception {
         if (mMaxTotalByteSizePerStepLimit == 0) {
             mMaxTotalByteSizePerStepLimit = Long.MAX_VALUE;

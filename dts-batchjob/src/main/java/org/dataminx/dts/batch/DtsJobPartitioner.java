@@ -65,7 +65,6 @@ public class DtsJobPartitioner implements Partitioner, InitializingBean {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Map<String, ExecutionContext> partition(final int gridSize) {
         final List<DtsJobStep> jobSteps = mDtsJobDetails.getJobSteps();
         int i = 0;
@@ -85,7 +84,6 @@ public class DtsJobPartitioner implements Partitioner, InitializingBean {
         mDtsJobDetails = dtsJobDetails;
     }
 
-    @Override
     public void afterPropertiesSet() throws Exception {
         Assert.state(mDtsJobDetails != null, "Unable to find DtsJobDetails in execution context.");
     }

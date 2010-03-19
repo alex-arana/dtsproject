@@ -67,7 +67,6 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
 
     private volatile boolean isLastTry = false;
 
-    @Override
     public RepeatStatus execute(final StepContribution contribution, final ChunkContext chunkContext) throws Exception {
         LOGGER.debug("MaxStreamCounterTask execute()");
 
@@ -145,7 +144,6 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
         mSubmitJobRequest = submitJobRequest;
     }
 
-    @Override
     public void afterPropertiesSet() throws Exception {
         Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
         Assert.state(mDtsVfsUtil != null, "DtsVfsUtil has not been set.");

@@ -44,7 +44,6 @@ public class DtsJobListener implements MessageListener {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void onMessage(final Message message) {
         LOG.info("JMS message received: " + message);
     }

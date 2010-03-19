@@ -26,7 +26,6 @@ public class XmlPayloadDelayExtractor implements DelayExtractor {
         this.mQueryStr = mQueryStr;
     }
 
-    @Override
     public String extractDelay(Object object) {
         if (object instanceof XmlObject) {
             XmlObject payload = (XmlObject) object;

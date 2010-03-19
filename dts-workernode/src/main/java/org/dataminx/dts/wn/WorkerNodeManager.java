@@ -56,7 +56,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     /* (non-Javadoc)
      * @see org.springframework.batch.core.launch.JobOperator#getExecutions(long)
      */
-    @Override
     public List<Long> getExecutions(long instanceId) throws NoSuchJobInstanceException {
         return mOperator.getExecutions(instanceId);
     }
@@ -64,7 +63,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     /* (non-Javadoc)
      * @see org.springframework.batch.core.launch.JobOperator#getJobInstances(java.lang.String, int, int)
      */
-    @Override
     public List<Long> getJobInstances(String jobName, int start, int count)
         throws NoSuchJobException {
         return mOperator.getJobInstances(jobName, start, count);
@@ -73,7 +71,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     /* (non-Javadoc)
      * @see org.springframework.batch.core.launch.JobOperator#getJobNames()
      */
-    @Override
     public Set<String> getJobNames() {
         return mOperator.getJobNames();
     }
@@ -81,7 +78,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     /* (non-Javadoc)
      * @see org.springframework.batch.core.launch.JobOperator#getParameters(long)
      */
-    @Override
     public String getParameters(long executionId) throws NoSuchJobExecutionException {
         return mOperator.getParameters(executionId);
     }
@@ -89,7 +85,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     /* (non-Javadoc)
      * @see org.springframework.batch.core.launch.JobOperator#getRunningExecutions(java.lang.String)
      */
-    @Override
     public Set<Long> getRunningExecutions(String jobName) throws NoSuchJobException {
         return mOperator.getRunningExecutions(jobName);
     }
@@ -97,7 +92,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     /* (non-Javadoc)
      * @see org.springframework.batch.core.launch.JobOperator#getStepExecutionSummaries(long)
      */
-    @Override
     public Map<Long, String> getStepExecutionSummaries(long executionId)
         throws NoSuchJobExecutionException {
         return mOperator.getStepExecutionSummaries(executionId);
@@ -106,7 +100,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     /* (non-Javadoc)
      * @see org.springframework.batch.core.launch.JobOperator#getSummary(long)
      */
-    @Override
     public String getSummary(long executionId) throws NoSuchJobExecutionException {
         return mOperator.getSummary(executionId);
     }
@@ -114,7 +107,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     /* (non-Javadoc)
      * @see org.springframework.batch.core.launch.JobOperator#restart(long)
      */
-    @Override
     public Long restart(long executionId) throws JobInstanceAlreadyCompleteException,
         NoSuchJobExecutionException, NoSuchJobException, JobRestartException {
         return mOperator.restart(executionId);
@@ -123,7 +115,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     /* (non-Javadoc)
      * @see org.springframework.batch.core.launch.JobOperator#start(java.lang.String, java.lang.String)
      */
-    @Override
     public Long start(String jobName, String parameters) throws NoSuchJobException,
         JobInstanceAlreadyExistsException {
         return mOperator.start(jobName, parameters);
@@ -132,7 +123,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     /* (non-Javadoc)
      * @see org.springframework.batch.core.launch.JobOperator#startNextInstance(java.lang.String)
      */
-    @Override
     public Long startNextInstance(String jobName) throws NoSuchJobException,
         JobParametersNotFoundException, JobRestartException, JobExecutionAlreadyRunningException,
         JobInstanceAlreadyCompleteException {
@@ -142,7 +132,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     /* (non-Javadoc)
      * @see org.springframework.batch.core.launch.JobOperator#stop(long)
      */
-    @Override
     public boolean stop(long executionId) throws NoSuchJobExecutionException,
         JobExecutionNotRunningException {
         return mOperator.stop(executionId);
@@ -152,7 +141,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
      * Bases on number of current running job and max number of batch job allowed to
      * determine whether this manager can poll more message from the JMS Queue.
      */
-    @Override
     public synchronized boolean canPoll() {
         final int runningJobs = runningJobs();
         if (runningJobs < maxBatchJobNumer) {
@@ -179,7 +167,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     /**
      *
      */
-    @Override
     public void afterPropertiesSet() throws Exception {
 //        File userHomeLockFile = new File(SystemUtils.USER_HOME + File.pathSeparator + WORKER_NODE_DIR_NAME +
 //                                            File.pathSeparator+ LOCK_FILE_NAME);
@@ -196,7 +183,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
      * Manages graceful shutdown of the workernode by attempting to remove the lock file. The absence
      * of lock file indicates a graceful,managed shutdown.
      */
-    @Override
     public void destroy() throws Exception {
         // TODO: a graceful shutdown should stop all the running jobs cleanly as well.
         // remove lock file if graceful shutdown

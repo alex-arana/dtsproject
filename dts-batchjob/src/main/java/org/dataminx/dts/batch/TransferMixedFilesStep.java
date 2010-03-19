@@ -72,12 +72,10 @@ public class TransferMixedFilesStep implements DtsJobStep, Serializable {
         return strBuff.toString();
     }
 
-    @Override
     public String getSourceRootFileObjectString() {
         return mSourceRootFileObject;
     }
 
-    @Override
     public String getTargetRootFileObjectString() {
         return mTargetRootFileObject;
     }

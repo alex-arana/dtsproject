@@ -37,7 +37,6 @@ public class JobScopingTask implements Tasklet, StepExecutionListener, Initializ
 
     private String mJobResourceKey;
 
-    @Override
     public RepeatStatus execute(final StepContribution contribution, final ChunkContext chunkContext) throws Exception {
 
         Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
@@ -75,7 +74,6 @@ public class JobScopingTask implements Tasklet, StepExecutionListener, Initializ
         mExecutionContextCleaner = executionContextCleaner;
     }
 
-    @Override
     public void afterPropertiesSet() throws Exception {
         Assert.state(mSubmitJobRequest != null, "Unable to find DTS Job Request in execution context.");
         Assert.state(mJobPartitioningStrategy != null, "JobPartitioningStrategy has not been set.");
@@ -84,7 +82,6 @@ public class JobScopingTask implements Tasklet, StepExecutionListener, Initializ
         Assert.state(mExecutionContextCleaner != null, "ExecutionContextCleaner has not been set.");
     }
 
-    @Override
     public ExitStatus afterStep(final StepExecution stepExecution) {
         if (stepExecution.getStatus() == BatchStatus.COMPLETED) {
             mExecutionContextCleaner.removeStepExecutionContextEntry(stepExecution, DTS_SUBMIT_JOB_REQUEST_KEY);
@@ -93,7 +90,6 @@ public class JobScopingTask implements Tasklet, StepExecutionListener, Initializ
         return null;
     }
 
-    @Override
     public void beforeStep(final StepExecution stepExecution) {
         // do nothing
     }

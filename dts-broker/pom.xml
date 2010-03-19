@@ -6,6 +6,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>${dataminx.group}</groupId>
+  <name>MINX-DTS Broker</name>
   <artifactId>dts-broker</artifactId>
   <version>${minx-dts.version}</version>
   <description>DTS Message Broker</description>
@@ -281,6 +282,10 @@
       <scope>provided</scope>
     </dependency>
     
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+    </dependency>
 
     <!-- JUnit -->
 

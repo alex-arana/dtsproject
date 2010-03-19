@@ -74,7 +74,6 @@ public abstract class AbstractBasicLoginModule implements LoginModule {
     }
 
 
-    @Override
     public boolean abort() throws LoginException {
         LOGGER.debug("AbstractBasicLoginModule abort()");
 
@@ -88,7 +87,6 @@ public abstract class AbstractBasicLoginModule implements LoginModule {
         return true;
     }
 
-    @Override
     public boolean commit() throws LoginException {
         LOGGER.debug("AbstractBasicLoginModule commit()");
 
@@ -126,7 +124,6 @@ public abstract class AbstractBasicLoginModule implements LoginModule {
         }
     }
 
-    @Override
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState,
             Map<String, ?> options) {
         LOGGER.debug("AbstractBasicLoginModule initialize()");
@@ -138,7 +135,6 @@ public abstract class AbstractBasicLoginModule implements LoginModule {
         mOptions = options;
     }
 
-    @Override
     public boolean login() throws LoginException {
         LOGGER.debug("AbstractBasicLoginModule login()");
 
@@ -176,7 +172,6 @@ public abstract class AbstractBasicLoginModule implements LoginModule {
         }
     }
 
-    @Override
     public boolean logout() throws LoginException {
         LOGGER.debug("AbstractBasicLoginModule logout()");
 

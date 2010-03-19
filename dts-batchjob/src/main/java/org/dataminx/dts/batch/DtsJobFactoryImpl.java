@@ -71,7 +71,6 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void setBeanFactory(final BeanFactory beanFactory) throws BeansException {
         mBeanFactory = beanFactory;
     }
@@ -102,7 +101,6 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
     /**
      * {@inheritDoc}
      */
-    @Override
     public DtsJob createJob(final String jobId, final Object criteria) {
         // obtain the name of the DTS job that is going to handle this request
         Assert.notNull(criteria, "Criteria element cannot be null in call to DTS job factory.");
