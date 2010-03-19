@@ -64,7 +64,6 @@ public class PassiveCallbackHandler implements CallbackHandler {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void handle(Callback[] callbacks)
         throws java.io.IOException, UnsupportedCallbackException  {
         for (int i = 0; i < callbacks.length; i++) {

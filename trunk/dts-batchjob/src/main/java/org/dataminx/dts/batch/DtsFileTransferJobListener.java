@@ -34,7 +34,6 @@ public class DtsFileTransferJobListener implements JobExecutionListener, Initial
 
     private static final Log LOGGER = LogFactory.getLog(DtsFileTransferJobListener.class);
 
-    @Override
     public void afterJob(final JobExecution jobExecution) {
         // we'll close the connections as the next time we restart the job, we'll need to check for the
         // max number of connections again.
@@ -74,7 +73,6 @@ public class DtsFileTransferJobListener implements JobExecutionListener, Initial
         }
     }
 
-    @Override
     public void beforeJob(final JobExecution jobExecution) {
         // do nothing
     }
@@ -91,7 +89,6 @@ public class DtsFileTransferJobListener implements JobExecutionListener, Initial
         mExecutionContextCleaner = executionContextCleaner;
     }
 
-    @Override
     public void afterPropertiesSet() throws Exception {
         Assert.state(mFileSystemManagerCache != null, "FileSystemManagerCache has not been set.");
         Assert.state(mJobExplorer != null, "JobExplorer has not been set.");

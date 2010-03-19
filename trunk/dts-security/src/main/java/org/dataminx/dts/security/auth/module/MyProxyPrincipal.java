@@ -98,7 +98,6 @@ public class MyProxyPrincipal implements Principal, Serializable {
      *
      * @return the user name for this <code>MyProxyPrincipal</code>
      */
-    @Override
     public String getName() {
         return mName;
     }

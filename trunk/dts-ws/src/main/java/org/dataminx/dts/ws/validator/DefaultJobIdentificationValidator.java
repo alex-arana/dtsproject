@@ -44,7 +44,6 @@ public class DefaultJobIdentificationValidator implements JobIdentificationValid
     /**
      * {@inheritDoc}
      */
-    @Override
     public boolean supports(Class clazz) {
         return JobIdentificationType.class.isAssignableFrom(clazz);
     }
@@ -52,7 +51,6 @@ public class DefaultJobIdentificationValidator implements JobIdentificationValid
     /**
      * {@inheritDoc}
      */
-    @Override
     public void validate(Object object, Errors errors) {
         //ValidationUtils.rejectIfEmpty(errors, "jobName", "jobIdentification.jobName.empty");
         JobIdentificationType jobIdentificationType = (JobIdentificationType) object;

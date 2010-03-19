@@ -69,7 +69,6 @@ public class DtsFaultMessageResolver implements FaultMessageResolver {
 
     private static final String DTS_MESSAGES_NS = "http://schemas.dataminx.org/dts/2009/07/messages";
 
-    @Override
     public void resolveFault(WebServiceMessage message) throws IOException {
         LOGGER.debug("DtsFaultMessageResolver resolveFault()");
         SoapMessage soapMessage = (SoapMessage) message;

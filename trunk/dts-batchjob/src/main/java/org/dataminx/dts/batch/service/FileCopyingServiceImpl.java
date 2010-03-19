@@ -69,7 +69,6 @@ public class FileCopyingServiceImpl implements FileCopyingService {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void copyFiles(final String sourceURI, final String targetURI,
             final FileSystemManager sourceFileSystemManager, final FileSystemManager targetFileSystemManager) {
         LOGGER.info(String.format("Copying source '%s' to target '%s'...", sourceURI, targetURI));
@@ -120,7 +119,6 @@ public class FileCopyingServiceImpl implements FileCopyingService {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void copyFiles(final String sourceURI, final String targetURI, final FileSystemManager fileSystemManager) {
         copyFiles(sourceURI, targetURI, fileSystemManager, fileSystemManager);
     }
@@ -128,7 +126,6 @@ public class FileCopyingServiceImpl implements FileCopyingService {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void copyFiles(final SourceTargetType source, final SourceTargetType target,
             final FileSystemManager fileSystemManager) {
         copyFiles(source, target, fileSystemManager, fileSystemManager);
@@ -137,7 +134,6 @@ public class FileCopyingServiceImpl implements FileCopyingService {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void copyFiles(final String sourceURI, final String targetURI, final DataTransferType dataTransferType,
             final FileSystemManager fileSystemManager) {
         copyFiles(sourceURI, targetURI, dataTransferType, fileSystemManager, fileSystemManager);

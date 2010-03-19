@@ -55,7 +55,6 @@ public class DtsWorkerNodeInformationServiceImpl implements DtsWorkerNodeInforma
     /**
      * {@inheritDoc}
      */
-    @Override
     public Date getCurrentTime() {
         //TODO return transaction start time via TLS?
         return Calendar.getInstance().getTime();
@@ -64,7 +63,6 @@ public class DtsWorkerNodeInformationServiceImpl implements DtsWorkerNodeInforma
     /**
      * {@inheritDoc}
      */
-    @Override
     public String getInstanceId() {
         return mInstanceId;
     }

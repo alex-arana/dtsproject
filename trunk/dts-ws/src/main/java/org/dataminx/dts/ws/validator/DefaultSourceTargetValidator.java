@@ -48,7 +48,6 @@ public class DefaultSourceTargetValidator implements SourceTargetValidator {
     /**
      * {@inheritDoc}
      */
-    @Override
     public boolean supports(Class clazz) {
         return SourceTargetType.class.isAssignableFrom(clazz);
     }
@@ -56,7 +55,6 @@ public class DefaultSourceTargetValidator implements SourceTargetValidator {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void validate(Object object, Errors errors) {
         MinxSourceTargetType sourceTarget = (MinxSourceTargetType) object;
 

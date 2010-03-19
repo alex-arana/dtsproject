@@ -49,7 +49,6 @@ public class DefaultDtsJobDefinitionValidator extends AbstractDtsJobDefinitionVa
     /**
      * {@inheritDoc}
      */
-    @Override
     public boolean supports(Class clazz) {
         return JobDefinitionType.class.isAssignableFrom(clazz);
     }
@@ -57,7 +56,6 @@ public class DefaultDtsJobDefinitionValidator extends AbstractDtsJobDefinitionVa
     /**
      * {@inheritDoc}
      */
-    @Override
     public void validate(Object object, Errors errors) {
         LOGGER.debug("DefaultDtsJobDefinitionValidator validate()");
         // now let's check for semantic issues..

@@ -47,7 +47,6 @@ public class PasswordFilePrincipal implements Principal, Serializable {
         mName = name;
     }
 
-    @Override
     public String getName() {
         return mName;
     }
