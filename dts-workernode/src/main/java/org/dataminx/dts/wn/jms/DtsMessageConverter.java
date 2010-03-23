@@ -63,6 +63,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.xml.transform.StringResult;
 
+
+import org.dataminx.schemas.dts.x2009.x07.messages.InvalidJobDefinitionFaultDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.InvalidJobDefinitionFaultType;
+
+
+
 /**
  * This class is a dual-purpose messaging converter:
  * <ul>
@@ -82,6 +88,12 @@ public class DtsMessageConverter extends SimpleMessageConverter {
      * Default format of outgoing messages.
      */
     private OutputFormat mOutputFormat = OutputFormat.XML_TEXT;
+
+    /**
+     * A reference to the Job Event Queue sender object.
+     */
+    @Autowired
+    private JobEventQueueSender mJobEventQueueSender;
 
     /**
      * A reference to the DTS Job factory.
@@ -112,8 +124,30 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         final Object payload = extractMessagePayload(message);
         LOG.debug(String.format("Finished reading message payload of type: '%s'", payload.getClass().getName()));
 
-        // convert the payload into a DTS job definition
-        final Object dtsJobRequest = mTransformer.transformPayload(payload);
+        Object dtsJobRequest = null;
+
+        // convert the payload into a DTS job definition. If an un-marshalling
+        // error occurs, then we need to notify the JobEventQueue with an error.
+        try
+        {
+        dtsJobRequest = mTransformer.transformPayload(payload);
+        }
+        catch(Exception e){
+            LOG.debug("Invalid XML payload: "+e.getMessage());
+            final InvalidJobDefinitionFaultDocument document = InvalidJobDefinitionFaultDocument.Factory.newInstance();
+            final InvalidJobDefinitionFaultType InvalidJobDefinitionFaultDetail = document.addNewInvalidJobDefinitionFault();
+            InvalidJobDefinitionFaultDetail.setMessage(e.getMessage());
+            mJobEventQueueSender.doSend(jobId, document);
+            // Here we need to return null - seemingly in order to consume the
+            // message so that it does not remain on the queue. If we throw
+            // a MessageConversionException, then the message is never consumed
+            // and the mJobEventQueueSender.doSend above appears not to work.
+            // So why do we need to return null ?  rather than thrown MessageConversionException ?
+            //
+            //throw new MessageConversionException("Invalid XML Payload "+e.getMessage());
+            return null; 
+        }
+
         if (LOG.isDebugEnabled()) {
             final String auditable = SchemaUtils.getAuditableString(dtsJobRequest);
             if (StringUtils.isNotBlank(auditable)) {
