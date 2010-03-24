@@ -36,7 +36,8 @@ import org.springframework.oxm.Unmarshaller;
 import org.springframework.util.ClassUtils;
 
 /**
- * Deserialises an incoming Message payload into an object graph using a schema unmarshaller.
+ * Deserialises an incoming Message payload into an object graph using a schema 
+ * unmarshaller (XML -to-> content objects).
  *
  * @author Alex Arana
  */

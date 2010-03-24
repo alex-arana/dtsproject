@@ -98,6 +98,19 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
                 errorDetails.addFailureTrace(ExceptionUtils.getFullStackTrace(failure));
             }
 
+            // TODO: rather than invoke the JMS job event queue sender directly,
+            // we should be sending the document to the 'dtsJobEvents' channel.
+            // The 'dtsJobEvents' is bound to an out-bound channel adapter which
+            // facilitates different message targets/sources (jms, dir, rmi ws etc);
+
+         // should we be returning a Spring Integration Message here for
+         // subsequent publishing to a SI channel?  e.g. something like?
+         //
+         //org.springframework.integration.core.Message<Object> mess =
+         //        org.springframework.integration.message.MessageBuilder.withPayload(document).setCorrelationId(jobId).build();
+         //MessageChannelTemplate template = new MessageChannelTemplate();
+         //template.send(mess, dtsJobEvents);
+
             mJobEventQueueSender.doSend(jobId, document);
         }
     }
@@ -125,6 +138,10 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
                 errorDetails.addFailureTrace(ExceptionUtils.getFullStackTrace(failure));
             }
 
+            // TODO: rather than invoke the JMS job event queue sender directly,
+            // we should be sending the document to the 'dtsJobEvents' channel.
+            // The 'dtsJobEvents' is bound to an out-bound channel adapter which
+            // facilitates different message targets/sources (jms, dir, rmi ws etc);
             mJobEventQueueSender.doSend(jobId, document);
         }
     }
@@ -167,6 +184,10 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
             break;
         }
 
+        // TODO: rather than invoke the JMS job event queue sender directly,
+        // we should be sending the document to the 'dtsJobEvents' channel.
+        // The 'dtsJobEvents' is bound to an out-bound channel adapter which
+        // facilitates different message targets/sources (jms, dir, rmi ws etc);
         mJobEventQueueSender.doSend(jobId, document);
     }
 
@@ -183,6 +204,11 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
         jobEventDetail.setFilesTransferred(BigInteger.valueOf(filesTransferred));
         jobEventDetail.setVolumeTransferred(BigInteger.valueOf(volumeTransferred));
         jobEventDetail.setStatus(StatusValueType.TRANSFERRING);
+
+            // TODO: rather than invoke the JMS job event queue sender directly,
+            // we should be sending the document to the 'dtsJobEvents' channel.
+            // The 'dtsJobEvents' is bound to an out-bound channel adapter which
+            // facilitates different message targets/sources (jms, dir, rmi ws etc);
         mJobEventQueueSender.doSend(jobId, document);
 
     }
@@ -200,6 +226,11 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
         jobEventDetail.setFilesTotal(BigInteger.valueOf(filesTotal));
         jobEventDetail.setVolumeTotal(BigInteger.valueOf(volumeTotal));
         jobEventDetail.setStatus(StatusValueType.TRANSFERRING);
+
+            // TODO: rather than invoke the JMS job event queue sender directly,
+            // we should be sending the document to the 'dtsJobEvents' channel.
+            // The 'dtsJobEvents' is bound to an out-bound channel adapter which
+            // facilitates different message targets/sources (jms, dir, rmi ws etc);
         mJobEventQueueSender.doSend(jobId, document);
     }
 }
