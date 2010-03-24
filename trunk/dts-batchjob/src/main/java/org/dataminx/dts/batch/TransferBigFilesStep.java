@@ -40,4 +40,14 @@ public class TransferBigFilesStep implements DtsJobStep, Serializable {
         return null;
     }
 
+    public String getJobStepFilename() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void setJobStepFilename(final String filename) {
+        // TODO Auto-generated method stub
+
+    }
+
 }

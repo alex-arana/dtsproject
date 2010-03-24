@@ -113,7 +113,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener, Initializin
         LOGGER.debug("Started up the FileCopyTask at " + mStopwatchTimer.getFormattedElapsedTime());
 
         // TODO: remove this block of code later on once testing is done
-        //if (stepContext.getStepName().equals("fileCopyStep:DATA_TRANSFER_STEP:001")) {
+        //if (stepContext.getStepName().equals("fileCopyStep:DATA_TRANSFER_STEP:000")) {
         //    throw new Exception("throw test error in step");
         //}
 

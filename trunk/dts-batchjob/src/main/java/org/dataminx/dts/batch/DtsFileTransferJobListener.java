@@ -4,13 +4,14 @@ import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_DATA_TRANSF
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_DETAILS;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
 
-import org.dataminx.dts.common.vfs.FileSystemManagerCache;
-
-import java.text.SimpleDateFormat;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataminx.dts.batch.common.DtsBatchJobConstants;
 import org.dataminx.dts.batch.common.util.ExecutionContextCleaner;
+import org.dataminx.dts.common.vfs.FileSystemManagerCache;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
@@ -46,7 +47,6 @@ public class DtsFileTransferJobListener implements JobExecutionListener, Initial
         // that have failed last time
         final List<JobExecution> prevJobExecutions = mJobExplorer.getJobExecutions(jobExecution.getJobInstance());
 
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
         for (final JobExecution jobEx : prevJobExecutions) {
 
             // we'll only remove the following attributes from the JobExecutionContext if the jobEx is not the latest
@@ -70,6 +70,23 @@ public class DtsFileTransferJobListener implements JobExecutionListener, Initial
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             mExecutionContextCleaner.removeJobExecutionContextEntry(jobExecution, DTS_JOB_DETAILS);
             mExecutionContextCleaner.removeJobExecutionContextEntry(jobExecution, DTS_SUBMIT_JOB_REQUEST_KEY);
+            removeJobStepFiles(jobExecution.getExecutionContext().getString(DtsBatchJobConstants.DTS_JOB_RESOURCE_KEY));
+        }
+    }
+
+    private void removeJobStepFiles(final String jobResourceKey) {
+        LOGGER.debug("Deleting job step files.");
+        final File jobStepDirectory = new File(System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY));
+        final File[] jobStepFiles = jobStepDirectory.listFiles(new FilenameFilter() {
+            public boolean accept(final File dir, final String name) {
+                if (name.startsWith(jobResourceKey) && name.endsWith("dts")) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        for (final File jobStepFile : jobStepFiles) {
+            jobStepFile.delete();
         }
     }
 
