@@ -22,7 +22,20 @@
   <channel id="dtsJobEvents"/>
   <channel id="dtsJobExecutions"/>
 
- 
+  <!-- <channel id="dtsJobRequestValidation"/> -->
+
+  <!--
+  Define our own Polling inbound JMS channel adapter for the DTS job submission queue.
+  The inbound adapter means we are receiving from JMS and placing an instance of
+  org.springframework.integration.core.Message on the configured channel (dtsJobRequests).
+  We require a custom polling channel adapter so that the recieved messages can
+  be throttled-back to a maximum number of concurrently processed messages
+  (configured using maxBatchJobNumber property - if we use a message driven
+  channel adapter, then the worker can become
+  saturated/over-burden with too many delivered messages).
+  TODO: currently this message wraps a dtsJobLaunchRequest, but we first need to
+  insert a new filter to do the un-marshalling and validation.
+  -->
   <beans:bean class="org.dataminx.dts.wn.jms.DtsSourcePollingChannelAdapter">
     <beans:property name="trigger" ref="trigger"/>
     <beans:property name="source" ref="jmsMessageSource"/>
@@ -75,6 +88,12 @@
   <!--
     Defines an outbound JMS channel adapter for DTS job events and progress
     notifications.
+    TODO: this has not yet been integrated with JobNotificationService and
+    a newly required filter for un-marshalling+validating JobSubmitRequests
+    (un-marshall/validation errors will need to be sent to the 'dtsJobEvents'
+    channel rather than direclty sent to JMS queue).
+    (worker node should always use channel adapters rather than directly
+    sending/recieving messages to/from message sources/targets)
   -->
   <jms:outbound-channel-adapter
       channel="dtsJobEvents"
@@ -82,17 +101,33 @@
       destination="jmsJobEventQueue"
       />
 
+  <!--
+  The spring batch JobLaunchingMessageHandler requires an implementatioin of
+  the 'JobLauncher' interface (dtsJobLauncher). This message handler already
+  provides us with an annontated service method:
+  '@ServiceActivator
+  public JobExecution launch(JobLaunchRequest request)'
+
+  -->
   <beans:bean id="dtsJobRequestHandler"
               class="org.springframework.batch.integration.launch.JobLaunchingMessageHandler">
     <beans:constructor-arg index="0" ref="dtsJobLauncher"/>
   </beans:bean>
 
+  <!--
+  Service Activator - the service activator is the endpoint type for connecting
+  any Spring managed object so that it may play the role of a service.
+  -->
   <service-activator input-channel="dtsJobRequests"
                      output-channel="dtsJobExecutions"
                      ref="dtsJobRequestHandler"/>
 
   <logging-channel-adapter channel="dtsJobExecutions"/>
 
+  <!--
+  From Spring doc: "The XmlBeansMarshaller implements both the Marshaller and Unmarshaller interfaces"
+  (Marshalling = Object -to-> XML)
+  -->
   <beans:bean id="dtsMarshaller"
               class="org.springframework.oxm.xmlbeans.XmlBeansMarshaller">
     <beans:property name="validating" value="true"/>

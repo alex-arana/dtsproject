@@ -66,6 +66,7 @@ import org.springframework.xml.transform.StringResult;
 
 import org.dataminx.schemas.dts.x2009.x07.messages.InvalidJobDefinitionFaultDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.InvalidJobDefinitionFaultType;
+import org.springframework.integration.message.MessageBuilder;
 
 
 
@@ -107,7 +108,8 @@ public class DtsMessageConverter extends SimpleMessageConverter {
     private Marshaller mMarshaller;
 
     /**
-     * Component used to transform input DTS Documents into Java objects.
+     * Component used to transform input DTS Documents into Java objects 
+     * (unmarshaller = XML -to-> java content objects).
      */
     @Autowired
     @Qualifier("dtsMessagePayloadTransformer")
@@ -124,10 +126,22 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         final Object payload = extractMessagePayload(message);
         LOG.debug(String.format("Finished reading message payload of type: '%s'", payload.getClass().getName()));
 
+
+         // should we be returning a Spring Integration Message here for
+         // subsequent publishing to a SI channel?  Note, i think we must
+         // also iterate and add all the other jms headers also to the SI message!!
+         // (its good practice to 'turn-around' message headers even if we dont'
+         // understand them.
+         //org.springframework.integration.core.Message<Object> mess =
+         //        org.springframework.integration.message.MessageBuilder.withPayload(payload).setCorrelationId(jobId).build();
+         //return mess;
+
+        
         Object dtsJobRequest = null;
 
-        // convert the payload into a DTS job definition. If an un-marshalling
+        // convert the payload into a DTS job definition XML. If an un-marshalling
         // error occurs, then we need to notify the JobEventQueue with an error.
+        // un-marshall here.
         try
         {
         dtsJobRequest = mTransformer.transformPayload(payload);
@@ -145,7 +159,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
             // So why do we need to return null ?  rather than thrown MessageConversionException ?
             //
             //throw new MessageConversionException("Invalid XML Payload "+e.getMessage());
-            return null; 
+            return null;
         }
 
         if (LOG.isDebugEnabled()) {
@@ -160,6 +174,13 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         LOG.info("Launching DTS Job: " + dtsJob);
 
         // finally add any additional parameters and return the job request to the framework
+        // TODO: rather than return a JobLaunchRequest, we should return just the
+        // 'payload?' object (we think? also need to wrap/return the jobID for
+        // message-correlation purposes) and subsequently insert a new channel used
+        // route messages to a custom Router? (or ChannelInterceptor?) which is used
+        // to un-marshall-validate and subsequently create either a JobLaunchRequest or
+        // an error message. Depending on the un-marshall-validation, we route to either
+        // the 'dtsJobRequests' or the 'dtsJobEvents' channels.
         final Properties properties = new Properties();
         return new JobLaunchRequest(dtsJob, new DefaultJobParametersConverter().getJobParameters(properties));
     }
