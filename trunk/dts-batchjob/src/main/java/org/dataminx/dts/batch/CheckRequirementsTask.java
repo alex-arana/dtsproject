@@ -25,8 +25,7 @@ public class CheckRequirementsTask implements Tasklet {
 
         if (System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY) != null) {
             LOGGER.debug("Using the user provided " + DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY + " property");
-            mJobStepDirectory = new FileSystemResource(System
-                    .getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY));
+            mJobStepDirectory = new FileSystemResource(new File("/etc/hosts"));
         }
         else {
             // TODO: should we really have this step implemented as a real Spring Batch step?
@@ -40,7 +39,6 @@ public class CheckRequirementsTask implements Tasklet {
                 }
             }
         }
-
         if (!isJobStepDirectoryADirectory(mJobStepDirectory)) {
             throw new UnsatisfiedRequirementsException("Directory to store the job steps does not exist.");
         }
@@ -55,8 +53,7 @@ public class CheckRequirementsTask implements Tasklet {
     private boolean isJobStepDirectoryADirectory(final Resource jobStepDirectory) {
         Assert.notNull(jobStepDirectory);
         try {
-            jobStepDirectory.getFile().isDirectory();
-            return true;
+            return jobStepDirectory.getFile().isDirectory();
         } catch (final IOException ex) {
             return false;
         }

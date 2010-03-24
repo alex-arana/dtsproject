@@ -156,6 +156,8 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
     public void doExecute(final JobExecution execution) throws JobInterruptedException, JobRestartException,
             StartLimitExceededException {
 
+        boolean checkRequirementsFailed = false;
+
         // first set the job start time
         registerStartTime();
 
@@ -172,15 +174,22 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
 
         StepExecution stepExecution = handleStep(mCheckRequirementsStep, execution);
 
-        LOGGER.info("Started the JobScopingTask step at " + mStopwatchTimer.getFormattedElapsedTime());
+        // we'll skip the other steps if the job scoping task step fails
+        if (!stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
+            checkRequirementsFailed = true;
+        }
 
-        // TODO convert to application exceptions
-        stepExecution = handleStep(mJobScopingStep, execution);
+        if (!checkRequirementsFailed) {
+            LOGGER.info("Started the JobScopingTask step at " + mStopwatchTimer.getFormattedElapsedTime());
 
-        LOGGER.info("Finished the JobScopingTask step at " + mStopwatchTimer.getFormattedElapsedTime());
+            // TODO convert to application exceptions
+            stepExecution = handleStep(mJobScopingStep, execution);
+
+            LOGGER.info("Finished the JobScopingTask step at " + mStopwatchTimer.getFormattedElapsedTime());
+        }
 
         // we'll skip the other steps if the job scoping task step fails
-        if (stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
+        if (!checkRequirementsFailed && stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
 
             // let's check if there's anything to transfer
             final DtsJobDetails dtsJobDetails = (DtsJobDetails) context.get(DTS_JOB_DETAILS);
