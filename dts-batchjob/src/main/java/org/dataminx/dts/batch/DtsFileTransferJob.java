@@ -77,6 +77,8 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
 
     private Step mJobScopingStep;
 
+    private Step mCheckRequirementsStep;
+
     private StopwatchTimer mStopwatchTimer;
 
     /**
@@ -166,10 +168,14 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
         context.put(DTS_SUBMIT_JOB_REQUEST_KEY, mJobRequest);
         context.put(DTS_JOB_RESOURCE_KEY, getJobId());
 
+        LOGGER.info("Started the CheckRequirementsTask step at " + mStopwatchTimer.getFormattedElapsedTime());
+
+        StepExecution stepExecution = handleStep(mCheckRequirementsStep, execution);
+
         LOGGER.info("Started the JobScopingTask step at " + mStopwatchTimer.getFormattedElapsedTime());
 
         // TODO convert to application exceptions
-        StepExecution stepExecution = handleStep(mJobScopingStep, execution);
+        stepExecution = handleStep(mJobScopingStep, execution);
 
         LOGGER.info("Finished the JobScopingTask step at " + mStopwatchTimer.getFormattedElapsedTime());
 
@@ -224,6 +230,10 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
         mJobScopingStep = jobScopingStep;
     }
 
+    public void setCheckRequirementsStep(final Step checkRequirementsStep) {
+        mCheckRequirementsStep = checkRequirementsStep;
+    }
+
     public void setJobExecutionListeners(final List<JobExecutionListener> jobExecutionListeners) {
         setJobExecutionListeners(jobExecutionListeners.toArray(new JobExecutionListener[0]));
     }
@@ -236,7 +246,8 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         Assert.state(mPartitioningStep != null, "PartitioningStep has not been set.");
         Assert.state(mMaxStreamCountingStep != null, "MaxStreamCountingStep has not been set.");
-        Assert.state(mJobScopingStep != null, "JobScopingStep has not been set");
+        Assert.state(mJobScopingStep != null, "JobScopingStep has not been set.");
+        Assert.state(mCheckRequirementsStep != null, "CheckRequirementsStep has not been set.");
         super.afterPropertiesSet();
     }
 

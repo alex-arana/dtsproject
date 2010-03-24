@@ -39,7 +39,7 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
 
     private static final Log LOGGER = LogFactory.getLog(VfsMixedFilesJobPartitioningStrategy.class);
 
-    private MixedFilesJobStepAllocator mDtsJobStepAllocator;
+    private DtsJobStepAllocator mDtsJobStepAllocator;
 
     public DtsJobDetails partitionTheJob(final JobDefinitionType jobDefinition, final String jobResourceKey)
             throws JobScopingException {
@@ -127,7 +127,7 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
         jobDetails.setExcludedFiles(mExcluded);
         jobDetails.setTotalBytes(mTotalSize);
         jobDetails.setTotalFiles(mTotalFiles);
-        jobDetails.setJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps());
+        jobDetails.saveJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps());
 
         for (final DtsJobStep jobStep : mDtsJobStepAllocator.getAllocatedJobSteps()) {
             LOGGER.debug(jobStep);
@@ -164,6 +164,8 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
             }
             else if (sourceParent.getType().equals(FileType.FILE) && !mCancelled) {
 
+                // check and see if the size of the file has exceeded the max size of files to be transferred
+                // by a step
                 if (sourceParent.getContent().getSize() > mMaxTotalByteSizePerStepLimit) {
                     throw new JobScopingException("file: " + sourceParent.getName()
                             + " too big. Try transferring files smaller than " + mMaxTotalByteSizePerStepLimit

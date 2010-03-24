@@ -81,6 +81,10 @@
     <property name="executionContextCleaner" ref="executionContextCleaner"/>
   </bean>
   
+  <bean id="checkRequirementsTask" class="org.dataminx.dts.batch.CheckRequirementsTask" scope="step">
+    <property name="jobStepDirectory" value="file:///${dataminx.dir}/jobsteps" />
+  </bean>
+  
   <bean id="promotionListener" class="org.springframework.batch.core.listener.ExecutionContextPromotionListener">
     <property name="keys" value="JOB_DETAILS"/>
   </bean>
@@ -104,6 +108,7 @@
     <property name="jobScopingStep" ref="jobScopingStep"/>
     <property name="maxStreamCountingStep" ref="maxStreamCountingStep"/>
     <property name="partitioningStep" ref="partitioningStep"/>
+    <property name="checkRequirementsStep" ref="checkRequirementsStep"/>
     <property name="jobExecutionListeners">
       <list>
         <ref bean="dtsFileTransferJobListener"/>
@@ -126,6 +131,10 @@
           <batch:listener ref="promotionListener"/>
       </batch:listeners>    
     </batch:tasklet>
+  </batch:step>
+  
+  <batch:step id="checkRequirementsStep">
+    <batch:tasklet ref="checkRequirementsTask" allow-start-if-complete="true"/>
   </batch:step>
 
   <batch:step id="fileCopyStep">

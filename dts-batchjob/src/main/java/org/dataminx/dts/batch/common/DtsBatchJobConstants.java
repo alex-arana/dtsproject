@@ -49,4 +49,6 @@ public final class DtsBatchJobConstants {
 
     public static final String DTS_JOB_DETAILS = "JOB_DETAILS";
 
+    public static final String DTS_JOB_STEP_DIRECTORY_KEY = "job.step.dir";
+
 }

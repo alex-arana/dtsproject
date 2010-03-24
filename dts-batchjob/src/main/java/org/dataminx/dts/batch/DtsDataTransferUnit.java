@@ -14,6 +14,8 @@ public class DtsDataTransferUnit implements Serializable {
 
     private String mSrcURI;
     private String mDestURI;
+
+    /** The DataTransfer element index. */
     private int mIndex;
     private long mSize = 0;
 

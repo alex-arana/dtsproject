@@ -1,9 +1,15 @@
 package org.dataminx.dts.batch;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import org.dataminx.dts.batch.common.DtsBatchJobConstants;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 /**
  * This class holds all the details about the DTS Job that Spring Batch will go
@@ -12,6 +18,8 @@ import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
  * @author Gerson Galang
  */
 public class DtsJobDetails implements Serializable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DtsJobDetails.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -65,7 +73,18 @@ public class DtsJobDetails implements Serializable {
         return mJobSteps;
     }
 
-    public void setJobSteps(final List<DtsJobStep> jobSteps) {
+    public void saveJobSteps(final List<DtsJobStep> jobSteps) {
+        LOGGER.debug("DtsJobDetails saveJobSteps()");
+
+        // write the DataTransferUnits held by each of the steps and also add the filename where the DataTransferUnits
+        // were written to the JobStep object
+        for (final DtsJobStep jobStep : jobSteps) {
+            final String filename = System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY) + "/" + mJobId
+                    + "-" + jobStep.getStepId() + ".dts";
+            writeJobStepToFile(filename, jobStep);
+            jobStep.setJobStepFilename(filename);
+        }
+
         mJobSteps = jobSteps;
     }
 
@@ -87,6 +106,23 @@ public class DtsJobDetails implements Serializable {
 
     public boolean isCompleted() {
         return mBytesTransferred == mTotalBytes;
+    }
+
+    private void writeJobStepToFile(final String filename, final DtsJobStep jobStep) {
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(filename);
+        } catch (final FileNotFoundException e) {
+            Assert.isTrue(true,
+                    "FileNotFoundException was thrown while creating a step file to store the DataTransferUnits.");
+        }
+        for (final DtsDataTransferUnit dataTransferUnit : jobStep.getDataTransferUnits()) {
+            writer.print(dataTransferUnit.getSourceFileURI() + ";");
+            writer.print(dataTransferUnit.getDestinationFileURI() + ";");
+            writer.print(dataTransferUnit.getDataTransferIndex() + ";");
+            writer.println(dataTransferUnit.getSize() + ";");
+        }
+        writer.close();
     }
 
 }

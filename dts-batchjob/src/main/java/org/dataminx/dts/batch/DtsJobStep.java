@@ -18,4 +18,8 @@ public interface DtsJobStep {
 
     String getTargetRootFileObjectString();
 
+    String getJobStepFilename();
+
+    void setJobStepFilename(String filename);
+
 }
