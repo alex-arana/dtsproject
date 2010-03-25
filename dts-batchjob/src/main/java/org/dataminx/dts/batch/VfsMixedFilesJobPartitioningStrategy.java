@@ -2,6 +2,7 @@ package org.dataminx.dts.batch;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,8 +27,17 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
     private final boolean mCancelled = false;
     private String mFailureMessage = "";
 
+    /** The total size of all the files that will be transferred by this job. */
     private long mTotalSize = 0;
+
+    /** The total number of files to be transferred by this job. */
     private int mTotalFiles = 0;
+
+    /**
+     * The total number of files to be transferred by a Data Transfer element
+     * (ie Source-Target pair).
+     */
+    private int mPerDataTransferTotalFiles = 0;
 
     private long mMaxTotalByteSizePerStepLimit = 0;
 
@@ -64,6 +74,9 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
         jobDetails.setJobDefinition(jobDefinition);
         jobDetails.setJobId(jobResourceKey);
 
+        final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = jobDetails
+                .getSourceTargetMaxTotalFilesToTransfer();
+
         mDtsJobStepAllocator = new MixedFilesJobStepAllocator();
         mExcluded = new ArrayList<String>();
         mTotalSize = 0;
@@ -85,6 +98,9 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
         for (final DataTransferType dataTransfer : dataTransfers) {
 
             try {
+                // reset the total number of files to be transferred within this DataTransfer element
+                mPerDataTransferTotalFiles = 0;
+
                 final FileObject sourceParent = fileSystemManager.resolveFile(dataTransfer.getSource().getURI(),
                         mDtsVfsUtil.createFileSystemOptions(dataTransfer.getSource()));
 
@@ -102,6 +118,34 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
                         .getCreationFlag();
 
                 prepare(sourceParent, targetParent, dataTransferIndex, creationFlag);
+
+                final String sourceParentRootStr = sourceParent.getFileSystem().getRoot().getURL().toString();
+                final String targetParentRootStr = targetParent.getFileSystem().getRoot().getURL().toString();
+
+                if (sourceTargetMaxTotalFilesToTransfer.containsKey(sourceParentRootStr)
+                        && sourceTargetMaxTotalFilesToTransfer.containsKey(targetParentRootStr)) {
+                    updateSourceTargetMaxTotalFilesToTransfer(sourceTargetMaxTotalFilesToTransfer, sourceParentRootStr,
+                            mPerDataTransferTotalFiles);
+                    updateSourceTargetMaxTotalFilesToTransfer(sourceTargetMaxTotalFilesToTransfer, targetParentRootStr,
+                            mPerDataTransferTotalFiles);
+                }
+                else if (sourceTargetMaxTotalFilesToTransfer.containsKey(sourceParentRootStr)
+                        && !sourceTargetMaxTotalFilesToTransfer.containsKey(targetParentRootStr)) {
+                    updateSourceTargetMaxTotalFilesToTransfer(sourceTargetMaxTotalFilesToTransfer, sourceParentRootStr,
+                            mPerDataTransferTotalFiles);
+                    sourceTargetMaxTotalFilesToTransfer.put(targetParentRootStr, mPerDataTransferTotalFiles);
+                }
+                else if (!sourceTargetMaxTotalFilesToTransfer.containsKey(sourceParentRootStr)
+                        && sourceTargetMaxTotalFilesToTransfer.containsKey(targetParentRootStr)) {
+                    sourceTargetMaxTotalFilesToTransfer.put(sourceParentRootStr, mPerDataTransferTotalFiles);
+                    updateSourceTargetMaxTotalFilesToTransfer(sourceTargetMaxTotalFilesToTransfer, targetParentRootStr,
+                            mPerDataTransferTotalFiles);
+                }
+                else {
+                    sourceTargetMaxTotalFilesToTransfer.put(sourceParentRootStr, mPerDataTransferTotalFiles);
+                    sourceTargetMaxTotalFilesToTransfer.put(targetParentRootStr, mPerDataTransferTotalFiles);
+                }
+
                 dataTransferIndex++;
             } catch (final DtsJobCancelledException e) {
                 // TODO: handle DTS Job Cancel event
@@ -139,6 +183,14 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
         ((DefaultFileSystemManager) fileSystemManager).close();
 
         return jobDetails;
+    }
+
+    private void updateSourceTargetMaxTotalFilesToTransfer(
+            final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer, final String parentRootStr,
+            final int perDataTransferTotalFiles) {
+        if (sourceTargetMaxTotalFilesToTransfer.get(parentRootStr) < perDataTransferTotalFiles) {
+            sourceTargetMaxTotalFilesToTransfer.put(parentRootStr, perDataTransferTotalFiles);
+        }
     }
 
     private void prepare(final FileObject sourceParent, final FileObject destinationParent,
@@ -258,6 +310,7 @@ public class VfsMixedFilesJobPartitioningStrategy implements JobPartitioningStra
                 + dataTransferIndex + ")");
         mTotalSize += source.getContent().getSize();
         mTotalFiles++;
+        mPerDataTransferTotalFiles++;
         mDtsJobStepAllocator.addDataTransferUnit(new DtsDataTransferUnit(source.getURL().toString(), destination
                 .getURL().toString(), dataTransferIndex, source.getContent().getSize()));
     }

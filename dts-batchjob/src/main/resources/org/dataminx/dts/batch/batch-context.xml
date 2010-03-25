@@ -182,6 +182,7 @@
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
     <property name="fileSystemManagerCache" ref="fileSystemManagerCache"/>
     <property name="jobRepository" ref="jobRepository"/>
+    <property name="dtsJobDetails" value="#{jobExecutionContext[JOB_DETAILS]}"/>
   </bean>
   
   <bean id="fileSystemManagerCache" class="org.dataminx.dts.common.vfs.FileSystemManagerCache"/>

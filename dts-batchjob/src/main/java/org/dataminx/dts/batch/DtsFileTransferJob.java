@@ -199,9 +199,13 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
                 stepExecution = handleStep(mMaxStreamCountingStep, execution);
                 LOGGER.info("Finished the MaxStreamCounting step at " + mStopwatchTimer.getFormattedElapsedTime());
 
-                LOGGER.info("Started the FileCopying process at " + mStopwatchTimer.getFormattedElapsedTime());
-                stepExecution = handleStep(mPartitioningStep, execution);
-                LOGGER.info("Finished the FileCopying process at " + mStopwatchTimer.getFormattedElapsedTime());
+                // we'll only run the FileCopyTask and the master PartitioningStep if MaxStreamCounting step
+                // completed successfully
+                if (stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
+                    LOGGER.info("Started the FileCopying process at " + mStopwatchTimer.getFormattedElapsedTime());
+                    stepExecution = handleStep(mPartitioningStep, execution);
+                    LOGGER.info("Finished the FileCopying process at " + mStopwatchTimer.getFormattedElapsedTime());
+                }
 
             }
 
