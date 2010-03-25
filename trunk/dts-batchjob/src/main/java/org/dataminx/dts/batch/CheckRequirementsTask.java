@@ -25,7 +25,8 @@ public class CheckRequirementsTask implements Tasklet {
 
         if (System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY) != null) {
             LOGGER.debug("Using the user provided " + DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY + " property");
-            mJobStepDirectory = new FileSystemResource(new File("/etc/hosts"));
+            mJobStepDirectory = new FileSystemResource(new File(System
+                    .getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY)));
         }
         else {
             // TODO: should we really have this step implemented as a real Spring Batch step?
