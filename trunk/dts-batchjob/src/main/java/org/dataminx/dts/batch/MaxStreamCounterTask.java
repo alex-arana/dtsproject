@@ -57,6 +57,8 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
 
     private FileSystemManagerCache mFileSystemManagerCache;
 
+    private DtsJobDetails mDtsJobDetails;
+
     private final Map<String, FileObject> mFileObjectMap = new FileObjectMap<String, FileObject>();
 
     private final Map<String, List<FileSystemManager>> mWorkingConnectionsListPerRootFileObject = new FileObjectMap<String, List<FileSystemManager>>();
@@ -124,10 +126,26 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
         // let's close the connection here.. 
         ((DefaultFileSystemManager) fileSystemManager).close();
 
+        final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = new FileObjectMap<String, Integer>();
+        sourceTargetMaxTotalFilesToTransfer.putAll(mDtsJobDetails.getSourceTargetMaxTotalFilesToTransfer());
+
         // go through each FO in the map and check for max connections we can
         // make on each one and put in map<URI in String, Integer of max connections>
-        for (final FileObject foRoot : mFileObjectMap.values()) {
-            gatherMaxConnections(foRoot, mMaxConnectionsToTry);
+        for (final String foRootKey : mFileObjectMap.keySet()) {
+
+            final FileObject foRoot = mFileObjectMap.get(foRootKey);
+
+            // if there are more files to transfer for this source/target, we'll use
+            // our own preset max parallel connections to try.
+            if (sourceTargetMaxTotalFilesToTransfer.get(foRootKey) > mMaxConnectionsToTry) {
+                gatherMaxConnections(foRoot, mMaxConnectionsToTry);
+            }
+            else {
+                // since there's not that many files to transfer for this source/target
+                // we'll try and open up connections to the same number of files that will
+                // be transferred from this source/target
+                gatherMaxConnections(foRoot, sourceTargetMaxTotalFilesToTransfer.get(foRootKey));
+            }
         }
 
         try {
@@ -175,7 +193,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
                 isLastTry = true;
             }
             LOGGER.debug("==========================");
-            LOGGER.debug("Trying with " + threadCounter + " threads.");
+            LOGGER.debug("Trying with " + threadCounter + " threads on " + fileObjectRoot.getURL().toString() + ".");
             workingConnections = startRemoteConnections(fileObjectRoot, threadCounter);
 
             if (mHasConnectionErrorArised) {
@@ -201,8 +219,8 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
             throw e;
         }
 
-        LOGGER.debug("Max allowed concurrent connections for FileObject root \"" + fileObjectRoot.getURL().toString()
-                + "\" " + workingConnections.size());
+        LOGGER.info("Max allowed concurrent connections for FileObject root \"" + fileObjectRoot.getURL().toString()
+                + "\": " + workingConnections.size());
     }
 
     public boolean isLastTry() {
@@ -252,6 +270,10 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
 
         // TODO: probably need to remove mMaxAllowedConnections if workignConnectionsList can provide the same info
         return workingConnectionsList;
+    }
+
+    public void setDtsJobDetails(final DtsJobDetails dtsJobDetails) {
+        mDtsJobDetails = dtsJobDetails;
     }
 
     private class RemoteConnection implements Runnable {

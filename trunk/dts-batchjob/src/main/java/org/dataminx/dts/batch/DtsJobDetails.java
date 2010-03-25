@@ -4,7 +4,9 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.dataminx.dts.batch.common.DtsBatchJobConstants;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 import org.slf4j.Logger;
@@ -30,6 +32,12 @@ public class DtsJobDetails implements Serializable {
     private JobDefinitionType mJobDefinition = null;
     private String mJobId;
     private List<String> mExcludedFiles = new ArrayList<String>();
+
+    /**
+     * Holds the maximum number of files to be transferred from each Source or
+     * Target element.
+     */
+    private final Map<String, Integer> mSourceTargetMaxTotalFilesToTransfer = new HashMap<String, Integer>();
 
     public List<String> getExcludedFiles() {
         return mExcludedFiles;
@@ -106,6 +114,10 @@ public class DtsJobDetails implements Serializable {
 
     public boolean isCompleted() {
         return mBytesTransferred == mTotalBytes;
+    }
+
+    public Map<String, Integer> getSourceTargetMaxTotalFilesToTransfer() {
+        return mSourceTargetMaxTotalFilesToTransfer;
     }
 
     private void writeJobStepToFile(final String filename, final DtsJobStep jobStep) {
