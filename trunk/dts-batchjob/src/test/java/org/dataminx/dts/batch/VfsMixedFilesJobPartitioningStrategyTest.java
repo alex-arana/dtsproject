@@ -13,6 +13,7 @@ import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.apache.xmlbeans.XmlException;
 import org.dataminx.dts.DtsException;
 import org.dataminx.dts.batch.common.DtsBatchJobConstants;
+import org.dataminx.dts.common.DtsConstants;
 import org.dataminx.dts.common.vfs.DtsVfsUtil;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.core.io.ClassPathResource;
@@ -35,7 +36,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest {
     @BeforeClass
     public void init() {
         mDtsVfsUtil = mock(DtsVfsUtil.class);
-
+        System.setProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY, "/tmp");
     }
 
     @Test(groups = { "local-file-transfer-test" })
@@ -47,8 +48,6 @@ public class VfsMixedFilesJobPartitioningStrategyTest {
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(3);
 
-        System.setProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY, "/tmp");
-
         final FileSystemManager fileSystemManager = DtsVfsUtil.createNewFsManager(false, false, false, false, true,
                 true, false, "/tmp");
 
@@ -59,6 +58,8 @@ public class VfsMixedFilesJobPartitioningStrategyTest {
         assertNotNull(jobDetails);
         assertEquals(jobDetails.getJobSteps().size(), 1);
         assertEquals(jobDetails.getTotalFiles(), 1);
+        assertEquals(jobDetails.getSourceTargetMaxTotalFilesToTransfer().get(DtsConstants.FILE_ROOT_PROTOCOL)
+                .intValue(), 1);
     }
 
     @Test(groups = { "local-file-transfer-test" }, expectedExceptions = DtsException.class)
