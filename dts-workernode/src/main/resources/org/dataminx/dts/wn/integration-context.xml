@@ -95,19 +95,39 @@
     (worker node should always use channel adapters rather than directly
     sending/recieving messages to/from message sources/targets)
   -->
-  <jms:outbound-channel-adapter
+   <!--
+   <jms:outbound-channel-adapter
       channel="dtsJobEvents"
       connection-factory="jmsConnectionFactory"
       destination="jmsJobEventQueue"
       />
+   -->
+   <jms:outbound-channel-adapter
+      channel="dtsJobEvents"
+      jms-template="jmsJobEventQueueConvertableJmsTemplate"
+   />
+     
+   <!--
+   A MessageChannelTemplate for the 'dtsJobEvents' channel that can be injected
+   into application code in order to send/recieve messages from this channel.
+   -->
+   <beans:bean id="dtsJobEventsChannelTemplate"
+        class="org.springframework.integration.channel.MessageChannelTemplate">
+    <beans:constructor-arg ref="dtsJobEvents"/>
+   </beans:bean>
 
+
+   <beans:bean id="jobNotificationService"
+        class="org.dataminx.dts.wn.service.WorkerNodeJobNotificationService">
+     <beans:property name="channelTemplate" ref="dtsJobEventsChannelTemplate"/>
+   </beans:bean>
+  
   <!--
   The spring batch JobLaunchingMessageHandler requires an implementatioin of
   the 'JobLauncher' interface (dtsJobLauncher). This message handler already
   provides us with an annontated service method:
   '@ServiceActivator
   public JobExecution launch(JobLaunchRequest request)'
-
   -->
   <beans:bean id="dtsJobRequestHandler"
               class="org.springframework.batch.integration.launch.JobLaunchingMessageHandler">

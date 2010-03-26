@@ -67,6 +67,7 @@ import org.springframework.xml.transform.StringResult;
 import org.dataminx.schemas.dts.x2009.x07.messages.InvalidJobDefinitionFaultDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.InvalidJobDefinitionFaultType;
 import org.springframework.integration.message.MessageBuilder;
+import org.springframework.integration.channel.MessageChannelTemplate;
 
 
 
@@ -93,8 +94,8 @@ public class DtsMessageConverter extends SimpleMessageConverter {
     /**
      * A reference to the Job Event Queue sender object.
      */
-    @Autowired
-    private JobEventQueueSender mJobEventQueueSender;
+    //@Autowired
+    //private JobEventQueueSender mJobEventQueueSender;
 
     /**
      * A reference to the DTS Job factory.
@@ -115,6 +116,10 @@ public class DtsMessageConverter extends SimpleMessageConverter {
     @Qualifier("dtsMessagePayloadTransformer")
     private DtsMessagePayloadTransformer mTransformer;
 
+     /** A reference to the ChannelTemplate object. */
+    @Autowired
+    private MessageChannelTemplate mChannelTemplate;
+
     /**
      * {@inheritDoc}
      */
@@ -125,17 +130,6 @@ public class DtsMessageConverter extends SimpleMessageConverter {
 
         final Object payload = extractMessagePayload(message);
         LOG.debug(String.format("Finished reading message payload of type: '%s'", payload.getClass().getName()));
-
-
-         // should we be returning a Spring Integration Message here for
-         // subsequent publishing to a SI channel?  Note, i think we must
-         // also iterate and add all the other jms headers also to the SI message!!
-         // (its good practice to 'turn-around' message headers even if we dont'
-         // understand them.
-         //org.springframework.integration.core.Message<Object> mess =
-         //        org.springframework.integration.message.MessageBuilder.withPayload(payload).setCorrelationId(jobId).build();
-         //return mess;
-
         
         Object dtsJobRequest = null;
 
@@ -151,13 +145,18 @@ public class DtsMessageConverter extends SimpleMessageConverter {
             final InvalidJobDefinitionFaultDocument document = InvalidJobDefinitionFaultDocument.Factory.newInstance();
             final InvalidJobDefinitionFaultType InvalidJobDefinitionFaultDetail = document.addNewInvalidJobDefinitionFault();
             InvalidJobDefinitionFaultDetail.setMessage(e.getMessage());
-            mJobEventQueueSender.doSend(jobId, document);
-            // Here we need to return null - seemingly in order to consume the
-            // message so that it does not remain on the queue. If we throw
-            // a MessageConversionException, then the message is never consumed
-            // and the mJobEventQueueSender.doSend above appears not to work.
-            // So why do we need to return null ?  rather than thrown MessageConversionException ?
-            //
+            //mJobEventQueueSender.doSend(jobId, document);
+            
+            // TODO: Note, we also need to copy all the other jms headers into the SI message!!
+            // consider the given ClientID property that the client uses to filter
+            // messages intended only for them. Here we need to 'turn-around' the message headers even
+            // if we dont understand them, e.g. consider the JMS.REPLY_TO header).
+            // msg.putHeader("ClientID", message.getStringProperty("ClientID");
+            org.springframework.integration.core.Message<InvalidJobDefinitionFaultDocument> msg = MessageBuilder.withPayload(document).setCorrelationId(jobId).build();
+            mChannelTemplate.send(msg);
+                        
+            // Here we need to return null rather than throw a new MessageConversionException
+            // this is related to the jms transaction we think.
             //throw new MessageConversionException("Invalid XML Payload "+e.getMessage());
             return null;
         }
@@ -174,14 +173,13 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         LOG.info("Launching DTS Job: " + dtsJob);
 
         // finally add any additional parameters and return the job request to the framework
-        // TODO: rather than return a JobLaunchRequest, we should return just the
-        // 'payload?' object (we think? also need to wrap/return the jobID for
-        // message-correlation purposes) and subsequently insert a new channel used
-        // route messages to a custom Router? (or ChannelInterceptor?) which is used
-        // to un-marshall-validate and subsequently create either a JobLaunchRequest or
-        // an error message. Depending on the un-marshall-validation, we route to either
-        // the 'dtsJobRequests' or the 'dtsJobEvents' channels.
+        // TODO: here? we need to store the given JMS.ClientID header property
+        // in the jobProperties so that we can subsequenlty 'turn-around' (set)
+        // this property when sending event notifications back to the client.
+        // e.g. the client would use the ClientID property to filter their own
+        // messages from the dtsJobEvents queue.
         final Properties properties = new Properties();
+        //properties.setProperty("ClientID", message.getStringProperty("ClientID"));
         return new JobLaunchRequest(dtsJob, new DefaultJobParametersConverter().getJobParameters(properties));
     }
 
@@ -312,5 +310,14 @@ public class DtsMessageConverter extends SimpleMessageConverter {
          * Send outgoing messages as Text messages containing an XML document.
          */
         XML_TEXT
+    }
+
+    /**
+     * Inject a message channel template for the Job Event queue
+     *
+     * @param mChannelTemplate
+     */
+    public void setchannelTemplate(final MessageChannelTemplate mChannelTemplate) {
+        this.mChannelTemplate = mChannelTemplate;
     }
 }
