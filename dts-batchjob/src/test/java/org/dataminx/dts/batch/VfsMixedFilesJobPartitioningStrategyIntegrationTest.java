@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 import org.apache.xmlbeans.XmlException;
+import org.dataminx.dts.batch.common.DtsBatchJobConstants;
+import org.dataminx.dts.common.DtsConstants;
 import org.dataminx.dts.common.vfs.DtsVfsUtil;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.core.io.ClassPathResource;
@@ -32,6 +34,7 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest {
         mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
         final DtsVfsUtil dtsVfsUtil = new DtsVfsUtil();
         mPartitioningStrategy.setDtsVfsUtil(dtsVfsUtil);
+        System.setProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY, "/tmp");
     }
 
     @DataProvider(name = "jobwith9files-provider")
@@ -55,6 +58,8 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest {
         assertEquals(jobDetails.getJobSteps().size(), expectedNumOfSteps);
         assertEquals(jobDetails.getTotalBytes(), 9437184);
         assertEquals(jobDetails.getTotalFiles(), 9);
+        assertEquals(jobDetails.getSourceTargetMaxTotalFilesToTransfer().get(DtsConstants.FILE_ROOT_PROTOCOL)
+                .intValue(), 9);
     }
 
     @Test(groups = { "local-file-transfer-test" })
@@ -73,6 +78,8 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest {
         assertEquals(jobDetails.getJobSteps().size(), 11);
         assertEquals(jobDetails.getTotalBytes(), 30408704);
         assertEquals(jobDetails.getTotalFiles(), 20);
+        assertEquals(jobDetails.getSourceTargetMaxTotalFilesToTransfer().get(DtsConstants.FILE_ROOT_PROTOCOL)
+                .intValue(), 11);
     }
 
     @Test(groups = { "local-file-transfer-test" })
@@ -90,6 +97,8 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest {
         assertEquals(jobDetails.getJobSteps().size(), 5);
         assertEquals(jobDetails.getTotalBytes(), 20971520);
         assertEquals(jobDetails.getTotalFiles(), 11);
+        assertEquals(jobDetails.getSourceTargetMaxTotalFilesToTransfer().get(DtsConstants.FILE_ROOT_PROTOCOL)
+                .intValue(), 11);
     }
 
     @Test(groups = { "local-file-transfer-test" }, expectedExceptions = JobScopingException.class)
