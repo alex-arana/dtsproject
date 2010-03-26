@@ -11,7 +11,6 @@ import org.dataminx.dts.batch.common.DtsBatchJobConstants;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.Assert;
 
 /**
  * This class holds all the details about the DTS Job that Spring Batch will go
@@ -125,8 +124,7 @@ public class DtsJobDetails implements Serializable {
         try {
             writer = new PrintWriter(filename);
         } catch (final FileNotFoundException e) {
-            Assert.isTrue(true,
-                    "FileNotFoundException was thrown while creating a step file to store the DataTransferUnits.");
+            LOGGER.debug("FileNotFoundException was thrown while creating a step file to store the DataTransferUnits.");
         }
         for (final DtsDataTransferUnit dataTransferUnit : jobStep.getDataTransferUnits()) {
             writer.print(dataTransferUnit.getSourceFileURI() + ";");

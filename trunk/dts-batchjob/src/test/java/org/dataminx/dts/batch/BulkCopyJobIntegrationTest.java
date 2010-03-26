@@ -79,7 +79,7 @@ public class BulkCopyJobIntegrationTest extends AbstractTestNGSpringContextTests
             assertNull(jobEx.getExecutionContext().get(DTS_SUBMIT_JOB_REQUEST_KEY));
 
             for (final StepExecution stepExecution : jobEx.getStepExecutions()) {
-                assertNotNull(stepExecution.getExecutionContext().get(DTS_DATA_TRANSFER_STEP_KEY));
+                assertNull(stepExecution.getExecutionContext().get(DTS_DATA_TRANSFER_STEP_KEY));
             }
         }
 
@@ -94,7 +94,12 @@ public class BulkCopyJobIntegrationTest extends AbstractTestNGSpringContextTests
         final String jobId = UUID.randomUUID().toString();
         final JobExecution jobExecution = mJobLauncher.run(jobId, mDtsJob);
         assertTrue(jobExecution.getStatus() == BatchStatus.FAILED);
+
+        // we're checking for null as only a successful jobscoping step would write the DTS_JOB_DETAILS
+        // to the JobExecutionContext. since this test fails on the job scoping step, we can safely
+        // assume that the DTS_JOB_DETAILS hasn't been saved to the DB.
         assertNull(jobExecution.getExecutionContext().get(DTS_JOB_DETAILS));
+
         assertNotNull(jobExecution.getExecutionContext().get(DTS_SUBMIT_JOB_REQUEST_KEY));
     }
 

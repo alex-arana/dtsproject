@@ -42,7 +42,7 @@ public class CheckRequirementsTask implements Tasklet {
         }
         if (!isJobStepDirectoryADirectory(mJobStepDirectory)) {
             throw new UnsatisfiedRequirementsException("The directory \""
-                    + mJobStepDirectory.getFile().getAbsolutePath() + "\"to store the job steps does not exist.");
+                    + mJobStepDirectory.getFile().getAbsolutePath() + "\"to store the job steps is not a directory.");
         }
 
         if (System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY) == null) {
