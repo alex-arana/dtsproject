@@ -35,7 +35,7 @@ import org.dataminx.dts.batch.DtsJob;
 import org.dataminx.dts.batch.service.DtsWorkerNodeInformationService;
 import org.dataminx.dts.batch.service.JobNotificationService;
 import org.dataminx.dts.common.model.JobStatus;
-import org.dataminx.dts.wn.jms.JobEventQueueSender;
+//import org.dataminx.dts.wn.jms.JobEventQueueSender;
 import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument;
 import org.dataminx.schemas.dts.x2009.x07.jms.FireUpStepFailureEventDocument;
 import org.dataminx.schemas.dts.x2009.x07.jms.JobErrorEventDetailType;
@@ -51,6 +51,9 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.integration.channel.MessageChannelTemplate;
+import org.springframework.integration.core.Message;
+import org.springframework.integration.message.MessageBuilder;
 import org.springframework.util.Assert;
 
 /**
@@ -69,12 +72,17 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
     private DtsWorkerNodeInformationService mdtsWorkerNodeInformationService;
 
     /** A reference to the Job Event Queue sender object. */
+    //@Autowired
+    //private JobEventQueueSender mJobEventQueueSender;
+
+     /** A reference to the ChannelTemplate object. */
     @Autowired
-    private JobEventQueueSender mJobEventQueueSender;
+    private MessageChannelTemplate mChannelTemplate;
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public void notifyJobError(final String jobId, final JobExecution jobExecution) {
         Assert.notNull(jobId);
         Assert.notNull(jobExecution);
@@ -98,26 +106,28 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
                 errorDetails.addFailureTrace(ExceptionUtils.getFullStackTrace(failure));
             }
 
-            // TODO: rather than invoke the JMS job event queue sender directly,
-            // we should be sending the document to the 'dtsJobEvents' channel.
-            // The 'dtsJobEvents' is bound to an out-bound channel adapter which
+            // Previously, we sent directly to the JMS queue rather than to 
+            // a spring integration channel.
+            //mJobEventQueueSender.doSend(jobId, document);
+
+            // Rather than invoke the JMS job event queue sender directly,
+            // we send the XML entity document to the 'dtsJobEvents' channel
+            // using the injected channel template.
+            // The 'dtsJobEvents' channel is bound to an out-bound channel adapter which
             // facilitates different message targets/sources (jms, dir, rmi ws etc);
-
-         // should we be returning a Spring Integration Message here for
-         // subsequent publishing to a SI channel?  e.g. something like?
-         //
-         //org.springframework.integration.core.Message<Object> mess =
-         //        org.springframework.integration.message.MessageBuilder.withPayload(document).setCorrelationId(jobId).build();
-         //MessageChannelTemplate template = new MessageChannelTemplate();
-         //template.send(mess, dtsJobEvents);
-
-            mJobEventQueueSender.doSend(jobId, document);
-        }
+            // TODO: we need to set additional message headers (e.g. consider the 
+            // ClientID given by the client that the client uses to filter their own 
+            // messages.
+            //String clientid = jobExecution.getExecutionContext().getString("ClientID");
+            Message<FireUpJobErrorEventDocument> msg = MessageBuilder.withPayload(document).setCorrelationId(jobId).build();
+            mChannelTemplate.send(msg);
+         }
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public void notifyStepFailures(final String jobId, final StepExecution stepExecution) {
         Assert.notNull(jobId);
         Assert.notNull(stepExecution);
@@ -138,17 +148,19 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
                 errorDetails.addFailureTrace(ExceptionUtils.getFullStackTrace(failure));
             }
 
-            // TODO: rather than invoke the JMS job event queue sender directly,
-            // we should be sending the document to the 'dtsJobEvents' channel.
-            // The 'dtsJobEvents' is bound to an out-bound channel adapter which
-            // facilitates different message targets/sources (jms, dir, rmi ws etc);
-            mJobEventQueueSender.doSend(jobId, document);
+            // Previously, we sent directly to the JMS queue rather than to
+            // a spring integration channel.
+            //mJobEventQueueSender.doSend(jobId, document);
+
+            Message<FireUpStepFailureEventDocument> msg = MessageBuilder.withPayload(document).setCorrelationId(jobId).build();
+            mChannelTemplate.send(msg);
         }
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public void notifyJobProgress(final DtsJob dtsJob, final String message) {
         // TODO Implement this method or get rid of it
         throw new UnsupportedOperationException("Method notifyJobProgress() not yet implemented");
@@ -157,6 +169,7 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
     /**
      * {@inheritDoc}
      */
+    @Override
     public void notifyJobStatus(final DtsJob dtsJob, final JobStatus jobStatus) {
         Assert.notNull(dtsJob);
         final String jobId = dtsJob.getJobId();
@@ -184,13 +197,18 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
             break;
         }
 
-        // TODO: rather than invoke the JMS job event queue sender directly,
-        // we should be sending the document to the 'dtsJobEvents' channel.
-        // The 'dtsJobEvents' is bound to an out-bound channel adapter which
-        // facilitates different message targets/sources (jms, dir, rmi ws etc);
-        mJobEventQueueSender.doSend(jobId, document);
+            // Previously, we sent directly to the JMS queue rather than to
+            // a spring integration channel.
+            //mJobEventQueueSender.doSend(jobId, document);
+
+        Message<JobEventUpdateRequestDocument> msg = MessageBuilder.withPayload(document).setCorrelationId(jobId).build();
+        mChannelTemplate.send(msg);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void notifyJobProgress(final String jobId, final int filesTransferred, final long volumeTransferred) {
         Assert.notNull(jobId);
         LOG.info(String.format("DTS Job '%s' progress notification", jobId));
@@ -205,14 +223,18 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
         jobEventDetail.setVolumeTransferred(BigInteger.valueOf(volumeTransferred));
         jobEventDetail.setStatus(StatusValueType.TRANSFERRING);
 
-            // TODO: rather than invoke the JMS job event queue sender directly,
-            // we should be sending the document to the 'dtsJobEvents' channel.
-            // The 'dtsJobEvents' is bound to an out-bound channel adapter which
-            // facilitates different message targets/sources (jms, dir, rmi ws etc);
-        mJobEventQueueSender.doSend(jobId, document);
+            // Previously, we sent directly to the JMS queue rather than to
+            // a spring integration channel.
+            //mJobEventQueueSender.doSend(jobId, document);
 
+        Message<JobEventUpdateRequestDocument> msg = MessageBuilder.withPayload(document).setCorrelationId(jobId).build();
+        mChannelTemplate.send(msg);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void notifyJobScope(final String jobId, final int filesTotal, final long volumeTotal) {
         Assert.notNull(jobId);
         LOG.info(String.format("DTS Job '%s' job scope notification", jobId));
@@ -227,10 +249,21 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
         jobEventDetail.setVolumeTotal(BigInteger.valueOf(volumeTotal));
         jobEventDetail.setStatus(StatusValueType.TRANSFERRING);
 
-            // TODO: rather than invoke the JMS job event queue sender directly,
-            // we should be sending the document to the 'dtsJobEvents' channel.
-            // The 'dtsJobEvents' is bound to an out-bound channel adapter which
-            // facilitates different message targets/sources (jms, dir, rmi ws etc);
-        mJobEventQueueSender.doSend(jobId, document);
+            // Previously, we sent directly to the JMS queue rather than to
+            // a spring integration channel.
+            //mJobEventQueueSender.doSend(jobId, document);
+
+        Message<JobEventUpdateRequestDocument> msg = MessageBuilder.withPayload(document).setCorrelationId(jobId).build();
+        mChannelTemplate.send(msg);
+    }
+
+
+    /**
+     * Inject a message channel template for the Job Event queue
+     * 
+     * @param mChannelTemplate
+     */
+    public void setchannelTemplate(final MessageChannelTemplate mChannelTemplate) {
+        this.mChannelTemplate = mChannelTemplate;
     }
 }
