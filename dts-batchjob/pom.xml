@@ -238,6 +238,14 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- POSTGRES JDBC Driver -->
+    <dependency>
+      <groupId>postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+
     <!-- C3P0 -->
     <dependency>
       <groupId>c3p0</groupId>
