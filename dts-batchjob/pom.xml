@@ -97,7 +97,11 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.5.5</version>
+      <!--<version>1.5.5</version>-->
+    </dependency>
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
     </dependency>
 
     <!-- Log4J -->
@@ -157,7 +161,22 @@
       <groupId>org.springframework.batch</groupId>
       <artifactId>org.springframework.batch.core</artifactId>
     </dependency>
-
+    <!--
+    Not adding the following pom dependency for batch.infrastructure causes the
+    following transitive depdendency warning when doing a 'mvn dependency:analyze'
+    (of course, this dependency declaration would need an accompanying
+    definition for batch.infrastructure within the parent pom). In this case,
+    i think its ok not to define this dependency here as this will be included
+    as a transitive dependency in spring batch. 
+    ...
+    [WARNING] Used undeclared dependencies found:
+    [WARNING]    org.springframework.batch:org.springframework.batch.infrastructure:jar:2.0.4.RELEASE:compile
+    <dependency>
+      <groupId>org.springframework.batch</groupId>
+      <artifactId>org.springframework.batch.infrastructure</artifactId>
+    </dependency>
+    -->
+    
     <!-- Spring Batch Integration -->
     <dependency>
       <groupId>org.springframework.batch</groupId>
@@ -174,6 +193,12 @@
     <dependency>
       <groupId>commons-vfs-grid</groupId>
       <artifactId>commons-vfs-grid</artifactId>
+    </dependency>
+
+    <!-- commons-vfs -->
+    <dependency>
+      <groupId>commons-vfs</groupId>
+      <artifactId>commons-vfs</artifactId>
     </dependency>
 
     <dependency>
@@ -291,6 +316,10 @@
     <dependency>
       <groupId>external.jglobus</groupId>
       <artifactId>puretls</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>external.jglobus</groupId>
+      <artifactId>cog-jglobus</artifactId>
     </dependency>
     <dependency>
       <groupId>bouncycastle</groupId>
