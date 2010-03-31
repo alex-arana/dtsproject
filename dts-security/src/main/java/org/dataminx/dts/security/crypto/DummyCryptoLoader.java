@@ -1,10 +1,10 @@
-package org.dataminx.dts.security.crypt;
+package org.dataminx.dts.security.crypto;
 
-public class DummyCryptLoader implements CryptLoader {
+public class DummyCryptoLoader implements CryptoLoader {
 
     private final Encrypter mEncrypter;
 
-    public DummyCryptLoader() {
+    public DummyCryptoLoader() {
         mEncrypter = new DummyEncrypter();
     }
 
