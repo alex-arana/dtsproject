@@ -1,0 +1,63 @@
+#labels Phase-Implementation,Install-Guide,User-Guide
+<wiki:toc max_depth="3" />
+
+== Data Transfer Service ==
+
+The Data Transfer Service is composed of a number of components and the sections below will show you how each of the DTS modules can be installed and used. 
+
+
+=== Preinstall ===
+==== Prerequisites ====
+Following is a list of software components required to get the Data Transfer Service components running. Each item in the list contains a link to the product website where you can download the required distribution files:
+
+   * [http://java.sun.com/javase/downloads/ Java SE JDK] Current release is [http://java.sun.com/javase/6/webnotes/6u14.html JDK 6 Update 18]
+   * [http://subversion.tigris.org/getting.html Subversion]
+   * [http://maven.apache.org/ Maven]
+   * The database of your choice. We're using [http://www.mysql.com MySQL].
+
+==== Getting The Code ====
+The DTS codebase is currently hosted in the DTS Google Code SVN repository. You can check out the code by running:
+{{{
+  > cd /usr/local
+  > svn checkout http://dtsproject.googlecode.com/svn/trunk/ minx-dts
+}}}
+
+
+=== Install ===
+==== Build the project ====
+{{{
+ > cd minx-dts
+ > touch /usr/local/minx-dts/dts-batchjob/src/test/filters/filter.properties
+ > touch /usr/local/minx-dts/dts-ws/src/test/filters/filter.properties
+ > mvn -DskipTests=true install
+}}}
+
+=== Postinstall ===
+==== DTS Batch Job ====
+
+Run the following commands...
+{{{
+ > cd ~
+ > mkdir .dataminx
+ > cd .dataminx
+ > cp /usr/local/minx-dts/dts-batchjob/src/main/resources/dts-bulkcopyjob.properties.template ~/.dataminx/dts-bulkcopyjob.properties
+}}}
+
+Edit the values of the following fields in dts-bulkcopyjob.properties
+   * batch.jdbc.user
+   * batch.jdbc.password
+
+Create the Spring Batch DB by running the db script provided in /usr/local/minx-dts/dts-batchjob/src/main/resources/db for the DB you are using. Provide the user who will run the DTS access to it. Remember to use a password for root@localhost and dts-user@localhost if you've decided to use MySQL.
+
+Run /usr/local/minx-dts/dts-batchjob/src/test/resources/create-testfiles.sh to create the test files the unit tests would use.
+
+Add this line to /usr/local/minx-dts/dts-batchjob/src/test/filters/filter.properties and use the DTS user's home directory as its value
+{{{
+users.home.dir=<the DTS user's home directory>
+}}}
+
+Run the test
+{{{
+ > mvn -e -Ddataminx.dir=/home/dts-user/.dataminx test
+ > mvn -e -Ddataminx.dir=/home/dts-user/.dataminx integration-test
+}}}
