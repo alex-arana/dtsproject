@@ -95,6 +95,7 @@
     <gwt.version>1.7.0</gwt.version>
     <jaas.version>1.0.01</jaas.version>
     <mockito.version>1.8.2</mockito.version>
+    <maven-assembly-plugin.version>2.2-beta-5</maven-assembly-plugin.version>
   </properties>
 
   <repositories>
@@ -190,7 +191,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <!--<version>${gwt-maven-plugin.version}</version>-->
+        <version>${gwt-maven-plugin.version}</version>
       </plugin>
     </plugins>
 
@@ -209,6 +210,11 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>gwt-maven-plugin</artifactId>
           <version>${gwt-maven-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${maven-assembly-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
