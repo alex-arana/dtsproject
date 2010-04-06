@@ -75,6 +75,25 @@
           </execution>
         </executions>
       </plugin>
+      <!-- maven assembly plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+            <descriptorRefs>
+                <!-- TODO: lets use jar-with-dependencies for now, but will need to
+                use our own assembly descriptor in order to build a more regular
+                distribution that will include the embedded db data dir and lib dir
+                for dependencies -->
+                <descriptorRef>
+                    jar-with-dependencies
+                </descriptorRef>
+            </descriptorRefs>
+          <!--<descriptors>
+            <descriptor>src/main/assembly/assembly1.xml</descriptor>
+          </descriptors>-->
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   
