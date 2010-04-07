@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : assembly1.xml
+    Created on : 06 April 2010, 15:23
+    Author     : djm76
+    Description:
+        TODO: Unfinished.
+        A maven assembly to build a dts-batch agent release that can be used
+        standalone without having to use maven as an execution container
+        (similar to maven's 'jar-with-dependencies' assembly, but we will need
+        to include an embedded database for 'out-of-the-box' usage')
+-->
+
+<assembly  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns='http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.1'
+   xsi:schemaLocation='http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.1 http://maven.apache.org/xsd/assembly-1.1.1.xsd'>
+
+    <id>dts-agent</id>
+    <formats>
+        <format>dir</format>
+    </formats>
+
+    <!-- not necessary -->
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <!--
+    Match all runtime dependencies (includes compile scope implicilty).
+    It will also copy the current project's main artifact into the assembly archive
+    if it exists (you have to explicilty exclude it using and <exclude/> or
+    set <useProjectArtifact> to false in the relevant dependencySet if thats
+    what you need).
+    -->
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <!--<useProjectArtifact>false</useProjectArtifact>-->
+        </dependencySet>
+    </dependencySets>
+
+    <!-- copy the main artifact (not needed, lets just stuff all jars into lib) -->
+    <!--<files>
+        <file>
+            <source>target/${artifact.artifactId}-${artifact.version}.jar</source>
+        </file>
+    </files>-->
+
+</assembly>
