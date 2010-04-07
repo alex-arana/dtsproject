@@ -101,17 +101,17 @@ public class DtsBulkCopyJobCLIRunner {
      */
     public static void main(final String[] args) {
 
-        // lets setup the dataminx config file first.
-        final String configDir = System.getProperty(DATAMINX_CONFIGURATION_KEY);
-        final DtsBulkCopyJobCLIRunner jobRunner = new DtsBulkCopyJobCLIRunner(configDir);
-        jobRunner.initAppContext();
-
         // now lets check for the required cmd line arg
         if (args.length != 1) {
             System.err.println("DtsBulkCopyJobCLIRunner: missing input file");
             System.err.println("Try DtsBulkCopyJobCLIRunner <path-to-dts-job-definition-document>");
             return;
         }
+
+        // lets setup the dataminx config.
+        final String configDir = System.getProperty(DATAMINX_CONFIGURATION_KEY);
+        final DtsBulkCopyJobCLIRunner jobRunner = new DtsBulkCopyJobCLIRunner(configDir);
+        jobRunner.initAppContext();
 
         File f;
         try {
