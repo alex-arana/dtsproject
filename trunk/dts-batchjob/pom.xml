@@ -399,7 +399,7 @@
                           <manifest>
                              <mainClass>org.dataminx.dts.batch.DtsBulkCopyJobCLIRunner</mainClass>
                              <addClasspath>true</addClasspath>
-                             <classpathPrefix>lib</classpathPrefix>
+                             <!--<classpathPrefix>lib</classpathPrefix>-->
                           </manifest>
                         </archive>
                       </configuration>
