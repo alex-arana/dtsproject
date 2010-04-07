@@ -33,6 +33,7 @@
     <dependencySets>
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
+
             <!--
             The default value for the <outputFileNameMapping/> element is:
             "${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}"
@@ -48,7 +49,7 @@
             Rather, the classpath in the manifest appears to use
             the ${artifact.baseVersion} not the ${artifact.version}. Therefore,
             i needed to specify the baseVersion in order to build the correct
-            classpath value in the manifest. 
+            classpath value in the manifest.
             -->
             <outputFileNameMapping>
                ${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
