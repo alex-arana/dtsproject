@@ -88,7 +88,15 @@
       <artifactId>dts-common</artifactId>
       <groupId>${dataminx.group}</groupId>
     </dependency>
-
+    <dependency>
+      <artifactId>dts-security</artifactId>
+      <groupId>${dataminx.group}</groupId>
+    </dependency>
+    <dependency>
+      <artifactId>dts-crypto-plugin</artifactId>
+      <groupId>org.dataminx.dts.security</groupId>
+    </dependency>
+    
     <dependency>
       <artifactId>dts-schema</artifactId>
       <groupId>${dataminx.group}</groupId>
@@ -397,7 +405,7 @@
                       <configuration>
                         <archive>
                           <manifest>
-                             <mainClass>org.dataminx.dts.batch.DtsBulkCopyJobCLIRunner</mainClass>
+                             <mainClass>org.dataminx.dts.batch.DtsBulkCopyJobCliRunner</mainClass>
                              <addClasspath>true</addClasspath>
                              <!--<classpathPrefix>lib</classpathPrefix>-->
                           </manifest>

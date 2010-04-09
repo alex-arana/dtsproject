@@ -1,7 +1,7 @@
 users.home.dir=/change/me
 ftp.username=changeme
-ftp.password=changeme
+ftp.password=clear-text:changeme
 srb.username=changeme
-srb.password=changeme
+srb.password=clear-text:changeme
 myproxy.username=changeme
-myproxy.password=changeme
+myproxy.password=clear-text:changeme

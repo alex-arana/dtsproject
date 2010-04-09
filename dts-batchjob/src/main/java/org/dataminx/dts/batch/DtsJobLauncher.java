@@ -27,11 +27,11 @@
  */
 package org.dataminx.dts.batch;
 
-import org.dataminx.dts.common.util.SchemaUtils;
-
 import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataminx.dts.common.util.SchemaUtils;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.batch.core.JobExecution;
@@ -43,14 +43,16 @@ import org.springframework.batch.core.repository.JobRestartException;
 
 /**
  * This is the Spring Batch Launcher for the DTS Worker Node.
- * 
+ *
  * @author Alex Arana
  * @author Gerson Galang
  */
 public class DtsJobLauncher extends SimpleJobLauncher {
 
+    /** The logger. */
     private static final Log LOGGER = LogFactory.getLog(DtsJobLauncher.class);
 
+    /** A reference to the DtsJobFactory. */
     private DtsJobFactory mJobFactory;
 
     /**
@@ -60,23 +62,40 @@ public class DtsJobLauncher extends SimpleJobLauncher {
 
     }
 
+    /**
+     * An overloaded version of the {@link SimpleJobLauncher#run(org.springframework.batch.core.Job,
+     * org.springframework.batch.core.JobParameters) run} method which launches
+     * a DTS Job.
+     *
+     * @param jobId the jobResourceKey
+     * @param job the JobDefinitionDocument
+     * @return the JobExecution if job launch is successful
+     * @throws JobExecutionAlreadyRunningException if the job is already running
+     * @throws JobRestartException if the job is not allowed to be restarted
+     * @throws JobInstanceAlreadyCompleteException if the job has already completed
+     */
     public JobExecution run(final String jobId, final JobDefinitionDocument job)
-            throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
-        final SubmitJobRequestDocument dtsJobRequest = SubmitJobRequestDocument.Factory.newInstance();
+        throws JobExecutionAlreadyRunningException, JobRestartException,
+        JobInstanceAlreadyCompleteException {
+        final SubmitJobRequestDocument dtsJobRequest = SubmitJobRequestDocument.Factory
+            .newInstance();
         //SubmitJobRequest submitJobRequest =
         dtsJobRequest.addNewSubmitJobRequest();
 
         // replace JobDefinition with the one read from the input file
-        dtsJobRequest.getSubmitJobRequest().setJobDefinition(job.getJobDefinition());
+        dtsJobRequest.getSubmitJobRequest().setJobDefinition(
+            job.getJobDefinition());
 
         // TODO: filter out the credential info from the logs using the one that WN uses
-        final String auditableRequest = SchemaUtils.getAuditableString(dtsJobRequest);
+        final String auditableRequest = SchemaUtils
+            .getAuditableString(dtsJobRequest);
         LOGGER.debug("request payload:\n" + auditableRequest);
 
         // invoke the job factory to create a new job instance
         final DtsJob dtsJob = mJobFactory.createJob(jobId, dtsJobRequest);
 
-        return run(dtsJob, new DefaultJobParametersConverter().getJobParameters(new Properties()));
+        return run(dtsJob, new DefaultJobParametersConverter()
+            .getJobParameters(new Properties()));
     }
 
     public void setDtsJobFactory(final DtsJobFactory jobFactory) {

@@ -29,26 +29,25 @@ package org.dataminx.dts.batch.common;
 
 /**
  * Defines a common set of constants global to the DTS Worker Node application.
- * 
+ *
  * @author Alex Arana
  * @author Gerson Galang
  */
 public final class DtsBatchJobConstants {
 
-    /**
-     * A job execution context key used to hold a DTS job request.
-     */
+    /** A job execution context key used to hold a DTS job request. */
     public static final String DTS_SUBMIT_JOB_REQUEST_KEY = "SUBMIT_JOB_REQUEST";
 
+    /** A job execution context key used to hold the Job Resource Key. */
     public static final String DTS_JOB_RESOURCE_KEY = "JOB_RESOURCE_KEY";
 
-    /**
-     * A step execution context key used to hold a data staging element.
-     */
+    /** A step execution context key used to hold a data staging element. */
     public static final String DTS_DATA_TRANSFER_STEP_KEY = "DATA_TRANSFER_STEP";
 
+    /** A job execution context used to hold the JobDetails object. */
     public static final String DTS_JOB_DETAILS = "JOB_DETAILS";
 
+    /** A system properties key to the job step directory/folder. */
     public static final String DTS_JOB_STEP_DIRECTORY_KEY = "job.step.dir";
 
 }

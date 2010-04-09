@@ -39,7 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Base class implementation of the DTS worker node job.
- * 
+ *
  * @author Alex Arana
  */
 public abstract class DtsJob extends SimpleJob {
@@ -60,6 +60,7 @@ public abstract class DtsJob extends SimpleJob {
     @Autowired
     private JobNotificationService mJobNotificationService;
 
+    /** A reference to the JobPartitioningStrategy. */
     @Autowired
     private JobPartitioningStrategy mJobPartitioningStrategy;
 
@@ -69,7 +70,7 @@ public abstract class DtsJob extends SimpleJob {
      * <p>
      * The input job ID <em>must</em> be unique across the entire job
      * repository.
-     * 
+     *
      * @param jobId Unique identifier for this job.
      */
     public DtsJob(final String jobId) {
@@ -80,12 +81,13 @@ public abstract class DtsJob extends SimpleJob {
      * {@inheritDoc}
      */
     @Override
-    public abstract void doExecute(JobExecution execution) throws JobInterruptedException, JobRestartException,
-            StartLimitExceededException;
+    public abstract void doExecute(JobExecution execution)
+        throws JobInterruptedException, JobRestartException,
+        StartLimitExceededException;
 
     /**
      * Returns the time when this job started executing.
-     * 
+     *
      * @return job's execution start time in milliseconds
      */
     public long getStartTime() {
@@ -97,7 +99,8 @@ public abstract class DtsJob extends SimpleJob {
      * WorkerNode's current time.
      */
     public void registerStartTime() {
-        mStartTime = mDtsWorkerNodeInformationService.getCurrentTime().getTime();
+        mStartTime = mDtsWorkerNodeInformationService.getCurrentTime()
+            .getTime();
     }
 
     public long getCompletedTime() {
@@ -109,12 +112,13 @@ public abstract class DtsJob extends SimpleJob {
      * WorkerNode's current time.
      */
     public void registerCompletedTime() {
-        mCompletedTime = mDtsWorkerNodeInformationService.getCurrentTime().getTime();
+        mCompletedTime = mDtsWorkerNodeInformationService.getCurrentTime()
+            .getTime();
     }
 
     /**
      * Returns the ID that uniquely identifies this job.
-     * 
+     *
      * @return Job ID
      */
     public String getJobId() {
@@ -129,7 +133,7 @@ public abstract class DtsJob extends SimpleJob {
 
     /**
      * Returns a human-readable description of this DTS Job.
-     * 
+     *
      * @return Job description as a {@link String}
      */
     public abstract String getDescription();

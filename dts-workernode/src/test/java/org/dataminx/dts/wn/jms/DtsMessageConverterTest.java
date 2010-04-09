@@ -119,7 +119,7 @@ public class DtsMessageConverterTest extends UnitilsTestNG {
 
         // modify the internal state when the marshal() method is invoked
         final MockBehavior behaviour = new MockBehavior() {
-            @Override
+
             public Object execute(final ProxyInvocation proxyInvocation) throws Throwable {
                 final List<Object> arguments = proxyInvocation.getArguments();
                 final XmlObject xmlObject = (XmlObject) arguments.get(0);

@@ -32,6 +32,7 @@ import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_RESOURC
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
 
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.common.model.JobStatus;
@@ -57,53 +58,173 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * DTS Job that performs a file copy operation.
- * 
+ *
  * @author Alex Arana
  * @author Gerson Galang
  */
 public class DtsFileTransferJob extends DtsJob implements InitializingBean {
+
+    /** The logger. */
+    private static final Log LOGGER = LogFactory
+        .getLog(DtsFileTransferJob.class);
+
     /** Holds the information about the job request. */
     private final SubmitJobRequest mJobRequest;
 
-    private static final Log LOGGER = LogFactory.getLog(DtsFileTransferJob.class);
-
-    /**
-     * The partitioning step acts as the master step over all of the
-     * fileCopyingSteps.
-     */
+    /** The partitioning step acts as the master step over all of the fileCopyingSteps. */
     private Step mPartitioningStep;
 
+    /** A reference to the MaxStreamCounterTask step. */
     private Step mMaxStreamCountingStep;
 
+    /** A reference to the JobScopingTask step. */
     private Step mJobScopingStep;
 
+    /** A reference to the CheckRequirementsTask step. */
     private Step mCheckRequirementsStep;
 
+    /** A reference to the StopwatchTimer. */
     private StopwatchTimer mStopwatchTimer;
 
     /**
-     * Constructs a new instance of <code>DtsSubmitJob</code> using the
-     * specified job request details.
-     * 
-     * @param jobId Unique job identifier
-     * @param jobRequest Job request details
-     * @param jobRepository Job repository
+     * Constructs a new instance of <code>DtsSubmitJob</code> using the specified job request details.
+     *
+     * @param jobId
+     *            Unique job identifier
+     * @param jobRequest
+     *            Job request details
+     * @param jobRepository
+     *            Job repository
      */
-    public DtsFileTransferJob(final String jobId, final SubmitJobRequestDocument jobRequest,
-            final JobRepository jobRepository) {
+    public DtsFileTransferJob(final String jobId,
+        final SubmitJobRequestDocument jobRequest,
+        final JobRepository jobRepository) {
 
         super(jobId);
-        Assert.notNull(jobRequest, "Cannot construct a DTS submit job without the required job details.");
+        Assert
+            .notNull(jobRequest,
+                "Cannot construct a DTS submit job without the required job details.");
         mJobRequest = jobRequest.getSubmitJobRequest();
         setJobRepository(jobRepository);
+
+        /*
+        final MinxSourceTargetType target = ((MinxJobDescriptionType) mJobRequest
+            .getJobDefinition().getJobDescription()).getDataTransferArray(0)
+            .getTarget();
+        target.getCredential().getMyProxyToken().setNil();
+        //target.getCredential().getMyProxyToken()
+        final CredentialType credential = target.getCredential();
+        LOGGER.debug("******************** GERSON");
+        LOGGER.debug("****************** credential: " + mJobRequest.xmlText());
+        */
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Assert.state(mPartitioningStep != null,
+            "PartitioningStep has not been set.");
+        Assert.state(mMaxStreamCountingStep != null,
+            "MaxStreamCountingStep has not been set.");
+        Assert.state(mJobScopingStep != null,
+            "JobScopingStep has not been set.");
+        Assert.state(mCheckRequirementsStep != null,
+            "CheckRequirementsStep has not been set.");
+        super.afterPropertiesSet();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String getName() {
-        return getJobId();
+    public void doExecute(final JobExecution execution)
+        throws JobInterruptedException, JobRestartException,
+        StartLimitExceededException {
+
+        boolean checkRequirementsFailed = false;
+
+        // first set the job start time
+        registerStartTime();
+
+        // TODO determine exactly what job notifications we need to return and
+        // when
+        getJobNotificationService().notifyJobStatus(this,
+            JobStatus.TRANSFERRING);
+
+        // first, store the DTS job request object in the job execution context
+        final ExecutionContext context = execution.getExecutionContext();
+        context.put(DTS_SUBMIT_JOB_REQUEST_KEY, mJobRequest);
+        context.put(DTS_JOB_RESOURCE_KEY, getJobId());
+
+        LOGGER.info("Started the CheckRequirementsTask step at "
+            + mStopwatchTimer.getFormattedElapsedTime());
+
+        StepExecution stepExecution = handleStep(mCheckRequirementsStep,
+            execution);
+
+        // we'll skip the other steps if the job scoping task step fails
+        if (!stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
+            checkRequirementsFailed = true;
+        }
+
+        if (!checkRequirementsFailed) {
+            LOGGER.info("Started the JobScopingTask step at "
+                + mStopwatchTimer.getFormattedElapsedTime());
+
+            // TODO convert to application exceptions
+            stepExecution = handleStep(mJobScopingStep, execution);
+
+            LOGGER.info("Finished the JobScopingTask step at "
+                + mStopwatchTimer.getFormattedElapsedTime());
+        }
+
+        // we'll skip the other steps if the job scoping task step fails
+        if (!checkRequirementsFailed
+            && stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
+
+            // let's check if there's anything to transfer
+            final DtsJobDetails dtsJobDetails = (DtsJobDetails) context
+                .get(DTS_JOB_DETAILS);
+            if (!dtsJobDetails.getJobSteps().isEmpty()) {
+
+                LOGGER.info("Started the MaxStreamCounting step at "
+                    + mStopwatchTimer.getFormattedElapsedTime());
+                stepExecution = handleStep(mMaxStreamCountingStep, execution);
+                LOGGER.info("Finished the MaxStreamCounting step at "
+                    + mStopwatchTimer.getFormattedElapsedTime());
+
+                // we'll only run the FileCopyTask and the master PartitioningStep if MaxStreamCounting step
+                // completed successfully
+                if (stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
+                    LOGGER.info("Started the FileCopying process at "
+                        + mStopwatchTimer.getFormattedElapsedTime());
+                    stepExecution = handleStep(mPartitioningStep, execution);
+                    LOGGER.info("Finished the FileCopying process at "
+                        + mStopwatchTimer.getFormattedElapsedTime());
+                }
+
+            }
+
+            // update the job status to have the same status as the master step
+            if (stepExecution != null) {
+                logger.debug("Upgrading JobExecution status: " + stepExecution);
+                execution.upgradeStatus(stepExecution.getStatus());
+                execution.setExitStatus(stepExecution.getExitStatus());
+            }
+
+            if (stepExecution.getStatus().isUnsuccessful()) {
+                getJobNotificationService().notifyJobError(getJobId(),
+                    execution);
+                return;
+            }
+
+            // TODO move this somewhere it always gets called
+            registerCompletedTime();
+            getJobNotificationService().notifyJobStatus(this, JobStatus.DONE);
+        }
+        else {
+            execution.setStatus(BatchStatus.FAILED);
+            getJobNotificationService().notifyJobError(getJobId(), execution);
+        }
     }
 
     /**
@@ -120,9 +241,8 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
     }
 
     /**
-     * Returns the job description, containing all details about the underlying
-     * job.
-     * 
+     * Returns the job description, containing all details about the underlying job.
+     *
      * @return Job request details
      */
     protected JobDescriptionType getJobDescription() {
@@ -135,9 +255,8 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
     }
 
     /**
-     * Returns the job identification, containing all details about the
-     * underlying job.
-     * 
+     * Returns the job identification, containing all details about the underlying job.
+     *
      * @return Job identification details
      */
     protected JobIdentificationType getJobIdentification() {
@@ -153,115 +272,39 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
      * {@inheritDoc}
      */
     @Override
-    public void doExecute(final JobExecution execution) throws JobInterruptedException, JobRestartException,
-            StartLimitExceededException {
-
-        boolean checkRequirementsFailed = false;
-
-        // first set the job start time
-        registerStartTime();
-
-        // TODO determine exactly what job notifications we need to return and
-        // when
-        getJobNotificationService().notifyJobStatus(this, JobStatus.TRANSFERRING);
-
-        // first, store the DTS job request object in the job execution context
-        final ExecutionContext context = execution.getExecutionContext();
-        context.put(DTS_SUBMIT_JOB_REQUEST_KEY, mJobRequest);
-        context.put(DTS_JOB_RESOURCE_KEY, getJobId());
-
-        LOGGER.info("Started the CheckRequirementsTask step at " + mStopwatchTimer.getFormattedElapsedTime());
-
-        StepExecution stepExecution = handleStep(mCheckRequirementsStep, execution);
-
-        // we'll skip the other steps if the job scoping task step fails
-        if (!stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
-            checkRequirementsFailed = true;
-        }
-
-        if (!checkRequirementsFailed) {
-            LOGGER.info("Started the JobScopingTask step at " + mStopwatchTimer.getFormattedElapsedTime());
-
-            // TODO convert to application exceptions
-            stepExecution = handleStep(mJobScopingStep, execution);
-
-            LOGGER.info("Finished the JobScopingTask step at " + mStopwatchTimer.getFormattedElapsedTime());
-        }
-
-        // we'll skip the other steps if the job scoping task step fails
-        if (!checkRequirementsFailed && stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
-
-            // let's check if there's anything to transfer
-            final DtsJobDetails dtsJobDetails = (DtsJobDetails) context.get(DTS_JOB_DETAILS);
-            if (!dtsJobDetails.getJobSteps().isEmpty()) {
-
-                LOGGER.info("Started the MaxStreamCounting step at " + mStopwatchTimer.getFormattedElapsedTime());
-                stepExecution = handleStep(mMaxStreamCountingStep, execution);
-                LOGGER.info("Finished the MaxStreamCounting step at " + mStopwatchTimer.getFormattedElapsedTime());
-
-                // we'll only run the FileCopyTask and the master PartitioningStep if MaxStreamCounting step
-                // completed successfully
-                if (stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
-                    LOGGER.info("Started the FileCopying process at " + mStopwatchTimer.getFormattedElapsedTime());
-                    stepExecution = handleStep(mPartitioningStep, execution);
-                    LOGGER.info("Finished the FileCopying process at " + mStopwatchTimer.getFormattedElapsedTime());
-                }
-
-            }
-
-            // update the job status to have the same status as the master step
-            if (stepExecution != null) {
-                logger.debug("Upgrading JobExecution status: " + stepExecution);
-                execution.upgradeStatus(stepExecution.getStatus());
-                execution.setExitStatus(stepExecution.getExitStatus());
-            }
-
-            if (stepExecution.getStatus().isUnsuccessful()) {
-                getJobNotificationService().notifyJobError(getJobId(), execution);
-                return;
-            }
-
-            // TODO move this somewhere it always gets called
-            registerCompletedTime();
-            getJobNotificationService().notifyJobStatus(this, JobStatus.DONE);
-        }
-        else {
-            execution.setStatus(BatchStatus.FAILED);
-            getJobNotificationService().notifyJobError(getJobId(), execution);
-        }
-    }
-
-    public void setPartitioningStep(final Step partitioningStep) {
-        mPartitioningStep = partitioningStep;
-    }
-
-    public void setMaxStreamCountingStep(final Step maxStreamCountingStep) {
-        mMaxStreamCountingStep = maxStreamCountingStep;
-    }
-
-    public void setJobScopingStep(final Step jobScopingStep) {
-        mJobScopingStep = jobScopingStep;
+    public String getName() {
+        return getJobId();
     }
 
     public void setCheckRequirementsStep(final Step checkRequirementsStep) {
         mCheckRequirementsStep = checkRequirementsStep;
     }
 
-    public void setJobExecutionListeners(final List<JobExecutionListener> jobExecutionListeners) {
-        setJobExecutionListeners(jobExecutionListeners.toArray(new JobExecutionListener[0]));
+    /**
+     * Sets the List of JobExecutionListeners.
+     *
+     * @param jobExecutionListeners the List of JobExecutionListeners
+     */
+    public void setJobExecutionListeners(
+        final List<JobExecutionListener> jobExecutionListeners) {
+        setJobExecutionListeners(jobExecutionListeners
+            .toArray(new JobExecutionListener[0]));
+    }
+
+    public void setJobScopingStep(final Step jobScopingStep) {
+        mJobScopingStep = jobScopingStep;
+    }
+
+    public void setMaxStreamCountingStep(final Step maxStreamCountingStep) {
+        mMaxStreamCountingStep = maxStreamCountingStep;
+    }
+
+    public void setPartitioningStep(final Step partitioningStep) {
+        mPartitioningStep = partitioningStep;
     }
 
     public void setStopwatchTimer(final StopwatchTimer stopwatchTimer) {
         mStopwatchTimer = stopwatchTimer;
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Assert.state(mPartitioningStep != null, "PartitioningStep has not been set.");
-        Assert.state(mMaxStreamCountingStep != null, "MaxStreamCountingStep has not been set.");
-        Assert.state(mJobScopingStep != null, "JobScopingStep has not been set.");
-        Assert.state(mCheckRequirementsStep != null, "CheckRequirementsStep has not been set.");
-        super.afterPropertiesSet();
     }
 
     /**
@@ -272,7 +315,8 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
         final StringBuilder buffer = new StringBuilder();
         buffer.append(ObjectUtils.identityToString(this));
         buffer.append(" [jobId").append("='").append(getJobId()).append("' ");
-        buffer.append("jobDescription").append("='").append(getDescription()).append("']");
+        buffer.append("jobDescription").append("='").append(getDescription())
+            .append("']");
         return buffer.toString();
     }
 }

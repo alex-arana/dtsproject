@@ -32,6 +32,7 @@ import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_DATA_TRANSF
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,14 +53,16 @@ import org.springframework.util.Assert;
  * It is a requirement that the {@link SubmitJobRequest} input to this class be
  * either injected or set manually prior to its {@link #partition(int)} method
  * being called.
- * 
+ *
  * @author Alex Arana
  * @author Gerson Galang
  */
 public class DtsJobPartitioner implements Partitioner, InitializingBean {
     /** Internal logger object. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(DtsJobPartitioner.class);
+    private static final Logger LOGGER = LoggerFactory
+        .getLogger(DtsJobPartitioner.class);
 
+    /** A reference to the DtsJobDetails. */
     private DtsJobDetails mDtsJobDetails;
 
     /**
@@ -69,11 +72,13 @@ public class DtsJobPartitioner implements Partitioner, InitializingBean {
         final List<DtsJobStep> jobSteps = mDtsJobDetails.getJobSteps();
         int i = 0;
 
-        final Map<String, ExecutionContext> map = new HashMap<String, ExecutionContext>(gridSize);
+        final Map<String, ExecutionContext> map = new HashMap<String, ExecutionContext>(
+            gridSize);
         for (final DtsJobStep jobStep : jobSteps) {
             final ExecutionContext context = new ExecutionContext();
             context.put(DTS_DATA_TRANSFER_STEP_KEY, jobStep);
-            map.put(String.format("%s:%03d", DTS_DATA_TRANSFER_STEP_KEY, i), context);
+            map.put(String.format("%s:%03d", DTS_DATA_TRANSFER_STEP_KEY, i),
+                context);
             i++;
         }
 
@@ -84,7 +89,11 @@ public class DtsJobPartitioner implements Partitioner, InitializingBean {
         mDtsJobDetails = dtsJobDetails;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void afterPropertiesSet() throws Exception {
-        Assert.state(mDtsJobDetails != null, "Unable to find DtsJobDetails in execution context.");
+        Assert.state(mDtsJobDetails != null,
+            "Unable to find DtsJobDetails in execution context.");
     }
 }

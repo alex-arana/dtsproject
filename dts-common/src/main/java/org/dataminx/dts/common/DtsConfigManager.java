@@ -56,7 +56,7 @@ public class DtsConfigManager {
     }
 
     /**
-     * Sets the dts config location
+     * Sets the dts config location.
      *
      * @param dtsConfigLocation the new dts config location in URL format
      * @throws ConfigurationException if an error occurs while initialising the configuration from the

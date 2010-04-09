@@ -57,11 +57,5 @@
         <groupId>au.org.arcs.auth</groupId>
         <artifactId>simpleProxyLib</artifactId>
     </dependency>
-
-    <!-- JAAS -->
-    <dependency>
-      <groupId>javax.security</groupId>
-      <artifactId>jaas</artifactId>
-    </dependency>
   </dependencies>
 </project>

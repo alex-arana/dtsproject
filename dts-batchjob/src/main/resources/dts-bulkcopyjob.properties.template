@@ -39,3 +39,6 @@ max.total.bytes.perstep = 10485760
 
 # Maximum number of files a step will transfer
 max.total.num.files.perstep = 3
+
+# The Encrypter/Decrypter to use
+crypto.loader = org.dataminx.dts.security.crypto.DummyCryptoLoader
