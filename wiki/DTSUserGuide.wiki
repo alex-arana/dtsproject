@@ -62,7 +62,7 @@ Run the test
  > mvn -e -Ddataminx.dir=/home/dts-user/.dataminx integration-test
 }}}
 
-Edit testjob.xml in src/test/resources/org/dataminx/dts/batch and add the source/destination you want to access then run the command below. Remember to add your credential details to filter.properties in src/test/filters
+Edit testjob.xml in src/test/resources/org/dataminx/dts/batch and add the source/destination you want to access then run the command below. Remember to add your credential details to filter.properties in src/test/filters if you don't want to put your credentials in the actual job document.
 {{{
  > mvn -Ddataminx.dir=/home/dts-user/.dataminx -Dtest=QuickBulkCopyJobIntegrationTest test
 }}}
