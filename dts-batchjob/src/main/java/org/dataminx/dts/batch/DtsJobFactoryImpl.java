@@ -89,6 +89,24 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
             throw new DtsJobCreationException(message);
         }
 
+        // TODO: Maybe? (only an idea so far...)
+        //
+        // Prior to creating the DtsJob replace the children
+        // of the <Credential> elements with new CredentialType
+        // elements that are used to hold pointer/reference values
+        // to the credentials (e.g. <CredentialReference/>).
+        // We could then use a new service (e.g. CredentialStoreImpl)
+        // to get/put credentials in/out of a credential store. We could
+        // provide both persistent and non-persistent (hashmap)
+        // implementations at runtime as required depending on the request.
+        //
+        // The same CredentialStoreImpl could be passed-in as a constructor arg
+        // or injected into the DtsFileTransferJob (below).
+        //
+        // This service would provide a lookup method for resolving
+        // the credentials from a given <CredentialReference> value.
+        // The spring batch job could use this to resolve the creds.
+
         // create a new instance of the job using the spring bean factory
         return (DtsJob) mBeanFactory.getBean(dtsJobName, new Object[] {jobId,
             criteria, mJobRepository});
@@ -103,7 +121,11 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
      *         <code>null</code> if one has not yet been defined.
      */
     private String lookupJobName(final Object instance) {
+        //Return all interfaces that the given instance implements as array,
+	//including ones implemented by superclasses
         for (final Class<?> definition : ClassUtils.getAllInterfaces(instance)) {
+            // Returns the  name of the entity (class, interface, array class,
+            // primitive type, or void)
             final String key = definition.getName();
             if (DTS_JOB_REGISTRY.containsKey(key)) {
                 return DTS_JOB_REGISTRY.get(key);
