@@ -27,32 +27,38 @@
  */
 package org.dataminx.dts.batch.service;
 
-import org.dataminx.dts.common.vfs.DtsVfsUtil;
-
 import java.io.IOException;
+
 import org.apache.commons.vfs.Capability;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSelector;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.Selectors;
+import org.dataminx.dts.common.vfs.DtsVfsUtil;
+import org.dataminx.dts.security.crypto.CryptoLoader;
+import org.dataminx.dts.security.crypto.Encrypter;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
+
 import uk.ac.dl.escience.vfs.util.MarkerListenerImpl;
 import uk.ac.dl.escience.vfs.util.VFSUtil;
 
 /**
  * Default implementation of {@link FileCopyingService}.
- * 
+ *
  * @author Alex Arana
  * @author Gerson Galang
  */
-public class FileCopyingServiceImpl implements FileCopyingService {
+public class FileCopyingServiceImpl implements FileCopyingService,
+    InitializingBean {
     /** A reference to the internal logger object. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileCopyingServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory
+        .getLogger(FileCopyingServiceImpl.class);
 
     /** Default file selector to be used during file copy operations. */
     private static final FileSelector DEFAULT_FILE_SELECTOR = Selectors.SELECT_ALL;
@@ -64,18 +70,27 @@ public class FileCopyingServiceImpl implements FileCopyingService {
      */
     private final boolean mPreserveLastModified = true;
 
+    /** A reference to the DtsVfsUtil. */
     private DtsVfsUtil mDtsVfsUtil;
+
+    /** A reference to the Encrypter. */
+    private Encrypter mEncrypter;
 
     /**
      * {@inheritDoc}
      */
     public void copyFiles(final String sourceURI, final String targetURI,
-            final FileSystemManager sourceFileSystemManager, final FileSystemManager targetFileSystemManager) {
-        LOGGER.info(String.format("Copying source '%s' to target '%s'...", sourceURI, targetURI));
+        final FileSystemManager sourceFileSystemManager,
+        final FileSystemManager targetFileSystemManager) {
+        LOGGER.info(String.format("Copying source '%s' to target '%s'...",
+            sourceURI, targetURI));
         try {
-            copyFiles(sourceFileSystemManager.resolveFile(sourceURI), targetFileSystemManager.resolveFile(targetURI));
-        } catch (final FileSystemException ex) {
-            LOGGER.error("An error has occurred during a file copy operation: " + ex, ex);
+            copyFiles(sourceFileSystemManager.resolveFile(sourceURI),
+                targetFileSystemManager.resolveFile(targetURI));
+        }
+        catch (final FileSystemException ex) {
+            LOGGER.error("An error has occurred during a file copy operation: "
+                + ex, ex);
             throw new DtsFileCopyOperationException(ex);
         }
     }
@@ -83,15 +98,21 @@ public class FileCopyingServiceImpl implements FileCopyingService {
     /**
      * {@inheritDoc}
      */
-    public void copyFiles(final SourceTargetType source, final SourceTargetType target,
-            final FileSystemManager sourceFileSystemManager, final FileSystemManager targetFileSystemManager) {
-        LOGGER.info(String.format("Copying source '%s' to target '%s'...", source.getURI(), target.getURI()));
+    public void copyFiles(final SourceTargetType source,
+        final SourceTargetType target,
+        final FileSystemManager sourceFileSystemManager,
+        final FileSystemManager targetFileSystemManager) {
+        LOGGER.info(String.format("Copying source '%s' to target '%s'...",
+            source.getURI(), target.getURI()));
         try {
-            copyFiles(
-                    sourceFileSystemManager.resolveFile(source.getURI(), mDtsVfsUtil.createFileSystemOptions(source)),
-                    targetFileSystemManager.resolveFile(target.getURI(), mDtsVfsUtil.createFileSystemOptions(target)));
-        } catch (final FileSystemException ex) {
-            LOGGER.error("An error has occurred during a file copy operation: " + ex, ex);
+            copyFiles(sourceFileSystemManager.resolveFile(source.getURI(),
+                mDtsVfsUtil.createFileSystemOptions(source, mEncrypter)),
+                targetFileSystemManager.resolveFile(target.getURI(),
+                    mDtsVfsUtil.createFileSystemOptions(target, mEncrypter)));
+        }
+        catch (final FileSystemException ex) {
+            LOGGER.error("An error has occurred during a file copy operation: "
+                + ex, ex);
             throw new DtsFileCopyOperationException(ex);
         }
     }
@@ -99,19 +120,25 @@ public class FileCopyingServiceImpl implements FileCopyingService {
     /**
      * {@inheritDoc}
      */
-    public void copyFiles(final String sourceURI, final String targetURI, final DataTransferType dataTransferType,
-            final FileSystemManager sourceFileSystemManager, final FileSystemManager targetFileSystemManager) {
+    public void copyFiles(final String sourceURI, final String targetURI,
+        final DataTransferType dataTransferType,
+        final FileSystemManager sourceFileSystemManager,
+        final FileSystemManager targetFileSystemManager) {
         final SourceTargetType source = dataTransferType.getSource();
         final SourceTargetType target = dataTransferType.getTarget();
         FileObject sourceFO = null;
         FileObject targetFO = null;
 
         try {
-            sourceFO = sourceFileSystemManager.resolveFile(sourceURI, mDtsVfsUtil.createFileSystemOptions(source));
-            targetFO = targetFileSystemManager.resolveFile(targetURI, mDtsVfsUtil.createFileSystemOptions(target));
+            sourceFO = sourceFileSystemManager.resolveFile(sourceURI,
+                mDtsVfsUtil.createFileSystemOptions(source, mEncrypter));
+            targetFO = targetFileSystemManager.resolveFile(targetURI,
+                mDtsVfsUtil.createFileSystemOptions(target, mEncrypter));
             copyFiles(sourceFO, targetFO);
-        } catch (final FileSystemException e) {
-            LOGGER.error("An error has occurred during a file copy operation: " + e, e);
+        }
+        catch (final FileSystemException e) {
+            LOGGER.error("An error has occurred during a file copy operation: "
+                + e, e);
             throw new DtsFileCopyOperationException(e);
         }
     }
@@ -119,35 +146,39 @@ public class FileCopyingServiceImpl implements FileCopyingService {
     /**
      * {@inheritDoc}
      */
-    public void copyFiles(final String sourceURI, final String targetURI, final FileSystemManager fileSystemManager) {
+    public void copyFiles(final String sourceURI, final String targetURI,
+        final FileSystemManager fileSystemManager) {
         copyFiles(sourceURI, targetURI, fileSystemManager, fileSystemManager);
     }
 
     /**
      * {@inheritDoc}
      */
-    public void copyFiles(final SourceTargetType source, final SourceTargetType target,
-            final FileSystemManager fileSystemManager) {
+    public void copyFiles(final SourceTargetType source,
+        final SourceTargetType target, final FileSystemManager fileSystemManager) {
         copyFiles(source, target, fileSystemManager, fileSystemManager);
     }
 
     /**
      * {@inheritDoc}
      */
-    public void copyFiles(final String sourceURI, final String targetURI, final DataTransferType dataTransferType,
-            final FileSystemManager fileSystemManager) {
-        copyFiles(sourceURI, targetURI, dataTransferType, fileSystemManager, fileSystemManager);
+    public void copyFiles(final String sourceURI, final String targetURI,
+        final DataTransferType dataTransferType,
+        final FileSystemManager fileSystemManager) {
+        copyFiles(sourceURI, targetURI, dataTransferType, fileSystemManager,
+            fileSystemManager);
     }
 
     /**
      * Copies the content from a source file to a destination file.
-     * 
+     *
      * @param sourceFile Source file to copy from
      * @param destinationFile Destination file to copy
      * @throws FileSystemException when an error occurs during a VFS file copy
      *         operation.
      */
-    private void copyFiles(final FileObject sourceFile, final FileObject destinationFile) throws FileSystemException {
+    private void copyFiles(final FileObject sourceFile,
+        final FileObject destinationFile) throws FileSystemException {
         Assert.notNull(sourceFile);
         Assert.notNull(destinationFile);
 
@@ -161,23 +192,64 @@ public class FileCopyingServiceImpl implements FileCopyingService {
         // do in every step of the
         // data transfer process.
         try {
-            VFSUtil.copy(sourceFile, destinationFile, new MarkerListenerImpl(), true);
+            VFSUtil.copy(sourceFile, destinationFile, new MarkerListenerImpl(),
+                true);
 
-        } catch (final IOException e) {
-            LOGGER.error(String.format("IOException was thrown while trying to copy source '%s' to target '%s\n%s",
-                    sourceFile.getURL().toString(), destinationFile.getURL().toString(), e.getMessage()));
+        }
+        catch (final IOException e) {
+            LOGGER
+                .error(String
+                    .format(
+                        "IOException was thrown while trying to copy source '%s' to target '%s\n%s",
+                        sourceFile.getURL().toString(), destinationFile
+                            .getURL().toString(), e.getMessage()));
             throw new FileSystemException(e.getMessage(), e.getCause());
         }
 
-        if (mPreserveLastModified && sourceFile.getFileSystem().hasCapability(Capability.GET_LAST_MODIFIED)
-                && destinationFile.getFileSystem().hasCapability(Capability.SET_LAST_MODIFIED_FILE)) {
-            final long lastModTime = sourceFile.getContent().getLastModifiedTime();
+        if (mPreserveLastModified
+            && sourceFile.getFileSystem().hasCapability(
+                Capability.GET_LAST_MODIFIED)
+            && destinationFile.getFileSystem().hasCapability(
+                Capability.SET_LAST_MODIFIED_FILE)) {
+            final long lastModTime = sourceFile.getContent()
+                .getLastModifiedTime();
             destinationFile.getContent().setLastModifiedTime(lastModTime);
         }
     }
 
     public void setDtsVfsUtil(final DtsVfsUtil dtsVfsUtil) {
         mDtsVfsUtil = dtsVfsUtil;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void afterPropertiesSet() throws Exception {
+        Assert.state(mDtsVfsUtil != null, "DtsVfsUtil has not been set.");
+        Assert.state(mEncrypter != null, "CryptoLoader has not been set.");
+    }
+
+    /**
+     * Sets the CryptoLoader.
+     *
+     * @param cryptoLoader the CryptoLoader
+     */
+    @SuppressWarnings("unchecked")
+    public void setCryptoLoader(final String cryptoLoader) {
+        try {
+            final Class cryptLoaderClass = Class.forName(cryptoLoader);
+            mEncrypter = ((CryptoLoader) cryptLoaderClass.newInstance())
+                .getEncrypter();
+        }
+        catch (final ClassNotFoundException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        catch (final InstantiationException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        catch (final IllegalAccessException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
     }
 
 }

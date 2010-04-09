@@ -20,6 +20,11 @@
       <artifactId>dts-schema</artifactId>
       <groupId>${dataminx.group}</groupId>
     </dependency>
+    
+    <dependency>
+      <artifactId>dts-security</artifactId>
+      <groupId>${dataminx.group}</groupId>
+    </dependency>
 
     <!-- Log4J -->
     <dependency>

@@ -98,10 +98,12 @@
     <property name="executionContextCleaner" ref="executionContextCleaner"/>
     <property name="fileSystemManagerCache" ref="fileSystemManagerCache"/>
     <property name="stopwatchTimer" ref="stopwatchTimer"/>
+    <property name="cryptoLoader" value="${crypto.loader}" />
   </bean>
   
   <bean id="fileCopyingService" class="org.dataminx.dts.batch.service.FileCopyingServiceImpl">
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
+    <property name="cryptoLoader" value="${crypto.loader}" />
   </bean>
   
   <bean id="dtsFileTransferJob" scope="prototype" class="org.dataminx.dts.batch.DtsFileTransferJob">
@@ -170,6 +172,7 @@
     -->
     <!-- process 3 files per step -->
     <property name="maxTotalFileNumPerStepLimit" value="${max.total.num.files.perstep}" />
+    <property name="cryptoLoader" value="${crypto.loader}" />
   </bean>
   
   <batch:step id="maxStreamCountingStep">
@@ -183,6 +186,7 @@
     <property name="fileSystemManagerCache" ref="fileSystemManagerCache"/>
     <property name="jobRepository" ref="jobRepository"/>
     <property name="dtsJobDetails" value="#{jobExecutionContext[JOB_DETAILS]}"/>
+    <property name="cryptoLoader" value="${crypto.loader}" />
   </bean>
   
   <bean id="fileSystemManagerCache" class="org.dataminx.dts.common.vfs.FileSystemManagerCache"/>

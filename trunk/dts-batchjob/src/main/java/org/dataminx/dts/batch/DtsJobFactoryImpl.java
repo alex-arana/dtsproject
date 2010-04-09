@@ -29,6 +29,7 @@ package org.dataminx.dts.batch;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
@@ -42,25 +43,25 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * This is the factory class for all Spring Batch jobs included with the DTS
- * implementation.
+ * This is the factory class for all Spring Batch jobs included with the DTS implementation.
  * <p>
- * All DTS Jobs designed to handle client requests are to be created via this
- * class. A list of all known jobs and their corresponding Spring components are
- * maintained within its internal registry. Add new ones as required.
- * 
+ * All DTS Jobs designed to handle client requests are to be created via this class. A list of all known jobs and their
+ * corresponding Spring components are maintained within its internal registry. Add new ones as required.
+ *
  * @author Alex Arana
  */
 public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
     /** Internal logger object. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(DtsJobFactoryImpl.class);
+    private static final Logger LOGGER = LoggerFactory
+        .getLogger(DtsJobFactoryImpl.class);
 
     /**
      * Maps DTS job request types to DTS jobs (by their ID).
      */
     @SuppressWarnings("unchecked")
-    private static final Map<String, String> DTS_JOB_REGISTRY = MapUtils.putAll(new HashMap(), new String[][] { {
-            SubmitJobRequestDocument.class.getName(), "dtsFileTransferJob" } });
+    private static final Map<String, String> DTS_JOB_REGISTRY = MapUtils
+        .putAll(new HashMap(), new String[][] {{
+            SubmitJobRequestDocument.class.getName(), "dtsFileTransferJob"}});
 
     /** A reference to the Spring Batch Job repository. */
     private JobRepository mJobRepository;
@@ -71,22 +72,35 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
     /**
      * {@inheritDoc}
      */
-    public void setBeanFactory(final BeanFactory beanFactory) throws BeansException {
-        mBeanFactory = beanFactory;
-    }
+    public DtsJob createJob(final String jobId, final Object criteria) {
+        // obtain the name of the DTS job that is going to handle this request
+        Assert.notNull(criteria,
+            "Criteria element cannot be null in call to DTS job factory.");
+        final String dtsJobName = lookupJobName(criteria);
 
-    public void setJobRepository(final JobRepository jobRepository) {
-        mJobRepository = jobRepository;
+        // if we don't have a job capable of handling this type of request raise an exception
+        if (StringUtils.isEmpty(dtsJobName)) {
+            final String message = String
+                .format(
+                    "Unsupported DTS job request type.  A DTS Worker Node job capable"
+                        + " of handling requests of type '%s' is not yet registered.",
+                    criteria.getClass().getName());
+            LOGGER.error(message);
+            throw new DtsJobCreationException(message);
+        }
+
+        // create a new instance of the job using the spring bean factory
+        return (DtsJob) mBeanFactory.getBean(dtsJobName, new Object[] {jobId,
+            criteria, mJobRepository});
     }
 
     /**
-     * Returns the DTS Job name corresponding to the given request object
-     * instance.
-     * 
-     * @param instance DTS Job input request object
-     * @return A fully-qualified class name of the corresponding DTS Job to
-     *         handle the input request or <code>null</code> if one has not yet
-     *         been defined.
+     * Returns the DTS Job name corresponding to the given request object instance.
+     *
+     * @param instance
+     *            DTS Job input request object
+     * @return A fully-qualified class name of the corresponding DTS Job to handle the input request or
+     *         <code>null</code> if one has not yet been defined.
      */
     private String lookupJobName(final Object instance) {
         for (final Class<?> definition : ClassUtils.getAllInterfaces(instance)) {
@@ -101,20 +115,12 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
     /**
      * {@inheritDoc}
      */
-    public DtsJob createJob(final String jobId, final Object criteria) {
-        // obtain the name of the DTS job that is going to handle this request
-        Assert.notNull(criteria, "Criteria element cannot be null in call to DTS job factory.");
-        final String dtsJobName = lookupJobName(criteria);
+    public void setBeanFactory(final BeanFactory beanFactory)
+        throws BeansException {
+        mBeanFactory = beanFactory;
+    }
 
-        // if we don't have a job capable of handling this type of request raise an exception
-        if (StringUtils.isEmpty(dtsJobName)) {
-            final String message = String.format("Unsupported DTS job request type.  A DTS Worker Node job capable"
-                    + " of handling requests of type '%s' is not yet registered.", criteria.getClass().getName());
-            LOGGER.error(message);
-            throw new DtsJobCreationException(message);
-        }
-
-        // create a new instance of the job using the spring bean factory
-        return (DtsJob) mBeanFactory.getBean(dtsJobName, new Object[] { jobId, criteria, mJobRepository });
+    public void setJobRepository(final JobRepository jobRepository) {
+        mJobRepository = jobRepository;
     }
 }

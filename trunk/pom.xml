@@ -93,9 +93,9 @@
     <gwt-maven-plugin.version>1.1</gwt-maven-plugin.version>
     <gxt.version>2.0.1</gxt.version>
     <gwt.version>1.7.0</gwt.version>
-    <jaas.version>1.0.01</jaas.version>
     <mockito.version>1.8.2</mockito.version>
     <maven-assembly-plugin.version>2.2-beta-5</maven-assembly-plugin.version>
+    <dts-crypto-plugin.version>0.0.1-SNAPSHOT</dts-crypto-plugin.version>
   </properties>
 
   <repositories>
@@ -268,6 +268,11 @@
         <artifactId>dts-batchjob</artifactId>
         <groupId>${dataminx.group}</groupId>
         <version>${minx-dts.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>dts-crypto-plugin</artifactId>
+        <groupId>org.dataminx.dts.security</groupId>
+        <version>${dts-crypto-plugin.version}</version>
       </dependency>
 
       <!-- SLF4J -->
@@ -875,13 +880,6 @@
             <artifactId>bcprov-jdk15</artifactId>
           </exclusion>
         </exclusions>
-      </dependency>
-
-      <!-- JAAS -->
-      <dependency>
-        <groupId>javax.security</groupId>
-        <artifactId>jaas</artifactId>
-        <version>${jaas.version}</version>
       </dependency>
 
       <!-- DbUnit for DB testing -->

@@ -31,6 +31,7 @@ import static org.dataminx.dts.common.DtsConstants.DEFAULT_LOG4J_CONFIGURATION_F
 import static org.dataminx.dts.common.DtsConstants.DEFAULT_LOG4J_CONFIGURATION_KEY;
 
 import java.io.IOException;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -46,9 +47,9 @@ import org.springframework.util.Log4jConfigurer;
 import org.springframework.util.ResourceUtils;
 
 /**
- * A simple bean that initialises the Log4j logging subsystem. This class can then be configured
- * as a Spring {@link InitializingBean}.
- *
+ * A simple bean that initialises the Log4j logging subsystem. This class can then be configured as a Spring
+ * {@link InitializingBean}.
+ * 
  * @author Alex Arana
  */
 @Scope("singleton")
@@ -59,8 +60,7 @@ public class Log4jConfiguratorBean implements InitializingBean {
     private Resource mConfiguration;
 
     /**
-     * Delay between refresh checks, in milliseconds.
-     * Default is 0, indicating no refresh checks at all.
+     * Delay between refresh checks, in milliseconds. Default is 0, indicating no refresh checks at all.
      */
     @Qualifier
     private long mRefreshInterval;
@@ -69,7 +69,7 @@ public class Log4jConfiguratorBean implements InitializingBean {
      * {@inheritDoc}
      */
     public void afterPropertiesSet() throws Exception {
-        if (mConfiguration == null || !mConfiguration.exists()) {
+        if ((mConfiguration == null) || !mConfiguration.exists()) {
             mConfiguration = new ClassPathResource(DEFAULT_LOG4J_CONFIGURATION_FILE);
         }
 
@@ -86,12 +86,10 @@ public class Log4jConfiguratorBean implements InitializingBean {
         if (isFileResource(mConfiguration)) {
             if (mRefreshInterval == 0) {
                 Log4jConfigurer.initLogging(uri);
-            }
-            else {
+            } else {
                 Log4jConfigurer.initLogging(uri, mRefreshInterval);
             }
-        }
-        else {
+        } else {
             // the resource cannot be resolved as an absolute file path,
             // thus refresh is not supported
             Log4jConfigurer.initLogging(uri);
@@ -100,13 +98,13 @@ public class Log4jConfiguratorBean implements InitializingBean {
     }
 
     /**
-     * Returns logical <code>true</code> if the specified {@link Resource} points to a file in a locally
-     * available file system, <code>false</code> otherwise.
+     * Returns logical <code>true</code> if the specified {@link Resource} points to a file in a locally available file
+     * system, <code>false</code> otherwise.
      * <p>
-     * This is purely a convenience method to handle a potential exception being raised when detecting
-     * this condition.
-     *
-     * @param resource Object that points to an underlying resource such as a file or classpath resource
+     * This is purely a convenience method to handle a potential exception being raised when detecting this condition.
+     * 
+     * @param resource
+     *            Object that points to an underlying resource such as a file or classpath resource
      * @return true if the given Resource points to a File, false otherwise
      */
     private boolean isFileResource(final Resource resource) {
@@ -114,8 +112,7 @@ public class Log4jConfiguratorBean implements InitializingBean {
         try {
             resource.getFile();
             return true;
-        }
-        catch (IOException ex) {
+        } catch (final IOException ex) {
             return false;
         }
     }
