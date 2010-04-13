@@ -32,11 +32,17 @@ import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_RESOURC
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.common.model.JobStatus;
+import org.dataminx.dts.common.util.CredentialStore;
 import org.dataminx.dts.common.util.StopwatchTimer;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialKeyPointerDocument;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
@@ -89,16 +95,14 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
     /**
      * Constructs a new instance of <code>DtsSubmitJob</code> using the specified job request details.
      *
-     * @param jobId
-     *            Unique job identifier
-     * @param jobRequest
-     *            Job request details
-     * @param jobRepository
-     *            Job repository
+     * @param jobId Unique job identifier
+     * @param jobRequest Job request details
+     * @param jobRepository Job repository
+     * @param credentialStore the credential store
      */
     public DtsFileTransferJob(final String jobId,
         final SubmitJobRequestDocument jobRequest,
-        final JobRepository jobRepository) {
+        final JobRepository jobRepository, final CredentialStore credentialStore) {
 
         super(jobId);
         Assert
@@ -107,16 +111,84 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
         mJobRequest = jobRequest.getSubmitJobRequest();
         setJobRepository(jobRepository);
 
-        /*
-        final MinxSourceTargetType target = ((MinxJobDescriptionType) mJobRequest
-            .getJobDefinition().getJobDescription()).getDataTransferArray(0)
-            .getTarget();
-        target.getCredential().getMyProxyToken().setNil();
-        //target.getCredential().getMyProxyToken()
-        final CredentialType credential = target.getCredential();
-        LOGGER.debug("******************** GERSON");
-        LOGGER.debug("****************** credential: " + mJobRequest.xmlText());
-        */
+        applyCredentialFiltering(credentialStore);
+    }
+
+    /**
+     * Apply the credential filtering over all the specified credentials in the job submission document.
+     *
+     * @param credentialStore the credential store
+     */
+    private void applyCredentialFiltering(final CredentialStore credentialStore) {
+        final DataTransferType[] dataTransfers = ((MinxJobDescriptionType) mJobRequest
+            .getJobDefinition().getJobDescription()).getDataTransferArray();
+
+        for (int i = 0; i < dataTransfers.length; i++) {
+            final CredentialType sourceCredential = dataTransfers[i]
+                .getSource().getCredential();
+            final CredentialType targetCredential = dataTransfers[i]
+                .getTarget().getCredential();
+
+            // these are the credentials that need to be stored in the CredentialStore
+            if (sourceCredential != null) {
+                final CredentialType sourceCredentialToStore = (CredentialType) sourceCredential
+                    .copy();
+
+                final String credUUID = replaceCredentialWithKeyPointer(sourceCredential);
+
+                // store the original source credential on the credential store
+                // TODO: find out when we should write to memory or to database
+                credentialStore
+                    .writeToMemory(credUUID, sourceCredentialToStore);
+            }
+
+            if (targetCredential != null) {
+                final CredentialType targetCredentialToStore = (CredentialType) targetCredential
+                    .copy();
+
+                final String credUUID = replaceCredentialWithKeyPointer(targetCredential);
+
+                // store the original target credential on the credential store
+                // TODO: find out when we should write to memory or to database
+                credentialStore
+                    .writeToMemory(credUUID, targetCredentialToStore);
+            }
+
+        }
+    }
+
+    /**
+     * Replace the current child of the Credential element with CredentialKeyPointer element wrapped by
+     * OtherCredentialToken.
+     *
+     * @param sourceOrTargetCredential the source or target Credential
+     * @return the key to be used in storing the given credential to the CredentialStore
+     */
+    private String replaceCredentialWithKeyPointer(
+        final CredentialType sourceOrTargetCredential) {
+        // unset the child element of the sourceCredentialCopy
+        if (sourceOrTargetCredential.isSetUsernameToken()) {
+            sourceOrTargetCredential.unsetUsernameToken();
+        }
+        else if (sourceOrTargetCredential.isSetMyProxyToken()) {
+            sourceOrTargetCredential.unsetMyProxyToken();
+        }
+        else if (sourceOrTargetCredential.isSetOtherCredentialToken()) {
+            sourceOrTargetCredential.unsetOtherCredentialToken();
+        }
+
+        // the credential key uuid
+        final String credentialUUID = UUID.randomUUID().toString();
+
+        final CredentialKeyPointerDocument credentialKeyPointer = CredentialKeyPointerDocument.Factory
+            .newInstance();
+        credentialKeyPointer.setCredentialKeyPointer(credentialUUID);
+
+        // replace the child element of the CredentialType with the new CredentialKeyPointer element
+        // wrapped by the OtherCredentialToken
+        sourceOrTargetCredential.addNewOtherCredentialToken().set(
+            credentialKeyPointer);
+        return credentialUUID;
     }
 
     @Override

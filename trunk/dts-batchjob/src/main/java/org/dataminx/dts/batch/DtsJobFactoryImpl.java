@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.dataminx.dts.common.util.CredentialStore;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +69,9 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
 
     /** A reference to the Spring bean factory. */
     private BeanFactory mBeanFactory;
+
+    /** A reference to the credential store. */
+    private CredentialStore mCredentialStore;
 
     /**
      * {@inheritDoc}
@@ -109,7 +113,7 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
 
         // create a new instance of the job using the spring bean factory
         return (DtsJob) mBeanFactory.getBean(dtsJobName, new Object[] {jobId,
-            criteria, mJobRepository});
+            criteria, mJobRepository, mCredentialStore});
     }
 
     /**
@@ -122,7 +126,7 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
      */
     private String lookupJobName(final Object instance) {
         //Return all interfaces that the given instance implements as array,
-	//including ones implemented by superclasses
+        //including ones implemented by superclasses
         for (final Class<?> definition : ClassUtils.getAllInterfaces(instance)) {
             // Returns the  name of the entity (class, interface, array class,
             // primitive type, or void)
@@ -144,5 +148,9 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
 
     public void setJobRepository(final JobRepository jobRepository) {
         mJobRepository = jobRepository;
+    }
+
+    public void setCredentialStore(final CredentialStore credentialStore) {
+        mCredentialStore = credentialStore;
     }
 }

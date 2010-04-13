@@ -28,6 +28,7 @@
 package org.dataminx.dts.common.vfs;
 
 import static org.apache.commons.lang.StringUtils.EMPTY;
+import static org.dataminx.dts.common.DtsConstants.DTS_JSDL_NAMESPACE_URI;
 import static org.dataminx.dts.common.DtsConstants.WS_SECURITY_NAMESPACE_URI;
 import static org.dataminx.dts.common.util.XmlBeansUtils.extractElementTextAsString;
 import static org.dataminx.dts.common.util.XmlBeansUtils.selectAnyElement;
@@ -52,6 +53,7 @@ import org.apache.commons.vfs.provider.gridftp.cogjglobus.GridFtpFileSystemConfi
 import org.apache.commons.vfs.provider.irods.IRODSFileSystemConfigBuilder;
 import org.apache.commons.vfs.provider.storageresourcebroker.SRBFileSystemConfigBuilder;
 import org.apache.xmlbeans.XmlObject;
+import org.dataminx.dts.common.util.CredentialStore;
 import org.dataminx.dts.security.crypto.Encrypter;
 import org.dataminx.dts.security.crypto.UnknownEncryptionAlgorithmException;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
@@ -59,6 +61,7 @@ import org.dataminx.schemas.dts.x2009.x07.jsdl.GridFtpURIPropertiesType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.IrodsURIPropertiesType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxSourceTargetType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MyProxyTokenType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.OtherCredentialTokenType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.SrbURIPropertiesType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 import org.globus.ftp.MarkerListener;
@@ -83,6 +86,11 @@ public class DtsVfsUtil extends VFSUtil {
      */
     private static final QName PASSWORD_STRING_QNAME = new QName(
         WS_SECURITY_NAMESPACE_URI, "PasswordString");
+
+    private static final QName CREDENTIAL_KEY_POINTER_QNAME = new QName(
+        DTS_JSDL_NAMESPACE_URI, "CredentialKeyPointer");
+
+    private CredentialStore mCredentialStore;
 
     /** Internal logger object. */
     private static final Logger LOGGER = LoggerFactory
@@ -310,58 +318,17 @@ public class DtsVfsUtil extends VFSUtil {
             if (credentialType != null) {
                 // at the moment we're only supporting MyProxy credentials
                 if (credentialType.getMyProxyToken() != null) {
-                    final MyProxyTokenType myProxyDetails = credentialType
-                        .getMyProxyToken();
-                    final MyProxy myproxy = new MyProxy(myProxyDetails
-                        .getMyProxyServer(), myProxyDetails.getMyProxyPort());
+                    addMyProxyCredentialDetailsToFileSystemOptions(options,
+                        credentialType.getMyProxyToken(), encrypter);
 
-                    GSSCredential credential = null;
-                    try {
-                        credential = myproxy.get(myProxyDetails
-                            .getMyProxyUsername(), encrypter
-                            .decrypt(myProxyDetails.getMyProxyPassword()),
-                            mMyProxyCredentialLifetime);
-                        GridFtpFileSystemConfigBuilder.getInstance()
-                            .setGSSCredential(options, credential);
-                        SRBFileSystemConfigBuilder.getInstance()
-                            .setGSSCredential(options, credential);
-                        IRODSFileSystemConfigBuilder.getInstance()
-                            .setGSSCredential(options, credential);
-                    }
-                    catch (final MyProxyException ex) {
-                        LOGGER
-                            .error(String
-                                .format(
-                                    "Could not get delegated proxy from server '%s:%s'\n%s",
-                                    myProxyDetails.getMyProxyServer(),
-                                    myProxyDetails.getMyProxyPort(), ex
-                                        .getMessage()));
-                        throw new FileSystemAuthenticationException(ex
-                            .getMessage());
-                    }
-                    catch (final UnknownEncryptionAlgorithmException ex) {
-                        LOGGER.error("Password could not be decrypted", ex);
-                        throw new FileSystemAuthenticationException(ex
-                            .getMessage());
-                    }
                 }
                 else if (credentialType.getUsernameToken() != null) {
-                    final UsernameTokenType usernameTokenDetails = credentialType
-                        .getUsernameToken();
-                    final String username = usernameTokenDetails.getUsername()
-                        .getStringValue();
-                    final XmlObject element = selectAnyElement(
-                        usernameTokenDetails, PASSWORD_STRING_QNAME);
-                    final String password = element == null ? EMPTY
-                        : extractElementTextAsString(element);
-                    final StaticUserAuthenticator auth = new StaticUserAuthenticator(
-                        null, username, password);
-                    DefaultFileSystemConfigBuilder.getInstance()
-                        .setUserAuthenticator(options, auth);
-                    SRBFileSystemConfigBuilder.getInstance()
-                        .setUserAuthenticator(options, auth);
-                    IRODSFileSystemConfigBuilder.getInstance()
-                        .setUserAuthenticator(options, auth);
+                    addUsernameCredentialDetailsToFileSystemOptions(options,
+                        credentialType.getUsernameToken(), encrypter);
+                }
+                else if (credentialType.getOtherCredentialToken() != null) {
+                    addOtherCredentialDetailsToFileSystemOptions(options,
+                        credentialType.getOtherCredentialToken(), encrypter);
                 }
 
                 //TODO support other types of credentials
@@ -463,6 +430,91 @@ public class DtsVfsUtil extends VFSUtil {
         return options;
     }
 
+    private void addMyProxyCredentialDetailsToFileSystemOptions(
+        final FileSystemOptions options, final MyProxyTokenType myProxyDetails,
+        final Encrypter encrypter) {
+        final MyProxy myproxy = new MyProxy(myProxyDetails.getMyProxyServer(),
+            myProxyDetails.getMyProxyPort());
+
+        GSSCredential credential = null;
+        try {
+            credential = myproxy.get(myProxyDetails.getMyProxyUsername(),
+                encrypter.decrypt(myProxyDetails.getMyProxyPassword()),
+                mMyProxyCredentialLifetime);
+            GridFtpFileSystemConfigBuilder.getInstance().setGSSCredential(
+                options, credential);
+            SRBFileSystemConfigBuilder.getInstance().setGSSCredential(options,
+                credential);
+            IRODSFileSystemConfigBuilder.getInstance().setGSSCredential(
+                options, credential);
+        }
+        catch (final MyProxyException ex) {
+            LOGGER.error(String.format(
+                "Could not get delegated proxy from server '%s:%s'\n%s",
+                myProxyDetails.getMyProxyServer(), myProxyDetails
+                    .getMyProxyPort(), ex.getMessage()));
+            throw new FileSystemAuthenticationException(ex.getMessage());
+        }
+        catch (final UnknownEncryptionAlgorithmException ex) {
+            LOGGER.error("Password could not be decrypted", ex);
+            throw new FileSystemAuthenticationException(ex.getMessage());
+        }
+    }
+
+    private void addUsernameCredentialDetailsToFileSystemOptions(
+        final FileSystemOptions options,
+        final UsernameTokenType usernameTokenDetails, final Encrypter encrypter)
+        throws FileSystemException {
+        final String username = usernameTokenDetails.getUsername()
+            .getStringValue();
+        final XmlObject element = selectAnyElement(usernameTokenDetails,
+            PASSWORD_STRING_QNAME);
+        final String password = element == null ? EMPTY
+            : extractElementTextAsString(element);
+        final StaticUserAuthenticator auth = new StaticUserAuthenticator(null,
+            username, password);
+        DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(
+            options, auth);
+        SRBFileSystemConfigBuilder.getInstance().setUserAuthenticator(options,
+            auth);
+        IRODSFileSystemConfigBuilder.getInstance().setUserAuthenticator(
+            options, auth);
+    }
+
+    private void addOtherCredentialDetailsToFileSystemOptions(
+        final FileSystemOptions options,
+        final OtherCredentialTokenType otherCredentialTokenDetails,
+        final Encrypter encrypter) throws FileSystemException {
+
+        final XmlObject element = selectAnyElement(otherCredentialTokenDetails,
+            CREDENTIAL_KEY_POINTER_QNAME);
+
+        if (element != null) {
+            final String credentialKey = extractElementTextAsString(element);
+            final CredentialType realCredential = mCredentialStore
+                .getCredential(credentialKey);
+
+            if (realCredential != null) {
+                if (realCredential.getMyProxyToken() != null) {
+                    addMyProxyCredentialDetailsToFileSystemOptions(options,
+                        realCredential.getMyProxyToken(), encrypter);
+
+                }
+                else if (realCredential.getUsernameToken() != null) {
+                    addUsernameCredentialDetailsToFileSystemOptions(options,
+                        realCredential.getUsernameToken(), encrypter);
+                }
+            }
+            else {
+                throw new FileSystemAuthenticationException(
+                    "The key to the credential store has not been found.");
+            }
+        }
+
+        // TODO: handle other types of OtherCredentialTokens
+
+    }
+
     public DefaultFileSystemManager createNewFsManager()
         throws FileSystemException {
         return VFSUtil.createNewFsManager(mFtpSupported, mSftpSupported,
@@ -540,6 +592,10 @@ public class DtsVfsUtil extends VFSUtil {
 
     public void setTmpDirPath(final String tmpDirPath) {
         mTmpDirPath = tmpDirPath;
+    }
+
+    public void setCredentialStore(final CredentialStore credentialStore) {
+        mCredentialStore = credentialStore;
     }
 
 }
