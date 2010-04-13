@@ -62,6 +62,8 @@ public class DtsConstants {
     /** Holds the namespace URI of the WS-Security namespace. */
     public static final String WS_SECURITY_NAMESPACE_URI = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
 
+    public static final String DTS_JSDL_NAMESPACE_URI = "http://schemas.dataminx.org/dts/2009/07/jsdl";
+
     public static final String TMP_ROOT_PROTOCOL = "tmp:///";
 
     public static final String FILE_ROOT_PROTOCOL = "file:///";

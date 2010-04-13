@@ -45,6 +45,7 @@
     <property name="fileSupported" value="true" />
     <property name="irodsSupported" value="true" />
     <property name="myProxyCredentialLifetime" value="${default.myproxy.lifetime}" />
+    <property name="credentialStore" ref="credentialStore"/>
   </bean>
   
   <bean id="jobExplorer" class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">
@@ -59,6 +60,7 @@
   
   <bean id="dtsJobFactory" class="org.dataminx.dts.batch.DtsJobFactoryImpl">
     <property name="jobRepository" ref="jobRepository"/>
+    <property name="credentialStore" ref="credentialStore"/>
   </bean>
 
   <!-- the task executor below will have to be provided by the calling application  -->
@@ -118,6 +120,8 @@
     </property>
     <property name="stopwatchTimer" ref="stopwatchTimer"/>
   </bean>
+  
+  <bean id="credentialStore" class="org.dataminx.dts.common.util.CredentialStoreImpl"/>
   
   <bean id="stopwatchTimer" class="org.dataminx.dts.common.util.StopwatchTimer"/>
   
