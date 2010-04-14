@@ -469,16 +469,22 @@ public class DtsVfsUtil extends VFSUtil {
             .getStringValue();
         final XmlObject element = selectAnyElement(usernameTokenDetails,
             PASSWORD_STRING_QNAME);
-        final String password = element == null ? EMPTY
-            : extractElementTextAsString(element);
-        final StaticUserAuthenticator auth = new StaticUserAuthenticator(null,
-            username, password);
-        DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(
-            options, auth);
-        SRBFileSystemConfigBuilder.getInstance().setUserAuthenticator(options,
-            auth);
-        IRODSFileSystemConfigBuilder.getInstance().setUserAuthenticator(
-            options, auth);
+        try {
+            final String password = element == null ? EMPTY : encrypter
+                .decrypt(extractElementTextAsString(element));
+            final StaticUserAuthenticator auth = new StaticUserAuthenticator(
+                null, username, password);
+            DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(
+                options, auth);
+            SRBFileSystemConfigBuilder.getInstance().setUserAuthenticator(
+                options, auth);
+            IRODSFileSystemConfigBuilder.getInstance().setUserAuthenticator(
+                options, auth);
+        }
+        catch (final UnknownEncryptionAlgorithmException ex) {
+            LOGGER.error("Password could not be decrypted", ex);
+            throw new FileSystemAuthenticationException(ex.getMessage());
+        }
     }
 
     private void addOtherCredentialDetailsToFileSystemOptions(
