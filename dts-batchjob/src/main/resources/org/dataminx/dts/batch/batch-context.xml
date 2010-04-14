@@ -120,9 +120,7 @@
     </property>
     <property name="stopwatchTimer" ref="stopwatchTimer"/>
   </bean>
-  
-  <bean id="credentialStore" class="org.dataminx.dts.common.util.CredentialStoreImpl"/>
-  
+
   <bean id="stopwatchTimer" class="org.dataminx.dts.common.util.StopwatchTimer"/>
   
   <bean id="dtsFileTransferJobListener" class="org.dataminx.dts.batch.DtsFileTransferJobListener">
@@ -199,5 +197,4 @@
     <property name="jobRepository" ref="jobRepository"/>
     <property name="jobExplorer" ref="jobExplorer"/>
   </bean>
-  
 </beans>

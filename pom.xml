@@ -269,12 +269,15 @@
         <groupId>${dataminx.group}</groupId>
         <version>${minx-dts.version}</version>
       </dependency>
+      <!-- comment this dependency temporarily until we start using it -->
+      <!--
       <dependency>
         <artifactId>dts-crypto-plugin</artifactId>
         <groupId>org.dataminx.dts.security</groupId>
         <version>${dts-crypto-plugin.version}</version>
       </dependency>
-
+      -->
+      
       <!-- SLF4J -->
       <dependency>
         <groupId>org.slf4j</groupId>
