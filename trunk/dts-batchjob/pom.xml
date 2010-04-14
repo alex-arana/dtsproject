@@ -92,11 +92,14 @@
       <artifactId>dts-security</artifactId>
       <groupId>${dataminx.group}</groupId>
     </dependency>
+    
+    <!-- comment this dependency temporarily until we start using it -->
+    <!--
     <dependency>
       <artifactId>dts-crypto-plugin</artifactId>
       <groupId>org.dataminx.dts.security</groupId>
     </dependency>
-    
+    -->
     <dependency>
       <artifactId>dts-schema</artifactId>
       <groupId>${dataminx.group}</groupId>
