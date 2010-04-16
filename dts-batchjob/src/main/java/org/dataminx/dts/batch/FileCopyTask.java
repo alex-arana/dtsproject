@@ -153,6 +153,13 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
             DtsDataTransferUnit dataTransferUnit = getNextDataTransferUnit();
             while (dataTransferUnit != null) { // TODO: && !stopped) {
 
+                if (mHasTransferErrorArised) {
+                    LOGGER_FC
+                        .debug("No need to continue the transfer as an error has occurred on a"
+                            + " data transfer being performed by another FileCopier thread.");
+                    break;
+                }
+
                 LOGGER_FC.debug(mCopierName + " is doing a transfer from "
                     + dataTransferUnit.getSourceFileUri() + " to "
                     + dataTransferUnit.getDestinationFileUri());
@@ -179,6 +186,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
                     // no need to continue pro
                     LOGGER_FC.error("A DtsException was thrown while copying "
                         + dataTransferUnit.getSourceFileUri(), e);
+                    mHasTransferErrorArised = true;
                     break;
                 }
                 try {
@@ -233,6 +241,9 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
             }
         }
     }
+
+    /** Indicates if an error has occurred while doing the transfer. */
+    private volatile boolean mHasTransferErrorArised;
 
     /** The wait time for the finished FileCopier. */
     private static final int FILE_COPIER_WAIT_TIME = 100;
@@ -417,6 +428,11 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
         }
 
         executor.shutdown();
+
+        if (mHasTransferErrorArised) {
+            throw new DtsException(
+                "An error has occurred while one of the FileCopier threads is doing a data transfer.");
+        }
 
         LOGGER.debug("Finished up the FileCopyTask at "
             + mStopwatchTimer.getFormattedElapsedTime());
