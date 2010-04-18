@@ -66,3 +66,17 @@ Edit testjob.xml in src/test/resources/org/dataminx/dts/batch and add the source
 {{{
  > mvn -Ddataminx.dir=/home/dts-user/.dataminx -Dtest=QuickBulkCopyJobIntegrationTest test
 }}}
+
+==== DTS Broker ====
+You will need following files in the dataminx.dir for running the DTS Broker:
+dts-broker.properties
+plugin-context.xml
+template files can be found in src/main/resources of dts-broker module
+
+Now let's start up the ActiveMQ instance
+The run the following command to start Broker:
+mvn -Ddataminx.dir=/path/to/dataminx/dir exec:java
+
+To run test simply type:
+mvn test 
+mvn integration-test
