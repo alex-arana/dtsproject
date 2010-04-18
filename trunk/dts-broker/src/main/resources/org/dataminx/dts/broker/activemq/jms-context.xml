@@ -36,6 +36,9 @@
   <bean id="brokerANSTOGroupQueue" class="org.apache.activemq.command.ActiveMQQueue">
     <constructor-arg index="0" value="broker.ansto.group.queue"/>
   </bean>    
+  <bean id="brokerASFGroupQueue" class="org.apache.activemq.command.ActiveMQQueue">
+    <constructor-arg index="0" value="broker.asf.group.queue"/>
+  </bean>    
   <!-- end of declaration -->
   
 </beans>

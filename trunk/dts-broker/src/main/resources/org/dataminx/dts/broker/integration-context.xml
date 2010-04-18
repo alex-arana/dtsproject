@@ -18,25 +18,25 @@
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
+  <import resource="file:///${dataminx.dir}/*-context.xml"/>
+  
   <context:annotation-config/>
   <context:component-scan base-package="org.dataminx.dts.broker"/>
   
   <!-- Defines a point-to-point channel for receiving DTS job requests. -->
-  <si:channel id="brokerJobSubmissionChannel"/>
+  <si:channel id="brokerJobSubmissionChannel">
+    <si:interceptors>
+      <si:ref bean="securityInterceptor"/>
+      <si:ref bean="schemaVerifier"/>
+    </si:interceptors>
+  </si:channel>
   <si:channel id="brokerSchedulingChannel" />
   <si:channel id="brokerRoutingChannel"/>
   <si:channel id="brokerDefaultOutputChannel"/>
+  <si:channel id="brokerErrorReportingChannel"/>
   
 
  
- <!-- 
-<jms:inbound-channel-adapter id="jmsIn" destination="inQueue" channel="exampleChannel"> 
-    <integration:poller>
-        <integration:interval-trigger interval="30" time-unit="SECONDS"/> 
-    </integration:poller> 
-</jms:inbound-channel-adapter>
- -->
-   
   <si-jms:message-driven-channel-adapter
       channel="brokerJobSubmissionChannel"
       connection-factory="jmsConnectionFactory"
@@ -48,8 +48,6 @@
       connection-factory="jmsConnectionFactory"
       destination="brokerDefaultOutputQueue"/>
             
-
-        
   <!--
     Defines an inbound JMS channel adapter for the DTS job submission queue.
     The inbound adapter means we are receiving from JMS and placing an instance of
@@ -60,6 +58,14 @@
     <property name="delayHeaderName" value="${broker.delay.headerName}"/>
   </bean>
   
+  <bean id="schemaVerifier" class="org.dataminx.dts.broker.si.DtsSchemaVerifier">
+    <property name="transformer" ref="dtsMessagePayloadTransformer"/>
+  </bean>
+  
+  <bean id="securityInterceptor" class="org.dataminx.dts.broker.si.DtsSecurityInterceptor">
+    <property name="encrypter" ref="encryptionPlugin" />
+  </bean>
+  
   <bean id="xmlPayloadDelayExtractor" class="org.dataminx.dts.broker.si.XmlPayloadDelayExtractor">
     <constructor-arg index="0" value="${broker.xml.queryStr}"/>
   </bean>
@@ -67,7 +73,7 @@
   <si:service-activator input-channel="brokerJobSubmissionChannel" 
                         ref="dtsJobScheduler"
                         output-channel="brokerSchedulingChannel"/>
-
+                                                
   <si:delayer default-delay="0" 
               delay-header-name="${broker.delay.headerName}"
               input-channel="brokerSchedulingChannel"
@@ -80,6 +86,7 @@
     
     <!-- Custom routing mapping for each group -->
     <si:mapping value="ANSTO" channel="brokerANSTOChannel" />
+    <si:mapping value="ASF" channel="brokerASFChannel" />
     <!-- end custom definition -->
     
   </si:header-value-router>
@@ -100,11 +107,16 @@
     <constructor-arg index="0" ref="dtsMarshaller"/>
   </bean>
   
-    <!-- Custom declaration for individual group -->
+  <!-- Custom declaration for individual group -->
   <si:channel id="brokerANSTOChannel"/>
   <si-jms:outbound-channel-adapter
       channel="brokerANSTOChannel"
       connection-factory="jmsConnectionFactory"
       destination="brokerANSTOGroupQueue"/>
       
+  <si:channel id="brokerASFChannel"/>
+  <si-jms:outbound-channel-adapter
+      channel="brokerASFChannel"
+      connection-factory="jmsConnectionFactory"
+      destination="brokerASFGroupQueue"/>      
 </beans>

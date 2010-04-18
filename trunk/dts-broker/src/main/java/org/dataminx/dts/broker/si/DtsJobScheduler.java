@@ -65,8 +65,7 @@ public class DtsJobScheduler {
 
         LOG.debug(message.getPayload().toString());
 
-        Message<?> xmlMsg = transformer.transform(message);
-        String delay = extractor.extractDelay(xmlMsg.getPayload());
+        final String delay = extractor.extractDelay(message.getPayload());
 
         if (LOG.isDebugEnabled()){
             LOG.debug("Found delay transfer requirement: " + delay);

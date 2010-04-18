@@ -37,13 +37,13 @@ public class JobQueueSender {
      * @param jobId DTS Job ID
      * @param message JMS message payload
      */
-    public void doSend(final String jobId, final Object message) {
+    public void doSend(final String jobId, final String dest, final Object message) {
         mJmsTemplate.send(mQueue, new MessageCreator() {
             public Message createMessage(Session session) throws JMSException {
                 final MessageConverter messageConverter = mJmsTemplate.getMessageConverter();
                 final Message jmsMessage = messageConverter.toMessage(message, session);
                 jmsMessage.setJMSCorrelationID(jobId);
-                jmsMessage.setStringProperty("routingHeader", "ANSTO");
+                jmsMessage.setStringProperty("routingHeader", dest);
                 return jmsMessage;
             }
         });

@@ -16,19 +16,19 @@
       </jsdl1:JobIdentification>
       <jsdl:DataTransfer>
         <jsdl:Source>
-          <jsdl1:URI>ftp://dm11/pub/Ubuntu/LiveCD</jsdl1:URI>
+          <jsdl1:URI>ftp://dataminx.chem.usyd.edu.au/home/hung/oracle-xe-univ-10.2.0.1-1.0.i386.rpm</jsdl1:URI>
           <jsdl:Credential>
             <oas:UsernameToken>
-              <oas:Username>gerson</oas:Username>
-              <oas:PasswordString>Pru9A5tA</oas:PasswordString>
+              <oas:Username>hung</oas:Username>
+              <oas:PasswordString>nguyen01</oas:PasswordString>
             </oas:UsernameToken>
           </jsdl:Credential>
         </jsdl:Source>
         <jsdl:Target>
-          <jsdl1:URI>tmp://DataMINX-dude/minx-dts</jsdl1:URI>
+          <jsdl1:URI>file:///F:/</jsdl1:URI>
         </jsdl:Target>
         <jsdl:TransferRequirements>
-          <dmi:StartNotBefore>2010-02-28T12:00:00</dmi:StartNotBefore>
+          <dmi:StartNotBefore>2010-03-11T17:50:00</dmi:StartNotBefore>
           <dmi:MaxAttempts>0</dmi:MaxAttempts>
           <jsdl1:CreationFlag>overwrite</jsdl1:CreationFlag>
         </jsdl:TransferRequirements>
