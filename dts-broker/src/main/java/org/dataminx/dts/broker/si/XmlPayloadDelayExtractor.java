@@ -3,9 +3,8 @@
  */
 package org.dataminx.dts.broker.si;
 
-import org.dataminx.dts.common.util.XmlBeansUtils;
-
 import org.apache.xmlbeans.XmlObject;
+import org.dataminx.dts.common.util.XmlBeansUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +21,8 @@ public class XmlPayloadDelayExtractor implements DelayExtractor {
     /** XPath query string used to extract delay info in the targeted xml object */
     private final String mQueryStr;
 
-    public XmlPayloadDelayExtractor(String mQueryStr) {
-        this.mQueryStr = mQueryStr;
+    public XmlPayloadDelayExtractor(String queryStr) {
+        this.mQueryStr = queryStr;
     }
 
     public String extractDelay(Object object) {
