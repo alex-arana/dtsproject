@@ -276,25 +276,41 @@ public class VfsMixedFilesJobPartitioningStrategy implements
         int dataTransferIndex = 0;
         for (final DataTransferType dataTransfer : dataTransfers) {
 
-            try {
-                // reset the total number of files to be transferred within this DataTransfer element
-                mPerDataTransferTotalFiles = 0;
+            // reset the total number of files to be transferred within this DataTransfer element
+            mPerDataTransferTotalFiles = 0;
 
-                final FileObject sourceParent = fileSystemManager.resolveFile(
-                    dataTransfer.getSource().getURI(), mDtsVfsUtil
-                        .createFileSystemOptions(dataTransfer.getSource(),
-                            mEncrypter));
+            FileObject sourceParent = null;
+
+            try {
+                sourceParent = fileSystemManager.resolveFile(dataTransfer
+                    .getSource().getURI(), mDtsVfsUtil.createFileSystemOptions(
+                    dataTransfer.getSource(), mEncrypter));
 
                 if (!sourceParent.getContent().getFile().exists()
                     || !sourceParent.getContent().getFile().isReadable()) {
                     throw new JobScopingException("The source " + sourceParent
                         + " provided does not exist or is not readable.");
                 }
-                final FileObject targetParent = fileSystemManager.resolveFile(
-                    dataTransfer.getTarget().getURI(), mDtsVfsUtil
-                        .createFileSystemOptions(dataTransfer.getTarget(),
-                            mEncrypter));
+            }
+            catch (final FileSystemException e) {
+                throw new JobScopingException(
+                    "FileSystemException was thrown while accessing the remote file "
+                        + dataTransfer.getSource().getURI() + ".", e);
+            }
 
+            FileObject targetParent = null;
+            try {
+                targetParent = fileSystemManager.resolveFile(dataTransfer
+                    .getTarget().getURI(), mDtsVfsUtil.createFileSystemOptions(
+                    dataTransfer.getTarget(), mEncrypter));
+            }
+            catch (final FileSystemException e) {
+                throw new JobScopingException(
+                    "FileSystemException was thrown while accessing the remote file "
+                        + dataTransfer.getTarget().getURI() + ".", e);
+            }
+
+            try {
                 mDtsJobStepAllocator.createNewDataTransfer(sourceParent
                     .getFileSystem().getRoot().getURL().toString(),
                     targetParent.getFileSystem().getRoot().getURL().toString());

@@ -404,7 +404,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
 
         LOGGER.info("Processing a FileCopyStep that uses "
             + numConcurrentConnections
-            + " concurrent connections to the remote destination.");
+            + " concurrent connection/s to the remote destination.");
 
         final ThreadPoolExecutor executor = new ThreadPoolExecutor(
             numConcurrentConnections, numConcurrentConnections, 10,
