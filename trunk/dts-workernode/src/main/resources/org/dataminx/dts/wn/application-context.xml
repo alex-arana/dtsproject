@@ -38,5 +38,11 @@
   </bean>
   
   <bean id="jobNotificationService" class="org.dataminx.dts.wn.service.WorkerNodeJobNotificationService" />
-
+<!--
+     This bean has to be declared outside of the batch-context.xml so that the calling module
+     (which most of the time will be dts-workernode) will declare this on its own spring config
+     file. doing it this way, we can be sure that the credentialStore will be accessible all the
+     time while the calling module is running.
+  -->
+  <bean id="credentialStore" class="org.dataminx.dts.common.util.CredentialStoreImpl"/>
 </beans>
