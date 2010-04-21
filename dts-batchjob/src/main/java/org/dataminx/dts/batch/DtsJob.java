@@ -27,7 +27,7 @@
  */
 package org.dataminx.dts.batch;
 
-import org.dataminx.dts.batch.service.DtsWorkerNodeInformationService;
+import java.util.Calendar;
 import org.dataminx.dts.batch.service.JobNotificationService;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInterruptedException;
@@ -51,10 +51,6 @@ public abstract class DtsJob extends SimpleJob {
 
     /** The time in milliseconds when the job completed executing. */
     private long mCompletedTime;
-
-    /** A reference to the application's environment information service. */
-    @Autowired
-    private DtsWorkerNodeInformationService mDtsWorkerNodeInformationService;
 
     /** A reference to the application's job notification service. */
     @Autowired
@@ -99,8 +95,7 @@ public abstract class DtsJob extends SimpleJob {
      * WorkerNode's current time.
      */
     public void registerStartTime() {
-        mStartTime = mDtsWorkerNodeInformationService.getCurrentTime()
-            .getTime();
+        mStartTime = Calendar.getInstance().getTime().getTime();
     }
 
     public long getCompletedTime() {
@@ -112,8 +107,7 @@ public abstract class DtsJob extends SimpleJob {
      * WorkerNode's current time.
      */
     public void registerCompletedTime() {
-        mCompletedTime = mDtsWorkerNodeInformationService.getCurrentTime()
-            .getTime();
+        mCompletedTime = Calendar.getInstance().getTime().getTime();
     }
 
     /**
@@ -152,10 +146,6 @@ public abstract class DtsJob extends SimpleJob {
     @Override
     public JobParametersIncrementer getJobParametersIncrementer() {
         return null;
-    }
-
-    public DtsWorkerNodeInformationService getDtsWorkerNodeInformationService() {
-        return mDtsWorkerNodeInformationService;
     }
 
     public JobNotificationService getJobNotificationService() {

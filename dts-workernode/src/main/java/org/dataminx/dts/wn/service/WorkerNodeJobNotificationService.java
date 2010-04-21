@@ -32,7 +32,7 @@ import static org.dataminx.dts.common.util.DateUtils.toCalendar;
 import java.math.BigInteger;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.dataminx.dts.batch.DtsJob;
-import org.dataminx.dts.batch.service.DtsWorkerNodeInformationService;
+import org.dataminx.dts.wn.DtsWorkerNodeInformationService;
 import org.dataminx.dts.batch.service.JobNotificationService;
 import org.dataminx.dts.common.model.JobStatus;
 //import org.dataminx.dts.wn.jms.JobEventQueueSender;

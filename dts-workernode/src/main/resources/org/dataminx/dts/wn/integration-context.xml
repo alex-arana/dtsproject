@@ -72,6 +72,10 @@
   <beans:bean id="jobRegistryBeanPostProcessor" class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">
     <beans:property name="jobRegistry" ref="jobRegistry"/>
   </beans:bean>
+
+  <beans:bean id="dtsWorkerNodeInformationServiceImpl" class="org.dataminx.dts.wn.DtsWorkerNodeInformationServiceImpl">
+    <beans:property name="workerNodeID" value="${wn.id}"/>
+  </beans:bean>
   <!--
     Defines an inbound JMS channel adapter for the DTS job submission queue.
     The inbound adapter means we are receiving from JMS and placing an instance of
