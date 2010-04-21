@@ -35,7 +35,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.dataminx.dts.DtsException;
-import org.dataminx.dts.batch.service.DtsWorkerNodeInformationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -124,7 +123,14 @@ public class DtsWorkerNodeCommandLineRunner {
 
         final DtsWorkerNodeInformationService service = (DtsWorkerNodeInformationService) context
                 .getBean("dtsWorkerNodeInformationService");
-        LOG.info(String.format("DTS Worker Node has started: %s", service.getInstanceId()));
+        /*
+         Call the getInstanceId()method that is able to read or generate and persistent a worker node ID.
+         Read the work node ID from the dts-workernode.properties configuration file, if the ID exists in that file;
+         otherwise, to generate a unique ID for the worker node firstly and persistent 
+         the ID into the configuration file for later restarts of worker node and accesses.
+        */
+        String workerNodeID = service.getInstanceId();
+        LOG.info(String.format("DTS Worker Node has started: %s", workerNodeID));
     }
 
     /**
