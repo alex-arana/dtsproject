@@ -49,7 +49,7 @@ import org.dataminx.dts.common.batch.util.FileObjectMap;
 import org.dataminx.dts.common.vfs.DtsVfsUtil;
 import org.dataminx.dts.common.vfs.FileSystemManagerCache;
 import org.dataminx.dts.common.vfs.FileSystemManagerCacheAlreadyInitializedException;
-import org.dataminx.dts.security.crypto.CryptoLoader;
+import org.dataminx.dts.security.crypto.DummyEncrypter;
 import org.dataminx.dts.security.crypto.Encrypter;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
@@ -190,8 +190,8 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
                 // having this here will help us avoid old connections not being
                 // let go
                 if (!mSuccessfulConnection
-                    || (!mParent.getHasConnectionErrorArised()
-                        && !mParent.isLastTry() && (fileSystemManager != null))) {
+                    || !mParent.getHasConnectionErrorArised()
+                    && !mParent.isLastTry() && fileSystemManager != null) {
                     ((DefaultFileSystemManager) fileSystemManager).close();
                 }
                 else {
@@ -263,7 +263,9 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
         Assert.state(mMaxConnectionsToTry != 0,
             "MaxConnectionsToTry has not been set.");
         Assert.state(mJobRepository != null, "JobRepository has not been set.");
-        Assert.state(mEncrypter != null, "CryptoLoader has not been set.");
+        if (mEncrypter == null) {
+            mEncrypter = new DummyEncrypter();
+        }
     }
 
     /**
@@ -422,7 +424,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
                 break;
             }
 
-            if (LOGGER.isDebugEnabled() && (threadCounter != maxTry)) {
+            if (LOGGER.isDebugEnabled() && threadCounter != maxTry) {
                 Assert.isTrue(workingConnections.isEmpty(),
                     "WorkingConnections list should be empty.");
             }
@@ -432,7 +434,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
             threadCounter++;
         }
 
-        if (LOGGER.isDebugEnabled() && (threadCounter == maxTry)) {
+        if (LOGGER.isDebugEnabled() && threadCounter == maxTry) {
             Assert
                 .isTrue(
                     maxTry != workingConnections.size(),
@@ -460,26 +462,12 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
     }
 
     /**
-     * Sets the CryptoLoader.
+     * Sets the Encrypter.
      *
-     * @param cryptoLoader the CryptoLoader
+     * @param encrypter the Encrypter
      */
-    @SuppressWarnings("unchecked")
-    public void setCryptoLoader(final String cryptoLoader) {
-        try {
-            final Class cryptLoaderClass = Class.forName(cryptoLoader);
-            mEncrypter = ((CryptoLoader) cryptLoaderClass.newInstance())
-                .getEncrypter();
-        }
-        catch (final ClassNotFoundException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        catch (final InstantiationException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        catch (final IllegalAccessException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+    public void setEncrypter(final Encrypter encrypter) {
+        mEncrypter = encrypter;
     }
 
     public void setDtsJobDetails(final DtsJobDetails dtsJobDetails) {

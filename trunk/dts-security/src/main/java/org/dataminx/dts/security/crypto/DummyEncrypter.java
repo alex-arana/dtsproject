@@ -34,29 +34,21 @@ package org.dataminx.dts.security.crypto;
  * 
  * @author Gerson Galang
  */
-class DummyEncrypter implements Encrypter {
+public class DummyEncrypter implements Encrypter {
 
     /**
      * {@inheritDoc}
      */
     public String decrypt(final String stringToDecrypt)
         throws UnknownEncryptionAlgorithmException {
-        final String cryptoAlgorithmHash = stringToDecrypt.substring(0,
-            stringToDecrypt.indexOf(":"));
-        final String realStringToDecrypt = stringToDecrypt
-            .substring(stringToDecrypt.indexOf(":") + 1);
-        if (cryptoAlgorithmHash.equals(CLEAR_TEXT_HASH)) {
-            return realStringToDecrypt;
-        }
-        throw new UnknownEncryptionAlgorithmException(
-            "Could not decrypt the string as the hash of the algorith used is unknown.");
+        return stringToDecrypt;
     }
 
     /**
      * {@inheritDoc}
      */
     public String encrypt(final String stringToEncrypt) {
-        return CLEAR_TEXT_HASH + ":" + stringToEncrypt;
+        return stringToEncrypt;
     }
 
     /**
@@ -69,7 +61,7 @@ class DummyEncrypter implements Encrypter {
     /**
      * {@inheritDoc}
      */
-    public void setSalt(final byte[] salt) {
+    public void setSalt(final String salt) {
         // don't do anything
     }
 

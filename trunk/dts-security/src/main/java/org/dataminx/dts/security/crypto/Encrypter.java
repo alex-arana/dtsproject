@@ -27,6 +27,7 @@
  */
 package org.dataminx.dts.security.crypto;
 
+
 /**
  * The Encrypter interface that DTS encryption plugins need to implement if the
  * clients want to use a custom written encryption mechanism. This class will be
@@ -37,15 +38,13 @@ package org.dataminx.dts.security.crypto;
  */
 public interface Encrypter {
 
-    /** The clear text hash. */
-    public static final String CLEAR_TEXT_HASH = "clear-text";
-
     /**
-     * Sets the salt to be used by this encrypter.
-     * 
-     * @param salt the array of bytes to be used as salt by this encrypter
+     * Sets the salt to be used by this encrypter. It is up to the implementation
+     * of this Encrypter to use a salt in encrypting the provided message.
+     *
+     * @param salt the salt to be used by this encrypter
      */
-    void setSalt(byte[] salt);
+    void setSalt(String salt);
 
     /**
      * Sets the passphrase to be used by this encrypter.
