@@ -7,7 +7,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
-import org.dataminx.dts.security.crypto.DummyCryptoLoader;
+import org.dataminx.dts.security.crypto.DummyEncrypter;
 import org.dataminx.dts.security.crypto.Encrypter;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -45,6 +45,7 @@ public class DtsSecurityInterceptor extends ChannelInterceptorAdapter  implement
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
+
         String payload = (String)message.getPayload();
         SAXBuilder builder = new SAXBuilder();
         Reader reader = new StringReader(payload);
@@ -71,7 +72,7 @@ public class DtsSecurityInterceptor extends ChannelInterceptorAdapter  implement
     @Override
     public void afterPropertiesSet() throws Exception {
         if (mEncrypter == null) {
-            mEncrypter = new DummyCryptoLoader().getEncrypter();
+            mEncrypter = new DummyEncrypter();
         }
     }
 }
