@@ -5,8 +5,11 @@ package org.dataminx.dts.broker.si;
 
 import java.util.Calendar;
 import java.util.Date;
+
 import javax.xml.bind.DatatypeConverter;
+
 import org.apache.xmlbeans.XmlException;
+import org.dataminx.dts.common.util.SchemaUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +22,6 @@ import org.springframework.integration.handler.DelayHandler;
 import org.springframework.integration.message.MessageBuilder;
 import org.springframework.integration.xml.transformer.XmlPayloadUnmarshallingTransformer;
 
-
 /**
  * An {@link Handler} that processes the incoming message and output an message that can be
  * scheduled by the {@link DelayHandler}. Other implementation can do the scheduling by itself
@@ -30,7 +32,8 @@ import org.springframework.integration.xml.transformer.XmlPayloadUnmarshallingTr
 @MessageEndpoint("brokerJobSubmissionChannel")
 public class DtsJobScheduler {
     /** A reference to the internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(DtsJobScheduler.class);
+    private static final Logger LOG = LoggerFactory
+        .getLogger(DtsJobScheduler.class);
 
     /** Extracting delay information from the message payload object*/
     @Autowired
@@ -46,7 +49,7 @@ public class DtsJobScheduler {
     }
 
     @Required
-    public void setDelayHeaderName(String delayHeaderName) {
+    public void setDelayHeaderName(final String delayHeaderName) {
         this.delayHeaderName = delayHeaderName;
     }
 
@@ -61,30 +64,35 @@ public class DtsJobScheduler {
      * @throws XmlException
      */
     @ServiceActivator
-    public Message<?> schedule(Message<?> message){
+    public Message<?> schedule(final Message<?> message) {
 
-        LOG.debug(message.getPayload().toString());
+        final String auditableRequest = SchemaUtils.getAuditableString(message
+            .getPayload());
+
+        LOG.debug(auditableRequest);
 
         final String delay = extractor.extractDelay(message.getPayload());
 
-        if (LOG.isDebugEnabled()){
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Found delay transfer requirement: " + delay);
             LOG.debug("All headers: " + message.getHeaders().toString());
         }
         try {
-            Calendar cal = DatatypeConverter.parseDateTime(delay);
-            Date tillDate = cal.getTime();
+            final Calendar cal = DatatypeConverter.parseDateTime(delay);
+            final Date tillDate = cal.getTime();
             return buildMessageWithNewHeader(message, tillDate);
         }
-        catch (IllegalArgumentException e) {
+        catch (final IllegalArgumentException e) {
             LOG.warn("Delay is not xsd:datetime formatted");
             return buildMessageWithNewHeader(message, delay);
         }
-   }
+    }
 
     /* Constructs a new message with approriate header name/value for {@link DelayHandler} to process */
-    private Message<?> buildMessageWithNewHeader(Message<?> message, Object headerValue) {
-        return MessageBuilder.fromMessage(message).setHeader(delayHeaderName, headerValue).build();
+    private Message<?> buildMessageWithNewHeader(final Message<?> message,
+        final Object headerValue) {
+        return MessageBuilder.fromMessage(message).setHeader(delayHeaderName,
+            headerValue).build();
     }
 
 }

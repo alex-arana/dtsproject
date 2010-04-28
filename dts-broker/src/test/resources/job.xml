@@ -19,8 +19,8 @@
           <jsdl1:URI>ftp://dataminx.chem.usyd.edu.au/home/hung/oracle-xe-univ-10.2.0.1-1.0.i386.rpm</jsdl1:URI>
           <jsdl:Credential>
             <oas:UsernameToken>
-              <oas:Username>hung</oas:Username>
-              <oas:PasswordString>nguyen01</oas:PasswordString>
+              <oas:Username>${ftp.username}</oas:Username>
+              <oas:PasswordString>${ftp.password}</oas:PasswordString>
             </oas:UsernameToken>
           </jsdl:Credential>
         </jsdl:Source>
