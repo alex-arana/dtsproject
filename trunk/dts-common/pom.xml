@@ -49,6 +49,12 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring</artifactId>
     </dependency>
+    
+    <!-- JMS -->
+    <dependency>
+      <groupId>javax.jms</groupId>
+      <artifactId>jms</artifactId>
+    </dependency>
 
     <!-- commons-vfs-grid -->
     <dependency>
