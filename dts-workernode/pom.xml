@@ -21,6 +21,26 @@
   </properties>
 
   <build>
+    <!--
+      Enable resource filters as a workaround to the issue of accidentally uploading Credential details on the test
+      files. Using filters is also a good way to avoid overwriting another developers desktop specific settings (ie
+      Windows or Unix format used for 'file://')
+    -->
+    <filters>
+      <filter>src/test/filters/filter.properties</filter>
+    </filters>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

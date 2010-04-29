@@ -1,7 +1,12 @@
 package org.dataminx.dts.broker;
 
+import static org.dataminx.dts.common.broker.DtsBrokerConstants.ROUTING_HEADER_KEY;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
-import org.dataminx.dts.broker.util.JobQueueSender;
+
+import org.dataminx.dts.common.jms.JobQueueSender;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,7 +21,8 @@ import org.testng.annotations.Test;
  * @author hnguyen
  */
 @ContextConfiguration
-public class TestBrokeringDtsJobMessage extends AbstractTestNGSpringContextTests{
+public class TestBrokeringDtsJobMessage extends
+    AbstractTestNGSpringContextTests {
 
     @Autowired
     @Qualifier("mQueueSender")
@@ -24,10 +30,14 @@ public class TestBrokeringDtsJobMessage extends AbstractTestNGSpringContextTests
 
     @Test
     public void submitDtsJobAsText() throws Exception {
-        Resource xml = new ClassPathResource("/job.xml");
-        final SubmitJobRequestDocument root = SubmitJobRequestDocument.Factory.parse(xml.getInputStream());;
+        final Resource xml = new ClassPathResource("/job.xml");
+        final SubmitJobRequestDocument root = SubmitJobRequestDocument.Factory
+            .parse(xml.getInputStream());
+        ;
         final String dtsJobId = generateNewJobId();
-        mQueueSender.doSend(dtsJobId+"ANSTO", "ANSTO", root.xmlText());
+        final Map<String, Object> jmsParameterMap = new HashMap<String, Object>();
+        jmsParameterMap.put(ROUTING_HEADER_KEY, "ANSTO");
+        mQueueSender.doSend(dtsJobId + "ANSTO", root.xmlText());
 
     }
 
