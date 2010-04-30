@@ -6,7 +6,9 @@ package org.dataminx.dts.wn;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.dataminx.dts.wn.jms.DtsMessagePayloadTransformer;
 import org.dataminx.dts.wn.service.WorkerNodeJobPollable;
+import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument.CancelJobRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
@@ -22,6 +24,8 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.integration.core.Message;
 
 /**
  * An {@link JobOperator} implementation that decorates {@link SimpleJobOperator} with
@@ -38,19 +42,94 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     private JobOperator mOperator;
 
     /** max number of batch job that can be run by this WorkNodeManager */
-    private int maxBatchJobNumer;
+    private int mMaxBatchJobNumer;
+
+    private DtsMessagePayloadTransformer mTransformer;
 
     private static final String LOCK_FILE_NAME=".lock";
 
     private static final String WORKER_NODE_DIR_NAME="dts-workernode";
 
 
-    public void setmOperator(JobOperator mOperator) {
-        this.mOperator = mOperator;
+    public void setOperator(JobOperator operator) {
+        this.mOperator = operator;
     }
 
     public void setMaxBatchJobNumer(int maxBatchJobNumer) {
-        this.maxBatchJobNumer = maxBatchJobNumer;
+        this.mMaxBatchJobNumer = maxBatchJobNumer;
+    }
+
+    public void setTransformer(DtsMessagePayloadTransformer transformer) {
+        this.mTransformer = transformer;
+    }
+
+    /**
+     * Bases on number of current running job and max number of batch job allowed to
+     * determine whether this manager can poll more message from the JMS Queue.
+     */
+    public synchronized boolean canPoll() {
+        final int runningJobs = runningJobs();
+        if (runningJobs < mMaxBatchJobNumer) {
+            return true;
+        }
+        return false;
+    }
+
+    private synchronized int runningJobs() {
+        int runningJobs=0;
+        for (String jobName:mOperator.getJobNames()) {
+            try {
+                if (mOperator.getRunningExecutions(jobName).size()>=1) {
+                    runningJobs++;
+                }
+            }
+            catch (NoSuchJobException ex) {
+                LOG.debug("Ignore job " + jobName,ex);
+            }
+        }
+        return runningJobs;
+    }
+
+    @ServiceActivator
+    public void handleControlRequest(Message<?> message) {
+        final Object controlRequest = mTransformer.transformPayload(message.getPayload());
+        if (controlRequest instanceof CancelJobRequest) {
+            final CancelJobRequest cancelRequest = (CancelJobRequest)controlRequest;
+            final String jobCancelled = cancelRequest.getJobResourceKey();
+            LOG.debug("received cancel job request for " + cancelRequest.getJobResourceKey());
+            for (String jobName:mOperator.getJobNames()) {
+                if (jobName.equals(jobCancelled)) {
+                    LOG.debug("Found running job requested cancelled");
+                    try {
+                        for (Long execId:mOperator.getRunningExecutions(jobName)) {
+                            this.stop(execId);
+                        }
+                    } catch (NoSuchJobException e) {
+                        LOG.debug(e.getMessage());
+                    } catch (JobExecutionNotRunningException e) {
+                        LOG.debug(e.getMessage());
+                    } catch (NoSuchJobExecutionException e) {
+                        LOG.debug(e.getMessage());
+                    }
+                }
+            }
+        }
+    }
+    /**
+     *
+     */
+    public void afterPropertiesSet() throws Exception {
+
+        LOG.debug("afterPropertiesSet()");
+    }
+
+    /**
+     * Manages graceful shutdown of the workernode by attempting to remove the lock file. The absence
+     * of lock file indicates a graceful,managed shutdown.
+     */
+    public void destroy() throws Exception {
+
+        LOG.debug("destroy()");
     }
 
     /* (non-Javadoc)
@@ -137,60 +216,5 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
         return mOperator.stop(executionId);
     }
 
-    /**
-     * Bases on number of current running job and max number of batch job allowed to
-     * determine whether this manager can poll more message from the JMS Queue.
-     */
-    public synchronized boolean canPoll() {
-        final int runningJobs = runningJobs();
-        if (runningJobs < maxBatchJobNumer) {
-            return true;
-        }
-        return false;
-    }
 
-    private synchronized int runningJobs() {
-        int runningJobs=0;
-        for (String jobName:mOperator.getJobNames()) {
-            try {
-                if (mOperator.getRunningExecutions(jobName).size()>=1) {
-                    runningJobs++;
-                }
-            }
-            catch (NoSuchJobException ex) {
-                LOG.debug("Ignore job " + jobName,ex);
-            }
-        }
-        return runningJobs;
-    }
-
-    /**
-     *
-     */
-    public void afterPropertiesSet() throws Exception {
-//        File userHomeLockFile = new File(SystemUtils.USER_HOME + File.pathSeparator + WORKER_NODE_DIR_NAME +
-//                                            File.pathSeparator+ LOCK_FILE_NAME);
-//        for (String jobName:mOperator.getJobNames()) {
-//            for (Long execId:mOperator.getExecutions(jobName)) {
-//                mOperator.stop(execId); // because the job status still be STARTED
-//                mOperator.restart(execId);
-//            }
-//        }
-        LOG.debug("afterPropertiesSet()");
-    }
-
-    /**
-     * Manages graceful shutdown of the workernode by attempting to remove the lock file. The absence
-     * of lock file indicates a graceful,managed shutdown.
-     */
-    public void destroy() throws Exception {
-        // TODO: a graceful shutdown should stop all the running jobs cleanly as well.
-        // remove lock file if graceful shutdown
-//        File userHomeLockFile = new File(SystemUtils.USER_HOME + File.pathSeparator + WORKER_NODE_DIR_NAME +
-//            File.pathSeparator+ LOCK_FILE_NAME);
-//        if (!userHomeLockFile.delete()) {
-//            userHomeLockFile.deleteOnExit();
-//        }
-        LOG.debug("destroy()");
-    }
 }

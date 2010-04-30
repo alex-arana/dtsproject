@@ -20,7 +20,7 @@ public class DtsSourcePollingChannelAdapter extends SourcePollingChannelAdapter 
 
     private WorkerNodeManager mWorkerNodeManager;
 
-    public void setmWorkerNodeManager(WorkerNodeManager mWorkerNodeManager) {
+    public void setWorkerNodeManager(WorkerNodeManager mWorkerNodeManager) {
         this.mWorkerNodeManager = mWorkerNodeManager;
     }
 
