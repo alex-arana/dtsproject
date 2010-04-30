@@ -27,6 +27,10 @@
     <constructor-arg index="0" value="${si.jms.jobEventQueueName}"/>
   </bean>
 
+  <bean id="jmsJobControlQueue" class="org.apache.activemq.command.ActiveMQQueue">
+    <constructor-arg index="0" value="${si.jms.jobControlQueueName}"/>
+  </bean>
+  
   <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
     <property name="connectionFactory" ref="jmsConnectionFactory"/>
     <property name="defaultDestination" ref="jmsJobEventQueue"/>
