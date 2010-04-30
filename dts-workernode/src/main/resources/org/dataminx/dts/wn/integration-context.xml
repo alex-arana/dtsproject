@@ -41,7 +41,7 @@
     <beans:property name="source" ref="jmsMessageSource"/>
     <beans:property name="outputChannel" ref="dtsJobRequests"/>
     <beans:property name="transactionManager" ref="jmsTransactionManager"/>
-    <beans:property name="mWorkerNodeManager" ref="workerNodeManager"/>
+    <beans:property name="workerNodeManager" ref="workerNodeManager"/>
   </beans:bean>
   
   <beans:bean id="jmsMessageSource" class="org.springframework.integration.jms.JmsDestinationPollingSource">
@@ -53,7 +53,7 @@
   </beans:bean>
 
   <beans:bean id="workerNodeManager" class="org.dataminx.dts.wn.WorkerNodeManager">
-    <beans:property name="mOperator" ref="jobOperator"/>
+    <beans:property name="operator" ref="jobOperator"/>
     <beans:property name="maxBatchJobNumer" value="${wn.manager.maxBatchJobNumber}"/>
   </beans:bean>
   
