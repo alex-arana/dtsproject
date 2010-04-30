@@ -32,10 +32,8 @@ import static org.dataminx.dts.common.xml.XmlUtils.documentToString;
 
 import java.io.File;
 import java.util.UUID;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.dataminx.dts.common.jms.JobQueueSender;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
@@ -46,26 +44,24 @@ import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.Subm
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.CreationFlagEnumeration;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.Test;
 import org.w3c.dom.Document;
 
 /**
  * Test that a DTS job is launched when a JMS message is posted on the DTS Job
  * Submission queue.
- * 
+ *
  * @author Alex Arana
  */
 @ContextConfiguration
-@RunWith(SpringJUnit4ClassRunner.class)
-public class TestProcessDtsJobMessage {
+public class TestProcessDtsJobMessage extends AbstractTestNGSpringContextTests {
     @Autowired
     @Qualifier("mQueueSender")
     private JobQueueSender mJmsQueueSender;
