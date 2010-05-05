@@ -28,6 +28,22 @@
   
   <bean id="jobNotificationService" class="org.dataminx.dts.batch.service.LoggingJobNotificationService" />
   
+  <bean id="jobOperator" class="org.springframework.batch.core.launch.support.SimpleJobOperator">
+    <property name="jobExplorer" >
+        <bean class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">
+            <property name="dataSource" ref="dataSource" />
+        </bean>
+    </property>
+    <property name="jobRepository" ref="jobRepository" />
+    <property name="jobRegistry" ref="jobRegistry" />
+    <property name="jobLauncher" ref="dtsJobLauncher" />
+  </bean>
+  
+  <bean id="jobRegistry" class="org.springframework.batch.core.configuration.support.MapJobRegistry" />
+  <bean id="jobRegistryBeanPostProcessor" class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">
+    <property name="jobRegistry" ref="jobRegistry"/>
+  </bean>
+  
   <!--
      This bean has to be declared outside of the batch-context.xml so that the calling module
      (which most of the time will be dts-workernode) will declare this on its own spring config
