@@ -54,6 +54,7 @@ import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
@@ -323,10 +324,15 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
             mJobNotificationService.notifyStepFailures(dtsJobId, stepExecution);
         }
         else {
-            mJobNotificationService.notifyJobProgress(dtsJobId,
-                mBatchTotalFiles, mBatchVolumeSize);
-            mExecutionContextCleaner.removeStepExecutionContextEntry(
-                stepExecution, DTS_DATA_TRANSFER_STEP_KEY);
+            // we'll only delete the entry in the step execution context if the
+            // job has not been stopped ie it has completed/finished running
+            if (stepExecution.getStatus() == BatchStatus.COMPLETED) {
+                mJobNotificationService.notifyJobProgress(dtsJobId,
+                    mBatchTotalFiles, mBatchVolumeSize);
+
+                mExecutionContextCleaner.removeStepExecutionContextEntry(
+                    stepExecution, DTS_DATA_TRANSFER_STEP_KEY);
+            }
         }
 
         return exitStatus;
