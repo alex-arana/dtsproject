@@ -5,9 +5,7 @@ package org.dataminx.dts.broker.si;
 
 import java.util.Calendar;
 import java.util.Date;
-
 import javax.xml.bind.DatatypeConverter;
-
 import org.apache.xmlbeans.XmlException;
 import org.dataminx.dts.common.util.SchemaUtils;
 import org.slf4j.Logger;
@@ -70,7 +68,6 @@ public class DtsJobScheduler {
             .getPayload());
 
         LOG.debug(auditableRequest);
-
         final String delay = extractor.extractDelay(message.getPayload());
 
         if (LOG.isDebugEnabled()) {

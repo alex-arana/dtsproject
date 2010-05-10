@@ -6,12 +6,10 @@ package org.dataminx.dts.common.jms;
 import static org.dataminx.dts.common.broker.DtsBrokerConstants.ROUTING_HEADER_KEY;
 
 import java.util.Map;
-
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.Session;
-
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.jms.support.converter.MessageConverter;
@@ -54,7 +52,6 @@ public class JobQueueSender {
                 final Message jmsMessage = messageConverter.toMessage(message,
                     session);
                 jmsMessage.setJMSCorrelationID(jobId);
-
                 if (jmsParameterMap != null) {
                     if (jmsParameterMap.get(ROUTING_HEADER_KEY) != null
                         && !jmsParameterMap.get(ROUTING_HEADER_KEY).toString()

@@ -8,6 +8,7 @@ import org.springframework.integration.channel.ChannelInterceptor;
 import org.springframework.integration.channel.interceptor.ChannelInterceptorAdapter;
 import org.springframework.integration.core.Message;
 import org.springframework.integration.core.MessageChannel;
+import org.springframework.integration.message.MessageBuilder;
 import org.springframework.integration.xml.transformer.XmlPayloadUnmarshallingTransformer;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -37,10 +38,10 @@ public class DtsSchemaVerifier extends ChannelInterceptorAdapter implements Init
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         try {
-             Message<?> transformed = mTransformer.transform(message);
-             if (ClassUtils.isAssignableValue(XmlObject.class, transformed.getPayload())) {
-                 return transformed;
-             }
+            Object transformed = mTransformer.transformPayload(message.getPayload());
+            if (ClassUtils.isAssignableValue(XmlObject.class, transformed)) {
+                return MessageBuilder.withPayload(transformed).copyHeaders(message.getHeaders()).build();
+            }
             return null;
         }
         catch (Exception e) {

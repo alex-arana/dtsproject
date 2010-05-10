@@ -26,8 +26,7 @@
   <!-- Defines a point-to-point channel for receiving DTS job requests. -->
   <si:channel id="brokerJobSubmissionChannel">
     <si:interceptors>
-      <si:ref bean="securityInterceptor"/>
-      <si:ref bean="schemaVerifier"/>
+       <si:ref bean="securityInterceptor"/> 
     </si:interceptors>
   </si:channel>
   <si:channel id="brokerSchedulingChannel" />
@@ -41,12 +40,12 @@
       channel="brokerJobSubmissionChannel"
       connection-factory="jmsConnectionFactory"
       destination="brokerJobSubmissionQueue"
+      message-converter="dtsMessageConverter"
       transaction-manager="jmsTransactionManager"/>
  
   <si-jms:outbound-channel-adapter
       channel="brokerDefaultOutputChannel"
-      connection-factory="jmsConnectionFactory"
-      destination="brokerDefaultOutputQueue"/>
+      jms-template="jmsTemplate"/>
             
   <!--
     Defines an inbound JMS channel adapter for the DTS job submission queue.
@@ -107,16 +106,19 @@
     <constructor-arg index="0" ref="dtsMarshaller"/>
   </bean>
   
+  <bean id="dtsMessageConverter" class="org.dataminx.dts.common.jms.DtsMessageConverter">
+    <property name="transformer" ref="dtsMessagePayloadTransformer"/>
+    <property name="marshaller" ref="dtsMarshaller"/>
+  </bean>
+  
   <!-- Custom declaration for individual group -->
   <si:channel id="brokerANSTOChannel"/>
   <si-jms:outbound-channel-adapter
       channel="brokerANSTOChannel"
-      connection-factory="jmsConnectionFactory"
-      destination="brokerANSTOGroupQueue"/>
+      jms-template="jmsTemplate"/>
       
   <si:channel id="brokerASFChannel"/>
   <si-jms:outbound-channel-adapter
       channel="brokerASFChannel"
-      connection-factory="jmsConnectionFactory"
-      destination="brokerASFGroupQueue"/>      
+      jms-template="jmsTemplate"/>      
 </beans>
