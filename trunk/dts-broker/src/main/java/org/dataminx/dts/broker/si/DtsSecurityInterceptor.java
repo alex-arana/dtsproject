@@ -3,17 +3,25 @@
  */
 package org.dataminx.dts.broker.si;
 
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
+import static org.apache.commons.lang.StringUtils.EMPTY;
+import static org.dataminx.dts.common.DtsConstants.WS_SECURITY_NAMESPACE_URI;
+import static org.dataminx.dts.common.util.XmlBeansUtils.extractElementTextAsString;
+
+import java.util.LinkedList;
 import java.util.List;
+import javax.xml.namespace.QName;
+import org.apache.xmlbeans.XmlObject;
+import org.dataminx.dts.common.util.XmlBeansUtils;
 import org.dataminx.dts.security.crypto.DummyEncrypter;
 import org.dataminx.dts.security.crypto.Encrypter;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.XMLOutputter;
-import org.jdom.xpath.XPath;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxSourceTargetType;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
+import org.oasisOpen.docs.wss.x2004.x01.oasis200401WssWssecuritySecext10.PasswordString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -21,7 +29,6 @@ import org.springframework.integration.channel.ChannelInterceptor;
 import org.springframework.integration.channel.interceptor.ChannelInterceptorAdapter;
 import org.springframework.integration.core.Message;
 import org.springframework.integration.core.MessageChannel;
-import org.springframework.integration.message.MessageBuilder;
 
 /**
  * <p>A {@link ChannelInterceptor} that encrypts sensitive information in the message. The encryption
@@ -35,7 +42,8 @@ public class DtsSecurityInterceptor extends ChannelInterceptorAdapter  implement
     /** A reference to the internal logger object. */
     private static final Logger LOG = LoggerFactory.getLogger(DtsSecurityInterceptor.class);
 
-    private static final String CREDENTIAL_QUERY="//oas:PasswordString";
+    private static final QName PASSWORD_STRING_QNAME = new QName(
+        WS_SECURITY_NAMESPACE_URI, "PasswordString");
 
     private Encrypter mEncrypter;
 
@@ -46,27 +54,65 @@ public class DtsSecurityInterceptor extends ChannelInterceptorAdapter  implement
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
 
-        String payload = (String)message.getPayload();
-        SAXBuilder builder = new SAXBuilder();
-        Reader reader = new StringReader(payload);
-        try {
-            Document doc = builder.build(reader);
-            XPath xpath = XPath.newInstance(CREDENTIAL_QUERY);
-            List nodes = xpath.selectNodes(doc);
-            for (java.util.Iterator i = nodes.iterator();i.hasNext();) {
-                Element node = (Element)i.next();
-                String value = node.getValue();
-                node.setText(mEncrypter.encrypt(value));
+        XmlObject payload = (XmlObject)message.getPayload();
+        if (payload instanceof SubmitJobRequestDocument) {
+            SubmitJobRequestDocument document = (SubmitJobRequestDocument)payload;
+            SubmitJobRequest request = document.getSubmitJobRequest();
+            List<SourceTargetType> sourceAndTargets = getAllSourceOrTarget(request);
+            LOG.debug("lvl 1");
+            for (SourceTargetType sourceOrTarget:sourceAndTargets) {
+                LOG.debug("lvl 2");
+                if (sourceOrTarget instanceof MinxSourceTargetType) {
+                    LOG.debug("lvl 3");
+                    MinxSourceTargetType minxSourceTarget = (MinxSourceTargetType)sourceOrTarget;
+                    CredentialType credential = minxSourceTarget.getCredential();
+                    if (credential != null) {
+                        if (credential.getMyProxyToken() != null) {
+                            throw new UnsupportedOperationException("MyProxy not yet supported");
+
+                        }
+                        // at the moment we're only supporting u/p credentials
+                        else if (credential.getUsernameToken() != null) {
+                            XmlObject element = XmlBeansUtils.selectAnyElement(credential.getUsernameToken(), PASSWORD_STRING_QNAME);
+                            final String encryptedPassword = element == null ? EMPTY : mEncrypter
+                                .encrypt(extractElementTextAsString(element));
+                            LOG.debug("Encrypted password: " + encryptedPassword);
+                            final PasswordString password = PasswordString.Factory.newInstance();
+                            password.setStringValue(encryptedPassword);
+                            element.set(password);
+                        }
+                        else if (credential.getOtherCredentialToken() != null) {
+                            throw new UnsupportedOperationException("Other Credential Type not yet supported");
+                        }
+
+                    }
+                }
             }
-            XMLOutputter out = new XMLOutputter();
-            StringWriter writer = new StringWriter();
-            out.output(doc, writer);
-            return MessageBuilder.fromMessage(message).withPayload(writer.getBuffer().toString()).build();
         }
-        catch (Exception e) {
-            // TODO handle exception
-        }
+
+
         return message;
+    }
+
+    /*
+     *
+     */
+    private List<SourceTargetType> getAllSourceOrTarget(SubmitJobRequest request) {
+
+        final DataTransferType[] dataTransfers = ((MinxJobDescriptionType) request
+            .getJobDefinition().getJobDescription()).getDataTransferArray();
+        List<SourceTargetType> sourceOrTarget = new LinkedList<SourceTargetType>();
+
+        for (DataTransferType transfer:dataTransfers) {
+            if (transfer.getSource()!=null) {
+                sourceOrTarget.add(transfer.getSource());
+            }
+            if (transfer.getTarget()!=null) {
+                sourceOrTarget.add(transfer.getTarget());
+            }
+
+        }
+        return sourceOrTarget;
     }
 
     @Override

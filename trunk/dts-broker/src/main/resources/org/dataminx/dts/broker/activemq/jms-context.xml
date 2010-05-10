@@ -29,8 +29,21 @@
     
   <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
     <property name="connectionFactory" ref="jmsConnectionFactory"/>
-    <property name="defaultDestination" ref="brokerJobSubmissionQueue"/>
+    <property name="messageConverter" ref="dtsMessageConverter"/>
+    <property name="defaultDestination" ref="brokerDefaultOutputQueue"/>
   </bean>
+
+  <bean id="anstoJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="messageConverter" ref="dtsMessageConverter"/>
+    <property name="defaultDestination" ref="brokerANSTOGroupQueue"/>
+  </bean>
+
+  <bean id="asfJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="messageConverter" ref="dtsMessageConverter"/>
+    <property name="defaultDestination" ref="brokerASFGroupQueue"/>
+  </bean>    
   
   <!-- declaration of institution wide group queues -->
   <bean id="brokerANSTOGroupQueue" class="org.apache.activemq.command.ActiveMQQueue">
