@@ -249,6 +249,8 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
     /** The wait time for the finished FileCopier. */
     private static final int FILE_COPIER_WAIT_TIME = 100;
 
+    private static final String LAST_COMPLETED_SUSPENDED_STEP = "lastCompletedSuspendedStep";
+
     /** A reference to the internal logger object. */
     private static final Logger LOGGER = LoggerFactory
         .getLogger(FileCopyTask.class);
@@ -268,6 +270,8 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
 
     /** A reference to the DtsVfsUtil. */
     private DtsVfsUtil mDtsVfsUtil;
+
+    private String suspendedStepToSkip;
 
     /** A reference to the input DTS job request. */
     private SubmitJobRequest mSubmitJobRequest;
@@ -317,6 +321,11 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
      * {@inheritDoc}
      */
     public ExitStatus afterStep(final StepExecution stepExecution) {
+
+        LOGGER.debug("FileCopyTask.afterStep() for step "
+            + stepExecution.getStepName() + " has a status of: "
+            + stepExecution.getStatus());
+
         final ExitStatus exitStatus = stepExecution.getExitStatus();
         final String dtsJobId = extractDtsJobId(stepExecution);
         if (stepExecution.getStatus().isUnsuccessful()) {
@@ -335,6 +344,22 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
             }
         }
 
+        if (suspendedStepToSkip == null
+            && stepExecution.getStatus().equals(BatchStatus.STOPPED)) {
+            LOGGER.debug("^^^^^**** Setting suspended step to skip to: "
+                + stepExecution.getStepName() + " ****^^^^^");
+
+            stepExecution.getJobExecution().getExecutionContext().put(
+                LAST_COMPLETED_SUSPENDED_STEP, stepExecution.getStepName());
+        }
+        else {
+            LOGGER.debug("^^^^^**** Setting suspended step to skip again to: "
+                + suspendedStepToSkip + " ****^^^^^");
+
+            stepExecution.getJobExecution().getExecutionContext().put(
+                LAST_COMPLETED_SUSPENDED_STEP, suspendedStepToSkip);
+        }
+        LOGGER.debug("");
         return exitStatus;
     }
 
@@ -343,6 +368,15 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
      */
     public void beforeStep(final StepExecution stepExecution) {
         // perform any preliminary steps here
+        LOGGER.debug("");
+        LOGGER.debug("vvvvv**** FileCopyTask.beforeStep() is called by step "
+            + stepExecution.getStepName() + " ****vvvvv");
+
+        suspendedStepToSkip = (String) stepExecution.getJobExecution()
+            .getExecutionContext().get(LAST_COMPLETED_SUSPENDED_STEP);
+
+        LOGGER.debug("Name of the suspended step to skip: "
+            + suspendedStepToSkip);
     }
 
     /**
@@ -357,6 +391,13 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
         final ChunkContext chunkContext) throws Exception {
         final StepContext stepContext = chunkContext.getStepContext();
         LOGGER.info("Executing copy step: " + stepContext.getStepName());
+
+        if (suspendedStepToSkip != null
+            && suspendedStepToSkip.equals(stepContext.getStepName())) {
+            LOGGER
+                .info("Skipping this step as it has already finished when suspend was called.");
+            return RepeatStatus.FINISHED;
+        }
 
         LOGGER.debug("Started up the FileCopyTask at "
             + mStopwatchTimer.getFormattedElapsedTime());

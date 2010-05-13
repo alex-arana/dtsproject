@@ -6,15 +6,16 @@
     xmlns:p="http://www.springframework.org/schema/p"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
         http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-2.0.xsd
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
-        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
-  <import resource="file:///${dataminx.dir}/*-context.xml"/>
-  
+  <import resource="file:${dataminx.dir}/*-context.xml"/>
 <!-- 
   <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource">
     <property name="driverClassName" value="${batch.jdbc.driver}" />
@@ -89,8 +90,12 @@
     <property name="jobStepDirectory" value="file:///${dataminx.dir}/jobsteps" />
   </bean>
   
-  <bean id="promotionListener" class="org.springframework.batch.core.listener.ExecutionContextPromotionListener">
-    <property name="keys" value="JOB_DETAILS"/>
+  <bean id="jobScopingTaskPromotionListener" class="org.springframework.batch.core.listener.ExecutionContextPromotionListener">
+    <property name="keys" value="JOB_DETAILS" />
+  </bean>
+  
+  <bean id="fileCopyTaskPromotionListener" class="org.springframework.batch.core.listener.ExecutionContextPromotionListener">
+    <property name="keys" value="lastCompletedSuspendedStep" />
   </bean>
 
   <bean id="fileCopyTask" class="org.dataminx.dts.batch.FileCopyTask" scope="step">
@@ -134,7 +139,7 @@
   <batch:step id="jobScopingStep">
     <batch:tasklet ref="jobScopingTask">
       <batch:listeners>
-          <batch:listener ref="promotionListener"/>
+          <batch:listener ref="jobScopingTaskPromotionListener"/>
       </batch:listeners>    
     </batch:tasklet>
   </batch:step>
@@ -144,7 +149,11 @@
   </batch:step>
 
   <batch:step id="fileCopyStep">
-    <batch:tasklet ref="fileCopyTask"/>
+    <batch:tasklet ref="fileCopyTask">
+      <batch:listeners>
+          <batch:listener ref="fileCopyTaskPromotionListener"/>
+      </batch:listeners>    
+    </batch:tasklet>
   </batch:step>
 
   <bean id="partitioningStep"
