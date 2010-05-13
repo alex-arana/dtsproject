@@ -13,6 +13,8 @@
   <!-- Enable automatic classpath scanning -->
   <context:component-scan base-package="org.dataminx.dts" />
   
+  <context:property-placeholder location="file:///${dataminx.dir}/dts-bulkcopyjob.properties"/>
+  
   <bean id="jobLauncherTaskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
 
   <!-- Initialise the logging subsystem -->
@@ -21,6 +23,7 @@
     <property name="refreshInterval" value="5000" />
   </bean>
   
+  <!--
   <bean id="applicationProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="locations">
       <list>
@@ -31,6 +34,7 @@
     <property name="ignoreUnresolvablePlaceholders" value="false" />
     <property name="order" value="1" />
   </bean>
+  -->
   
   <bean id="jobNotificationService" class="org.dataminx.dts.batch.service.LoggingJobNotificationService" />
   
