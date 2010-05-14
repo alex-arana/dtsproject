@@ -32,16 +32,16 @@ import static org.dataminx.dts.common.xml.XmlUtils.documentToString;
 
 import java.io.File;
 import java.util.UUID;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.dataminx.dts.common.jms.JobQueueSender;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxSourceTargetType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxTransferRequirementsType;
+import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument.CancelJobRequest;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.CreationFlagEnumeration;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
@@ -54,12 +54,11 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.w3c.dom.Document;
-import org.testng.annotations.Test;
 
 /**
  * Test that a DTS job is launched when a JMS message is posted on the DTS Job
  * Submission queue.
- * 
+ *
  * @author Alex Arana
  */
 @ContextConfiguration
@@ -69,7 +68,7 @@ public class ProcessDtsJobMessageTest extends
     @Qualifier("mQueueSender")
     private JobQueueSender mJmsQueueSender;
 
-    @Test
+    //@Test
     public void submitDtsJobAsDocument() throws Exception {
         final File file = new ClassPathResource("minx-dts.xml", getClass())
             .getFile();
@@ -86,7 +85,7 @@ public class ProcessDtsJobMessageTest extends
         mJmsQueueSender.doSend(generateNewJobId(), dtsJob);
     }
 
-    @Test
+    //@Test
     public void submitDtsJobAsText() throws Exception {
         final SubmitJobRequestDocument root = SubmitJobRequestDocument.Factory
             .newInstance();
@@ -134,6 +133,21 @@ public class ProcessDtsJobMessageTest extends
         }
 
         mJmsQueueSender.doSend(dtsJobId, root.xmlText());
+    }
+
+    //@Test
+    public void submitJobCancelRequestAsText() {
+        final CancelJobRequestDocument document = CancelJobRequestDocument.Factory.newInstance();
+        final CancelJobRequest request = document.addNewCancelJobRequest();
+        final String dtsJobId = generateNewJobId();
+        request.setJobResourceKey(dtsJobId);
+        final Logger logger = LoggerFactory.getLogger(getClass());
+        if (logger.isDebugEnabled()) {
+            final String dtsJobRequest = document.xmlText();
+            logger.debug(String.format("submitJobCancelRequestAsText ['%s']:%s%s",
+                dtsJobId, LINE_SEPARATOR, dtsJobRequest));
+        }
+
     }
 
     private String generateTemporaryFilename(final String filename) {

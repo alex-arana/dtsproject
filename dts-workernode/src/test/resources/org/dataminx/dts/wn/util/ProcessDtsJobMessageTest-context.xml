@@ -6,4 +6,5 @@
 
     <import resource="classpath:/org/dataminx/dts/wn/test-context.xml"/>
     <import resource="classpath:/org/dataminx/dts/wn/activemq/jms-context.xml"/>
+    <import resource="classpath:/org/dataminx/dts/wn/batch-context.xml"/>
 </beans>

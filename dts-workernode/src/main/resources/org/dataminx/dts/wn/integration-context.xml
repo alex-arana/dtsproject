@@ -21,9 +21,22 @@
   <channel id="dtsJobRequests"/>
   <channel id="dtsJobEvents"/>
   <channel id="dtsJobExecutions"/>
+  <channel id="dtsJobControls"/>
 
   <!-- <channel id="dtsJobRequestValidation"/> -->
 
+  <jms:message-driven-channel-adapter 
+    destination="jmsJobControlQueue" 
+    channel="dtsJobControls"
+    message-converter="commonMessageConverter"
+    connection-factory="jmsConnectionFactory"/>
+  
+  <beans:bean id="commonMessageConverter" class="org.dataminx.dts.common.jms.DtsMessageConverter">
+    <beans:property name="transformer" ref="dtsMessagePayloadTransformer"/>
+  </beans:bean>
+  
+  <service-activator input-channel="dtsJobControls"
+                     ref="workerNodeManager"/>
   <!--
   Define our own Polling inbound JMS channel adapter for the DTS job submission queue.
   The inbound adapter means we are receiving from JMS and placing an instance of
