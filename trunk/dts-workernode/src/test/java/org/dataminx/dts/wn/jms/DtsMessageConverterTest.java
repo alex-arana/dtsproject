@@ -27,16 +27,11 @@
  */
 package org.dataminx.dts.wn.jms;
 
+import static org.apache.commons.lang.SystemUtils.LINE_SEPARATOR;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
-
-import org.dataminx.dts.common.xml.XmlUtils;
-
-
-import org.dataminx.dts.batch.DtsJob;
-import org.dataminx.dts.batch.DtsJobFactory;
 
 import java.io.StringWriter;
 import java.util.List;
@@ -48,7 +43,14 @@ import javax.jms.TextMessage;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
 import org.apache.xmlbeans.XmlObject;
+import org.dataminx.dts.batch.DtsJob;
+import org.dataminx.dts.batch.DtsJobFactory;
+import org.dataminx.dts.common.xml.XmlUtils;
+import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument.CancelJobRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.integration.launch.JobLaunchRequest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -88,6 +90,17 @@ public class DtsMessageConverterTest extends UnitilsTestNG {
      */
     @Test
     public void testFromMessage() throws Exception {
+        final CancelJobRequestDocument doc = CancelJobRequestDocument.Factory.newInstance();
+        final CancelJobRequest request = doc.addNewCancelJobRequest();
+        final String dtsJobId = "dts_001";
+        request.setJobResourceKey(dtsJobId);
+        final Logger logger = LoggerFactory.getLogger(getClass());
+        if (logger.isDebugEnabled()) {
+            final String dtsJobRequest = doc.xmlText();
+            logger.debug(String.format("submitJobCancelRequestAsText ['%s']:%s%s",
+                dtsJobId, LINE_SEPARATOR, dtsJobRequest));
+        }
+
         final Document document = XmlUtils.newDocument();
         final Resource xml = new ClassPathResource("/org/dataminx/dts/wn/util/minx-dts.xml");
         XmlUtils.transform(new StreamSource(xml.getInputStream()), new DOMResult(document));

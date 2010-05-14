@@ -6,9 +6,11 @@ package org.dataminx.dts.wn;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.dataminx.dts.wn.jms.DtsMessagePayloadTransformer;
 import org.dataminx.dts.wn.service.WorkerNodeJobPollable;
+import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument.CancelJobRequest;
+import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument.ResumeJobRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
@@ -44,13 +46,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     /** max number of batch job that can be run by this WorkNodeManager */
     private int mMaxBatchJobNumer;
 
-    private DtsMessagePayloadTransformer mTransformer;
-
-    private static final String LOCK_FILE_NAME=".lock";
-
-    private static final String WORKER_NODE_DIR_NAME="dts-workernode";
-
-
     public void setOperator(JobOperator operator) {
         this.mOperator = operator;
     }
@@ -59,9 +54,6 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
         this.mMaxBatchJobNumer = maxBatchJobNumer;
     }
 
-    public void setTransformer(DtsMessagePayloadTransformer transformer) {
-        this.mTransformer = transformer;
-    }
 
     /**
      * Bases on number of current running job and max number of batch job allowed to
@@ -92,11 +84,11 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
 
     @ServiceActivator
     public void handleControlRequest(Message<?> message) {
-        final Object controlRequest = mTransformer.transformPayload(message.getPayload());
-        if (controlRequest instanceof CancelJobRequest) {
-            final CancelJobRequest cancelRequest = (CancelJobRequest)controlRequest;
+        final Object controlRequest = message.getPayload();
+        if (controlRequest instanceof CancelJobRequestDocument) {
+            final CancelJobRequest cancelRequest = ((CancelJobRequestDocument)controlRequest).getCancelJobRequest();
             final String jobCancelled = cancelRequest.getJobResourceKey();
-            LOG.debug("received cancel job request for " + cancelRequest.getJobResourceKey());
+            LOG.debug("received cancel job request for " + jobCancelled);
             for (String jobName:mOperator.getJobNames()) {
                 if (jobName.equals(jobCancelled)) {
                     LOG.debug("Found running job requested cancelled");
@@ -113,6 +105,36 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
                     }
                 }
             }
+        } else if (controlRequest instanceof ResumeJobRequestDocument) {
+            final ResumeJobRequest resumeRequest  = ((ResumeJobRequestDocument)controlRequest).getResumeJobRequest();
+            final String jobResumed = resumeRequest.getJobResourceKey();
+            LOG.debug("Received a resume job request for " + jobResumed);
+            try {
+                List<Long> jobInstances = this.getJobInstances(jobResumed, 0, 1);
+                for (Long instanceId:jobInstances) {
+                    List<Long> executions = this.getExecutions(instanceId);
+                    for (Long execId:executions) {
+                        this.restart(execId);
+                    }
+                }
+            }
+            catch (NoSuchJobException ex) {
+                LOG.debug("No corresponding job + " + jobResumed + "found");
+            }
+            catch (NoSuchJobInstanceException ex) {
+                // TODO Auto-generated catch block
+                ex.printStackTrace();
+            }
+            catch (JobInstanceAlreadyCompleteException ex) {
+                LOG.debug("Job completed, no need to restart");
+            }
+            catch (NoSuchJobExecutionException ex) {
+                LOG.debug(ex.getMessage());
+            }
+            catch (JobRestartException ex) {
+                LOG.debug("Cannot restart the job");
+            }
+
         }
     }
     /**

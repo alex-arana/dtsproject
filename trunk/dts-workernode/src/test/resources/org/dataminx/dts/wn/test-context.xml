@@ -39,7 +39,8 @@
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="locations">
       <list>
-        <value>file:///${user.home}/.dataminx/dts-workernode.properties</value>
+        <value>file:///F:/java/minx-dts/config/dts-workernode.properties</value>
+        <value>file:///F:/java/minx-dts/config/dts-bulkcopyjob.properties</value>
       </list>
     </property>
     <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
