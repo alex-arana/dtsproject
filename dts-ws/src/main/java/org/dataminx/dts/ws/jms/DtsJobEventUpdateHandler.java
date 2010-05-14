@@ -28,6 +28,7 @@
 package org.dataminx.dts.ws.jms;
 
 import java.util.Date;
+
 import org.dataminx.dts.common.model.JobStatus;
 import org.dataminx.dts.ws.model.Job;
 import org.dataminx.dts.ws.repo.JobDao;
@@ -41,34 +42,34 @@ import org.dataminx.schemas.dts.x2009.x07.jms.JobEventUpdateRequestDocument.JobE
 import org.ogf.schemas.dmi.x2008.x05.dmi.StatusValueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.core.Message;
 
 /**
  * The Handler for all the Job Event Update messages coming from the Worker
  * Node.
- * 
+ *
  * @author Gerson Galang
  */
 public class DtsJobEventUpdateHandler {
 
     /** The logger. */
-    private static final Logger LOG = LoggerFactory.getLogger(DtsJobEventUpdateHandler.class);
+    private static final Logger LOG = LoggerFactory
+        .getLogger(DtsJobEventUpdateHandler.class);
 
     /** The job repository for this DTS implementation. */
-    @Autowired
     private JobDao mJobRepository;
 
     /**
      * Updates the job entity based on the details provided by the worker node.
-     * 
+     *
      * @param message the event update message
      */
     public void handleEvent(final Message<?> message) {
         final Object payload = message.getPayload();
 
         if (payload instanceof JobEventUpdateRequestDocument) {
-            final JobEventUpdateRequest request = ((JobEventUpdateRequestDocument) payload).getJobEventUpdateRequest();
+            final JobEventUpdateRequest request = ((JobEventUpdateRequestDocument) payload)
+                .getJobEventUpdateRequest();
 
             // TODO: probably need to look at making the resourcekey to WN job ID mapping clear (same names?)
             // later on
@@ -77,80 +78,97 @@ public class DtsJobEventUpdateHandler {
 
             // get the details of the job entry to be updated
             final String updatedJobResourceKey = request.getJobResourceKey();
-            final JobEventDetailType updatedJobDetail = request.getJobEventDetail();
+            final JobEventDetailType updatedJobDetail = request
+                .getJobEventDetail();
 
             // job to update
-            final Job job = mJobRepository.findByResourceKey(updatedJobResourceKey);
+            final Job job = mJobRepository
+                .findByResourceKey(updatedJobResourceKey);
 
             switch (updatedJobDetail.getStatus().intValue()) {
-            case StatusValueType.INT_TRANSFERRING:
-                job.setWorkerNodeHost(updatedJobDetail.getWorkerNodeHost());
+                case StatusValueType.INT_TRANSFERRING:
+                    job.setWorkerNodeHost(updatedJobDetail.getWorkerNodeHost());
 
-                if (updatedJobDetail.getActiveTime() != null) {
-                    job.setActiveTime(updatedJobDetail.getActiveTime().getTime());
-                }
-                LOG.debug("getFilesTotal: " + updatedJobDetail.getFilesTotal());
-                LOG.debug("getVolumeTotal: " + updatedJobDetail.getVolumeTotal());
-
-                // fields that need to be updated after scoping is done
-                if (updatedJobDetail.getFilesTotal() != null) {
-                    job.setFilesTotal(updatedJobDetail.getFilesTotal().intValue());
-                }
-
-                if (updatedJobDetail.getVolumeTotal() != null) {
-                    job.setVolumeTotal(updatedJobDetail.getVolumeTotal().longValue());
-                }
-
-                // fields that need to be updated after every step is finished
-                if (updatedJobDetail.getFilesTransferred() != null) {
-                    if (job.getFilesTransferred() != null) {
-                        job.setFilesTransferred(job.getFilesTransferred()
-                                + updatedJobDetail.getFilesTransferred().intValue());
+                    if (updatedJobDetail.getActiveTime() != null) {
+                        job.setActiveTime(updatedJobDetail.getActiveTime()
+                            .getTime());
                     }
-                    else {
-                        job.setFilesTransferred(updatedJobDetail.getFilesTransferred().intValue());
+                    LOG.debug("getFilesTotal: "
+                        + updatedJobDetail.getFilesTotal());
+                    LOG.debug("getVolumeTotal: "
+                        + updatedJobDetail.getVolumeTotal());
+
+                    // fields that need to be updated after scoping is done
+                    if (updatedJobDetail.getFilesTotal() != null) {
+                        job.setFilesTotal(updatedJobDetail.getFilesTotal()
+                            .intValue());
                     }
-                }
 
-                if (updatedJobDetail.getVolumeTransferred() != null) {
-                    if (job.getVolumeTransferred() != null) {
-                        job.setVolumeTransferred(job.getVolumeTransferred()
-                                + updatedJobDetail.getVolumeTransferred().longValue());
+                    if (updatedJobDetail.getVolumeTotal() != null) {
+                        job.setVolumeTotal(updatedJobDetail.getVolumeTotal()
+                            .longValue());
                     }
-                    else {
-                        job.setVolumeTransferred(updatedJobDetail.getVolumeTransferred().longValue());
+
+                    // fields that need to be updated after every step is finished
+                    if (updatedJobDetail.getFilesTransferred() != null) {
+                        if (job.getFilesTransferred() != null) {
+                            job.setFilesTransferred(job.getFilesTransferred()
+                                + updatedJobDetail.getFilesTransferred()
+                                    .intValue());
+                        }
+                        else {
+                            job.setFilesTransferred(updatedJobDetail
+                                .getFilesTransferred().intValue());
+                        }
                     }
-                }
 
-                job.setStatus(JobStatus.TRANSFERRING);
-                break;
-            case StatusValueType.INT_DONE:
-                job.setFinishedFlag(updatedJobDetail.getFinishedFlag());
-                job.setWorkerTerminatedTime(updatedJobDetail.getWorkerTerminatedTime().getTime());
-                job.setSuccessFlag(true);
-                job.setStatus(JobStatus.DONE);
+                    if (updatedJobDetail.getVolumeTransferred() != null) {
+                        if (job.getVolumeTransferred() != null) {
+                            job.setVolumeTransferred(job.getVolumeTransferred()
+                                + updatedJobDetail.getVolumeTransferred()
+                                    .longValue());
+                        }
+                        else {
+                            job.setVolumeTransferred(updatedJobDetail
+                                .getVolumeTransferred().longValue());
+                        }
+                    }
 
-                // also set the WS specific fields..
-                job.setJobAllDoneTime(new Date());
+                    job.setStatus(JobStatus.TRANSFERRING);
+                    break;
+                case StatusValueType.INT_DONE:
+                    job.setFinishedFlag(updatedJobDetail.getFinishedFlag());
+                    job.setWorkerTerminatedTime(updatedJobDetail
+                        .getWorkerTerminatedTime().getTime());
+                    job.setSuccessFlag(true);
+                    job.setStatus(JobStatus.DONE);
 
-                // TODO: need to think of how to handle error messages from WN so the success flag
-                // can be set
+                    // also set the WS specific fields..
+                    job.setJobAllDoneTime(new Date());
 
-                break;
-            default:
-                break;
+                    // TODO: need to think of how to handle error messages from WN so the success flag
+                    // can be set
+
+                    break;
+                default:
+                    break;
             }
             mJobRepository.saveOrUpdate(job);
         }
         else if (payload instanceof FireUpJobErrorEventDocument) {
-            LOG.info("DtsJobEventUpdateHandler received a FireUpJobErrorEvent.");
+            LOG
+                .info("DtsJobEventUpdateHandler received a FireUpJobErrorEvent.");
 
-            final FireUpJobErrorEvent errorEvent = ((FireUpJobErrorEventDocument) payload).getFireUpJobErrorEvent();
-            final String jobWithErrorResourceKey = errorEvent.getJobResourceKey();
-            final JobErrorEventDetailType jobErrorDetail = errorEvent.getJobErrorEventDetail();
+            final FireUpJobErrorEvent errorEvent = ((FireUpJobErrorEventDocument) payload)
+                .getFireUpJobErrorEvent();
+            final String jobWithErrorResourceKey = errorEvent
+                .getJobResourceKey();
+            final JobErrorEventDetailType jobErrorDetail = errorEvent
+                .getJobErrorEventDetail();
 
             // job to update
-            final Job job = mJobRepository.findByResourceKey(jobWithErrorResourceKey);
+            final Job job = mJobRepository
+                .findByResourceKey(jobWithErrorResourceKey);
             job.setStatus(JobStatus.FAILED);
             job.setSuccessFlag(false);
 
@@ -159,14 +177,20 @@ public class DtsJobEventUpdateHandler {
             mJobRepository.saveOrUpdate(job);
         }
         else if (payload instanceof FireUpStepFailureEventDocument) {
-            LOG.info("DtsJobEventUpdateHandler received a FireUpStepFailureEvent.");
+            LOG
+                .info("DtsJobEventUpdateHandler received a FireUpStepFailureEvent.");
 
             // TODO: handle the step failure event
         }
         else {
-            LOG.error("DtsJobEventUpdateHandler received an unknown update event from a WN.");
+            LOG
+                .error("DtsJobEventUpdateHandler received an unknown update event from a WN.");
 
             // TODO: provide an implementation
         }
+    }
+
+    public void setJobRepository(final JobDao jobRepository) {
+        mJobRepository = jobRepository;
     }
 }

@@ -27,39 +27,40 @@
  */
 package org.dataminx.dts.domain.jparepo;
 
-import org.dataminx.dts.ws.repo.JobDao;
-
-import org.dataminx.dts.ws.model.Job;
-
-import org.dataminx.dts.common.model.JobStatus;
-
 import java.io.FileInputStream;
 import java.sql.Connection;
 import java.util.List;
 import java.util.UUID;
+
 import javax.sql.DataSource;
-import junit.framework.Assert;
+
+import org.dataminx.dts.common.model.JobStatus;
+import org.dataminx.dts.ws.model.Job;
+import org.dataminx.dts.ws.repo.JobDao;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSet;
 import org.dbunit.operation.DatabaseOperation;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 /**
  * The JobJpaDaoImpl Unit Test.
  *
  * @author Gerson Galang
  */
-public class JobJpaDaoImplTest extends AbstractTransactionalDataSourceSpringContextTests {
+public class JobJpaDaoImplTest extends
+    AbstractTransactionalDataSourceSpringContextTests {
 
     /** The logger. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobJpaDaoImplTest.class);
+    private static final Logger LOGGER = LoggerFactory
+        .getLogger(JobJpaDaoImplTest.class);
 
     /** The Global Unique Id to be searched for. */
     private static final String SEARCH_GUID = "505f48c9-d31f-4c68-ba7b-1c69db06107a";
@@ -70,23 +71,23 @@ public class JobJpaDaoImplTest extends AbstractTransactionalDataSourceSpringCont
     public JobJpaDaoImplTest() {
         super();
         LOGGER.info("setting up test in JobJpaDaoImplTest constructor");
-        ApplicationContext ctx = super.getApplicationContext();
+        final ApplicationContext ctx = super.getApplicationContext();
         mJobRepository = (JobDao) ctx.getBean("jobRepository");
         assertNotNull(mJobRepository);
     }
 
     @Override
     protected String[] getConfigLocations() {
-        return new String[] {"testdomain-context.xml"};
+        return new String[] {"org/dataminx/dts/ws/testdomain-context.xml"};
     }
 
     @Override
     protected void onSetUpInTransaction() throws Exception {
-        DataSource dataSource = jdbcTemplate.getDataSource();
-        Connection con = DataSourceUtils.getConnection(dataSource);
-        IDatabaseConnection dbUnitCon = new DatabaseConnection(con);
-        IDataSet dataSet = new FlatXmlDataSet(
-            new FileInputStream("./src/test/resources/dbunit-test-data/JobJpaDaoImpl.xml"));
+        final DataSource dataSource = jdbcTemplate.getDataSource();
+        final Connection con = DataSourceUtils.getConnection(dataSource);
+        final IDatabaseConnection dbUnitCon = new DatabaseConnection(con);
+        final IDataSet dataSet = new FlatXmlDataSet(new FileInputStream(
+            "./src/test/resources/dbunit-test-data/JobJpaDaoImpl.xml"));
         try {
             DatabaseOperation.REFRESH.execute(dbUnitCon, dataSet);
         }
@@ -100,7 +101,7 @@ public class JobJpaDaoImplTest extends AbstractTransactionalDataSourceSpringCont
      */
     @Test
     public void testFindJobByResourceKey() {
-        Job job = mJobRepository.findByResourceKey(SEARCH_GUID);
+        final Job job = mJobRepository.findByResourceKey(SEARCH_GUID);
         Assert.assertEquals("job1", job.getName());
     }
 
@@ -109,8 +110,9 @@ public class JobJpaDaoImplTest extends AbstractTransactionalDataSourceSpringCont
      */
     @Test
     public void testFindJobByUser() {
-        List<Job> jobs = mJobRepository.findByUser("NEW_USER_1");
-        Assert.assertEquals("did not get expected number of entities", 3, jobs.size());
+        final List<Job> jobs = mJobRepository.findByUser("NEW_USER_1");
+        Assert.assertEquals(3, jobs.size(),
+            "did not get expected number of entities");
     }
 
     /**
@@ -118,11 +120,14 @@ public class JobJpaDaoImplTest extends AbstractTransactionalDataSourceSpringCont
      */
     @Test
     public void testFindJobByUserAndStatus() {
-        List<Job> jobs = mJobRepository.findByUserAndStatus("NEW_USER_1", JobStatus.DONE);
-        Assert.assertEquals("did not get expected number of entities", 1, jobs.size());
+        List<Job> jobs = mJobRepository.findByUserAndStatus("NEW_USER_1",
+            JobStatus.DONE);
+        Assert.assertEquals(1, jobs.size(),
+            "did not get expected number of entities");
 
         jobs = mJobRepository.findByUserAndStatus("NEW_USER_2", JobStatus.DONE);
-        Assert.assertEquals("did not get expected number of entities", 0, jobs.size());
+        Assert.assertEquals(0, jobs.size(),
+            "did not get expected number of entities");
     }
 
     /**
@@ -133,15 +138,16 @@ public class JobJpaDaoImplTest extends AbstractTransactionalDataSourceSpringCont
         Job job = null;
         job = new Job();
         job.setName("job6");
-        String newResourceKey = UUID.randomUUID().toString();
+        final String newResourceKey = UUID.randomUUID().toString();
         job.setResourceKey(newResourceKey);
         job.setStatus(JobStatus.CREATED);
         job.setSubjectName("NEW_USER_2");
         mJobRepository.saveOrUpdate(job);
 
-        List<Job> jobs = mJobRepository.findByUser("NEW_USER_2");
-        Assert.assertEquals("did not get expected number of entities", 3, jobs.size());
-        Assert.assertNotNull("entity did not get persisted", job.getJobId());
+        final List<Job> jobs = mJobRepository.findByUser("NEW_USER_2");
+        Assert.assertEquals(3, jobs.size(),
+            "did not get expected number of entities");
+        Assert.assertNotNull(job.getJobId(), "entity did not get persisted");
     }
 
     /**
@@ -149,14 +155,16 @@ public class JobJpaDaoImplTest extends AbstractTransactionalDataSourceSpringCont
      */
     @Test
     public void testFindAndUpdate() {
-        Job job = mJobRepository.findByResourceKey(SEARCH_GUID);
+        final Job job = mJobRepository.findByResourceKey(SEARCH_GUID);
         Assert.assertEquals("NEW_USER_1", job.getSubjectName());
 
         job.setStatus(JobStatus.DONE);
         mJobRepository.saveOrUpdate(job);
 
-        List<Job> jobs = mJobRepository.findByUserAndStatus("NEW_USER_1", JobStatus.DONE);
-        Assert.assertEquals("did not get expected number of entities", 2, jobs.size());
+        final List<Job> jobs = mJobRepository.findByUserAndStatus("NEW_USER_1",
+            JobStatus.DONE);
+        Assert.assertEquals(2, jobs.size(),
+            "did not get expected number of entities");
     }
 
 }

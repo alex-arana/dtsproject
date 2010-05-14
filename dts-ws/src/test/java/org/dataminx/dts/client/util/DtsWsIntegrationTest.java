@@ -27,28 +27,26 @@
  */
 package org.dataminx.dts.client.util;
 
-import org.dataminx.dts.ws.client.DataTransferServiceClient;
-
 import java.io.File;
-import junit.framework.Assert;
+
+import org.dataminx.dts.ws.client.DataTransferServiceClient;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 /**
  * The Unit Test for the integrated DTS WS, DTS Domain, and DTS Worker Node
  * modules.
- * 
+ *
  * @author Gerson Galang
  */
-@ContextConfiguration(locations = { "/client-context.xml" })
-@RunWith(SpringJUnit4ClassRunner.class)
-public class DtsWsIntegrationTest {
+@ContextConfiguration(locations = { "/org/dataminx/dts/ws/client-context.xml" })
+public class DtsWsIntegrationTest extends AbstractTestNGSpringContextTests {
 
     /** The DTS WS client. */
     @Autowired
@@ -59,10 +57,10 @@ public class DtsWsIntegrationTest {
 
     /**
      * Parses the test job and convert to a org.w3c.dom.Document object
-     * 
+     *
      * @throws Exception
      */
-    @Before
+    @BeforeClass
     public void parseDtsJobDef() throws Exception {
         final File f = new ClassPathResource("ws-minx-dts.xml").getFile();
         mDtsJob = JobDefinitionDocument.Factory.parse(f);
@@ -71,7 +69,7 @@ public class DtsWsIntegrationTest {
 
     /**
      * Test submit job.
-     * 
+     *
      * @throws Exception the exception
      */
     @Test
@@ -82,19 +80,20 @@ public class DtsWsIntegrationTest {
 
     /**
      * Test get job details.
-     * 
+     *
      * @throws Exception the exception
      */
     //@Test
     public void testGetJobDetails() throws Exception {
         final String jobResourceKey = mClient.submitJob(mDtsJob);
         Thread.sleep(2000);
-        Assert.assertEquals(jobResourceKey, mClient.getJobDetails(jobResourceKey).getJobResourceKey());
+        Assert.assertEquals(jobResourceKey, mClient.getJobDetails(
+            jobResourceKey).getJobResourceKey());
     }
 
     /**
      * Test get job status.
-     * 
+     *
      * @throws Exception the exception
      */
     //@Test
@@ -105,7 +104,7 @@ public class DtsWsIntegrationTest {
 
     /**
      * Test suspend job.
-     * 
+     *
      * @throws Exception the exception
      */
     //@Test
@@ -117,7 +116,7 @@ public class DtsWsIntegrationTest {
 
     /**
      * Test resume job.
-     * 
+     *
      * @throws Exception the exception
      */
     //@Test
@@ -125,12 +124,13 @@ public class DtsWsIntegrationTest {
         final String jobResourceKey = mClient.submitJob(mDtsJob);
         mClient.suspendJob(jobResourceKey);
         mClient.resumeJob(jobResourceKey);
-        Assert.assertEquals("Transferring", mClient.getJobStatus(jobResourceKey));
+        Assert.assertEquals("Transferring", mClient
+            .getJobStatus(jobResourceKey));
     }
 
     /**
      * Test cancel job.
-     * 
+     *
      * @throws Exception the exception
      */
     //@Test

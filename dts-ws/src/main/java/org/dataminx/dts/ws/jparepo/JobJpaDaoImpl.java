@@ -28,10 +28,12 @@
 package org.dataminx.dts.ws.jparepo;
 
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+
 import org.dataminx.dts.common.model.JobStatus;
 import org.dataminx.dts.ws.model.Job;
 import org.dataminx.dts.ws.repo.JobDao;
@@ -41,21 +43,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The Job Data Access Object's JPA implementation.
- * 
+ *
  * @author Gerson Galang
  */
 @Transactional
 public class JobJpaDaoImpl implements JobDao {
 
     /** The logger. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobJpaDaoImpl.class);
+    private static final Logger LOGGER = LoggerFactory
+        .getLogger(JobJpaDaoImpl.class);
 
     /** The entity manager. */
     private EntityManager mEntityManager;
 
     /**
      * Sets the entity manager.
-     * 
+     *
      * @param em the new entity manager
      */
     @PersistenceContext
@@ -65,7 +68,7 @@ public class JobJpaDaoImpl implements JobDao {
 
     /**
      * Gets the entity manager.
-     * 
+     *
      * @return the entity manager
      */
     private EntityManager getEntityManager() {
@@ -85,13 +88,16 @@ public class JobJpaDaoImpl implements JobDao {
      */
     public Job findByResourceKey(final String resourceKey) {
         LOGGER.debug("JobJapDaoImpl findByResourceKey()");
-        final Query query = mEntityManager.createNamedQuery("Job.findJobByResourceKey");
+        final Query query = mEntityManager
+            .createNamedQuery("Job.findJobByResourceKey");
         query.setParameter("resourceKey", resourceKey);
         Job foundJob = null;
         try {
             foundJob = (Job) query.getSingleResult();
-        } catch (final NoResultException e) {
+        }
+        catch (final NoResultException e) {
             // do nothing
+            LOGGER.debug(resourceKey + " is not found in the DB.");
         }
         return foundJob;
     }
@@ -101,7 +107,8 @@ public class JobJpaDaoImpl implements JobDao {
      */
     public List<Job> findByUser(final String subjectName) {
         LOGGER.debug("JobJapDaoImpl findByUser()");
-        final Query query = mEntityManager.createNamedQuery("Job.findJobByUser");
+        final Query query = mEntityManager
+            .createNamedQuery("Job.findJobByUser");
         query.setParameter("userDN", subjectName);
         return query.getResultList();
     }
@@ -109,9 +116,11 @@ public class JobJpaDaoImpl implements JobDao {
     /**
      * {@inheritDoc}
      */
-    public List<Job> findByUserAndStatus(final String subjectName, final JobStatus status) {
+    public List<Job> findByUserAndStatus(final String subjectName,
+        final JobStatus status) {
         LOGGER.debug("JobJapDaoImpl findByUserAndStatus()");
-        final Query query = mEntityManager.createNamedQuery("Job.findJobByUserAndStatus");
+        final Query query = mEntityManager
+            .createNamedQuery("Job.findJobByUserAndStatus");
         query.setParameter("userDN", subjectName);
         query.setParameter("status", status);
         return query.getResultList();

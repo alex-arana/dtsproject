@@ -27,19 +27,17 @@
  */
 package org.dataminx.dts.ws;
 
-import org.dataminx.dts.ws.service.DataTransferService;
-
-import org.dataminx.dts.ws.model.Job;
-
-import org.dataminx.dts.common.ws.InvalidJobDefinitionException;
-
 import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataminx.dts.common.ws.InvalidJobDefinitionException;
+import org.dataminx.dts.ws.model.Job;
+import org.dataminx.dts.ws.service.DataTransferService;
 import org.dataminx.dts.ws.validator.DtsJobDefinitionValidator;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobDetailsRequestDocument;
@@ -52,8 +50,9 @@ import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobResponseDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SuspendJobRequestDocument;
 import org.ogf.schemas.dmi.x2008.x05.dmi.StatusValueType;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.MessageSource;
+import org.springframework.util.Assert;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.MapBindingResult;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
@@ -62,17 +61,38 @@ import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 /**
  * The DataTransferServiceEndpoint processes the incoming XML messages and
  * produces a response from/to the DTS client.
- * 
+ *
  * @author Gerson Galang
  */
 @Endpoint
-public class DataTransferServiceEndpoint {
+public class DataTransferServiceEndpoint implements InitializingBean {
 
     /** The logger. */
-    private static final Log LOGGER = LogFactory.getLog(DataTransferServiceEndpoint.class);
+    private static final Log LOGGER = LogFactory
+        .getLog(DataTransferServiceEndpoint.class);
+
+    /** The DTS Messages namespace. */
+    private static final String DTS_MESSAGES_NS = "http://schemas.dataminx.org/dts/2009/07/messages";
+
+    /** The submitJobRequest element name. */
+    private static final String SUBMIT_JOB_REQUEST_LOCAL_NAME = "submitJobRequest";
+
+    /** The cancelJobRequest element name. */
+    private static final String CANCEL_JOB_REQUEST_LOCAL_NAME = "cancelJobRequest";
+
+    /** The suspendJobRequest element name. */
+    private static final String SUSPEND_JOB_REQUEST_LOCAL_NAME = "suspendJobRequest";
+
+    /** The resumeJobRequest element name. */
+    private static final String RESUME_JOB_REQUEST_LOCAL_NAME = "resumeJobRequest";
+
+    /** The getJobStatusRequest element name. */
+    private static final String GET_JOB_STATUS_REQUEST_LOCAL_NAME = "getJobStatusRequest";
+
+    /** The getJobDetailsRequest element name. */
+    private static final String GET_JOB_DETAILS_REQUEST_LOCAL_NAME = "getJobDetailsRequest";
 
     /** The data transfer service. */
-    @Autowired
     private DataTransferService mDataTransferService;
 
     /**
@@ -87,30 +107,22 @@ public class DataTransferServiceEndpoint {
      */
     private MessageSource mMessageSource;
 
-    /** The DTS Messages namespace. */
-    private static final String DTS_MESSAGES_NS = "http://schemas.dataminx.org/dts/2009/07/messages";
-
-    private static final String SUBMIT_JOB_REQUEST_LOCAL_NAME = "submitJobRequest";
-    private static final String CANCEL_JOB_REQUEST_LOCAL_NAME = "cancelJobRequest";
-    private static final String SUSPEND_JOB_REQUEST_LOCAL_NAME = "suspendJobRequest";
-    private static final String RESUME_JOB_REQUEST_LOCAL_NAME = "resumeJobRequest";
-    private static final String GET_JOB_STATUS_REQUEST_LOCAL_NAME = "getJobStatusRequest";
-    private static final String GET_JOB_DETAILS_REQUEST_LOCAL_NAME = "getJobDetailsRequest";
-
     /**
      * Handles the submit job request.
-     * 
+     *
      * @param request the submit job request
-     * 
+     *
      * @return the response to the submit job call
      */
     @PayloadRoot(localPart = SUBMIT_JOB_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
     public SubmitJobResponseDocument doit(final SubmitJobRequestDocument request) {
         LOGGER.debug("DataTransferServiceEndpoint doit(SubmitJobRequest)");
 
-        final MapBindingResult errors = new MapBindingResult(new HashMap(), "jobDefinitionErrors");
+        final MapBindingResult errors = new MapBindingResult(new HashMap(),
+            "jobDefinitionErrors");
 
-        mDtsJobDefinitionValidator.validate(request.getSubmitJobRequest().getJobDefinition(), errors);
+        mDtsJobDefinitionValidator.validate(request.getSubmitJobRequest()
+            .getJobDefinition(), errors);
 
         if (errors.hasErrors()) {
             //FieldError error = errors.getFieldError("jobIdentification.jobName");
@@ -118,23 +130,26 @@ public class DataTransferServiceEndpoint {
             final StringBuffer validationErrors = new StringBuffer();
             String validationErrorMessage = "";
             for (final FieldError fieldError : fieldErrors) {
-                validationErrorMessage = mMessageSource.getMessage(fieldError, Locale.getDefault());
+                validationErrorMessage = mMessageSource.getMessage(fieldError,
+                    Locale.getDefault());
                 validationErrors.append(validationErrorMessage).append("\n");
             }
-            throw new InvalidJobDefinitionException("Invalid job request\n" + validationErrors);
+            throw new InvalidJobDefinitionException("Invalid job request\n"
+                + validationErrors);
         }
 
         final String jobResourceKey = mDataTransferService.submitJob(request);
         LOGGER.info("New job '" + jobResourceKey + "' created.");
 
-        final SubmitJobResponseDocument response = SubmitJobResponseDocument.Factory.newInstance();
+        final SubmitJobResponseDocument response = SubmitJobResponseDocument.Factory
+            .newInstance();
         response.addNewSubmitJobResponse().setJobResourceKey(jobResourceKey);
         return response;
     }
 
     /**
      * Handles the cancel job request.
-     * 
+     *
      * @param request the cancel job request
      */
     @PayloadRoot(localPart = CANCEL_JOB_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
@@ -145,7 +160,7 @@ public class DataTransferServiceEndpoint {
 
     /**
      * Handles the suspend job request.
-     * 
+     *
      * @param request the suspend job request
      */
     @PayloadRoot(localPart = SUSPEND_JOB_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
@@ -156,7 +171,7 @@ public class DataTransferServiceEndpoint {
 
     /**
      * Handles the resume job request.
-     * 
+     *
      * @param request the resume job request
      */
     @PayloadRoot(localPart = RESUME_JOB_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
@@ -167,35 +182,41 @@ public class DataTransferServiceEndpoint {
 
     /**
      * Handles the get job status request.
-     * 
+     *
      * @param request the get job status request
-     * 
+     *
      * @return the response to the get job status call
      */
     @PayloadRoot(localPart = GET_JOB_STATUS_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
-    public GetJobStatusResponseDocument doit(final GetJobStatusRequestDocument request) {
+    public GetJobStatusResponseDocument doit(
+        final GetJobStatusRequestDocument request) {
         LOGGER.debug("DataTransferServiceEndpoint doit(GetJobStatusRequest)");
         final String status = mDataTransferService.getJobStatus(request);
-        final GetJobStatusResponseDocument response = GetJobStatusResponseDocument.Factory.newInstance();
-        response.addNewGetJobStatusResponse().addNewState().setValue(StatusValueType.Enum.forString(status));
+        final GetJobStatusResponseDocument response = GetJobStatusResponseDocument.Factory
+            .newInstance();
+        response.addNewGetJobStatusResponse().addNewState().setValue(
+            StatusValueType.Enum.forString(status));
         return response;
     }
 
     /**
      * Handles the get job details request.
-     * 
+     *
      * @param request the get job status request
-     * 
+     *
      * @return the response to the get job status call
      */
     @PayloadRoot(localPart = GET_JOB_DETAILS_REQUEST_LOCAL_NAME, namespace = DTS_MESSAGES_NS)
-    public GetJobDetailsResponseDocument doit(final GetJobDetailsRequestDocument request) {
+    public GetJobDetailsResponseDocument doit(
+        final GetJobDetailsRequestDocument request) {
         LOGGER.debug("DataTransferServiceEndpoint doit(GetJobDetailsRequest)");
         final Job foundJob = mDataTransferService.getJobDetails(request);
 
-        final GetJobDetailsResponseDocument response = GetJobDetailsResponseDocument.Factory.newInstance();
+        final GetJobDetailsResponseDocument response = GetJobDetailsResponseDocument.Factory
+            .newInstance();
 
-        final JobDetailsType jobDetails = response.addNewGetJobDetailsResponse().addNewJobDetails();
+        final JobDetailsType jobDetails = response
+            .addNewGetJobDetailsResponse().addNewJobDetails();
         fillInJobDetails(foundJob, jobDetails);
 
         return response;
@@ -203,36 +224,43 @@ public class DataTransferServiceEndpoint {
 
     /**
      * Sets the {@link DtsJobDefinitionValidator}.
-     * 
+     *
      * @param dtsJobDefinitionValidator the {@link DtsJobDefinitionValidator} to
      *        use
      */
-    public void setDtsJobDefinitionValidator(final DtsJobDefinitionValidator dtsJobDefinitionValidator) {
+    public void setDtsJobDefinitionValidator(
+        final DtsJobDefinitionValidator dtsJobDefinitionValidator) {
         mDtsJobDefinitionValidator = dtsJobDefinitionValidator;
     }
 
     /**
      * Sets the {@link MessageSource}.
-     * 
+     *
      * @param messageSource the {@link MessageSource} to use
      */
     public void setMessageSource(final MessageSource messageSource) {
         mMessageSource = messageSource;
     }
 
+    public void setDataTransferService(
+        final DataTransferService dataTransferService) {
+        mDataTransferService = dataTransferService;
+    }
+
     /**
      * Fills in the JobDetails object with information about the job taken from
      * the WS DB.
-     * 
-     * @param job
-     * @param jobDetails
+     *
+     * @param job the Job
+     * @param jobDetails the JobDetailsType
      */
     private void fillInJobDetails(final Job job, final JobDetailsType jobDetails) {
         jobDetails.setJobResourceKey(job.getResourceKey());
         if (job.getName() != null) {
             jobDetails.setJobName(job.getName());
         }
-        jobDetails.setStatus(StatusValueType.Enum.forString(job.getStatus().getStringValue()));
+        jobDetails.setStatus(StatusValueType.Enum.forString(job.getStatus()
+            .getStringValue()));
         if (job.getSubjectName() != null) {
             jobDetails.setOwner(job.getSubjectName());
         }
@@ -271,14 +299,27 @@ public class DataTransferServiceEndpoint {
             jobDetails.setFilesTotal(BigInteger.valueOf(job.getFilesTotal()));
         }
         if (job.getFilesTransferred() != null) {
-            jobDetails.setFilesTransferred(BigInteger.valueOf(job.getFilesTransferred()));
+            jobDetails.setFilesTransferred(BigInteger.valueOf(job
+                .getFilesTransferred()));
         }
         if (job.getVolumeTotal() != null) {
             jobDetails.setVolumeTotal(BigInteger.valueOf(job.getVolumeTotal()));
         }
         if (job.getVolumeTransferred() != null) {
-            jobDetails.setVolumeTransferred(BigInteger.valueOf(job.getVolumeTransferred()));
+            jobDetails.setVolumeTransferred(BigInteger.valueOf(job
+                .getVolumeTransferred()));
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void afterPropertiesSet() throws Exception {
+        Assert.notNull(mDataTransferService,
+            "DataTransferService has not been set.");
+        Assert.notNull(mMessageSource, "MessageSource has not been set.");
+        Assert.notNull(mDtsJobDefinitionValidator,
+            "DtsJobDefinitionValidator has not been set.");
     }
 
 }

@@ -6,10 +6,7 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context-2.5.xsd">
-
-    
-    <context:property-placeholder location="ws.properties"/>
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd">           
     
     <!-- Manually start server after setting parent context. (init-method="start") -->
     <bean id="jettyServer"
@@ -50,7 +47,7 @@
                                         <property name="initParameters">
                                             <map>
                                                 <entry key="contextConfigLocation" 
-                                                       value="classpath:/dts-servlet.xml classpath:/domain-context.xml classpath:/activemq/jms-context.xml classpath:/integration-context.xml" />
+                                                       value="classpath:/org/dataminx/dts/ws/application-context.xml classpath:/org/dataminx/dts/ws/dts-servlet.xml classpath:/org/dataminx/dts/ws/domain-context.xml classpath:/org/dataminx/dts/ws/activemq/jms-context.xml classpath:/org/dataminx/dts/ws/integration-context.xml" />
                                             </map>
                                         </property>
                                     </bean>

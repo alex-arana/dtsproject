@@ -28,6 +28,7 @@
 package org.dataminx.dts.ws;
 
 import javax.servlet.ServletContext;
+
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
@@ -49,29 +50,31 @@ public class JettyEmbeddedDtsWebService {
      * @throws Exception if the Server fails to start
      */
     public void run() throws Exception {
-        AbstractApplicationContext ctx =
-            new ClassPathXmlApplicationContext("/embedded-jetty-context.xml");
+        final AbstractApplicationContext ctx = new ClassPathXmlApplicationContext(
+            new String[] {"/org/dataminx/dts/ws/application-context.xml",
+                "/org/dataminx/dts/ws/embedded-jetty-context.xml"});
         ctx.registerShutdownHook();
 
-        Server server = (Server) ctx.getBean("jettyServer");
+        final Server server = (Server) ctx.getBean("jettyServer");
 
         ServletContext servletContext = null;
 
-        for (Handler handler : server.getHandlers()) {
+        for (final Handler handler : server.getHandlers()) {
             if (handler instanceof Context) {
-                Context context = (Context) handler;
+                final Context context = (Context) handler;
 
                 servletContext = context.getServletContext();
             }
         }
 
-        XmlWebApplicationContext wctx = new XmlWebApplicationContext();
+        final XmlWebApplicationContext wctx = new XmlWebApplicationContext();
         wctx.setParent(ctx);
         wctx.setConfigLocation("");
         wctx.setServletContext(servletContext);
         wctx.refresh();
 
-        servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wctx);
+        servletContext.setAttribute(
+            WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wctx);
 
         server.start();
     }
@@ -82,7 +85,7 @@ public class JettyEmbeddedDtsWebService {
      * @param args the arguments
      * @throws Exception if the Jetty server fails to start
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
         new JettyEmbeddedDtsWebService().run();
     }
 
