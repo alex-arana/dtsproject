@@ -44,14 +44,17 @@ import org.dataminx.dts.common.model.JobStatus;
 
 /**
  * The Job Entity.
- * 
+ *
  * @author Gerson Galang
  */
 @Entity
-@NamedQueries( {
-        @NamedQuery(name = "Job.findJobByResourceKey", query = "SELECT j FROM Job j WHERE j.resourceKey = :resourceKey"),
-        @NamedQuery(name = "Job.findJobByUser", query = "SELECT j FROM Job j WHERE j.subjectName = :userDN"),
-        @NamedQuery(name = "Job.findJobByUserAndStatus", query = "SELECT j FROM Job j WHERE j.subjectName = :userDN AND j.status = :status") })
+@NamedQueries({
+        @NamedQuery(name = "Job.findJobByResourceKey",
+                    query = "SELECT j FROM Job j WHERE j.resourceKey = :resourceKey"),
+        @NamedQuery(name = "Job.findJobByUser",
+                    query = "SELECT j FROM Job j WHERE j.subjectName = :userDN"),
+        @NamedQuery(name = "Job.findJobByUserAndStatus",
+                    query = "SELECT j FROM Job j WHERE j.subjectName = :userDN AND j.status = :status") })
 @Table(name = "job")
 public class Job {
 
@@ -120,7 +123,7 @@ public class Job {
 
     /**
      * Gets the job id.
-     * 
+     *
      * @return the job id
      */
     @Id
@@ -132,7 +135,7 @@ public class Job {
 
     /**
      * Sets the job id.
-     * 
+     *
      * @param jobId the new job id
      */
     public void setJobId(final Integer jobId) {
@@ -141,7 +144,7 @@ public class Job {
 
     /**
      * Gets the job resource key.
-     * 
+     *
      * @return the job resource key
      */
     @Column(name = "resource_key")
@@ -151,7 +154,7 @@ public class Job {
 
     /**
      * Sets the job resource key.
-     * 
+     *
      * @param resourceKey the new job resource key
      */
     public void setResourceKey(final String resourceKey) {
@@ -160,7 +163,7 @@ public class Job {
 
     /**
      * Gets the job name.
-     * 
+     *
      * @return the job name
      */
     @Column(name = "name")
@@ -170,7 +173,7 @@ public class Job {
 
     /**
      * Sets the job name.
-     * 
+     *
      * @param name the new job name
      */
     public void setName(final String name) {
@@ -179,7 +182,7 @@ public class Job {
 
     /**
      * Gets the status.
-     * 
+     *
      * @return the status
      */
     @Enumerated(EnumType.ORDINAL)
@@ -190,7 +193,7 @@ public class Job {
 
     /**
      * Sets the status.
-     * 
+     *
      * @param status the new status
      */
     public void setStatus(final JobStatus status) {
@@ -199,7 +202,7 @@ public class Job {
 
     /**
      * Gets the distinguished name of the owner of this job.
-     * 
+     *
      * @return the subject name
      */
     @Column(name = "subject_name")
@@ -209,7 +212,7 @@ public class Job {
 
     /**
      * Sets the distinguished name of the owner of this job.
-     * 
+     *
      * @param subjectName the new subject name
      */
     public void setSubjectName(final String subjectName) {
@@ -218,7 +221,7 @@ public class Job {
 
     /**
      * Gets the job description.
-     * 
+     *
      * @return the job description
      */
     @Column(name = "job_description")
@@ -228,7 +231,7 @@ public class Job {
 
     /**
      * Sets the job description.
-     * 
+     *
      * @param jobDescription the new job description
      */
     public void setJobDescription(final String jobDescription) {
@@ -237,7 +240,7 @@ public class Job {
 
     /**
      * Gets the creation time.
-     * 
+     *
      * @return the creation time
      */
     @Temporal(TemporalType.TIMESTAMP)
@@ -248,7 +251,7 @@ public class Job {
 
     /**
      * Sets the creation time.
-     * 
+     *
      * @param creationTime the new creation time
      */
     public void setCreationTime(final Date creationTime) {
@@ -257,7 +260,7 @@ public class Job {
 
     /**
      * Gets the queued time.
-     * 
+     *
      * @return the queued time
      */
     @Temporal(TemporalType.TIMESTAMP)
@@ -268,7 +271,7 @@ public class Job {
 
     /**
      * Sets the queued time.
-     * 
+     *
      * @param queuedTime the new queued time
      */
     public void setQueuedTime(final Date queuedTime) {
@@ -277,7 +280,7 @@ public class Job {
 
     /**
      * Checks if is success flag.
-     * 
+     *
      * @return the boolean
      */
     @Column(name = "success_flag")
@@ -287,7 +290,7 @@ public class Job {
 
     /**
      * Sets the success flag.
-     * 
+     *
      * @param successFlag the new success flag
      */
     public void setSuccessFlag(final Boolean successFlag) {
@@ -296,7 +299,7 @@ public class Job {
 
     /**
      * Checks if is finished flag.
-     * 
+     *
      * @return the boolean
      */
     @Column(name = "finished_flag")
@@ -306,7 +309,7 @@ public class Job {
 
     /**
      * Sets the finished flag.
-     * 
+     *
      * @param finishedFlag the new finished flag
      */
     public void setFinishedFlag(final Boolean finishedFlag) {
@@ -315,7 +318,7 @@ public class Job {
 
     /**
      * Gets the active time.
-     * 
+     *
      * @return the active time
      */
     @Temporal(TemporalType.TIMESTAMP)
@@ -326,7 +329,7 @@ public class Job {
 
     /**
      * Sets the active time.
-     * 
+     *
      * @param activeTime the new active time
      */
     public void setActiveTime(final Date activeTime) {
@@ -335,7 +338,7 @@ public class Job {
 
     /**
      * Gets the worker terminated time.
-     * 
+     *
      * @return the worker terminated time
      */
     @Temporal(TemporalType.TIMESTAMP)
@@ -346,7 +349,7 @@ public class Job {
 
     /**
      * Sets the worker terminated time.
-     * 
+     *
      * @param workerTerminatedTime the new worker terminated time
      */
     public void setWorkerTerminatedTime(final Date workerTerminatedTime) {
@@ -355,7 +358,7 @@ public class Job {
 
     /**
      * Gets the job all done time.
-     * 
+     *
      * @return the job all done time
      */
     @Temporal(TemporalType.TIMESTAMP)
@@ -366,7 +369,7 @@ public class Job {
 
     /**
      * Sets the job all done time.
-     * 
+     *
      * @param jobAllDoneTime the new job all done time
      */
     public void setJobAllDoneTime(final Date jobAllDoneTime) {
@@ -375,7 +378,7 @@ public class Job {
 
     /**
      * Gets the client hostname.
-     * 
+     *
      * @return the client hostname
      */
     @Column(name = "client_hostname")
@@ -385,7 +388,7 @@ public class Job {
 
     /**
      * Sets the client hostname.
-     * 
+     *
      * @param clientHostname the new client hostname
      */
     public void setClientHostname(final String clientHostname) {
@@ -394,7 +397,7 @@ public class Job {
 
     /**
      * Gets the execution host.
-     * 
+     *
      * @return the execution host
      */
     @Column(name = "execution_host")
@@ -404,7 +407,7 @@ public class Job {
 
     /**
      * Sets the execution host.
-     * 
+     *
      * @param executionHost the new execution host
      */
     public void setExecutionHost(final String executionHost) {
@@ -413,7 +416,7 @@ public class Job {
 
     /**
      * Gets the worker node host.
-     * 
+     *
      * @return the worker node host
      */
     @Column(name = "worker_node_host")
@@ -423,7 +426,7 @@ public class Job {
 
     /**
      * Sets the worker node host.
-     * 
+     *
      * @param workerNodeHost the new worker node host
      */
     public void setWorkerNodeHost(final String workerNodeHost) {
@@ -432,7 +435,7 @@ public class Job {
 
     /**
      * Gets the version.
-     * 
+     *
      * @return the version
      */
     @Column(name = "version")
@@ -442,7 +445,7 @@ public class Job {
 
     /**
      * Sets the version.
-     * 
+     *
      * @param version the new version
      */
     public void setVersion(final String version) {
@@ -451,7 +454,7 @@ public class Job {
 
     /**
      * Gets the files total.
-     * 
+     *
      * @return the files total
      */
     @Column(name = "files_total")
@@ -461,7 +464,7 @@ public class Job {
 
     /**
      * Sets the files total.
-     * 
+     *
      * @param filesTotal the new files total
      */
     public void setFilesTotal(final Integer filesTotal) {
@@ -470,7 +473,7 @@ public class Job {
 
     /**
      * Gets the files transferred.
-     * 
+     *
      * @return the files transferred
      */
     @Column(name = "files_transferred")
@@ -480,7 +483,7 @@ public class Job {
 
     /**
      * Sets the files transferred.
-     * 
+     *
      * @param filesTransferred the new files transferred
      */
     public void setFilesTransferred(final Integer filesTransferred) {
@@ -489,7 +492,7 @@ public class Job {
 
     /**
      * Gets the volume total.
-     * 
+     *
      * @return the volume total
      */
     @Column(name = "volume_total")
@@ -499,7 +502,7 @@ public class Job {
 
     /**
      * Sets the volume total.
-     * 
+     *
      * @param volumeTotal the new volume total
      */
     public void setVolumeTotal(final Long volumeTotal) {
@@ -508,7 +511,7 @@ public class Job {
 
     /**
      * Gets the volume transferred.
-     * 
+     *
      * @return the volume transferred
      */
     @Column(name = "volume_transferred")
@@ -518,7 +521,7 @@ public class Job {
 
     /**
      * Sets the volume transferred.
-     * 
+     *
      * @param volumeTransferred the new volume transferred
      */
     public void setVolumeTransferred(final Long volumeTransferred) {

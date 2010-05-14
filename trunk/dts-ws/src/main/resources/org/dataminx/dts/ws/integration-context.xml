@@ -29,10 +29,12 @@
 
   <beans:bean id="dtsWsMessageConverter"
               class="org.dataminx.dts.ws.jms.DtsWsMessageConverter">
+    <beans:property name="transformer" ref="dtsWsMessagePayloadTransformer" />
   </beans:bean>
 
   <beans:bean id="dtsJobEventUpdateHandler"
               class="org.dataminx.dts.ws.jms.DtsJobEventUpdateHandler">
+    <beans:property name="jobRepository" ref="jobRepository"/>
   </beans:bean>
 
   <!-- The DTS Job Event Updates Endpoint -->

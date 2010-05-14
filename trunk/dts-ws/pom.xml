@@ -233,9 +233,38 @@
       <artifactId>saaj-impl</artifactId>
       <scope>runtime</scope>
     </dependency>
+    
+    <!-- TestNG -->
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>${testng.version}</version>
+      <scope>test</scope>
+      <classifier>jdk15</classifier>
+    </dependency>
   </dependencies>
 
   <build>
+    <!--
+      Enable resource filters as a workaround to the issue of accidentally uploading Credential details on the test
+      files. Using filters is also a good way to avoid overwriting another developers desktop specific settings (ie
+      Windows or Unix format used for 'file://')
+    -->
+    <filters>
+      <filter>src/test/filters/filter.properties</filter>
+    </filters>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <!-- Handy plugin if we want to output the DDL -->
@@ -261,7 +290,7 @@
             <implementation>jpaconfiguration</implementation>
             <persistenceunit>punit</persistenceunit>
             <outputfilename>dtsjob.ddl</outputfilename>
-            <propertyfile>${basedir}/src/main/resources/database.properties</propertyfile>
+            <propertyfile>${dataminx.dir}/dts-ws.properties</propertyfile>
             <drop>true</drop>
             <create>true</create>
             <export>false</export>

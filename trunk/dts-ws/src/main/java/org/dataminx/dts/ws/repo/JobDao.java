@@ -27,11 +27,10 @@
  */
 package org.dataminx.dts.ws.repo;
 
-import org.dataminx.dts.ws.model.Job;
+import java.util.List;
 
 import org.dataminx.dts.common.model.JobStatus;
-
-import java.util.List;
+import org.dataminx.dts.ws.model.Job;
 
 /**
  * The Job Data Access Object. This provides operations for accessing and making changes to the Job entity.

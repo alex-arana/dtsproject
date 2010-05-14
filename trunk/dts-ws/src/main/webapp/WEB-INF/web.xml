@@ -11,7 +11,7 @@
     </servlet-class>
     <init-param>
       <param-name>contextConfigLocation</param-name>
-      <param-value>classpath:/dts-servlet.xml classpath:/domain-context.xml classpath:/activemq/jms-context.xml classpath:/integration-context.xml</param-value>
+      <param-value>classpath:/org/dataminx/dts/ws/application-context.xml classpath:/org/dataminx/dts/ws/dts-servlet.xml classpath:/org/dataminx/dts/ws/domain-context.xml classpath:/org/dataminx/dts/ws/activemq/jms-context.xml classpath:/org/dataminx/dts/ws/integration-context.xml</param-value>
     </init-param>
 
   </servlet>

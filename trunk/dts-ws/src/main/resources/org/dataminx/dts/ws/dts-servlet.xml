@@ -84,6 +84,7 @@
     <description>This endpoint handles data transfer requests.</description>
     <property name="dtsJobDefinitionValidator" ref="dtsJobDefinitionValidator" />
     <property name="messageSource" ref="messageSource" />
+    <property name="dataTransferService" ref="dataTransferService" />
   </bean>
 
   <bean id="dtsJobDefinitionValidator" class="org.dataminx.dts.ws.validator.DefaultDtsJobDefinitionValidator">
@@ -101,10 +102,16 @@
 
   <bean id="dataTransferService" class="org.dataminx.dts.ws.service.DataTransferServiceImpl">
     <description>This bean is our "business" service.</description>
+    <property name="jobQueueSender" ref="mQueueSender" />
+    <property name="jobRepository" ref="jobRepository" />
+    <property name="marshaller" ref="marshaller" />
   </bean>
 
   <!-- Message Sender -->
-  <bean id="messageSender" class="org.dataminx.dts.jms.JobSubmitQueueSender" />
+  <bean id="mQueueSender" class="org.dataminx.dts.common.jms.JobQueueSender">
+    <property name="mQueue" ref="jmsJobSubmitQueue"/>
+    <property name="mJmsTemplate" ref="jmsTemplate"/>
+  </bean>
 
   <!-- Configure XML Marshaller -->
   <bean class="org.springframework.ws.server.endpoint.adapter.GenericMarshallingMethodEndpointAdapter">
@@ -157,19 +164,6 @@
       </props>
     </property>
     <property name="order" value="3" />
-  </bean>
-
-  <bean id="wsApplicationProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    <property name="locations">
-      <list>
-        <value>classpath:/jms.properties</value>
-        <value>classpath:/ws.properties</value>
-        <value>classpath:/database.properties</value>
-      </list>
-    </property>
-    <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
-    <property name="ignoreUnresolvablePlaceholders" value="false" />
-    <property name="order" value="1" />
   </bean>
 
 </beans>
