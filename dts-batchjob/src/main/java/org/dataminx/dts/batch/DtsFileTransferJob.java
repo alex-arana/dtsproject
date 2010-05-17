@@ -295,6 +295,7 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
         }
         else {
             execution.setStatus(BatchStatus.FAILED);
+            getJobNotificationService().notifyJobError(getJobId(), execution);
         }
     }
 
