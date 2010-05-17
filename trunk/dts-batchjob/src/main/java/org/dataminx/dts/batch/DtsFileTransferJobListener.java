@@ -39,7 +39,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.batch.common.DtsBatchJobConstants;
 import org.dataminx.dts.batch.common.util.ExecutionContextCleaner;
-import org.dataminx.dts.batch.service.JobNotificationService;
 import org.dataminx.dts.common.vfs.FileSystemManagerCache;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -68,8 +67,6 @@ public class DtsFileTransferJobListener implements JobExecutionListener,
 
     /** A reference to the ExecutionContextCleaner. */
     private ExecutionContextCleaner mExecutionContextCleaner;
-
-    private JobNotificationService mJobNotificationService;
 
     /**
      * Performs a cleanup of the user's credentials on the Spring Batch DB after the job completes.
@@ -120,12 +117,6 @@ public class DtsFileTransferJobListener implements JobExecutionListener,
                 jobExecution, DTS_SUBMIT_JOB_REQUEST_KEY);
             removeJobStepFiles(jobExecution.getExecutionContext().getString(
                 DtsBatchJobConstants.DTS_JOB_RESOURCE_KEY));
-        }
-
-        if (jobExecution.getStatus().equals(BatchStatus.FAILED)) {
-            mJobNotificationService.notifyJobError(jobExecution
-                .getExecutionContext().getString(
-                    DtsBatchJobConstants.DTS_JOB_RESOURCE_KEY), jobExecution);
         }
     }
 
@@ -182,10 +173,5 @@ public class DtsFileTransferJobListener implements JobExecutionListener,
 
     public void setJobExplorer(final JobExplorer jobExplorer) {
         mJobExplorer = jobExplorer;
-    }
-
-    public void setJobNotificationService(
-        final JobNotificationService jobNotificationService) {
-        mJobNotificationService = jobNotificationService;
     }
 }
