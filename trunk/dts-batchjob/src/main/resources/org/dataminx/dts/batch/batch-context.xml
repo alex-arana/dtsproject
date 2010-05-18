@@ -108,6 +108,7 @@
     <property name="fileSystemManagerCache" ref="fileSystemManagerCache"/>
     <property name="stopwatchTimer" ref="stopwatchTimer"/>
     <property name="encrypter" ref="encryptionPlugin" />
+    <property name="jobOperator" ref="jobOperator" />
   </bean>
   
   <bean id="fileCopyingService" class="org.dataminx.dts.batch.service.FileCopyingServiceImpl">
@@ -208,4 +209,21 @@
     <property name="jobRepository" ref="jobRepository"/>
     <property name="jobExplorer" ref="jobExplorer"/>
   </bean>
+  
+  <bean id="jobOperator" class="org.springframework.batch.core.launch.support.SimpleJobOperator">
+    <property name="jobExplorer" >
+        <bean class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">
+            <property name="dataSource" ref="dataSource" />
+        </bean>
+    </property>
+    <property name="jobRepository" ref="jobRepository" />
+    <property name="jobRegistry" ref="jobRegistry" />
+    <property name="jobLauncher" ref="dtsJobLauncher" />
+  </bean>
+  
+  <bean id="jobRegistry" class="org.springframework.batch.core.configuration.support.MapJobRegistry" />
+  <bean id="jobRegistryBeanPostProcessor" class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">
+    <property name="jobRegistry" ref="jobRegistry"/>
+  </bean>
+  
 </beans>
