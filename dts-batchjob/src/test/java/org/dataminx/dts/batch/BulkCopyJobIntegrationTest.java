@@ -22,6 +22,8 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobOperator;
+import org.springframework.batch.core.launch.NoSuchJobException;
+import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
@@ -128,7 +130,7 @@ public class BulkCopyJobIntegrationTest extends
     @Test
     public void testSuspendResume() throws Exception {
         final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/transfer-20files.xml").getFile();
+            "/org/dataminx/dts/batch/transfer-suspend.xml").getFile();
         mDtsJob = JobDefinitionDocument.Factory.parse(f);
         assertNotNull(mDtsJob);
 
@@ -160,10 +162,14 @@ public class BulkCopyJobIntegrationTest extends
 
         jobLauncherThread.start();
 
-        Thread.sleep(1000);
+        // let's wait for a while and let the job start before we get
+        // the details of the job in the database.
+        Thread.sleep(10000);
 
         long executionId = 0;
 
+        // now that the job is running and has persisted itself in the DB,
+        // let's stop (suspend) its execution
         for (final String jobName : mJobOperator.getJobNames()) {
             if (jobName.equals(jobId)) {
                 LOGGER.debug("Found the running job to be cancelled");
@@ -177,6 +183,8 @@ public class BulkCopyJobIntegrationTest extends
             }
         }
 
+        // join the master thread so this doesn't run on its own and let
+        // the master thread finish before the actual job finishes
         jobLauncherThread.join();
 
         assertTrue(jobExecution != null
@@ -184,6 +192,140 @@ public class BulkCopyJobIntegrationTest extends
             "Job hasn't stopped");
 
         assertTrue(executionId != 0);
+
+        final Long restartedJobExecutionId = mJobOperator.restart(executionId);
+        jobExecution = mJobExplorer.getJobExecution(restartedJobExecutionId);
+
+        assertTrue(jobExecution != null
+            && jobExecution.getStatus() == BatchStatus.COMPLETED);
+
+    }
+
+    @Test(enabled = false)
+    public void testSuspendResumeSuspendResume() throws Exception {
+        final File f = new ClassPathResource(
+            "/org/dataminx/dts/batch/transfer-suspend.xml").getFile();
+        mDtsJob = JobDefinitionDocument.Factory.parse(f);
+        assertNotNull(mDtsJob);
+
+        final String jobId = UUID.randomUUID().toString();
+
+        JobExecution jobExecution = null;
+
+        final Thread jobLauncherThread = new Thread() {
+            @Override
+            public void run() {
+
+                try {
+                    mJobLauncher.run(jobId, mDtsJob);
+                }
+                catch (final JobExecutionAlreadyRunningException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                catch (final JobRestartException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                catch (final JobInstanceAlreadyCompleteException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        jobLauncherThread.start();
+
+        // let's wait for a while and let the job start before we get
+        // the details of the job in the database.
+        Thread.sleep(10000);
+
+        long executionId = 0;
+
+        // now that the job is running and has persisted itself in the DB,
+        // let's stop (suspend) its execution
+        for (final String jobName : mJobOperator.getJobNames()) {
+            if (jobName.equals(jobId)) {
+                LOGGER.debug("Found the running job to be cancelled");
+
+                for (final Long execId : mJobOperator
+                    .getRunningExecutions(jobName)) {
+                    mJobOperator.stop(execId);
+                    jobExecution = mJobExplorer.getJobExecution(execId);
+                    executionId = execId;
+                }
+            }
+        }
+
+        // join the master thread so this doesn't run on its own and let
+        // the master thread finish before the actual job finishes
+        jobLauncherThread.join();
+
+        assertTrue(jobExecution != null
+            && jobExecution.getStatus() == BatchStatus.STOPPING,
+            "Job hasn't stopped");
+
+        assertTrue(executionId != 0);
+
+        final long jobResumedExecId = executionId;
+
+        final Thread jobRelauncherThread = new Thread() {
+            @Override
+            public void run() {
+
+                try {
+                    mJobOperator.restart(jobResumedExecId);
+                }
+                catch (final JobRestartException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                catch (final JobInstanceAlreadyCompleteException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                catch (final NoSuchJobExecutionException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                catch (final NoSuchJobException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        jobRelauncherThread.start();
+
+        // let's wait for a while and let the job start before we get
+        // the details of the job in the database.
+        Thread.sleep(6000);
+
+        // now that the job is running and has persisted itself in the DB,
+        // let's stop (suspend) its execution
+        for (final String jobName : mJobOperator.getJobNames()) {
+            if (jobName.equals(jobId)) {
+                LOGGER.debug("Found the running job to be cancelled");
+
+                for (final Long execId : mJobOperator
+                    .getRunningExecutions(jobName)) {
+                    mJobOperator.stop(execId);
+                    jobExecution = mJobExplorer.getJobExecution(execId);
+                    executionId = execId;
+                }
+            }
+        }
+
+        // join the master thread so this doesn't run on its own and let
+        // the master thread finish before the actual job finishes
+        jobRelauncherThread.join();
+
+        assertTrue(jobExecution != null
+            && jobExecution.getStatus() == BatchStatus.STOPPING,
+            "Job hasn't stopped");
+
+        assertTrue(executionId != 0);
+
         final Long restartedJobExecutionId = mJobOperator.restart(executionId);
         jobExecution = mJobExplorer.getJobExecution(restartedJobExecutionId);
 

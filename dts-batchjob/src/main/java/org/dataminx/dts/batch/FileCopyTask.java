@@ -29,6 +29,7 @@ package org.dataminx.dts.batch;
 
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_DATA_TRANSFER_STEP_KEY;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -59,6 +60,8 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
+import org.springframework.batch.core.launch.JobOperator;
+import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.scope.context.StepContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -271,7 +274,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
     /** A reference to the DtsVfsUtil. */
     private DtsVfsUtil mDtsVfsUtil;
 
-    private String suspendedStepToSkip;
+    private List<String> suspendedStepToSkip;
 
     /** A reference to the input DTS job request. */
     private SubmitJobRequest mSubmitJobRequest;
@@ -294,6 +297,10 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
     /** The total number of files to be transferred within this batch. */
     private int mBatchTotalFiles;
 
+    private JobOperator mJobOperator;
+
+    private boolean finishedTransfer;
+
     /** A comparator to see if the Root of the FileObjects are the same. */
     private final RootFileObjectComparator mRootFileObjectComparator = new RootFileObjectComparator();
 
@@ -312,6 +319,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
             "FileSystemManagerCache has not been set.");
         Assert.state(mSubmitJobRequest != null,
             "Unable to find DTS Job Request in execution context.");
+        Assert.state(mJobOperator != null, "JobOperator has not been set.");
         if (mEncrypter == null) {
             mEncrypter = new DummyEncrypter();
         }
@@ -335,30 +343,65 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
         else {
             // we'll only delete the entry in the step execution context if the
             // job has not been stopped ie it has completed/finished running
-            if (stepExecution.getStatus() == BatchStatus.COMPLETED) {
+            if (stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
                 mJobNotificationService.notifyJobProgress(dtsJobId,
                     mBatchTotalFiles, mBatchVolumeSize);
 
                 mExecutionContextCleaner.removeStepExecutionContextEntry(
                     stepExecution, DTS_DATA_TRANSFER_STEP_KEY);
             }
+            if (suspendedStepToSkip != null) {
+                LOGGER
+                    .debug("^^^^^**** Setting suspended step to skip again to: "
+                        + suspendedStepToSkip + " ****^^^^^");
+
+                stepExecution.getJobExecution().getExecutionContext().put(
+                    LAST_COMPLETED_SUSPENDED_STEP, suspendedStepToSkip);
+            }
         }
 
-        if (suspendedStepToSkip == null
-            && stepExecution.getStatus().equals(BatchStatus.STOPPED)) {
-            LOGGER.debug("^^^^^**** Setting suspended step to skip to: "
-                + stepExecution.getStepName() + " ****^^^^^");
+        if (stepExecution.getStatus().equals(BatchStatus.STOPPED)
+            && finishedTransfer) {
+            if (suspendedStepToSkip == null) {
 
-            stepExecution.getJobExecution().getExecutionContext().put(
-                LAST_COMPLETED_SUSPENDED_STEP, stepExecution.getStepName());
-        }
-        else {
-            LOGGER.debug("^^^^^**** Setting suspended step to skip again to: "
-                + suspendedStepToSkip + " ****^^^^^");
+                // this condition gets satisfied the first time a suspend signal is sent
+                // and the current step running at the time the suspend signal is sent finishes
+                LOGGER.debug("^^^^^**** Setting suspended step to skip to: "
+                    + stepExecution.getStepName() + " ****^^^^^");
 
-            stepExecution.getJobExecution().getExecutionContext().put(
-                LAST_COMPLETED_SUSPENDED_STEP, suspendedStepToSkip);
+                final List<String> suspendedSteps = new ArrayList<String>();
+                suspendedSteps.add(stepExecution.getStepName());
+
+                stepExecution.getJobExecution().getExecutionContext().put(
+                    LAST_COMPLETED_SUSPENDED_STEP, suspendedSteps);
+            }
+            else {
+
+                try {
+                    // check if this has been resumed by at least once
+                    if (mJobOperator.getExecutions(
+                        stepExecution.getJobExecution().getJobId()).size() > 1
+                        && suspendedStepToSkip.size() < mJobOperator
+                            .getExecutions(
+                                stepExecution.getJobExecution().getJobId())
+                            .size()) {
+                        suspendedStepToSkip.add(stepExecution.getStepName());
+                    }
+                    // this is called when the succeeding steps after the first step that has finished
+                    // when a job gets suspended, is called
+                    LOGGER
+                        .debug("^^^^^**** Setting suspended step to skip again to: "
+                            + suspendedStepToSkip + " ****^^^^^");
+
+                    stepExecution.getJobExecution().getExecutionContext().put(
+                        LAST_COMPLETED_SUSPENDED_STEP, suspendedStepToSkip);
+                }
+                catch (final NoSuchJobInstanceException e) {
+                    LOGGER.debug("This line shouldn't be called");
+                }
+            }
         }
+
         LOGGER.debug("");
         return exitStatus;
     }
@@ -372,10 +415,10 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
         LOGGER.debug("vvvvv**** FileCopyTask.beforeStep() is called by step "
             + stepExecution.getStepName() + " ****vvvvv");
 
-        suspendedStepToSkip = (String) stepExecution.getJobExecution()
+        suspendedStepToSkip = (List) stepExecution.getJobExecution()
             .getExecutionContext().get(LAST_COMPLETED_SUSPENDED_STEP);
 
-        LOGGER.debug("Name of the suspended step to skip: "
+        LOGGER.debug("Name of the suspended steps to skip: "
             + suspendedStepToSkip);
     }
 
@@ -389,11 +432,18 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
      */
     public RepeatStatus execute(final StepContribution contribution,
         final ChunkContext chunkContext) throws Exception {
+
+        finishedTransfer = false;
+
         final StepContext stepContext = chunkContext.getStepContext();
         LOGGER.info("Executing copy step: " + stepContext.getStepName());
 
         if (suspendedStepToSkip != null
-            && suspendedStepToSkip.equals(stepContext.getStepName())) {
+            && suspendedStepToSkip.contains(stepContext.getStepName())) {
+            // let's also remove LAST_COMPLETED_SUSPENDED_STEP as we won't be needing it anymore
+            //stepContext.getStepExecution().getJobExecution()
+            //    .getExecutionContext().remove(LAST_COMPLETED_SUSPENDED_STEP);
+
             LOGGER
                 .info("Skipping this step as it has already finished when suspend was called.");
             return RepeatStatus.FINISHED;
@@ -485,6 +535,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
 
         LOGGER.debug("Finished up the FileCopyTask at "
             + mStopwatchTimer.getFormattedElapsedTime());
+        finishedTransfer = true;
 
         // TODO handle failures by returning ...
 
@@ -510,6 +561,10 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
      */
     public void setEncrypter(final Encrypter encrypter) {
         mEncrypter = encrypter;
+    }
+
+    public void setJobOperator(final JobOperator jobOperator) {
+        mJobOperator = jobOperator;
     }
 
     /**
