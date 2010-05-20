@@ -33,6 +33,7 @@ The DTS codebase is currently hosted in the DTS Google Code SVN repository. You 
  > touch /usr/local/minx-dts/dts-ws/src/test/filters/filter.properties
  > touch /usr/local/minx-dts/dts-workernode/src/test/filters/filter.properties
  > touch /usr/local/minx-dts/dts-broker/src/test/filters/filter.properties
+ > cp dts-ws/src/main/resources/dts-ws.properties.template /home/dts-user/.dataminx/dts-ws.properties
  > mvn -DskipTests=true install
 }}}
 
@@ -121,15 +122,6 @@ Setup the DB for DTS WS
  > cd dts-ws/src/main/resources/db
  > mysql -u root < create-accts.sql
  > mysql -u dts -D dts -p < create-tables.sql
-}}}
-
-Copy the other config files into the ~/.dataminx directory
-{{{
- > cd dts-ws
- > cp src/main/resources/dts-ws.properties.template ~/.dataminx/dts-ws.properties
- > cp src/main/resources/log4j.xml to ~/.dataminx
- > # edit ~/.dataminx/dts-ws.properties
-
 }}}
 
 Edit ~/.dataminx/dts-ws.properties and set the value of si.jms.jobSubmitQueueName to broker.job.submission.queue if you want the DTS-WS to use the broker in managing the scheduling of jobs or to dts.job.submit.queue if you want the job to go straight to the workernode.
