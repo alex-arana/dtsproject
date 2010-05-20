@@ -26,7 +26,7 @@ batch.schema =
 # Additional configuration
 
 # lifetime of MyProxy credentials (in hours, 0 for maximum)
-default.myproxy.lifetime = 1
+default.myproxy.lifetime = 43200
 
 # The number of parallel connections the job will try to use.
 # Note that the value provided below might not be achieved if
