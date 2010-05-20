@@ -99,15 +99,17 @@ Configure the dts-workernode
  > cp src/main/resources/dts-workernode.properties.default ~/.dataminx/dts-workernode.properties
  > # edit ~/.dataminx/dts-workernode.properties if you need to. by default the values in the properties file should just work
  > # set value of wn.id to the name of the host running the dts-workernode module. This should be unique.
- > mvn -Ddataminx.dir=~/.dataminx exec:java
+ > mvn -Ddataminx.dir=/home/dts-user/.dataminx exec:java
 }}}
 
 ==== DTS Broker ====
-You will need the following files in the dataminx.dir for running the DTS Broker:
-   # dts-broker.properties
-   # plugin-context.xml
-
-The template files can be found in src/main/resources of the dts-broker module.
+Configure the broker by running the following commands:
+{{{
+ > cd dts-broker
+ > cp src/main/resources/dts-broker.properties.template ~/.dataminx/dts-broker.properties
+ > # edit si.jms.brokerDefaultOutputQueue's value so it reflects the queue which the workernode reads DTS jobs from
+ > # for our case, the value of si.jms.brokerDefaultOutputQueue is dts.job.submit.queue
+}}}
 
 Assuming the ActiveMQ instance is still running from the configuration and deployment of the dts-workernode stage, run the following command to start Broker
 {{{
@@ -116,8 +118,8 @@ Assuming the ActiveMQ instance is still running from the configuration and deplo
 
 To run a test against the broker simply type:
 {{{
- > mvn test 
- > mvn integration-test
+ > mvn -Ddataminx.dir=/home/dts-user/.dataminx test 
+ > mvn -Ddataminx.dir=/home/dts-user/.dataminx integration-test
 }}}
 
 ==== DTS WS ====
