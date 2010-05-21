@@ -196,7 +196,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
                 try {
                     mBatchVolumeSize += mSourceFileSystemManager.resolveFile(
                         dataTransferUnit.getSourceFileUri(),
-                        mDtsVfsUtil.createFileSystemOptions(dataTransfer
+                        mDtsVfsUtil.getFileSystemOptions(dataTransfer
                             .getSource(), mEncrypter)).getContent().getSize();
                 }
                 catch (final FileSystemException e) {
@@ -420,6 +420,8 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
 
         LOGGER.debug("Name of the suspended steps to skip: "
             + suspendedStepToSkip);
+
+        finishedTransfer = false;
     }
 
     /**
@@ -432,8 +434,6 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
      */
     public RepeatStatus execute(final StepContribution contribution,
         final ChunkContext chunkContext) throws Exception {
-
-        finishedTransfer = false;
 
         final StepContext stepContext = chunkContext.getStepContext();
         LOGGER.info("Executing copy step: " + stepContext.getStepName());

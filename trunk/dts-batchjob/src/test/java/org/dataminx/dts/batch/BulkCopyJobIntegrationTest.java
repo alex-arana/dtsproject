@@ -127,7 +127,7 @@ public class BulkCopyJobIntegrationTest extends
         assertEquals(doesJobStepExists(jobId), false);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testSuspendResume() throws Exception {
         final File f = new ClassPathResource(
             "/org/dataminx/dts/batch/transfer-suspend.xml").getFile();

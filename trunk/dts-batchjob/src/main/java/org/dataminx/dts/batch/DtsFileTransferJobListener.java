@@ -39,7 +39,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.batch.common.DtsBatchJobConstants;
 import org.dataminx.dts.batch.common.util.ExecutionContextCleaner;
+import org.dataminx.dts.common.vfs.DtsVfsUtil;
 import org.dataminx.dts.common.vfs.FileSystemManagerCache;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
@@ -67,6 +69,8 @@ public class DtsFileTransferJobListener implements JobExecutionListener,
 
     /** A reference to the ExecutionContextCleaner. */
     private ExecutionContextCleaner mExecutionContextCleaner;
+
+    private DtsVfsUtil mDtsVfsUtil;
 
     /**
      * Performs a cleanup of the user's credentials on the Spring Batch DB after the job completes.
@@ -111,6 +115,9 @@ public class DtsFileTransferJobListener implements JobExecutionListener,
         // let's do a clean up of the ExecutionContexts having details of the users credentials
         // when the job completes successfully
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
+            mDtsVfsUtil
+                .clearCachedFileSystemOptions((SubmitJobRequest) jobExecution
+                    .getExecutionContext().get(DTS_SUBMIT_JOB_REQUEST_KEY));
             mExecutionContextCleaner.removeJobExecutionContextEntry(
                 jobExecution, DTS_JOB_DETAILS);
             mExecutionContextCleaner.removeJobExecutionContextEntry(
@@ -173,5 +180,9 @@ public class DtsFileTransferJobListener implements JobExecutionListener,
 
     public void setJobExplorer(final JobExplorer jobExplorer) {
         mJobExplorer = jobExplorer;
+    }
+
+    public void setDtsVfsUtil(final DtsVfsUtil dtsVfsUtil) {
+        mDtsVfsUtil = dtsVfsUtil;
     }
 }

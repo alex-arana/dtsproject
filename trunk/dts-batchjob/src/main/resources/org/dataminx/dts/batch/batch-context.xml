@@ -135,6 +135,7 @@
     <property name="fileSystemManagerCache" ref="fileSystemManagerCache"/>
     <property name="executionContextCleaner" ref="executionContextCleaner"/>
     <property name="jobExplorer" ref="jobExplorer"/>
+    <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
   </bean>
     
   <batch:step id="jobScopingStep">

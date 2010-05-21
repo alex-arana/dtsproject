@@ -313,14 +313,12 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
         // and target URIs and put unique root FO in a map<URI in String, FileObject>
         for (final DataTransferType dataTransfer : dataTransfers) {
 
-            final FileObject sourceFO = fileSystemManager.resolveFile(
-                dataTransfer.getSource().getURI(), mDtsVfsUtil
-                    .createFileSystemOptions(dataTransfer.getSource(),
-                        mEncrypter));
-            final FileObject targetFO = fileSystemManager.resolveFile(
-                dataTransfer.getTarget().getURI(), mDtsVfsUtil
-                    .createFileSystemOptions(dataTransfer.getTarget(),
-                        mEncrypter));
+            final FileObject sourceFO = fileSystemManager
+                .resolveFile(dataTransfer.getSource().getURI(), mDtsVfsUtil
+                    .getFileSystemOptions(dataTransfer.getSource(), mEncrypter));
+            final FileObject targetFO = fileSystemManager
+                .resolveFile(dataTransfer.getTarget().getURI(), mDtsVfsUtil
+                    .getFileSystemOptions(dataTransfer.getTarget(), mEncrypter));
 
             // TODO: handle cases where in source and destination root File
             // Object of File System are the same but the credentials to

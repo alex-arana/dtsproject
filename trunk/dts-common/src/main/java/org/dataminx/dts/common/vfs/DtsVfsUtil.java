@@ -36,6 +36,8 @@ import static org.dataminx.dts.common.util.XmlBeansUtils.selectAnyElement;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -57,12 +59,15 @@ import org.dataminx.dts.common.util.CredentialStore;
 import org.dataminx.dts.security.crypto.Encrypter;
 import org.dataminx.dts.security.crypto.UnknownEncryptionAlgorithmException;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.GridFtpURIPropertiesType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.IrodsURIPropertiesType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxSourceTargetType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MyProxyTokenType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.OtherCredentialTokenType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.SrbURIPropertiesType;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 import org.globus.ftp.MarkerListener;
 import org.globus.myproxy.MyProxy;
@@ -76,7 +81,7 @@ import uk.ac.dl.escience.vfs.util.GridFTPUtil;
 import uk.ac.dl.escience.vfs.util.VFSUtil;
 
 /**
- * 
+ *
  * @author Gerson Galang
  */
 public class DtsVfsUtil extends VFSUtil {
@@ -104,6 +109,13 @@ public class DtsVfsUtil extends VFSUtil {
 
     private static final int ONE_HUNDRED = 100;
 
+    private final Map<SourceTargetType, FileSystemOptions> sourceOrTargetFileSystemOptionsCache;
+
+    public DtsVfsUtil() {
+        super();
+        sourceOrTargetFileSystemOptionsCache = new HashMap<SourceTargetType, FileSystemOptions>();
+    }
+
     // TODO: think of a better way of having this implemented rather than
     // copying the code from the original VfsUtil
     protected static void copyFileToFile(final FileObject fromFo,
@@ -115,6 +127,18 @@ public class DtsVfsUtil extends VFSUtil {
         if (!fromFo.getType().equals(FileType.FILE)) {
             throw new IOException("path " + fromFo + " is not a file");
         }
+
+        /*
+        if (fromFo.getFileSystem() instanceof GridFtpFileSystem) {
+            ((GridFtpFileSystem) fromFo).getClient().setClientWaitParams(
+                Integer.MAX_VALUE, Session.DEFAULT_WAIT_DELAY);
+        }
+
+        if (toFo.getFileSystem() instanceof GridFtpFileSystem) {
+            ((GridFtpFileSystem) toFo).getClient().setClientWaitParams(
+                Integer.MAX_VALUE, Session.DEFAULT_WAIT_DELAY);
+        }
+        */
 
         InputStream xIS = null;
         OutputStream xOS = null;
@@ -286,27 +310,40 @@ public class DtsVfsUtil extends VFSUtil {
     private String mTmpDirPath = null;
 
     /**
-     * Specifies the lifetime of the MyProxy credentials managed by this class. If this setting is not specifically
-     * configured, it will hold a default value of <code>0</code> which means use the maximum possible lifetime for the
-     * credential.
+     * Specifies the lifetime of the MyProxy credentials managed by this class.
+     * If this setting is not specifically configured, it will hold a default
+     * value of <code>0</code> which means use the maximum possible lifetime for
+     * the credential.
      */
     private int mMyProxyCredentialLifetime;
 
     /**
-     * Create a new set of file system options, as an instance of {@link FileSystemOptions}, based on the provided
-     * source or target entity.
-     * 
+     * Creates a new file system options, as an instance of
+     * {@link FileSystemOptions}, based on the provided source or target entity
+     * if there isn't any created for the provided SourceTarget element yet. If
+     * not, the cached FileSystemOptions object for the given SourceTarget
+     * element is returned.
+     *
      * @param sourceOrTarget
      *            the source or target entity
      * @param encrypter
      *            the encrypter that will decrypt the password
-     * @return the set of file system options for the given source or target entity
+     * @return the set of file system options for the given source or target
+     *            entity
      * @throws FileSystemException
      *             when an error occurs during a VFS file copy operation.
      */
-    public FileSystemOptions createFileSystemOptions(
+    public FileSystemOptions getFileSystemOptions(
         final SourceTargetType sourceOrTarget, final Encrypter encrypter)
         throws FileSystemException {
+
+        // have a look at the cache first to see if we've already got a
+        // FileSystemOption for the provided SourceTarget element
+        if (sourceOrTargetFileSystemOptionsCache.containsKey(sourceOrTarget)) {
+            return sourceOrTargetFileSystemOptionsCache.get(sourceOrTarget);
+        }
+
+        // if not, we'll create a new one
         final FileSystemOptions options = new DtsFileSystemOptions();
 
         if (sourceOrTarget instanceof MinxSourceTargetType) {
@@ -427,7 +464,22 @@ public class DtsVfsUtil extends VFSUtil {
         // TODO set the other URI related options here like the min/max port numbers
         //      for GridFTP if provided
 
+        // let's put the newly generated FileSytemOptions in the cache
+        sourceOrTargetFileSystemOptionsCache.put(sourceOrTarget, options);
+
         return options;
+    }
+
+    public void clearCachedFileSystemOptions(final SubmitJobRequest job) {
+        LOGGER.debug("Clearing cached FileSystemOptions for this job");
+        final DataTransferType[] dataTransfers = ((MinxJobDescriptionType) job
+            .getJobDefinition().getJobDescription()).getDataTransferArray();
+        for (final DataTransferType dataTransfer : dataTransfers) {
+            sourceOrTargetFileSystemOptionsCache.remove(dataTransfer
+                .getSource());
+            sourceOrTargetFileSystemOptionsCache.remove(dataTransfer
+                .getTarget());
+        }
     }
 
     private void addMyProxyCredentialDetailsToFileSystemOptions(

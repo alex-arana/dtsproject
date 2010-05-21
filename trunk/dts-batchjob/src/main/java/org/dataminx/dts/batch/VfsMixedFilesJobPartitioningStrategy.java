@@ -285,7 +285,7 @@ public class VfsMixedFilesJobPartitioningStrategy implements
 
             try {
                 sourceParent = fileSystemManager.resolveFile(dataTransfer
-                    .getSource().getURI(), mDtsVfsUtil.createFileSystemOptions(
+                    .getSource().getURI(), mDtsVfsUtil.getFileSystemOptions(
                     dataTransfer.getSource(), mEncrypter));
 
                 if (!sourceParent.getContent().getFile().exists()
@@ -303,7 +303,7 @@ public class VfsMixedFilesJobPartitioningStrategy implements
             FileObject targetParent = null;
             try {
                 targetParent = fileSystemManager.resolveFile(dataTransfer
-                    .getTarget().getURI(), mDtsVfsUtil.createFileSystemOptions(
+                    .getTarget().getURI(), mDtsVfsUtil.getFileSystemOptions(
                     dataTransfer.getTarget(), mEncrypter));
             }
             catch (final FileSystemException e) {
