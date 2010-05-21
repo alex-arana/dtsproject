@@ -49,7 +49,7 @@ import org.springframework.util.Assert;
 
 /**
  * The JobScopingTask is a tasklet step that performs the scoping of the job to find out how many files are to be
- * transferred by the job. This step will also partitions the job into a number of steps which can be checkpointed
+ * transferred by the job. This step will also partition the job into a number of steps which can be checkpointed
  * at any point while the job is running.
  *
  * @author Gerson Galang
@@ -79,8 +79,12 @@ public class JobScopingTask implements Tasklet, StepExecutionListener,
     /**
      * Scopes the job by partitioning it into a number steps that can be check-pointed.
      *
-     * @param contribution mutable state to be passed back to update the current step execution
-     * @param chunkContext attributes shared between invocations but not between restarts
+     * @param contribution mutable state to be passed back to update the current step execution.
+     *        Its role is to collect updates to the current StepExecution without
+     *        having to worry about concurrent modifications in another thread.
+     * @param chunkContext attributes shared between invocations but not between restarts.
+     *        A chunk-scoped bag of key-value pairs. The tasklet can use this to store
+     *        intermediate results that will be preserved across a rollback.
      * @return a RepeatStatus indicating whether processing is continuable
      * @throws Exception on failure
      */
@@ -90,6 +94,7 @@ public class JobScopingTask implements Tasklet, StepExecutionListener,
         Assert.state(mSubmitJobRequest != null,
             "Unable to find DTS Job Request in execution context.");
 
+        // partition the job and return partitioning results in the jobDetails
         final DtsJobDetails jobDetails = mJobPartitioningStrategy
             .partitionTheJob(mSubmitJobRequest.getJobDefinition(),
                 mJobResourceKey);
@@ -98,6 +103,9 @@ public class JobScopingTask implements Tasklet, StepExecutionListener,
         mJobNotificationService.notifyJobScope(jobDetails.getJobId(),
             jobDetails.getTotalFiles(), jobDetails.getTotalBytes());
 
+        // store the jobDetails in the step execution context. these will get
+        // promoted to the Job execution context by the jobScopingTaskPromotionListener
+        // so that the jobDetails will be available from the job.
         final ExecutionContext stepContext = chunkContext.getStepContext()
             .getStepExecution().getExecutionContext();
         stepContext.put(DTS_JOB_DETAILS, jobDetails);

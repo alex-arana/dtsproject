@@ -89,7 +89,13 @@
   <bean id="checkRequirementsTask" class="org.dataminx.dts.batch.CheckRequirementsTask" scope="step">
     <property name="jobStepDirectory" value="file:///${dataminx.dir}/jobsteps" />
   </bean>
-  
+
+  <!--
+  ExecutionContextPromotionListener used to automatically promote items
+  from the Step ExecutionContext to the Job ExecutionContext at the
+  end of a step. A list of keys should be provided that correspond to the items
+  in the Step ExecutionContext that should be promoted.
+  -->
   <bean id="jobScopingTaskPromotionListener" class="org.springframework.batch.core.listener.ExecutionContextPromotionListener">
     <property name="keys" value="JOB_DETAILS" />
   </bean>
@@ -226,5 +232,13 @@
   <bean id="jobRegistryBeanPostProcessor" class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">
     <property name="jobRegistry" ref="jobRegistry"/>
   </bean>
+
+
+<!--
+    	<bean id="encryptionPlugin" class="org.dataminx.dts.security.crypto.DummyEncrypter">
+		<property name="passphrase" value="dummy"/>
+		<property name="salt" value="dummy"/>
+	</bean>
+    -->
   
 </beans>
