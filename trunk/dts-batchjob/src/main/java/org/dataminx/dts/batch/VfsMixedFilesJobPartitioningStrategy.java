@@ -239,174 +239,184 @@ public class VfsMixedFilesJobPartitioningStrategy implements
         }
 
         FileSystemManager fileSystemManager = null;
-        try {
-            fileSystemManager = mDtsVfsUtil.createNewFsManager();
-        }
-        catch (final FileSystemException e) {
-            throw new JobScopingException(
-                "FileSystemException was thrown while creating new FileSystemManager in the job scoping task.",
-                e);
-        }
-
         final DtsJobDetails jobDetails = new DtsJobDetails();
-        jobDetails.setJobDefinition(jobDefinition);
-        jobDetails.setJobId(jobResourceKey);
 
-        final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = jobDetails
-            .getSourceTargetMaxTotalFilesToTransfer();
-
-        mDtsJobStepAllocator = new MixedFilesJobStepAllocator();
-        mExcluded = new ArrayList<String>();
-        mTotalSize = 0;
-        mTotalFiles = 0;
-
-        final List<DataTransferType> dataTransfers = new ArrayList<DataTransferType>();
-
-        final JobDescriptionType jobDescription = jobDefinition
-            .getJobDescription();
-        if (jobDescription instanceof MinxJobDescriptionType) {
-            final MinxJobDescriptionType minxJobDescription = (MinxJobDescriptionType) jobDescription;
-            CollectionUtils.addAll(dataTransfers, minxJobDescription
-                .getDataTransferArray());
-        }
-        if (CollectionUtils.isEmpty(dataTransfers)) {
-            LOGGER
-                .warn("DTS job request is incomplete as it does not contain any data transfer elements.");
-            throw new DtsJobExecutionException(
-                "DTS job request contains no data transfer elements.");
-        }
-        int dataTransferIndex = 0;
-        for (final DataTransferType dataTransfer : dataTransfers) {
-
-            // reset the total number of files to be transferred within this DataTransfer element
-            mPerDataTransferTotalFiles = 0;
-
-            FileObject sourceParent = null;
-
+        try{
             try {
-                sourceParent = fileSystemManager.resolveFile(dataTransfer
-                    .getSource().getURI(), mDtsVfsUtil.getFileSystemOptions(
-                    dataTransfer.getSource(), mEncrypter));
-
-                if (!sourceParent.getContent().getFile().exists()
-                    || !sourceParent.getContent().getFile().isReadable()) {
-                    throw new JobScopingException("The source " + sourceParent
-                        + " provided does not exist or is not readable.");
-                }
+                fileSystemManager = mDtsVfsUtil.createNewFsManager();
             }
             catch (final FileSystemException e) {
                 throw new JobScopingException(
-                    "FileSystemException was thrown while accessing the remote file "
-                        + dataTransfer.getSource().getURI() + ".", e);
-            }
-
-            FileObject targetParent = null;
-            try {
-                targetParent = fileSystemManager.resolveFile(dataTransfer
-                    .getTarget().getURI(), mDtsVfsUtil.getFileSystemOptions(
-                    dataTransfer.getTarget(), mEncrypter));
-            }
-            catch (final FileSystemException e) {
-                throw new JobScopingException(
-                    "FileSystemException was thrown while accessing the remote file "
-                        + dataTransfer.getTarget().getURI() + ".", e);
-            }
-
-            try {
-                mDtsJobStepAllocator.createNewDataTransfer(sourceParent
-                    .getFileSystem().getRoot().getURL().toString(),
-                    targetParent.getFileSystem().getRoot().getURL().toString());
-
-                final CreationFlagEnumeration.Enum creationFlag = dataTransfer
-                    .getTransferRequirements().getCreationFlag();
-
-                prepare(sourceParent, targetParent, dataTransferIndex,
-                    creationFlag);
-
-                final String sourceParentRootStr = sourceParent.getFileSystem()
-                    .getRoot().getURL().toString();
-                final String targetParentRootStr = targetParent.getFileSystem()
-                    .getRoot().getURL().toString();
-
-                if (sourceTargetMaxTotalFilesToTransfer
-                    .containsKey(sourceParentRootStr)
-                    && sourceTargetMaxTotalFilesToTransfer
-                        .containsKey(targetParentRootStr)) {
-                    updateSourceTargetMaxTotalFilesToTransfer(
-                        sourceTargetMaxTotalFilesToTransfer,
-                        sourceParentRootStr, mPerDataTransferTotalFiles);
-                    updateSourceTargetMaxTotalFilesToTransfer(
-                        sourceTargetMaxTotalFilesToTransfer,
-                        targetParentRootStr, mPerDataTransferTotalFiles);
-                }
-                else if (sourceTargetMaxTotalFilesToTransfer
-                    .containsKey(sourceParentRootStr)
-                    && !sourceTargetMaxTotalFilesToTransfer
-                        .containsKey(targetParentRootStr)) {
-                    updateSourceTargetMaxTotalFilesToTransfer(
-                        sourceTargetMaxTotalFilesToTransfer,
-                        sourceParentRootStr, mPerDataTransferTotalFiles);
-                    sourceTargetMaxTotalFilesToTransfer.put(
-                        targetParentRootStr, mPerDataTransferTotalFiles);
-                }
-                else if (!sourceTargetMaxTotalFilesToTransfer
-                    .containsKey(sourceParentRootStr)
-                    && sourceTargetMaxTotalFilesToTransfer
-                        .containsKey(targetParentRootStr)) {
-                    sourceTargetMaxTotalFilesToTransfer.put(
-                        sourceParentRootStr, mPerDataTransferTotalFiles);
-                    updateSourceTargetMaxTotalFilesToTransfer(
-                        sourceTargetMaxTotalFilesToTransfer,
-                        targetParentRootStr, mPerDataTransferTotalFiles);
-                }
-                else {
-                    sourceTargetMaxTotalFilesToTransfer.put(
-                        sourceParentRootStr, mPerDataTransferTotalFiles);
-                    sourceTargetMaxTotalFilesToTransfer.put(
-                        targetParentRootStr, mPerDataTransferTotalFiles);
-                }
-
-                dataTransferIndex++;
-            }
-            catch (final DtsJobCancelledException e) {
-                // TODO: handle DTS Job Cancel event
-                LOGGER.debug("Job has been cancelled.");
-            }
-            catch (final FileSystemException e) {
-                throw new JobScopingException(
-                    "FileSystemException was thrown while accessing the remote files in the job scoping task.",
+                    "FileSystemException was thrown while creating new FileSystemManager in the job scoping task.",
                     e);
             }
-            catch (final JobScopingException e) {
-                // TODO Auto-generated catch block
-                throw e;
+
+
+            jobDetails.setJobDefinition(jobDefinition);
+            jobDetails.setJobId(jobResourceKey);
+
+            // get the Map that holds the maximum number of files to be transferred
+            // from each Source Map<Source URI (String), number of files (Integer)>
+            final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = jobDetails.getSourceTargetMaxTotalFilesToTransfer();
+
+            mDtsJobStepAllocator = new MixedFilesJobStepAllocator();
+            mExcluded = new ArrayList<String>();
+            mTotalSize = 0;
+            mTotalFiles = 0;
+
+            // populate the dataTransfers List from the given jobDefintion (i.e. a
+            // list of source to sink constructs).
+            final List<DataTransferType> dataTransfers = new ArrayList<DataTransferType>();
+
+            final JobDescriptionType jobDescription = jobDefinition
+                .getJobDescription();
+            if (jobDescription instanceof MinxJobDescriptionType) {
+                final MinxJobDescriptionType minxJobDescription = (MinxJobDescriptionType) jobDescription;
+                CollectionUtils.addAll(dataTransfers, minxJobDescription
+                    .getDataTransferArray());
+            }
+            if (CollectionUtils.isEmpty(dataTransfers)) {
+                LOGGER
+                    .warn("DTS job request is incomplete as it does not contain any data transfer elements.");
+                throw new DtsJobExecutionException(
+                    "DTS job request contains no data transfer elements.");
+            }
+            int dataTransferIndex = 0;
+            for (final DataTransferType dataTransfer : dataTransfers) {
+
+                // reset the total number of files to be transferred within this DataTransfer element
+                mPerDataTransferTotalFiles = 0;
+
+                FileObject sourceParent = null;
+                try {
+                    sourceParent = fileSystemManager.resolveFile(dataTransfer
+                        .getSource().getURI(), mDtsVfsUtil.getFileSystemOptions(
+                        dataTransfer.getSource(), mEncrypter));
+
+                    if (!sourceParent.getContent().getFile().exists()
+                        || !sourceParent.getContent().getFile().isReadable()) {
+                        throw new JobScopingException("The source " + sourceParent
+                            + " provided does not exist or is not readable.");
+                    }
+                }
+                catch (final FileSystemException e) {
+                    throw new JobScopingException(
+                        "FileSystemException was thrown while accessing the remote file "
+                            + dataTransfer.getSource().getURI() + ".", e);
+                }
+
+                FileObject targetParent = null;
+                try {
+                    targetParent = fileSystemManager.resolveFile(dataTransfer
+                        .getTarget().getURI(), mDtsVfsUtil.getFileSystemOptions(
+                        dataTransfer.getTarget(), mEncrypter));
+                }
+                catch (final FileSystemException e) {
+                    throw new JobScopingException(
+                        "FileSystemException was thrown while accessing the remote file "
+                            + dataTransfer.getTarget().getURI() + ".", e);
+                }
+
+                try {
+                    mDtsJobStepAllocator.createNewDataTransfer(sourceParent
+                        .getFileSystem().getRoot().getURL().toString(),
+                        targetParent.getFileSystem().getRoot().getURL().toString());
+
+                    final CreationFlagEnumeration.Enum creationFlag = dataTransfer
+                        .getTransferRequirements().getCreationFlag();
+
+                    prepare(sourceParent, targetParent, dataTransferIndex,
+                        creationFlag);
+
+                    final String sourceParentRootStr = sourceParent.getFileSystem()
+                        .getRoot().getURL().toString();
+                    final String targetParentRootStr = targetParent.getFileSystem()
+                        .getRoot().getURL().toString();
+
+                    if (sourceTargetMaxTotalFilesToTransfer
+                        .containsKey(sourceParentRootStr)
+                        && sourceTargetMaxTotalFilesToTransfer
+                            .containsKey(targetParentRootStr)) {
+                        updateSourceTargetMaxTotalFilesToTransfer(
+                            sourceTargetMaxTotalFilesToTransfer,
+                            sourceParentRootStr, mPerDataTransferTotalFiles);
+                        updateSourceTargetMaxTotalFilesToTransfer(
+                            sourceTargetMaxTotalFilesToTransfer,
+                            targetParentRootStr, mPerDataTransferTotalFiles);
+                    }
+                    else if (sourceTargetMaxTotalFilesToTransfer
+                        .containsKey(sourceParentRootStr)
+                        && !sourceTargetMaxTotalFilesToTransfer
+                            .containsKey(targetParentRootStr)) {
+                        updateSourceTargetMaxTotalFilesToTransfer(
+                            sourceTargetMaxTotalFilesToTransfer,
+                            sourceParentRootStr, mPerDataTransferTotalFiles);
+                        sourceTargetMaxTotalFilesToTransfer.put(
+                            targetParentRootStr, mPerDataTransferTotalFiles);
+                    }
+                    else if (!sourceTargetMaxTotalFilesToTransfer
+                        .containsKey(sourceParentRootStr)
+                        && sourceTargetMaxTotalFilesToTransfer
+                            .containsKey(targetParentRootStr)) {
+                        sourceTargetMaxTotalFilesToTransfer.put(
+                            sourceParentRootStr, mPerDataTransferTotalFiles);
+                        updateSourceTargetMaxTotalFilesToTransfer(
+                            sourceTargetMaxTotalFilesToTransfer,
+                            targetParentRootStr, mPerDataTransferTotalFiles);
+                    }
+                    else {
+                        sourceTargetMaxTotalFilesToTransfer.put(
+                            sourceParentRootStr, mPerDataTransferTotalFiles);
+                        sourceTargetMaxTotalFilesToTransfer.put(
+                            targetParentRootStr, mPerDataTransferTotalFiles);
+                    }
+
+                    dataTransferIndex++;
+                }
+                catch (final DtsJobCancelledException e) {
+                    // TODO: handle DTS Job Cancel event
+                    LOGGER.debug("Job has been cancelled.");
+                }
+                catch (final FileSystemException e) {
+                    throw new JobScopingException(
+                        "FileSystemException was thrown while accessing the remote files in the job scoping task.",
+                        e);
+                }
+                catch (final JobScopingException e) {
+                    // TODO Auto-generated catch block
+                    throw e;
+                }
+
+                mDtsJobStepAllocator.closeNewDataTransfer();
+
+            }
+            LOGGER.info("Total number of files to be transferred: " + mTotalFiles);
+            LOGGER.info("Total size of files to be transferred: " + mTotalSize
+                + " bytes");
+            LOGGER.debug("list of excluded files: ");
+            for (final String excluded : mExcluded) {
+                LOGGER.debug(" - " + excluded);
             }
 
-            mDtsJobStepAllocator.closeNewDataTransfer();
+            jobDetails.setExcludedFiles(mExcluded);
+            jobDetails.setTotalBytes(mTotalSize);
+            jobDetails.setTotalFiles(mTotalFiles);
+            jobDetails.saveJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps());
 
+            for (final DtsJobStep jobStep : mDtsJobStepAllocator
+                .getAllocatedJobSteps()) {
+                LOGGER.debug(jobStep);
+            }
+            // let's try to put the steps in the step execution context
+
+        } finally {
+            // Always, immediately close the file system manager so FileCopyTask will be able to use all of the
+            // available connections. Define this in finally so that we do not
+            // leave hanging connections if a scoping error occurs. 
+            if(fileSystemManager != null){
+               ((DefaultFileSystemManager) fileSystemManager).close();
+            }
         }
-        LOGGER.info("Total number of files to be transferred: " + mTotalFiles);
-        LOGGER.info("Total size of files to be transferred: " + mTotalSize
-            + " bytes");
-        LOGGER.debug("list of excluded files: ");
-        for (final String excluded : mExcluded) {
-            LOGGER.debug(" - " + excluded);
-        }
-
-        jobDetails.setExcludedFiles(mExcluded);
-        jobDetails.setTotalBytes(mTotalSize);
-        jobDetails.setTotalFiles(mTotalFiles);
-        jobDetails.saveJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps());
-
-        for (final DtsJobStep jobStep : mDtsJobStepAllocator
-            .getAllocatedJobSteps()) {
-            LOGGER.debug(jobStep);
-        }
-        // let's try to put the steps in the step execution context
-
-        // immediately close the file system manager so FileCopyTask will be able to use all of the
-        // available connections
-        ((DefaultFileSystemManager) fileSystemManager).close();
 
         return jobDetails;
     }
