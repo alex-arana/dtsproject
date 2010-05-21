@@ -106,9 +106,9 @@ public class FileCopyingServiceImpl implements FileCopyingService,
             source.getURI(), target.getURI()));
         try {
             copyFiles(sourceFileSystemManager.resolveFile(source.getURI(),
-                mDtsVfsUtil.createFileSystemOptions(source, mEncrypter)),
+                mDtsVfsUtil.getFileSystemOptions(source, mEncrypter)),
                 targetFileSystemManager.resolveFile(target.getURI(),
-                    mDtsVfsUtil.createFileSystemOptions(target, mEncrypter)));
+                    mDtsVfsUtil.getFileSystemOptions(target, mEncrypter)));
         }
         catch (final FileSystemException ex) {
             LOGGER.error("An error has occurred during a file copy operation: "
@@ -131,9 +131,9 @@ public class FileCopyingServiceImpl implements FileCopyingService,
 
         try {
             sourceFO = sourceFileSystemManager.resolveFile(sourceURI,
-                mDtsVfsUtil.createFileSystemOptions(source, mEncrypter));
+                mDtsVfsUtil.getFileSystemOptions(source, mEncrypter));
             targetFO = targetFileSystemManager.resolveFile(targetURI,
-                mDtsVfsUtil.createFileSystemOptions(target, mEncrypter));
+                mDtsVfsUtil.getFileSystemOptions(target, mEncrypter));
             copyFiles(sourceFO, targetFO);
         }
         catch (final FileSystemException e) {
