@@ -21,7 +21,7 @@ import org.unitils.inject.annotation.TestedObject;
 public class XmlPayloadDelayExtractorTest extends UnitilsTestNG {
 
     private static final String QUERY_STR="declare namespace dmi='http://schemas.ogf.org/dmi/2008/05/dmi';$this//dmi:StartNotBefore";
-    private static final String EXPECTED = "2010-02-28T12:00:00";
+    private static final String EXPECTED = "2010-03-11T17:50:00";
     @TestedObject
     private XmlPayloadDelayExtractor mExtractor;
 
