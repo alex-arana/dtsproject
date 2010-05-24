@@ -39,7 +39,7 @@
     <constructor-arg index="0" ref="dtsMarshaller"/>
   </bean>
 
-  <bean id="dtsMessageConverter" class="org.dataminx.dts.broker.si.DtsMessageConverter">
+  <bean id="dtsMessageConverter" class="org.dataminx.dts.common.jms.DtsMessageConverter">
     <property name="transformer" ref="dtsMessagePayloadTransformer"/>
     <property name="marshaller" ref="dtsMarshaller"/>
   </bean>
@@ -48,7 +48,7 @@
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="locations">
       <list>
-        <value>file:/${dataminx.dir}/dts-broker.properties</value>
+        <value>file:///${dataminx.dir}/dts-broker.properties</value>
       </list>
     </property>
     <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
