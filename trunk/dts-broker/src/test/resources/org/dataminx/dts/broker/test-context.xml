@@ -12,9 +12,14 @@
 
   <bean id="mQueueSender" class="org.dataminx.dts.common.jms.JobQueueSender">
     <property name="mQueue" ref="brokerJobSubmissionQueue"/>
-    <property name="mJmsTemplate" ref="jmsTemplate"/>
+    <property name="mJmsTemplate" ref="testJmsTemplate"/>
   </bean>
   
+  <bean id="testJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="defaultDestination" ref="brokerDefaultOutputQueue"/>
+  </bean>
+    
   <bean id="dtsJobScheduler" class="org.dataminx.dts.broker.si.DtsJobScheduler">
     <property name="delayHeaderName" value="${broker.delay.headerName}"/>
   </bean>
