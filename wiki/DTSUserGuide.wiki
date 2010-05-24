@@ -86,6 +86,15 @@ Edit testjob.xml in src/test/resources/org/dataminx/dts/batch and add the source
  > mvn -Ddataminx.dir=/home/dts-user/.dataminx -Dtest=QuickBulkCopyJobIntegrationTest test
 }}}
 
+==== DTS Batch Job Client ====
+There might be times when you would only deploy the DTS Batch Job module and not worry about the other DTS modules (eg scheduler/broker, webservice, and workernode manager). There's an option for you as a user to just run the DTS Batch Job as a standalone application by building the client module. Here's how you can build and run it.
+{{{
+ > cd dts-batchjobclient
+ > mvn assembly:assembly –Pdeploy-assembly1 –DskipTests=true
+ > cd target/dts-batchjobclient-0.0.1-SNAPSHOT-dts-agent/lib
+ > java –jar dts-batchjob-0.0.1-SNAPSHOT.jar <path-to-dts-job-def-doc>
+}}}
+
 ==== DTS Workernode ====
 
 Start ActiveMQ
