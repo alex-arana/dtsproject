@@ -143,11 +143,19 @@ The two lines above is used to authenticate to the web service.
 Setup the DB for DTS WS
 {{{
  > cd dts-ws/src/main/resources/db
+ > # the create-accts.sql probably won't have to be run anymore if the dts database
+ > # has been precreated by going through the dts-batchjob module section above
  > mysql -u root < create-accts.sql
+ >
  > mysql -u dts -D dts -p < create-tables.sql
 }}}
 
 Edit ~/.dataminx/dts-ws.properties and set the value of si.jms.jobSubmitQueueName to broker.job.submission.queue if you want the DTS-WS to use the broker in managing the scheduling of jobs or to dts.job.submit.queue if you want the job to go straight to the workernode.
+
+Build the DTS Web Service
+{{{
+ > mvn -Ddataminx.dir=/home/dts-user/.dataminx -DskipTests=true package
+}}}
 
 Deploying the WS on Tomcat
    * Before you go ahead and follow the succeeding instructions, you might consider just running the DTS-WS as an embedded Jetty web application for test purposes. If you do, have a look at the "Running the DTS-WS as an embedded application inside Jetty" section on this page.
