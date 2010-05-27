@@ -152,17 +152,18 @@
   </pluginRepositories>
 
   <modules>
+    <!-- temporarily disable the dts-portal module until we start working on it again -->
+    <!--<module>dts-portal</module>-->
     <module>build-tools</module>
     <module>dts-common</module>
     <module>dts-schema</module>
     <module>dts-workernode</module>
     <module>dts-batchjob</module>
     <module>dts-ws</module>
-    <!-- temporarily disable the dts-portal module until we start working on it again -->
-    <!--<module>dts-portal</module>-->
     <module>dts-security</module>
     <module>dts-wsclient</module>
     <module>dts-broker</module>
+    <module>dts-batchjobclient</module>
     <!--
     <module>dts-portal-gwt</module>
     <module>dts-gwt</module>
