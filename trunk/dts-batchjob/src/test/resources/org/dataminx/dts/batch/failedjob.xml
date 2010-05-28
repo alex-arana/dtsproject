@@ -14,8 +14,7 @@
       <jsdl:Description>Failed Job</jsdl:Description>
       <jsdl:JobAnnotation>failure</jsdl:JobAnnotation>
       <jsdl:JobProject>apollo13</jsdl:JobProject>
-    </jsdl:JobIdentification>
-    
+    </jsdl:JobIdentification>    
     <mjsdl:DataTransfer>
       <mjsdl:Source>        
         <jsdl:URI>tmp://uxtw</jsdl:URI>
@@ -23,11 +22,10 @@
       <mjsdl:Target>
         <jsdl:URI>tmp://</jsdl:URI>
       </mjsdl:Target>
-      <mjsdl:TransferRequirements>
-        <dmi:MaxAttempts>0</dmi:MaxAttempts>
-        <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
-      </mjsdl:TransferRequirements>
     </mjsdl:DataTransfer>
-    
+    <mjsdl:TransferRequirements>
+      <dmi:MaxAttempts>0</dmi:MaxAttempts>
+      <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    </mjsdl:TransferRequirements>    
   </jsdl:JobDescription>
 </jsdl:JobDefinition>

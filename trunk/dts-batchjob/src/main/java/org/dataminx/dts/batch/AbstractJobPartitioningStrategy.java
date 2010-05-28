@@ -225,7 +225,7 @@ public abstract class AbstractJobPartitioningStrategy implements
                             .toString(), mMaxTotalByteSizePerStepLimit,
                         mMaxTotalFileNumPerStepLimit);
 
-                    final CreationFlagEnumeration.Enum creationFlag = dataTransfer
+                    final CreationFlagEnumeration.Enum creationFlag = ((MinxJobDescriptionType) jobDescription)
                         .getTransferRequirements().getCreationFlag();
 
                     // find out the number of files to be transferred for the given

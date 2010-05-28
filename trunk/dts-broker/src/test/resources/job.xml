@@ -27,12 +27,12 @@
         <jsdl:Target>
           <jsdl1:URI>file:///F:/</jsdl1:URI>
         </jsdl:Target>
-        <jsdl:TransferRequirements>
-          <dmi:StartNotBefore>2010-03-11T17:50:00</dmi:StartNotBefore>
-          <dmi:MaxAttempts>0</dmi:MaxAttempts>
-          <jsdl1:CreationFlag>overwrite</jsdl1:CreationFlag>
-        </jsdl:TransferRequirements>
       </jsdl:DataTransfer>
+      <jsdl:TransferRequirements>
+        <dmi:StartNotBefore>2010-03-11T17:50:00</dmi:StartNotBefore>
+        <dmi:MaxAttempts>0</dmi:MaxAttempts>
+        <jsdl1:CreationFlag>overwrite</jsdl1:CreationFlag>
+      </jsdl:TransferRequirements>
     </jsdl1:JobDescription>
   </JobDefinition>
 </submitJobRequest>
