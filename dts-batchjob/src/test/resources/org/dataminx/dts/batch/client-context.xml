@@ -35,4 +35,13 @@
      time while the calling module is running.     
   -->
   <bean id="credentialStore" class="org.dataminx.dts.common.util.CredentialStoreImpl"/>
+  
+
+  <bean id="mixedFilesJobStepAllocator" class="org.dataminx.dts.batch.MixedFilesJobStepAllocator" scope="prototype"/>  
+  
+  <bean id="jobPartitioningStrategy" class="org.dataminx.dts.batch.AbstractJobPartitioningStrategy">
+    <!-- replace the jobStepAllocator implementation here if you want to use a 
+         new strategy for partitioning files -->
+    <lookup-method  name="createDtsJobStepAllocator" bean="mixedFilesJobStepAllocator"/>
+  </bean>
 </beans>

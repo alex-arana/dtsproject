@@ -28,6 +28,7 @@
 package org.dataminx.dts.batch;
 
 import java.util.Calendar;
+
 import org.dataminx.dts.batch.service.JobNotificationService;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInterruptedException;
@@ -57,7 +58,6 @@ public abstract class DtsJob extends SimpleJob {
     private JobNotificationService mJobNotificationService;
 
     /** A reference to the JobPartitioningStrategy. */
-    @Autowired
     private JobPartitioningStrategy mJobPartitioningStrategy;
 
     /**
@@ -154,5 +154,10 @@ public abstract class DtsJob extends SimpleJob {
 
     public JobPartitioningStrategy getJobPartitioningStrategy() {
         return mJobPartitioningStrategy;
+    }
+
+    public void setJobPartitioningStrategy(
+        final JobPartitioningStrategy jobPartitioningStrategy) {
+        mJobPartitioningStrategy = jobPartitioningStrategy;
     }
 }

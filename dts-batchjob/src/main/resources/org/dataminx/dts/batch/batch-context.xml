@@ -133,6 +133,7 @@
       </list>
     </property>
     <property name="stopwatchTimer" ref="stopwatchTimer"/>
+    <property name="jobPartitioningStrategy" ref="jobPartitioningStrategy"/>
   </bean>
 
   <bean id="stopwatchTimer" class="org.dataminx.dts.common.util.StopwatchTimer"/>
@@ -184,8 +185,20 @@
     <property name="jobRepository" ref="jobRepository"/>
   </bean>
   
-  <!-- TODO: put these values into the dts-bulkcopyjob.properties file later on -->
-  <bean id="jobPartitioningStrategy" class="org.dataminx.dts.batch.VfsMixedFilesJobPartitioningStrategy">
+  
+  <!-- DIFFERENT JOB STEP ALLOCATOR TO BE USED BY THE JOB PARTITIONING STRATEGY -->
+  <!-- A job step allocator that mixes big and smalls together in a step -->
+  <bean id="mixedFilesJobStepAllocator" class="org.dataminx.dts.batch.MixedFilesJobStepAllocator" scope="prototype"/>
+  <!-- A job step allocator that groups big files together (and same with small files) in a step -->
+  <bean id="categorizedFilesJobStepAllocator" class="org.dataminx.dts.batch.CategorizedFilesJobStepAllocator" scope="prototype">
+    <property name="bigFileSize" value="${min.bigfiles.bytes.size}"/>
+  </bean>
+  
+  
+  <bean id="jobPartitioningStrategy" class="org.dataminx.dts.batch.AbstractJobPartitioningStrategy">
+    <!-- replace the jobStepAllocator implementation here if you want to use a 
+         new strategy for partitioning files -->
+    <lookup-method  name="createDtsJobStepAllocator" bean="mixedFilesJobStepAllocator"/>
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
     <!-- limit the size of each step to not be more than 10MB -->
     <!-- 

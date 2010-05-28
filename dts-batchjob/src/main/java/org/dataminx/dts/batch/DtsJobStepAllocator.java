@@ -45,14 +45,18 @@ interface DtsJobStepAllocator {
      * @param targetRootFileObject the Root of the FileObject referred to by the target
      */
     void createNewDataTransfer(final String sourceRootFileObject,
-        final String targetRootFileObject);
+        final String targetRootFileObject,
+        final long maxTotalByteSizePerStepLimit,
+        final int maxTotalFileNumPerStepLimit);
 
     /**
      * Adds the new DtsDataTransferUnit to the current DtsJobStep.
      *
      * @param dataTransferUnit the DtsDataTransferUnit to be added to the DtsJobStep
      */
-    void addDataTransferUnit(final DtsDataTransferUnit dataTransferUnit);
+    void addDataTransferUnit(final DtsDataTransferUnit dataTransferUnit,
+        final long maxTotalByteSizePerStepLimit,
+        final int maxTotalFileNumPerStepLimit);
 
     /**
      * This method had to be called before a new DataTransfer element is processed.
