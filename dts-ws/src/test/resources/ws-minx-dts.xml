@@ -89,10 +89,6 @@
       <mjsdl:Target>
         <jsdl:URI>file:///tmp/passwd.copy</jsdl:URI>
       </mjsdl:Target>
-      <mjsdl:TransferRequirements>
-        <dmi:MaxAttempts>0</dmi:MaxAttempts>
-        <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
-      </mjsdl:TransferRequirements>
     </mjsdl:DataTransfer>
     <mjsdl:DataTransfer>
       <mjsdl:Source>        
@@ -101,10 +97,10 @@
       <mjsdl:Target>
         <jsdl:URI>file://tmp/hello/hi</jsdl:URI>
       </mjsdl:Target>
-      <mjsdl:TransferRequirements>
-        <dmi:MaxAttempts>0</dmi:MaxAttempts>
-        <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
-      </mjsdl:TransferRequirements>
     </mjsdl:DataTransfer>
+    <mjsdl:TransferRequirements>
+      <dmi:MaxAttempts>0</dmi:MaxAttempts>
+      <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    </mjsdl:TransferRequirements>
   </jsdl:JobDescription>
 </jsdl:JobDefinition>

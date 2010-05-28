@@ -32,6 +32,10 @@
           <jsdl1:CreationFlag>overwrite</jsdl1:CreationFlag>
         </jsdl:TransferRequirements>
       </jsdl:DataTransfer>
+      <jsdl:TransferRequirements>
+        <dmi:MaxAttempts>0</dmi:MaxAttempts>
+        <jsdl1:CreationFlag>overwrite</jsdl1:CreationFlag>
+      </jsdl:TransferRequirements>
     </jsdl1:JobDescription>
   </JobDefinition>
 </submitJobRequest>

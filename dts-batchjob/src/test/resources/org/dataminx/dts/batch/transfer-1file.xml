@@ -22,10 +22,10 @@
       <mjsdl:Target>
         <jsdl:URI>tmp://</jsdl:URI>
       </mjsdl:Target>
-      <mjsdl:TransferRequirements>
-        <dmi:MaxAttempts>0</dmi:MaxAttempts>
-        <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
-      </mjsdl:TransferRequirements>
     </mjsdl:DataTransfer>
+    <mjsdl:TransferRequirements>
+      <dmi:MaxAttempts>0</dmi:MaxAttempts>
+      <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    </mjsdl:TransferRequirements>  
   </jsdl:JobDescription>
 </jsdl:JobDefinition>

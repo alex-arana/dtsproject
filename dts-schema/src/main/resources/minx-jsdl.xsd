@@ -158,7 +158,6 @@
         <xsd:sequence>
             <xsd:element ref="mjsdl:Source" />
             <xsd:element ref="mjsdl:Target" />
-            <xsd:element ref="mjsdl:TransferRequirements" minOccurs="0" />
             <xsd:any namespace="##other" processContents="lax"
                 minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
@@ -182,6 +181,7 @@
                 <xsd:sequence>
                     <xsd:element ref="mjsdl:DataTransfer" minOccurs="1"
                         maxOccurs="unbounded" />
+                    <xsd:element ref="mjsdl:TransferRequirements" minOccurs="0" />
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
