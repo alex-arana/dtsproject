@@ -64,4 +64,6 @@ public interface JobPartitioningStrategy {
      */
     void setMaxTotalByteSizePerStepLimit(long maxTotalByteSizePerStepLimit);
 
+    DtsJobStepAllocator createDtsJobStepAllocator();
+
 }

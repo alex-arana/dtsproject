@@ -1,30 +1,3 @@
-/**
- * Copyright (c) 2010, VeRSI Consortium
- *   (Victorian eResearch Strategic Initiative, Australia)
- * All rights reserved.
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the VeRSI, the VeRSI Consortium members, nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 package org.dataminx.dts.batch;
 
 import java.util.ArrayList;
@@ -52,99 +25,12 @@ import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
-/**
- * The MixedFilesJobPartitioningStrategy is the a partitioning strategy which employs the mixing and matching of
- * big and small files into a job step as long as they stay within the limits of max allowed files to transfer and
- * max allowed size of all the files to transfer per step.
- *
- * @author Gerson Galang
- */
-public class VfsMixedFilesJobPartitioningStrategy implements
+public abstract class AbstractJobPartitioningStrategy implements
     JobPartitioningStrategy, InitializingBean {
-
-    /**
-     * The VfsMixedFilesJobPartitioningStrategy's DtsJobStepAllocator.
-     */
-    private class MixedFilesJobStepAllocator implements DtsJobStepAllocator {
-
-        /** The list of DtsJobSteps where DtsTransferUnits will be allocated. */
-        private final List<DtsJobStep> mSteps;
-
-        /** A reference to the DtsJobStep. */
-        private DtsJobStep mTmpDtsJobStep;
-
-        /** The Source Root FileObject URI string. */
-        private String mSourceRootFileObject;
-
-        /** The Target Root FileObject URI string. */
-        private String mTargetRootFileObject;
-
-        /**
-         * MixedFilesJobStepAllocator's constructor.
-         */
-        public MixedFilesJobStepAllocator() {
-            mSteps = new ArrayList<DtsJobStep>();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void addDataTransferUnit(
-            final DtsDataTransferUnit dataTransferUnit) {
-
-            // if mTmpDtsJobStep has already been initialised and (number of DataTransferUnits in the step
-            // has reached the max total number of files per step limit OR the size of the file we are going
-            // to add will exceed the max size in bytes of all the files per step limit)
-            if (mTmpDtsJobStep != null
-                && (mTmpDtsJobStep.getCurrentTotalFileNum() >= mMaxTotalFileNumPerStepLimit || mTmpDtsJobStep
-                    .getCurrentTotalByteSize()
-                    + dataTransferUnit.getSize() >= mMaxTotalByteSizePerStepLimit)) {
-                mSteps.add(mTmpDtsJobStep);
-                mTmpDtsJobStep = new TransferMixedFilesStep(
-                    mSourceRootFileObject, mTargetRootFileObject,
-                    mSteps.size() + 1, mMaxTotalFileNumPerStepLimit,
-                    mMaxTotalByteSizePerStepLimit);
-                mTmpDtsJobStep.addDataTransferUnit(dataTransferUnit);
-            }
-            else {
-                // if (!tmpDtsJobStep.isFull())
-                mTmpDtsJobStep.addDataTransferUnit(dataTransferUnit);
-            }
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void closeNewDataTransfer() {
-            if (mTmpDtsJobStep.getDataTransferUnits().size() > 0) {
-                mSteps.add(mTmpDtsJobStep);
-            }
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void createNewDataTransfer(final String sourceRootFileObject,
-            final String targetRootFileObject) {
-            mTmpDtsJobStep = new TransferMixedFilesStep(sourceRootFileObject,
-                targetRootFileObject, mSteps.size() + 1,
-                mMaxTotalFileNumPerStepLimit, mMaxTotalByteSizePerStepLimit);
-            mSourceRootFileObject = sourceRootFileObject;
-            mTargetRootFileObject = targetRootFileObject;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public List<DtsJobStep> getAllocatedJobSteps() {
-            return mSteps;
-        }
-
-    }
 
     /** The logger. */
     private static final Log LOGGER = LogFactory
-        .getLog(VfsMixedFilesJobPartitioningStrategy.class);
+        .getLog(AbstractJobPartitioningStrategy.class);
 
     /** A flag if the user has requested the processing of the job to be stopped or cancelled. */
     private final boolean mCancelled = false;
@@ -195,7 +81,8 @@ public class VfsMixedFilesJobPartitioningStrategy implements
         mPerDataTransferTotalFiles++;
         mDtsJobStepAllocator.addDataTransferUnit(new DtsDataTransferUnit(source
             .getURL().toString(), destination.getURL().toString(),
-            dataTransferIndex, source.getContent().getSize()));
+            dataTransferIndex, source.getContent().getSize()),
+            mMaxTotalByteSizePerStepLimit, mMaxTotalFileNumPerStepLimit);
     }
 
     /**
@@ -241,7 +128,7 @@ public class VfsMixedFilesJobPartitioningStrategy implements
         FileSystemManager fileSystemManager = null;
         final DtsJobDetails jobDetails = new DtsJobDetails();
 
-        try{
+        try {
             try {
                 fileSystemManager = mDtsVfsUtil.createNewFsManager();
             }
@@ -251,20 +138,26 @@ public class VfsMixedFilesJobPartitioningStrategy implements
                     e);
             }
 
-
             jobDetails.setJobDefinition(jobDefinition);
             jobDetails.setJobId(jobResourceKey);
 
             // get the Map that holds the maximum number of files to be transferred
-            // from each Source Map<Source URI (String), number of files (Integer)>
-            final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = jobDetails.getSourceTargetMaxTotalFilesToTransfer();
+            // from each Source Map<Source URI (String), number of files (Integer)>.
+            // we need this max number of files to be transferred for each source
+            // so we can intelligently decide how many parallel threads we need to use
+            // whenever we deal with the given source. knowing the number of parallel
+            // threads to use means knowing the number of FileSystemManager connections
+            // to cache. there's no point caching 4 FileSystemManagers for a given source
+            // if the number of files to be transferred from that source is only 1.
+            final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = jobDetails
+                .getSourceTargetMaxTotalFilesToTransfer();
 
-            mDtsJobStepAllocator = new MixedFilesJobStepAllocator();
+            mDtsJobStepAllocator = createDtsJobStepAllocator(); //this final has to be final instantiated everytime this class is loaded
             mExcluded = new ArrayList<String>();
             mTotalSize = 0;
             mTotalFiles = 0;
 
-            // populate the dataTransfers List from the given jobDefintion (i.e. a
+            // populate the dataTransfers List from the given jobDefinition (i.e. a
             // list of source to sink constructs).
             final List<DataTransferType> dataTransfers = new ArrayList<DataTransferType>();
 
@@ -287,15 +180,19 @@ public class VfsMixedFilesJobPartitioningStrategy implements
                 // reset the total number of files to be transferred within this DataTransfer element
                 mPerDataTransferTotalFiles = 0;
 
+                // the sourceParent can be a directory or a file that needs to be
+                // transferred to the target destination
                 FileObject sourceParent = null;
                 try {
                     sourceParent = fileSystemManager.resolveFile(dataTransfer
-                        .getSource().getURI(), mDtsVfsUtil.getFileSystemOptions(
-                        dataTransfer.getSource(), mEncrypter));
+                        .getSource().getURI(), mDtsVfsUtil
+                        .getFileSystemOptions(dataTransfer.getSource(),
+                            mEncrypter));
 
                     if (!sourceParent.getContent().getFile().exists()
                         || !sourceParent.getContent().getFile().isReadable()) {
-                        throw new JobScopingException("The source " + sourceParent
+                        throw new JobScopingException("The source "
+                            + sourceParent
                             + " provided does not exist or is not readable.");
                     }
                 }
@@ -308,8 +205,9 @@ public class VfsMixedFilesJobPartitioningStrategy implements
                 FileObject targetParent = null;
                 try {
                     targetParent = fileSystemManager.resolveFile(dataTransfer
-                        .getTarget().getURI(), mDtsVfsUtil.getFileSystemOptions(
-                        dataTransfer.getTarget(), mEncrypter));
+                        .getTarget().getURI(), mDtsVfsUtil
+                        .getFileSystemOptions(dataTransfer.getTarget(),
+                            mEncrypter));
                 }
                 catch (final FileSystemException e) {
                     throw new JobScopingException(
@@ -318,21 +216,33 @@ public class VfsMixedFilesJobPartitioningStrategy implements
                 }
 
                 try {
+                    // calling createNewDataTransfer initialises the Step and adds
+                    // the first source and target pair file to the list of files to be
+                    // transferred by the step
                     mDtsJobStepAllocator.createNewDataTransfer(sourceParent
                         .getFileSystem().getRoot().getURL().toString(),
-                        targetParent.getFileSystem().getRoot().getURL().toString());
+                        targetParent.getFileSystem().getRoot().getURL()
+                            .toString(), mMaxTotalByteSizePerStepLimit,
+                        mMaxTotalFileNumPerStepLimit);
 
                     final CreationFlagEnumeration.Enum creationFlag = dataTransfer
                         .getTransferRequirements().getCreationFlag();
 
+                    // find out the number of files to be transferred for the given
+                    // source and target pair. also create the directory structure
+                    // on the target destination
                     prepare(sourceParent, targetParent, dataTransferIndex,
                         creationFlag);
 
-                    final String sourceParentRootStr = sourceParent.getFileSystem()
-                        .getRoot().getURL().toString();
-                    final String targetParentRootStr = targetParent.getFileSystem()
-                        .getRoot().getURL().toString();
+                    final String sourceParentRootStr = sourceParent
+                        .getFileSystem().getRoot().getURL().toString();
+                    final String targetParentRootStr = targetParent
+                        .getFileSystem().getRoot().getURL().toString();
 
+                    // update the max number of total files to be transferred for the
+                    // given source and/or target based on the number of files to be 
+                    // transferred between the source and target so we can use the 
+                    // values for finding out the number of FileSystemManagers we can cache
                     if (sourceTargetMaxTotalFilesToTransfer
                         .containsKey(sourceParentRootStr)
                         && sourceTargetMaxTotalFilesToTransfer
@@ -387,10 +297,14 @@ public class VfsMixedFilesJobPartitioningStrategy implements
                     throw e;
                 }
 
+                // get the current Step in the allocator to not accept anymore
+                // source-target pair file to process and have the new source-target
+                // pair files to be added to a new Step
                 mDtsJobStepAllocator.closeNewDataTransfer();
 
             }
-            LOGGER.info("Total number of files to be transferred: " + mTotalFiles);
+            LOGGER.info("Total number of files to be transferred: "
+                + mTotalFiles);
             LOGGER.info("Total size of files to be transferred: " + mTotalSize
                 + " bytes");
             LOGGER.debug("list of excluded files: ");
@@ -401,7 +315,8 @@ public class VfsMixedFilesJobPartitioningStrategy implements
             jobDetails.setExcludedFiles(mExcluded);
             jobDetails.setTotalBytes(mTotalSize);
             jobDetails.setTotalFiles(mTotalFiles);
-            jobDetails.saveJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps());
+            jobDetails
+                .saveJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps());
 
             for (final DtsJobStep jobStep : mDtsJobStepAllocator
                 .getAllocatedJobSteps()) {
@@ -409,12 +324,13 @@ public class VfsMixedFilesJobPartitioningStrategy implements
             }
             // let's try to put the steps in the step execution context
 
-        } finally {
+        }
+        finally {
             // Always, immediately close the file system manager so FileCopyTask will be able to use all of the
             // available connections. Define this in finally so that we do not
             // leave hanging connections if a scoping error occurs. 
-            if(fileSystemManager != null){
-               ((DefaultFileSystemManager) fileSystemManager).close();
+            if (fileSystemManager != null) {
+                ((DefaultFileSystemManager) fileSystemManager).close();
             }
         }
 

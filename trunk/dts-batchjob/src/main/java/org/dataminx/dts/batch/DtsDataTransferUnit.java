@@ -100,6 +100,10 @@ public class DtsDataTransferUnit implements Serializable {
         mDestUri = destinationFileUri;
     }
 
+    /**
+     * Gets the size of the "source" file to be transferred.
+     * @param size the size of the "source" file to be transferred
+     */
     public void setSize(final long size) {
         mSize = size;
     }

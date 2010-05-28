@@ -39,3 +39,7 @@ max.total.bytes.perstep = 10485760
 
 # Maximum number of files a step will transfer
 max.total.num.files.perstep = 3
+
+
+# Anything equal to or higher than this value is considered a big file
+min.bigfiles.bytes.size = 1024
