@@ -32,8 +32,10 @@ import static org.dataminx.dts.common.xml.XmlUtils.documentToString;
 
 import java.io.File;
 import java.util.UUID;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.dataminx.dts.common.jms.JobQueueSender;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
@@ -62,8 +64,7 @@ import org.w3c.dom.Document;
  * @author Alex Arana
  */
 @ContextConfiguration
-public class ProcessDtsJobMessageTest extends
-    AbstractTestNGSpringContextTests {
+public class ProcessDtsJobMessageTest extends AbstractTestNGSpringContextTests {
     @Autowired
     @Qualifier("mQueueSender")
     private JobQueueSender mJmsQueueSender;
@@ -110,7 +111,7 @@ public class ProcessDtsJobMessageTest extends
         transferRequirements.setMaxAttempts(0L);
         transferRequirements.setCreationFlag(CreationFlagEnumeration.OVERWRITE);
 
-        dataTransfer.setTransferRequirements(transferRequirements);
+        jobDescription.setTransferRequirements(transferRequirements);
         dataTransfer.setSource(source);
         dataTransfer.setTarget(target);
 
@@ -137,15 +138,17 @@ public class ProcessDtsJobMessageTest extends
 
     //@Test
     public void submitJobCancelRequestAsText() {
-        final CancelJobRequestDocument document = CancelJobRequestDocument.Factory.newInstance();
+        final CancelJobRequestDocument document = CancelJobRequestDocument.Factory
+            .newInstance();
         final CancelJobRequest request = document.addNewCancelJobRequest();
         final String dtsJobId = generateNewJobId();
         request.setJobResourceKey(dtsJobId);
         final Logger logger = LoggerFactory.getLogger(getClass());
         if (logger.isDebugEnabled()) {
             final String dtsJobRequest = document.xmlText();
-            logger.debug(String.format("submitJobCancelRequestAsText ['%s']:%s%s",
-                dtsJobId, LINE_SEPARATOR, dtsJobRequest));
+            logger.debug(String.format(
+                "submitJobCancelRequestAsText ['%s']:%s%s", dtsJobId,
+                LINE_SEPARATOR, dtsJobRequest));
         }
 
     }
