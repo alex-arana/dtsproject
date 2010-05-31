@@ -27,10 +27,6 @@
         <jsdl:Target>
           <jsdl1:URI>tmp://DataMINX-dude/minx-dts</jsdl1:URI>
         </jsdl:Target>
-        <jsdl:TransferRequirements>
-          <dmi:MaxAttempts>0</dmi:MaxAttempts>
-          <jsdl1:CreationFlag>overwrite</jsdl1:CreationFlag>
-        </jsdl:TransferRequirements>
       </jsdl:DataTransfer>
       <jsdl:TransferRequirements>
         <dmi:MaxAttempts>0</dmi:MaxAttempts>
