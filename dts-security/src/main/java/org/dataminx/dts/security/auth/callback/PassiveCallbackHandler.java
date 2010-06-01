@@ -32,11 +32,12 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * PassiveCallbackHandler is used if username and password can't be provided from within the handle() method
+ * PassiveCallbackHandler is used if username and password can't be provided from within the handle() method.
  *
  * @author Gerson Galang
  */
@@ -44,10 +45,14 @@ import org.apache.commons.logging.LogFactory;
 public class PassiveCallbackHandler implements CallbackHandler {
 
     /** The logger. */
-    private static final Log LOGGER = LogFactory.getLog(PassiveCallbackHandler.class);
+    private static final Log LOGGER = LogFactory
+        .getLog(PassiveCallbackHandler.class);
 
-    private String mUsername;
-    char[] mPassword;
+    /** The username. */
+    private final String mUsername;
+
+    /** The password. */
+    private char[] mPassword;
 
     /**
      * Creates a callback handler given the username and password.
@@ -55,7 +60,7 @@ public class PassiveCallbackHandler implements CallbackHandler {
      * @param user the username
      * @param password the password
      */
-    public PassiveCallbackHandler(String user, String password) {
+    public PassiveCallbackHandler(final String user, final String password) {
         LOGGER.debug("PassiveCallbackHandler constructor");
         mUsername = user;
         mPassword = password.toCharArray();
@@ -64,16 +69,18 @@ public class PassiveCallbackHandler implements CallbackHandler {
     /**
      * {@inheritDoc}
      */
-    public void handle(Callback[] callbacks)
-        throws java.io.IOException, UnsupportedCallbackException  {
+    public void handle(final Callback[] callbacks) throws java.io.IOException,
+        UnsupportedCallbackException {
         for (int i = 0; i < callbacks.length; i++) {
             if (callbacks[i] instanceof NameCallback) {
-                ((NameCallback)callbacks[i]).setName(mUsername);
-            } else if (callbacks[i] instanceof PasswordCallback) {
-                ((PasswordCallback)callbacks[i]).setPassword(mPassword);
-            } else {
-                throw new UnsupportedCallbackException(
-                            callbacks[i], "Callback class not supported");
+                ((NameCallback) callbacks[i]).setName(mUsername);
+            }
+            else if (callbacks[i] instanceof PasswordCallback) {
+                ((PasswordCallback) callbacks[i]).setPassword(mPassword);
+            }
+            else {
+                throw new UnsupportedCallbackException(callbacks[i],
+                    "Callback class not supported");
             }
         }
     }
@@ -83,8 +90,9 @@ public class PassiveCallbackHandler implements CallbackHandler {
      */
     public void clearPassword() {
         if (mPassword != null) {
-            for (int i = 0; i < mPassword.length; i++)
+            for (int i = 0; i < mPassword.length; i++) {
                 mPassword[i] = ' ';
+            }
             mPassword = null;
         }
     }

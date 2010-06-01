@@ -27,17 +27,21 @@
  */
 package org.dataminx.dts.security.auth.module;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.security.auth.callback.PassiveCallbackHandler;
@@ -51,11 +55,19 @@ public abstract class AbstractBasicLoginModule implements LoginModule {
     // TODO: javadoc
 
     /** The logger. */
-    private static final Log LOGGER = LogFactory.getLog(AbstractBasicLoginModule.class);
+    private static final Log LOGGER = LogFactory
+        .getLog(AbstractBasicLoginModule.class);
 
+    /** A reference to the callback handler. */
     protected CallbackHandler mCallbackHandler;
+
+    /** The credential's subject. */
     protected Subject mSubject;
+
+    /** The shared state. */
     protected Map<String, ?> mSharedState;
+
+    /** The options. */
     protected Map<String, ?> mOptions;
 
     /** The authentication status. */
@@ -64,8 +76,10 @@ public abstract class AbstractBasicLoginModule implements LoginModule {
     /** Temporary holder of Principal objects. */
     protected List<Principal> mTempPrincipals;
 
+    /** Temporary holder of the Credential objects. */
     protected List<BasicPrivateCredential> mTempCredentials;
 
+    /** Default constructor of the AbstractBasicLoginModule. */
     public AbstractBasicLoginModule() {
         LOGGER.debug("AbstractBasicLoginModule constructor");
         mSuccess = false;
@@ -73,59 +87,68 @@ public abstract class AbstractBasicLoginModule implements LoginModule {
         mTempCredentials = new ArrayList<BasicPrivateCredential>();
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     public boolean abort() throws LoginException {
         LOGGER.debug("AbstractBasicLoginModule abort()");
 
         mSuccess = false;
         mTempPrincipals.clear();
 
-        if (mCallbackHandler instanceof PassiveCallbackHandler)
-            ((PassiveCallbackHandler)mCallbackHandler).clearPassword();
+        if (mCallbackHandler instanceof PassiveCallbackHandler) {
+            ((PassiveCallbackHandler) mCallbackHandler).clearPassword();
+        }
 
         logout();
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public boolean commit() throws LoginException {
         LOGGER.debug("AbstractBasicLoginModule commit()");
 
         if (mSuccess) {
             if (mSubject.isReadOnly()) {
-                throw new LoginException ("Subject is Readonly");
+                throw new LoginException("Subject is Readonly");
             }
 
-            try {
-                if (LOGGER.isDebugEnabled()) {
-                    for (Principal p : mTempPrincipals) {
-                        LOGGER.debug(" - Principal: " + p);
-                    }
+            if (LOGGER.isDebugEnabled()) {
+                for (final Principal p : mTempPrincipals) {
+                    LOGGER.debug(" - Principal: " + p);
                 }
-
-                mSubject.getPrincipals().addAll(mTempPrincipals);
-                mTempPrincipals.clear();
-                LOGGER.debug("see if we are allowed to edit the private credential?");
-                mSubject.getPrivateCredentials().addAll(mTempCredentials);
-                LOGGER.debug("yes we are allowed to edit the private credential!");
-                mTempCredentials.clear();
-
-                if(mCallbackHandler instanceof PassiveCallbackHandler)
-                    ((PassiveCallbackHandler)mCallbackHandler).clearPassword();
-
-                return true;
-            } catch (Exception ex) {
-                ex.printStackTrace(System.out);
-                throw new LoginException(ex.getMessage());
             }
-        } else {
+
+            mSubject.getPrincipals().addAll(mTempPrincipals);
+            mTempPrincipals.clear();
+            LOGGER
+                .debug("see if we are allowed to edit the private credential?");
+            mSubject.getPrivateCredentials().addAll(mTempCredentials);
+            LOGGER.debug("yes we are allowed to edit the private credential!");
+            mTempCredentials.clear();
+
+            if (mCallbackHandler instanceof PassiveCallbackHandler) {
+                ((PassiveCallbackHandler) mCallbackHandler).clearPassword();
+            }
+
+            return true;
+
+        }
+        else {
             mTempPrincipals.clear();
             mTempCredentials.clear();
             return true;
         }
     }
 
-    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState,
-            Map<String, ?> options) {
+    /**
+     * {@inheritDoc}
+     */
+    public void initialize(final Subject subject,
+        final CallbackHandler callbackHandler,
+        final Map<String, ?> sharedState, final Map<String, ?> options) {
         LOGGER.debug("AbstractBasicLoginModule initialize()");
 
         // save the initial state
@@ -135,54 +158,73 @@ public abstract class AbstractBasicLoginModule implements LoginModule {
         mOptions = options;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public boolean login() throws LoginException {
         LOGGER.debug("AbstractBasicLoginModule login()");
 
-        if (mCallbackHandler == null)
-            throw new LoginException("Error: no CallbackHandler available to handle" +
-                    " authentication information from the user");
+        if (mCallbackHandler == null) {
+            throw new LoginException(
+                "Error: no CallbackHandler available to handle"
+                    + " authentication information from the user");
+        }
 
         try {
             // Setup default callback handlers.
-            Callback[] callbacks = new Callback[] {
+            final Callback[] callbacks = new Callback[] {
                 new NameCallback("Username: "),
-                new PasswordCallback("Password: ", false)
-            };
+                new PasswordCallback("Password: ", false)};
 
             mCallbackHandler.handle(callbacks);
 
-            String username = ((NameCallback)callbacks[0]).getName();
-            String password = new String(((PasswordCallback)callbacks[1]).getPassword());
+            final String username = ((NameCallback) callbacks[0]).getName();
+            final String password = ((PasswordCallback) callbacks[1])
+                .getPassword().toString();
 
-            ((PasswordCallback)callbacks[1]).clearPassword();
+            ((PasswordCallback) callbacks[1]).clearPassword();
 
             mSuccess = authenticate(username, password);
 
             callbacks[0] = null;
             callbacks[1] = null;
 
-            if (!mSuccess)
-                throw new LoginException("Authentication failed: Username and/or Password does/do not match");
+            if (!mSuccess) {
+                throw new LoginException(
+                    "Authentication failed: Username and/or Password does/do not match");
+            }
 
             return true;
-        } catch (LoginException ex) {
+        }
+        catch (final LoginException ex) {
             throw ex;
-        } catch (Exception ex) {
+        }
+        catch (final IOException ex) {
+            throw new LoginException(ex.getMessage());
+        }
+        catch (final UnsupportedCallbackException ex) {
             throw new LoginException(ex.getMessage());
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public boolean logout() throws LoginException {
         LOGGER.debug("AbstractBasicLoginModule logout()");
 
         mTempPrincipals.clear();
 
-        if (mCallbackHandler instanceof PassiveCallbackHandler)
-            ((PassiveCallbackHandler)mCallbackHandler).clearPassword();
+        if (mCallbackHandler instanceof PassiveCallbackHandler) {
+            ((PassiveCallbackHandler) mCallbackHandler).clearPassword();
+        }
 
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected abstract boolean authenticate(String username, String password);
 
 }

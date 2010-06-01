@@ -38,17 +38,25 @@ import org.ietf.jgss.GSSException;
  */
 public class MyProxyCredential extends BasicPrivateCredential {
 
-    // TODO: javadoc
+    /** The logger. */
+    private static final Log LOGGER = LogFactory
+        .getLog(MyProxyCredential.class);
 
+    /** A reference to the GSS Credential. */
     private GSSCredential mGssCredential;
 
-    /** The logger. */
-    private static final Log LOGGER = LogFactory.getLog(MyProxyCredential.class);
-
+    /**
+     * MyProxyCredential default constructor.
+     */
     public MyProxyCredential() {
     }
 
-    public void setGssCredential(GSSCredential gssCredential) {
+    /**
+     * Sets the GSS Credential for this object.
+     *
+     * @param gssCredential the GSS Credential
+     */
+    public void setGssCredential(final GSSCredential gssCredential) {
         mGssCredential = gssCredential;
     }
 
@@ -56,6 +64,10 @@ public class MyProxyCredential extends BasicPrivateCredential {
         return mGssCredential;
     }
 
+    /**
+     * Removes the GSS Credential from the memory.
+     */
+    @Override
     public void clearCredential() {
         super.clearCredential();
 
@@ -63,7 +75,7 @@ public class MyProxyCredential extends BasicPrivateCredential {
             try {
                 mGssCredential.dispose();
             }
-            catch (GSSException gssEx) {
+            catch (final GSSException gssEx) {
                 LOGGER.warn("GSSException thrown: " + gssEx.getMessage());
             }
         }

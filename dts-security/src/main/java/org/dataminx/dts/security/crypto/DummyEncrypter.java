@@ -31,7 +31,7 @@ package org.dataminx.dts.security.crypto;
  * A dummy implementation of the Encrypter interface. This encrypter will not
  * encrypt the message but instead only prepend the clear text hash at the front
  * of the actual message to be encrypted.
- * 
+ *
  * @author Gerson Galang
  */
 public class DummyEncrypter implements Encrypter {

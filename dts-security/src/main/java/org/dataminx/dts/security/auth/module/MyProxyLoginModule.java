@@ -28,9 +28,11 @@
 package org.dataminx.dts.security.auth.module;
 
 import java.util.Map;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.globus.myproxy.MyProxy;
@@ -46,10 +48,8 @@ public class MyProxyLoginModule extends AbstractBasicLoginModule {
     // TODO: javadoc
 
     /** The logger. */
-    private static final Log LOGGER = LogFactory.getLog(MyProxyLoginModule.class);
-
-
-    private boolean mDebug;
+    private static final Log LOGGER = LogFactory
+        .getLog(MyProxyLoginModule.class);
 
     /** The myproxy server. */
     private String mMyProxyHost;
@@ -60,7 +60,9 @@ public class MyProxyLoginModule extends AbstractBasicLoginModule {
     /** The myproxy lifetime. */
     private int mMyProxyLifetime;
 
-
+    /**
+     * MyProxyLoginModule default constructor.
+     */
     public MyProxyLoginModule() {
         super();
         LOGGER.debug("MyProxyLoginModule constructor");
@@ -70,8 +72,9 @@ public class MyProxyLoginModule extends AbstractBasicLoginModule {
      * {@inheritDoc}
      */
     @Override
-    public void initialize(Subject subject, CallbackHandler callbackHandler,
-            Map<String, ?> sharedState, Map<String, ?> options) {
+    public void initialize(final Subject subject,
+        final CallbackHandler callbackHandler,
+        final Map<String, ?> sharedState, final Map<String, ?> options) {
         LOGGER.debug("MyProxyLoginModule initialize()");
 
         super.initialize(subject, callbackHandler, sharedState, options);
@@ -82,7 +85,8 @@ public class MyProxyLoginModule extends AbstractBasicLoginModule {
         mMyProxyPort = Integer.parseInt((String) options.get("myproxy.port"));
         LOGGER.debug(" - myproxy.port: " + mMyProxyPort);
 
-        mMyProxyLifetime = Integer.parseInt((String) options.get("myproxy.lifetime"));
+        mMyProxyLifetime = Integer.parseInt((String) options
+            .get("myproxy.lifetime"));
         LOGGER.debug(" - myproxy.lifetime: " + mMyProxyLifetime);
 
     }
@@ -97,13 +101,15 @@ public class MyProxyLoginModule extends AbstractBasicLoginModule {
         super.logout();
 
         // remove the Principals the login module added
-        for (MyProxyPrincipal p : mSubject.getPrincipals(MyProxyPrincipal.class)) {
+        for (final MyProxyPrincipal p : mSubject
+            .getPrincipals(MyProxyPrincipal.class)) {
             LOGGER.debug("removing " + p);
             mSubject.getPrincipals().remove(p);
         }
 
         // remove the MyProxyCredentials the login module added
-        for (MyProxyCredential c : mSubject.getPrivateCredentials(MyProxyCredential.class)) {
+        for (final MyProxyCredential c : mSubject
+            .getPrivateCredentials(MyProxyCredential.class)) {
             LOGGER.debug("removing myproxy credential");
             c.clearCredential();
             mSubject.getPrivateCredentials().remove(c);
@@ -112,21 +118,27 @@ public class MyProxyLoginModule extends AbstractBasicLoginModule {
         return true;
     }
 
-    protected boolean authenticate(String username, String password) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean authenticate(final String username, final String password) {
         LOGGER.debug("MyProxyLoginModule myproxyAuthenticate");
-        MyProxy myProxy = new MyProxy(mMyProxyHost, mMyProxyPort);
+        final MyProxy myProxy = new MyProxy(mMyProxyHost, mMyProxyPort);
         GSSCredential credential = null;
-        String commonName = null;
+        final String commonName = null;
         boolean hasSuccessfullyAuthenticated = false;
         try {
             // TODO: remove this debug line later on
             //LOGGER.debug("username: " + username + "; password: " + password);
             credential = myProxy.get(username, password, mMyProxyLifetime);
-            LOGGER.info(String.format("Successfully downloaded a proxy credential from myproxy server, '%s:%s'\n",
-                    mMyProxyHost,
-                    mMyProxyPort));
+            LOGGER
+                .info(String
+                    .format(
+                        "Successfully downloaded a proxy credential from myproxy server, '%s:%s'\n",
+                        mMyProxyHost, mMyProxyPort));
 
-            MyProxyCredential myProxyCredential = new MyProxyCredential();
+            final MyProxyCredential myProxyCredential = new MyProxyCredential();
             myProxyCredential.setUsername(username);
             myProxyCredential.setPassword(password);
             myProxyCredential.setGssCredential(credential);
@@ -135,10 +147,11 @@ public class MyProxyLoginModule extends AbstractBasicLoginModule {
             // just work on authentication first.
 
             // at this point, we know that we've successfully authenticated. get the subject's details (ie DN)
-            String distinguishedName = credential.getName().toString();
+            final String distinguishedName = credential.getName().toString();
 
             mTempPrincipals.add(new MyProxyPrincipal(distinguishedName));
-            LOGGER.info(String.format("User '%s' successfully logged in", distinguishedName));
+            LOGGER.info(String.format("User '%s' successfully logged in",
+                distinguishedName));
 
             // TODO: figure out how I can control access to the private credential
             // use jaas.policy perhaps?
@@ -148,16 +161,18 @@ public class MyProxyLoginModule extends AbstractBasicLoginModule {
             hasSuccessfullyAuthenticated = true;
 
         }
-        catch (MyProxyException ex) {
-            LOGGER.error(String.format("Could not get delegated proxy for '%s' from server '%s:%s'\n%s",
-                username,
-                mMyProxyHost,
-                mMyProxyPort,
-                ex.getMessage()));
+        catch (final MyProxyException ex) {
+            LOGGER
+                .error(String
+                    .format(
+                        "Could not get delegated proxy for '%s' from server '%s:%s'\n%s",
+                        username, mMyProxyHost, mMyProxyPort, ex.getMessage()));
         }
-        catch (GSSException ex) {
+        catch (final GSSException ex) {
             // let's ignore this exception
-            LOGGER.warn(String.format("Couldn't perform GSSCredential method calls.\n%s", ex.getMessage()));
+            LOGGER.warn(String.format(
+                "Couldn't perform GSSCredential method calls.\n%s", ex
+                    .getMessage()));
             mTempPrincipals.add(new MyProxyPrincipal("Unknown User"));
         }
 

@@ -38,15 +38,24 @@ import java.security.Principal;
  * @author Gerson Galang
  */
 public class MyProxyPrincipal implements Principal, Serializable {
-    // TODO: javadoc
 
-    private String mName;
+    /** The username of the MyProxyPrincipal. */
+    private final String mName;
 
+    /**
+     * The default MyProxyPrincipal which uses an empty string as the username for the
+     * MyProxyPrincipal object.
+     */
     public MyProxyPrincipal() {
         mName = "";
     }
 
-    public MyProxyPrincipal(String name) {
+    /**
+     * The MyProxyPrincipal constructor that takes in a username to be used by this object.
+     *
+     * @param name the username of the MyProxyPrincipal
+     */
+    public MyProxyPrincipal(final String name) {
         mName = name;
     }
 
@@ -58,21 +67,22 @@ public class MyProxyPrincipal implements Principal, Serializable {
      * @param o Object to be compared for equality with this <code>MyProxyPrincipal</code>
      * @return true if the specified Object is equal equal to this <code>MyProxyPrincipal</code>
      */
-    public boolean equals(Object o) {
-        if (o == null)
+    @Override
+    public boolean equals(final Object o) {
+        if (o == null) {
             return false;
+        }
 
-        if (this == o)
+        if (this == o) {
             return true;
+        }
 
         if (o instanceof MyProxyPrincipal) {
-            if (((MyProxyPrincipal) o).getName().equals(mName))
-                return true;
-            else
-                return false;
+            return ((MyProxyPrincipal) o).getName().equals(mName);
         }
-        else
+        else {
             return false;
+        }
     }
 
     /**
@@ -80,6 +90,7 @@ public class MyProxyPrincipal implements Principal, Serializable {
      *
      * @return a hash code for this <code>MyProxyPrincipal</code>
      */
+    @Override
     public int hashCode() {
         return mName.hashCode();
     }
@@ -89,6 +100,7 @@ public class MyProxyPrincipal implements Principal, Serializable {
      *
      * @return a string representation of this <code>MyProxyPrincipal</code>
      */
+    @Override
     public String toString() {
         return mName;
     }
