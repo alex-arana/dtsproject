@@ -28,26 +28,44 @@
 package org.dataminx.dts.security.auth;
 
 /**
+ * LoginException.
  *
  * @author Gerson Galang
  */
 public class LoginException extends Exception {
 
-    // TODO: javadoc
-
+    /**
+     * Constructs an instance of {@link LoginException}.
+     */
     public LoginException() {
         super();
     }
 
-    public LoginException(String msg) {
+    /**
+     * Constructs an instance of {@link LoginException} with a specified message.
+     *
+     * @param msg the detail message.
+     */
+    public LoginException(final String msg) {
         super(msg);
     }
 
-    public LoginException(String msg, Throwable cause) {
+    /**
+     * Constructs an instance of {@link LoginException} with the specified detail message and cause.
+     *
+     * @param msg the detail message.
+     * @param cause the cause.
+     */
+    public LoginException(final String msg, final Throwable cause) {
         super(msg, cause);
     }
 
-    public LoginException(Throwable cause) {
+    /**
+     * Constructs an instance of {@link LoginException} with the specified cause.
+     *
+     * @param cause the cause.
+     */
+    public LoginException(final Throwable cause) {
         super(cause);
     }
 }

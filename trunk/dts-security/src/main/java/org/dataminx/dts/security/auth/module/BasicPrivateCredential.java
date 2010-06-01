@@ -33,12 +33,13 @@ package org.dataminx.dts.security.auth.module;
  */
 public class BasicPrivateCredential {
 
-    // TODO: javadoc
-
+    /** The password. */
     private char[] mPassword;
+
+    /** The username. */
     private String mUsername;
 
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         mPassword = password.toCharArray();
     }
 
@@ -50,10 +51,13 @@ public class BasicPrivateCredential {
         return mUsername;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         mUsername = username;
     }
 
+    /**
+     * Clears the credential from memory.
+     */
     public void clearCredential() {
         if (mPassword != null) {
             for (int i = 0; i < mPassword.length; i++) {

@@ -35,15 +35,24 @@ import java.security.Principal;
  * @author Gerson Galang
  */
 public class PasswordFilePrincipal implements Principal, Serializable {
-    // TODO: javadoc
 
-    private String mName;
+    /** The user name of the PasswordFilePrincipal. */
+    private final String mName;
 
+    /**
+     * The default PasswordFilePrincipal constructor.
+     */
     public PasswordFilePrincipal() {
         mName = "";
     }
 
-    public PasswordFilePrincipal(String name) {
+    /**
+     * The PasswordFilePrincipal constructor given the user name to be used by the
+     * PasswordFilePrincipal object.
+     *
+     * @param name the user name
+     */
+    public PasswordFilePrincipal(final String name) {
         mName = name;
     }
 
@@ -51,27 +60,39 @@ public class PasswordFilePrincipal implements Principal, Serializable {
         return mName;
     }
 
-    public boolean equals(Object o) {
-        if (o == null)
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(final Object o) {
+        if (o == null) {
             return false;
+        }
 
-        if (this == o)
+        if (this == o) {
             return true;
+        }
 
         if (o instanceof PasswordFilePrincipal) {
-            if (((PasswordFilePrincipal) o).getName().equals(mName))
-                return true;
-            else
-                return false;
+            return ((PasswordFilePrincipal) o).getName().equals(mName);
         }
-        else
+        else {
             return false;
+        }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public int hashCode() {
         return mName.hashCode();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String toString() {
         return mName;
     }

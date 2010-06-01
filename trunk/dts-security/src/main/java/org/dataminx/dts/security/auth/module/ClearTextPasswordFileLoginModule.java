@@ -33,9 +33,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -45,16 +47,26 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ClearTextPasswordFileLoginModule extends AbstractBasicLoginModule {
 
-    // TODO: javadoc
+    /** The logger. */
+    private static final Log LOGGER = LogFactory
+        .getLog(ClearTextPasswordFileLoginModule.class);
 
-    private static final Log LOGGER = LogFactory.getLog(ClearTextPasswordFileLoginModule.class);
+    /** Date (in long) the file has been last modified. */
+    private long mLastModified;
 
-    private long mLastModified = 0;
-    private Map<String, String> mUsers = null;
-    private String mPasswordFile = null;
+    /** Map of users and their respective passwords. */
+    private Map<String, String> mUsers;
 
-    private void load(File file) throws LoginException {
-        //System.out.println("Reading " + f);
+    /** The password file. */
+    private String mPasswordFile;
+
+    /**
+     * Loads the password file.
+     *
+     * @param file the password file
+     * @throws LoginException if the file couldn't be read
+     */
+    private void load(final File file) throws LoginException {
         mLastModified = file.lastModified();
         BufferedReader reader;
         try {
@@ -77,21 +89,31 @@ public class ClearTextPasswordFileLoginModule extends AbstractBasicLoginModule {
             }
 
             reader.close();
-        } catch (IOException e) {
+        }
+        catch (final IOException e) {
             throw new LoginException(e.getMessage());
         }
     }
 
+    /**
+     * Reloads the contents of the user-password map by reloading the contents of the password file.
+     *
+     * @throws LoginException if the file couldn't be read
+     */
     private void reload() throws LoginException {
-        File file = new File(mPasswordFile);
+        final File file = new File(mPasswordFile);
         if (mUsers == null || file.lastModified() != mLastModified) {
-           load(file);
+            load(file);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void initialize(Subject subject, CallbackHandler callbackHandler,
-            Map<String, ?> sharedState, Map<String, ?> options) {
+    public void initialize(final Subject subject,
+        final CallbackHandler callbackHandler,
+        final Map<String, ?> sharedState, final Map<String, ?> options) {
         LOGGER.debug("ClearTextPasswordFileLoginModule initialize()");
 
         super.initialize(subject, callbackHandler, sharedState, options);
@@ -100,18 +122,22 @@ public class ClearTextPasswordFileLoginModule extends AbstractBasicLoginModule {
         LOGGER.debug(" - password.file: " + mPasswordFile);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean logout() throws LoginException {
         super.logout();
 
         // remove the Principals the login module added
-        for (PasswordFilePrincipal p : mSubject.getPrincipals(PasswordFilePrincipal.class)) {
+        for (final PasswordFilePrincipal p : mSubject
+            .getPrincipals(PasswordFilePrincipal.class)) {
             mSubject.getPrincipals().remove(p);
         }
 
         // remove the MyProxyCredentials the login module added
-        for (BasicPrivateCredential c :
-                mSubject.getPrivateCredentials(BasicPrivateCredential.class)) {
+        for (final BasicPrivateCredential c : mSubject
+            .getPrivateCredentials(BasicPrivateCredential.class)) {
             c.clearCredential();
             mSubject.getPrivateCredentials().remove(c);
         }
@@ -119,19 +145,26 @@ public class ClearTextPasswordFileLoginModule extends AbstractBasicLoginModule {
         return true;
     }
 
-    protected boolean authenticate(String username, String password) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean authenticate(final String username, final String password) {
         try {
             reload();
-            if (mUsers.get(username) != null && mUsers.get(username).equals(password)) {
+            if (mUsers.get(username) != null
+                && mUsers.get(username).equals(password)) {
                 mTempPrincipals.add(new PasswordFilePrincipal(username));
-                BasicPrivateCredential credential = new BasicPrivateCredential();
+                final BasicPrivateCredential credential = new BasicPrivateCredential();
                 credential.setUsername(username);
                 credential.setPassword(password);
                 mTempCredentials.add(credential);
                 return true;
             }
-        } catch (LoginException e) {
-            LOGGER.error("LoginException was thrown in ClearTextPasswordFileLoginModule.authenticate()"
+        }
+        catch (final LoginException e) {
+            LOGGER
+                .error("LoginException was thrown in ClearTextPasswordFileLoginModule.authenticate()"
                     + e.getMessage());
         }
         return false;

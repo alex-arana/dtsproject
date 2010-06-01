@@ -27,13 +27,12 @@
  */
 package org.dataminx.dts.security.crypto;
 
-
 /**
  * The Encrypter interface that DTS encryption plugins need to implement if the
  * clients want to use a custom written encryption mechanism. This class will be
  * used to encrypt and decrypt the user's password credentials so they are not
  * displayed as clear text in the Message Broker and the Spring Batch Database.
- * 
+ *
  * @author Gerson Galang
  */
 public interface Encrypter {
@@ -48,8 +47,8 @@ public interface Encrypter {
 
     /**
      * Sets the passphrase to be used by this encrypter.
-     * 
-     * @param passphrase
+     *
+     * @param passphrase the passphrase to be used by the encrypter
      */
     void setPassphrase(String passphrase);
 
@@ -63,7 +62,7 @@ public interface Encrypter {
      * The Encrypter implementation may support more than one algorithm. So it
      * is up to the decrypter implementation to figure out how the supported
      * algorithms will be decrypted.
-     * 
+     *
      * @param stringToEncrypt the string to be encrypted
      * @return returns the encrypted string.
      */
@@ -71,11 +70,11 @@ public interface Encrypter {
 
     /**
      * Decrypt the given string.
-     * 
+     *
      * @param stringToDecrypt the string to be decrypted
      * @return the decrypted string
-     * @throws UnknownEncryptionAlgorithmException if the string being decrypted could not be decrypted due to an 
-     *         unknown algorithm used to decrypt it
+     * @throws UnknownEncryptionAlgorithmException if the string being decrypted could not be
+     *         decrypted due to an unknown algorithm used to decrypt it
      */
     String decrypt(String stringToDecrypt)
         throws UnknownEncryptionAlgorithmException;
