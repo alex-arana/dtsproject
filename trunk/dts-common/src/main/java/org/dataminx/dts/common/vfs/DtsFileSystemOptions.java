@@ -36,12 +36,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Container for default DTS file options.
- * 
+ *
  * @author Alex Arana
  */
 public class DtsFileSystemOptions extends FileSystemOptions {
     /** Internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(DtsFileSystemOptions.class);
+    private static final Logger LOG = LoggerFactory
+        .getLogger(DtsFileSystemOptions.class);
 
     /**
      * Default constructor for instances of {@link DtsFileSystemOptions}.
@@ -58,8 +59,10 @@ public class DtsFileSystemOptions extends FileSystemOptions {
         FtpFileSystemConfigBuilder.getInstance().setPassiveMode(this, true);
 
         try {
-            SftpFileSystemConfigBuilder.getInstance().setStrictHostKeyChecking(this, "no");
-        } catch (final FileSystemException ex) {
+            SftpFileSystemConfigBuilder.getInstance().setStrictHostKeyChecking(
+                this, "no");
+        }
+        catch (final FileSystemException ex) {
             LOG.warn("Unable to disable SFTP strict host key checking", ex);
         }
     }

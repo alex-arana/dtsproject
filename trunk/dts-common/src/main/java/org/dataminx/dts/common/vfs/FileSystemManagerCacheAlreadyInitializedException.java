@@ -27,6 +27,11 @@
  */
 package org.dataminx.dts.common.vfs;
 
+/**
+ * The FileSystemManagerCacheAlreadyInitializedException.
+ *
+ * @author Gerson Galang
+ */
 public class FileSystemManagerCacheAlreadyInitializedException extends
     Exception {
 
@@ -42,7 +47,7 @@ public class FileSystemManagerCacheAlreadyInitializedException extends
      * Constructs an instance of
      * {@link FileSystemManagerCacheAlreadyInitializedException} with a
      * specified message.
-     * 
+     *
      * @param message the detail message.
      */
     public FileSystemManagerCacheAlreadyInitializedException(
@@ -54,7 +59,7 @@ public class FileSystemManagerCacheAlreadyInitializedException extends
      * Constructs an instance of
      * {@link FileSystemManagerCacheAlreadyInitializedException} with the
      * specified detail message and cause.
-     * 
+     *
      * @param message the detail message.
      * @param cause the cause.
      */

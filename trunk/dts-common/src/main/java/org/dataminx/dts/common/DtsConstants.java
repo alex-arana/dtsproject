@@ -29,8 +29,9 @@ package org.dataminx.dts.common;
 
 /**
  * Defines all the constants for the DTS application.
- * 
+ *
  * @author Alex Arana
+ * @author Gerson Galang
  */
 public class DtsConstants {
 
@@ -40,7 +41,7 @@ public class DtsConstants {
      * <p>
      * Normally, this parameter would be passed to the application at startup
      * using the following:
-     * 
+     *
      * <pre>
      *   java <b>-Ddataminx.dir=</b><i>/home/username/.dataminx</i> ...  &lt;runner_class&gt;
      * </pre>
@@ -60,11 +61,15 @@ public class DtsConstants {
     public static final String DEFAULT_LOG4J_CONFIGURATION_KEY = "log4j.configuration";
 
     /** Holds the namespace URI of the WS-Security namespace. */
-    public static final String WS_SECURITY_NAMESPACE_URI = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
+    public static final String WS_SECURITY_NAMESPACE_URI =
+        "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
 
+    /** The dataminx JSDL namespace URI. */
     public static final String DTS_JSDL_NAMESPACE_URI = "http://schemas.dataminx.org/dts/2009/07/jsdl";
 
+    /** The tmp protocol scheme. */
     public static final String TMP_ROOT_PROTOCOL = "tmp:///";
 
+    /** The local file system protocol scheme. */
     public static final String FILE_ROOT_PROTOCOL = "file:///";
 }

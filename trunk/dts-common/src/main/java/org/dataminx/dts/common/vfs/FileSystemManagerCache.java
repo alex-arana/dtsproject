@@ -39,23 +39,43 @@ import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.dataminx.dts.common.batch.util.FileObjectMap;
 import org.springframework.util.Assert;
 
+/**
+ * A FileSystemManagerCache class is used as a cache to store FileSystemManager objects
+ * that have been instantiated by the MaxSteamCounterTask.
+ *
+ * @author Gerson Galang
+ */
 public class FileSystemManagerCache {
 
+    /** The logger. */
     private static final Log LOGGER = LogFactory
         .getLog(FileSystemManagerCache.class);
 
-    private final Map<String, Stack<FileSystemManager>> fsmAvailableStackPerRootFileObject;
-    private final Map<String, List<FileSystemManager>> fsmOnLoanListPerRootFileObject;
+    /** A map of the root FileObject and their corresponding stack of FileSystemManagers. */
+    private final Map<String, Stack<FileSystemManager>> mFsmAvailableStackPerRootFileObject;
 
+    /** A map of the root FileObject and their corrresponding list of FileSystemManagers that are on loan. */
+    private final Map<String, List<FileSystemManager>> mFsmOnLoanListPerRootFileObject;
+
+    /**
+     * Default constructor of the FileSystemManagerCache.
+     */
     public FileSystemManagerCache() {
-        fsmAvailableStackPerRootFileObject = new FileObjectMap<String, Stack<FileSystemManager>>();
-        fsmOnLoanListPerRootFileObject = new FileObjectMap<String, List<FileSystemManager>>();
+        mFsmAvailableStackPerRootFileObject = new FileObjectMap<String, Stack<FileSystemManager>>();
+        mFsmOnLoanListPerRootFileObject = new FileObjectMap<String, List<FileSystemManager>>();
     }
 
+    /**
+     * Borrows the FileSystemManager for the given root FileObject.
+     *
+     * @param rootFileObject the key to be used for the borrowed FileSystemManager
+     * @return the cached FileSystemManager for the given root FileObject
+     * @throws UnknownRootFileObjectException if the root FileObject is not found in the cache
+     */
     public synchronized FileSystemManager borrowOne(final String rootFileObject)
         throws UnknownRootFileObjectException {
-        if (fsmAvailableStackPerRootFileObject.containsKey(rootFileObject)) {
-            final Stack<FileSystemManager> fsmAvailableStack = fsmAvailableStackPerRootFileObject
+        if (mFsmAvailableStackPerRootFileObject.containsKey(rootFileObject)) {
+            final Stack<FileSystemManager> fsmAvailableStack = mFsmAvailableStackPerRootFileObject
                 .get(rootFileObject);
             if (!fsmAvailableStack.isEmpty()) {
                 LOGGER.debug("Borrowing a FileSystemManager for \""
@@ -64,7 +84,7 @@ public class FileSystemManagerCache {
                     .pop();
                 Assert.notNull(borrowedFileSystemManager);
 
-                fsmOnLoanListPerRootFileObject.get(rootFileObject).add(
+                mFsmOnLoanListPerRootFileObject.get(rootFileObject).add(
                     borrowedFileSystemManager);
                 return borrowedFileSystemManager;
             }
@@ -74,6 +94,9 @@ public class FileSystemManagerCache {
             + " is not in the FileSystemManagerCache.");
     }
 
+    /**
+     * Clears the cache by removing all the FileSystemObjects that have been cached.
+     */
     public synchronized void clear() {
         LOGGER.debug("FileSystemManagerCache clear()");
         FileSystemManager tmpFileSystemManager = null;
@@ -82,18 +105,18 @@ public class FileSystemManagerCache {
         // delete entries to the map while we are iterating through the items in the map
         List<String> rootFileObjectKeys = new ArrayList<String>();
 
-        for (final String rootFileObjectString : fsmAvailableStackPerRootFileObject
+        for (final String rootFileObjectString : mFsmAvailableStackPerRootFileObject
             .keySet()) {
-            while (!fsmAvailableStackPerRootFileObject
-                .get(rootFileObjectString).empty()) {
-                tmpFileSystemManager = fsmAvailableStackPerRootFileObject.get(
+            while (!mFsmAvailableStackPerRootFileObject.get(
+                rootFileObjectString).empty()) {
+                tmpFileSystemManager = mFsmAvailableStackPerRootFileObject.get(
                     rootFileObjectString).pop();
                 LOGGER
                     .debug("Closing FileSystemManager on the AvailableStack...");
                 ((DefaultFileSystemManager) tmpFileSystemManager).close();
             }
 
-            for (final FileSystemManager fsm : fsmOnLoanListPerRootFileObject
+            for (final FileSystemManager fsm : mFsmOnLoanListPerRootFileObject
                 .get(rootFileObjectString)) {
                 LOGGER
                     .debug("Closing FileSystemManagers on the OnLoandList...");
@@ -105,8 +128,8 @@ public class FileSystemManagerCache {
 
         // now we can safely delete items from the FileObjectMap
         for (final String rootFileObjectString : rootFileObjectKeys) {
-            fsmAvailableStackPerRootFileObject.remove(rootFileObjectString);
-            fsmOnLoanListPerRootFileObject.remove(rootFileObjectString);
+            mFsmAvailableStackPerRootFileObject.remove(rootFileObjectString);
+            mFsmOnLoanListPerRootFileObject.remove(rootFileObjectString);
         }
 
         // let's have this list garbage collected
@@ -114,10 +137,17 @@ public class FileSystemManagerCache {
 
     }
 
+    /**
+     * Gets the size of the cached FileSystemManagers for the given root FileObject.
+     *
+     * @param rootFileObject the root FileObject
+     * @return the size of cached FileSystemManagers for the given root FileObject
+     * @throws UnknownRootFileObjectException if the root FileObject is not in the cache
+     */
     public synchronized int getSizeOfAvailableFileSystemManagers(
         final String rootFileObject) throws UnknownRootFileObjectException {
-        if (fsmAvailableStackPerRootFileObject.containsKey(rootFileObject)) {
-            return fsmAvailableStackPerRootFileObject.get(rootFileObject)
+        if (mFsmAvailableStackPerRootFileObject.containsKey(rootFileObject)) {
+            return mFsmAvailableStackPerRootFileObject.get(rootFileObject)
                 .size();
         }
         else {
@@ -126,13 +156,21 @@ public class FileSystemManagerCache {
         }
     }
 
+    /**
+     * Initialises the FileSystemManagerCache object.
+     *
+     * @param fileSystemManagersPerRootFileObject A map of the root FileObjects and their corrresponding
+     *        list of FileSystemManagers that are on loan.
+     * @throws FileSystemManagerCacheAlreadyInitializedException if the cache has already been initialised
+     *         (ie already contains FileSystemManagers)
+     */
     public synchronized void initFileSystemManagerCache(
         final Map<String, List<FileSystemManager>> fileSystemManagersPerRootFileObject)
         throws FileSystemManagerCacheAlreadyInitializedException {
         LOGGER.debug("FileSystemManagerCache initFileSystemManagerCache()");
 
-        if (!fsmAvailableStackPerRootFileObject.isEmpty()
-            || !fsmOnLoanListPerRootFileObject.isEmpty()) {
+        if (!mFsmAvailableStackPerRootFileObject.isEmpty()
+            || !mFsmOnLoanListPerRootFileObject.isEmpty()) {
             throw new FileSystemManagerCacheAlreadyInitializedException();
         }
 
@@ -150,26 +188,35 @@ public class FileSystemManagerCache {
                 fsmAvailableStack.push(fsm);
             }
 
-            fsmAvailableStackPerRootFileObject.put(rootFileObjectString,
+            mFsmAvailableStackPerRootFileObject.put(rootFileObjectString,
                 fsmAvailableStack);
-            fsmOnLoanListPerRootFileObject.put(rootFileObjectString,
+            mFsmOnLoanListPerRootFileObject.put(rootFileObjectString,
                 new ArrayList<FileSystemManager>());
         }
     }
 
+    /**
+     * Returns the FileSystemManager that was previously borrowed.
+     *
+     * @param rootFileObject the root FileObject that owns the FileSystemManager that is being returned
+     * @param fileSystemManager the FileSystemManager being returned
+     * @throws UnknownFileSystemManagerException if the returned FileSystemManager does not belong to the
+     *         root FileObject
+     * @throws UnknownRootFileObjectException if the root FileObject is not in the cache
+     */
     public synchronized void returnOne(final String rootFileObject,
         final FileSystemManager fileSystemManager)
         throws UnknownFileSystemManagerException,
         UnknownRootFileObjectException {
-        if (fsmOnLoanListPerRootFileObject.containsKey(rootFileObject)) {
+        if (mFsmOnLoanListPerRootFileObject.containsKey(rootFileObject)) {
             // we'll only allow the return of a file system manager if it's in the cache
-            final List<FileSystemManager> fsmOnLoanList = fsmOnLoanListPerRootFileObject
+            final List<FileSystemManager> fsmOnLoanList = mFsmOnLoanListPerRootFileObject
                 .get(rootFileObject);
             if (fsmOnLoanList.contains(fileSystemManager)) {
                 LOGGER.debug("Returning a FileSystemManager for \""
                     + rootFileObject + "\" to the cache.");
                 if (fsmOnLoanList.remove(fileSystemManager)) {
-                    fsmAvailableStackPerRootFileObject.get(rootFileObject)
+                    mFsmAvailableStackPerRootFileObject.get(rootFileObject)
                         .push(fileSystemManager);
                 }
             }

@@ -49,7 +49,7 @@ import org.springframework.util.ResourceUtils;
 /**
  * A simple bean that initialises the Log4j logging subsystem. This class can then be configured as a Spring
  * {@link InitializingBean}.
- * 
+ *
  * @author Alex Arana
  */
 @Scope("singleton")
@@ -69,16 +69,19 @@ public class Log4jConfiguratorBean implements InitializingBean {
      * {@inheritDoc}
      */
     public void afterPropertiesSet() throws Exception {
-        if ((mConfiguration == null) || !mConfiguration.exists()) {
-            mConfiguration = new ClassPathResource(DEFAULT_LOG4J_CONFIGURATION_FILE);
+        if (mConfiguration == null || !mConfiguration.exists()) {
+            mConfiguration = new ClassPathResource(
+                DEFAULT_LOG4J_CONFIGURATION_FILE);
         }
 
         // allow the Log4J configuration resource to be overridden using the value of an
         // application-specific Java system property. eg.:
         //   java -Dlog4j.configuration=/etc/log4j.properties
-        final String log4jOverride = System.getProperty(DEFAULT_LOG4J_CONFIGURATION_KEY);
+        final String log4jOverride = System
+            .getProperty(DEFAULT_LOG4J_CONFIGURATION_KEY);
         if (StringUtils.isNotBlank(log4jOverride)) {
-            mConfiguration = new UrlResource(ResourceUtils.getURL(log4jOverride));
+            mConfiguration = new UrlResource(ResourceUtils
+                .getURL(log4jOverride));
         }
 
         LogManager.resetConfiguration();
@@ -86,15 +89,18 @@ public class Log4jConfiguratorBean implements InitializingBean {
         if (isFileResource(mConfiguration)) {
             if (mRefreshInterval == 0) {
                 Log4jConfigurer.initLogging(uri);
-            } else {
+            }
+            else {
                 Log4jConfigurer.initLogging(uri, mRefreshInterval);
             }
-        } else {
+        }
+        else {
             // the resource cannot be resolved as an absolute file path,
             // thus refresh is not supported
             Log4jConfigurer.initLogging(uri);
         }
-        Logger.getLogger(getClass()).info(String.format("Configured logging from %s", mConfiguration));
+        Logger.getLogger(getClass()).info(
+            String.format("Configured logging from %s", mConfiguration));
     }
 
     /**
@@ -102,7 +108,7 @@ public class Log4jConfiguratorBean implements InitializingBean {
      * system, <code>false</code> otherwise.
      * <p>
      * This is purely a convenience method to handle a potential exception being raised when detecting this condition.
-     * 
+     *
      * @param resource
      *            Object that points to an underlying resource such as a file or classpath resource
      * @return true if the given Resource points to a File, false otherwise
@@ -112,7 +118,8 @@ public class Log4jConfiguratorBean implements InitializingBean {
         try {
             resource.getFile();
             return true;
-        } catch (final IOException ex) {
+        }
+        catch (final IOException ex) {
             return false;
         }
     }

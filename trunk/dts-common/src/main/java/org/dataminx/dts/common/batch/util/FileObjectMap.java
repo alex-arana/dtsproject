@@ -35,11 +35,12 @@ import java.util.HashMap;
 /**
  * A customised HashMap implementation that maps a tmp:// and file:// root URLs
  * into a single key.
- * 
+ *
  * @author Gerson Galang
  */
 public class FileObjectMap<K, V> extends HashMap<K, V> {
 
+    /** Serial version UID. */
     private static final long serialVersionUID = 1L;
 
     /**

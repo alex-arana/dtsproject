@@ -36,7 +36,7 @@ import java.util.Date;
  */
 public class DtsFaultException extends RuntimeException {
 
-    /** The m timestamp. */
+    /** The timestamp. */
     private Date mTimestamp;
 
     /**
@@ -52,7 +52,7 @@ public class DtsFaultException extends RuntimeException {
      *
      * @param msg the exception message
      */
-    public DtsFaultException(String msg) {
+    public DtsFaultException(final String msg) {
         super(msg);
         setTimestamp(new Date());
     }
@@ -63,7 +63,7 @@ public class DtsFaultException extends RuntimeException {
      * @param msg the exception message
      * @param cause the error or exception that cause this exception to be thrown
      */
-    public DtsFaultException(String msg, Throwable cause) {
+    public DtsFaultException(final String msg, final Throwable cause) {
         super(msg, cause);
         setTimestamp(new Date());
     }
@@ -73,7 +73,7 @@ public class DtsFaultException extends RuntimeException {
      *
      * @param cause the error or exception that cause this exception to be thrown
      */
-    public DtsFaultException(Throwable cause) {
+    public DtsFaultException(final Throwable cause) {
         super(cause);
         setTimestamp(new Date());
     }
@@ -83,7 +83,7 @@ public class DtsFaultException extends RuntimeException {
      *
      * @param timestamp the timestamp
      */
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(final Date timestamp) {
         mTimestamp = timestamp;
     }
 
