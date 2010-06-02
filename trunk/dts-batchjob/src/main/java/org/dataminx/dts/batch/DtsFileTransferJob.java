@@ -115,9 +115,9 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
     }
 
     /**
-     * Apply the credential filtering over all the specified credentials in the job submission document.
-     * This replaces the credentials in the mJobRequest with pointers. The
-     * credentials are then stored within the given credentialStore. 
+     * Apply the credential filtering over all the specified credentials in the job submission
+     * document. This replaces the credentials in the mJobRequest with pointers. The credentials
+     * are then stored within the given credentialStore.
      *
      * @param credentialStore the credential store
      */
@@ -246,7 +246,7 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
                 + mStopwatchTimer.getFormattedElapsedTime());
 
             // TODO convert to application exceptions.
-            // jobScoping will store the jobDetails in the Job execution context. 
+            // jobScoping will store the jobDetails in the Job execution context.
             stepExecution = handleStep(mJobScopingStep, execution);
 
             LOGGER.info("Finished the JobScopingTask step at "
