@@ -246,12 +246,10 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
         }
     }
 
-    /** Indicates if an error has occurred while doing the transfer. */
-    private volatile boolean mHasTransferErrorArised;
-
     /** The wait time for the finished FileCopier. */
     private static final int FILE_COPIER_WAIT_TIME = 100;
 
+    /** The key used to query for the last completed suspended step from the Execution Context. */
     private static final String LAST_COMPLETED_SUSPENDED_STEP = "lastCompletedSuspendedStep";
 
     /** A reference to the internal logger object. */
@@ -261,6 +259,9 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
     /** The FileCopier's logger. */
     private static final Logger LOGGER_FC = LoggerFactory
         .getLogger(FileCopier.class);
+
+    /** Indicates if an error has occurred while doing the transfer. */
+    private volatile boolean mHasTransferErrorArised;
 
     /** A reference to the application's file copying service. */
     private FileCopyingService mFileCopyingService;
@@ -274,6 +275,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
     /** A reference to the DtsVfsUtil. */
     private DtsVfsUtil mDtsVfsUtil;
 
+    /** The list of names of steps to skip. */
     private List<String> suspendedStepToSkip;
 
     /** A reference to the input DTS job request. */
@@ -297,8 +299,10 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
     /** The total number of files to be transferred within this batch. */
     private int mBatchTotalFiles;
 
+    /** A reference to the job operator. */
     private JobOperator mJobOperator;
 
+    /** A flag to tell if the step has finished the transfer. */
     private boolean finishedTransfer;
 
     /** A comparator to see if the Root of the FileObjects are the same. */

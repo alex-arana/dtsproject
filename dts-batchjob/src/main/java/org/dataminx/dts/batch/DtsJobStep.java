@@ -77,10 +77,19 @@ public class DtsJobStep implements Serializable {
     /** The filename of the job step file. */
     private String mFilename;
 
+    /** The DtsJobStep type. */
     private final Type mStepType;
 
+    /** The enumeration of DtsJobStep types. */
     public enum Type {
-        MIXED_FILES, BIG_FILES, SMALL_FILES
+        /** Mixture of big and small files. */
+        MIXED_FILES,
+
+        /** Big files grouped into a step. */
+        BIG_FILES,
+
+        /** Small files grouped into a step. */
+        SMALL_FILES
     }
 
     /**
@@ -91,6 +100,7 @@ public class DtsJobStep implements Serializable {
      * @param stepId the job step ID
      * @param maxTotalFileNumLimit the maximum total file number limit that this job step can handle
      * @param maxTotalByteSizeLimit the maximum total size of all the files (in bytes) that this job step can handle
+     * @param dtsJobStepType the DtsJobStep type
      */
     public DtsJobStep(final String sourceRootFileObject,
         final String targetRootFileObject, final int stepId,
@@ -180,9 +190,9 @@ public class DtsJobStep implements Serializable {
     }
 
     /**
-     * Sets the name of the job step file.
+     * Gets the name of the job step file.
      *
-     * @param filename the name of the job step file
+     * @return filename the name of the job step file
      */
     public String getJobStepFilename() {
         return mFilename;

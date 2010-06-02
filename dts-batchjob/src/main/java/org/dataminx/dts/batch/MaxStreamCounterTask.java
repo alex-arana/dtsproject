@@ -163,7 +163,8 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
             }
             catch (final FileSystemException e) {
                 LOGGER_RC
-                    .error("FileSystemException thrown during the login process of the max parallel connection test task.");
+                    .error("FileSystemException thrown during the login process of the max"
+                        + "parallel connection test task.");
 
                 mParent.setHasConnectionErrorArised(true);
                 mSuccessfulConnection = false;
@@ -248,10 +249,11 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
     /**
      * The cache to hold the FileSystemManagers available for each source/target to use during the file copy process.
      */
-    private final Map<String, List<FileSystemManager>> mWorkingConnectionsListPerRootFileObject = new FileObjectMap<String, List<FileSystemManager>>();
+    private final Map<String, List<FileSystemManager>> mWorkingConnectionsListPerRootFileObject =
+        new FileObjectMap<String, List<FileSystemManager>>();
 
     /** An attribute that will say if maximum number of retries is reached. */
-    private volatile boolean isLastTry;
+    private volatile boolean mIsLastTry;
 
     /**
      * {@inheritDoc}
@@ -392,7 +394,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
      */
     private void gatherMaxConnections(final FileObject fileObjectRoot,
         final int maxTry) throws FileSystemException {
-        isLastTry = false;
+        mIsLastTry = false;
 
         int threadCounter = 1;
 
@@ -410,7 +412,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
         List<FileSystemManager> workingConnections = null;
         while (threadCounter <= maxTry) {
             if (threadCounter == maxTry) {
-                isLastTry = true;
+                mIsLastTry = true;
             }
             LOGGER.debug("==========================");
             LOGGER.debug("Trying with " + threadCounter + " threads on "
@@ -456,7 +458,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
     }
 
     public boolean isLastTry() {
-        return isLastTry;
+        return mIsLastTry;
     }
 
     /**

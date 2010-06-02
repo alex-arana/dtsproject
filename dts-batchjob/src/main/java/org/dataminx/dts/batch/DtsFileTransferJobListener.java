@@ -70,6 +70,7 @@ public class DtsFileTransferJobListener implements JobExecutionListener,
     /** A reference to the ExecutionContextCleaner. */
     private ExecutionContextCleaner mExecutionContextCleaner;
 
+    /** A reference to the DtsVfsUtil. */
     private DtsVfsUtil mDtsVfsUtil;
 
     /**
