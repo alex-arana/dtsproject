@@ -6,11 +6,13 @@ package org.dataminx.dts.common.jms;
 import static org.dataminx.dts.common.xml.XmlUtils.newDocument;
 
 import java.io.IOException;
+
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
+
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.common.xml.ByteArrayResult;
 import org.slf4j.Logger;
@@ -30,8 +32,14 @@ import org.springframework.xml.transform.StringResult;
  */
 public class DtsMessageConverter extends SimpleMessageConverter {
 
+    /** Internal logger object. */
+    private static final Logger LOG = LoggerFactory
+        .getLogger(DtsMessageConverter.class);
+
+    /** The XML Payload Unmarshalling transformer. */
     private XmlPayloadUnmarshallingTransformer mTransformer;
 
+    /** The marshaller. */
     private Marshaller mMarshaller;
 
     /**
@@ -39,11 +47,9 @@ public class DtsMessageConverter extends SimpleMessageConverter {
      */
     private final OutputFormat mOutputFormat = OutputFormat.XML_TEXT;
 
-    /** Internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(DtsMessageConverter.class);
-
     @Override
-    public Object fromMessage(final Message message) throws JMSException, MessageConversionException {
+    public Object fromMessage(final Message message) throws JMSException,
+        MessageConversionException {
         final String jobId = message.getJMSCorrelationID();
         LOG.info("A new JMS message has been received: " + jobId);
         final Object payload = super.fromMessage(message);
@@ -55,14 +61,14 @@ public class DtsMessageConverter extends SimpleMessageConverter {
     }
 
     @Override
-    public Message toMessage(final Object object,
-        final Session session) throws JMSException, MessageConversionException {
+    public Message toMessage(final Object object, final Session session)
+        throws JMSException, MessageConversionException {
 
         Assert.notNull(object);
         final Class<? extends Object> objectClass = object.getClass();
         if (!mMarshaller.supports(objectClass)) {
-//            throw new MessageConversionException(String.format(
-//                "Unable to convert object of type '%s' to a valid DTS Job update JMS message.", objectClass.getName()));
+            //            throw new MessageConversionException(String.format(
+            //                "Unable to convert object of type '%s' to a valid DTS Job update JMS message.", objectClass.getName()));
         }
 
         // convert the input schema entity to an object we can send back as the payload of a JMS message
@@ -71,14 +77,14 @@ public class DtsMessageConverter extends SimpleMessageConverter {
             mMarshaller.marshal(object, result);
         }
         catch (final XmlMappingException ex) {
-            final String message =
-                "An error has occurred marshalling the input object graph to an XML document: " + object;
+            final String message = "An error has occurred marshalling the input object graph to an XML document: "
+                + object;
             LOG.error(message, ex);
             throw new MessageConversionException(message, ex);
         }
         catch (final IOException ex) {
-            final String message =
-                "An I/O error has occurred marshalling the input object graph to an XML document: " + object;
+            final String message = "An I/O error has occurred marshalling the input object graph to an XML document: "
+                + object;
             LOG.error(message, ex);
             throw new MessageConversionException(message, ex);
         }
@@ -91,7 +97,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         return mMarshaller;
     }
 
-    public void setMarshaller(Marshaller mMarshaller) {
+    public void setMarshaller(final Marshaller mMarshaller) {
         this.mMarshaller = mMarshaller;
     }
 
@@ -129,14 +135,15 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         }
     }
 
-
     public XmlPayloadUnmarshallingTransformer getTransformer() {
         return mTransformer;
     }
 
-    public void setTransformer(XmlPayloadUnmarshallingTransformer mTransformer) {
+    public void setTransformer(
+        final XmlPayloadUnmarshallingTransformer mTransformer) {
         this.mTransformer = mTransformer;
     }
+
     /**
      * Enumerated type that represents the various kinds of output that this class can use when creating
      * outgoing messages.

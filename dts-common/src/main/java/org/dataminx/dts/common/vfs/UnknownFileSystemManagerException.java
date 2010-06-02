@@ -27,6 +27,11 @@
  */
 package org.dataminx.dts.common.vfs;
 
+/**
+ * The UnknownFileSystemManagerException.
+ *
+ * @author Gerson Galang
+ */
 public class UnknownFileSystemManagerException extends Exception {
     /**
      * Constructs an instance of {@link DtsJobCreationException}.
@@ -38,7 +43,7 @@ public class UnknownFileSystemManagerException extends Exception {
     /**
      * Constructs an instance of {@link UnknownFileSystemManagerException} with
      * a specified message.
-     * 
+     *
      * @param message the detail message.
      */
     public UnknownFileSystemManagerException(final String message) {
@@ -48,7 +53,7 @@ public class UnknownFileSystemManagerException extends Exception {
     /**
      * Constructs an instance of {@link UnknownFileSystemManagerException} with
      * the specified detail message and cause.
-     * 
+     *
      * @param message the detail message.
      * @param cause the cause.
      */

@@ -6,10 +6,12 @@ package org.dataminx.dts.common.jms;
 import static org.dataminx.dts.common.broker.DtsBrokerConstants.ROUTING_HEADER_KEY;
 
 import java.util.Map;
+
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.Session;
+
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.jms.support.converter.MessageConverter;
@@ -23,17 +25,29 @@ import org.springframework.jms.support.converter.MessageConverter;
  */
 public class JobQueueSender {
 
+    /** The job submit queue. */
     private Queue mQueue;
 
-    public void setmQueue(final Queue mQueue) {
-        this.mQueue = mQueue;
-    }
-
-    public void setmJmsTemplate(final JmsTemplate mJmsTemplate) {
-        this.mJmsTemplate = mJmsTemplate;
-    }
-
+    /** A reference to the JMS template. */
     private JmsTemplate mJmsTemplate;
+
+    /**
+     * Sets the job submit queue.
+     *
+     * @param queue the job submit queue
+     */
+    public void setmQueue(final Queue queue) {
+        mQueue = queue;
+    }
+
+    /**
+     * Sets the JMS Template.
+     *
+     * @param jmsTemplate the JMS Template
+     */
+    public void setmJmsTemplate(final JmsTemplate jmsTemplate) {
+        mJmsTemplate = jmsTemplate;
+    }
 
     /**
      * Sends a pre-configured message type to a remote destination.

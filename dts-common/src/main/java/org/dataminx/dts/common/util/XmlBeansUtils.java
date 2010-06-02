@@ -31,7 +31,9 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.namespace.QName;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.xmlbeans.XmlCursor;
@@ -63,7 +65,8 @@ public final class XmlBeansUtils {
                 }
             }
             return EMPTY;
-        } finally {
+        }
+        finally {
             cursor.dispose();
         }
     }
@@ -77,7 +80,8 @@ public final class XmlBeansUtils {
      *            The qualified name of the elements to be selected
      * @return Returns the contents of the selected child element
      */
-    public static XmlObject selectAnyElement(final XmlObject context, final QName name) {
+    public static XmlObject selectAnyElement(final XmlObject context,
+        final QName name) {
         final List<XmlObject> elements = selectAnyElements(context, name);
         return CollectionUtils.isEmpty(elements) ? null : elements.get(0);
     }
@@ -91,7 +95,8 @@ public final class XmlBeansUtils {
      *            The qualified name of the elements to be selected
      * @return Returns the contents of the selected elements in a <code>List</code>
      */
-    public static List<XmlObject> selectAnyElements(final XmlObject context, final QName name) {
+    public static List<XmlObject> selectAnyElements(final XmlObject context,
+        final QName name) {
         Assert.notNull(context);
         Assert.notNull(name);
         final List<XmlObject> list = new ArrayList<XmlObject>();

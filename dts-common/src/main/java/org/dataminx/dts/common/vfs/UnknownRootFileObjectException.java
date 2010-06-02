@@ -27,6 +27,11 @@
  */
 package org.dataminx.dts.common.vfs;
 
+/**
+ * The UknownRootFileObjectException.
+ *
+ * @author Gerson Galang
+ */
 public class UnknownRootFileObjectException extends Exception {
 
     /**
@@ -39,7 +44,7 @@ public class UnknownRootFileObjectException extends Exception {
     /**
      * Constructs an instance of {@link UnknownRootFileObjectException} with a
      * specified message.
-     * 
+     *
      * @param message the detail message.
      */
     public UnknownRootFileObjectException(final String message) {
@@ -49,7 +54,7 @@ public class UnknownRootFileObjectException extends Exception {
     /**
      * Constructs an instance of {@link UnknownRootFileObjectException} with
      * the specified detail message and cause.
-     * 
+     *
      * @param message the detail message.
      * @param cause the cause.
      */

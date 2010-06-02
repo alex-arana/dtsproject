@@ -34,17 +34,21 @@ import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 
 /**
  * A ThreadLocal FileSystemManager dispenser.
- * 
+ *
  * @author Gerson Galang
  */
 public class FileSystemManagerDispenser {
 
+    /** The logger. */
     private static final Log LOGGER = LogFactory
         .getLog(FileSystemManagerDispenser.class);
 
+    /** A reference to the DtsVfsUtil. */
     private DtsVfsUtil mDtsVfsUtil;
 
-    private final ThreadLocal<DefaultFileSystemManager> mThreadLocalFsManager = new ThreadLocal<DefaultFileSystemManager>() {
+    /** The ThreadLocal version of this FileSystemManager. */
+    private final ThreadLocal<DefaultFileSystemManager> mThreadLocalFsManager =
+        new ThreadLocal<DefaultFileSystemManager>() {
         @Override
         protected DefaultFileSystemManager initialValue() {
             try {
@@ -61,20 +65,33 @@ public class FileSystemManagerDispenser {
 
         @Override
         public void remove() {
-            (get()).close();
+            get().close();
         }
     };
 
+    /**
+     * Gets a FileSystemManager for the running thread.
+     *
+     * @return a FileSystemManager for the running thread
+     */
     public DefaultFileSystemManager getFileSystemManager() {
         LOGGER.debug("Instantiating a new FileSystemManager");
         return mThreadLocalFsManager.get();
     }
 
+    /**
+     * Closes the FileSystemManager for the current running thread.
+     */
     public void closeFileSystemManager() {
         LOGGER.debug("Closing FileSystemManager");
         mThreadLocalFsManager.remove();
     }
 
+    /**
+     * Sets the DtsVfsUtil.
+     *
+     * @param dtsVfsUtil the DtsVfsUtil
+     */
     public void setDtsVfsUtil(final DtsVfsUtil dtsVfsUtil) {
         mDtsVfsUtil = dtsVfsUtil;
     }

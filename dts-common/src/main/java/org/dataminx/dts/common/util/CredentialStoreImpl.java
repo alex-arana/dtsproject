@@ -42,14 +42,14 @@ public class CredentialStoreImpl implements CredentialStore {
     /**
      * A container for credentials that users want to be saved only in memory.
      */
-    private final Map<String, CredentialType> inMemoryCredentialMap = new HashMap<String, CredentialType>();
+    private final Map<String, CredentialType> mInMemoryCredentialMap = new HashMap<String, CredentialType>();
 
     /**
      * {@inheritDoc}
      */
     public CredentialType getCredential(final String credUUID) {
         // TODO implement getting of credentials from database later on
-        return inMemoryCredentialMap.get(credUUID);
+        return mInMemoryCredentialMap.get(credUUID);
     }
 
     /**
@@ -68,7 +68,7 @@ public class CredentialStoreImpl implements CredentialStore {
      */
     public void writeToMemory(final String credUUID,
         final CredentialType credential) {
-        inMemoryCredentialMap.put(credUUID, credential);
+        mInMemoryCredentialMap.put(credUUID, credential);
     }
 
 }
