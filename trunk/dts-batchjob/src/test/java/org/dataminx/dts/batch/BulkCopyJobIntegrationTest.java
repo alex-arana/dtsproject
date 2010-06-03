@@ -3,6 +3,7 @@ package org.dataminx.dts.batch;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_DATA_TRANSFER_STEP_KEY;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_DETAILS;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
+import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -103,7 +104,8 @@ public class BulkCopyJobIntegrationTest extends
     public void testNonExistenceOfPropertiesFromExecutionContextAfterJobFinishedSuccessfully()
         throws Exception {
         final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/transfer-1file.xml").getFile();
+            "/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()
+                + ".xml").getFile();
         mDtsJob = JobDefinitionDocument.Factory.parse(f);
         assertNotNull(mDtsJob);
 
@@ -130,7 +132,8 @@ public class BulkCopyJobIntegrationTest extends
     @Test(enabled = false)
     public void testSuspendResume() throws Exception {
         final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/transfer-suspend.xml").getFile();
+            "/org/dataminx/dts/batch/transfer-suspend" + getTestFilePostfix()
+                + ".xml").getFile();
         mDtsJob = JobDefinitionDocument.Factory.parse(f);
         assertNotNull(mDtsJob);
 
