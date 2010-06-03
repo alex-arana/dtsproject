@@ -67,11 +67,6 @@ Create the Spring Batch tables by running the db script provided in dts-batchjob
 
 Run dts-batchjob/src/test/resources/create-testfiles.sh to create the test files the unit tests would use. Remember to change the file to executable.
 
-Add this line to dts-batchjob/src/test/filters/filter.properties and use the DTS user's home directory as its value. This is needed so the test jobs
-{{{
-users.home.dir=<the DTS user's home directory>
-}}}
-
 Run the test
 {{{
  > cd dts-batchjob
