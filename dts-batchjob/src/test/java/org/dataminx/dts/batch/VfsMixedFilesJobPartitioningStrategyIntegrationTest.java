@@ -1,5 +1,6 @@
 package org.dataminx.dts.batch;
 
+import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -55,7 +56,8 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
         throws IOException, XmlException, JobScopingException {
 
         final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/transfer-20files.xml").getFile();
+            "/org/dataminx/dts/batch/transfer-20files" + getTestFilePostfix()
+                + ".xml").getFile();
         final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory
             .parse(f);
 
@@ -78,7 +80,8 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
         throws IOException, XmlException, JobScopingException {
 
         final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/transfer-9files.xml").getFile();
+            "/org/dataminx/dts/batch/transfer-9files" + getTestFilePostfix()
+                + ".xml").getFile();
         final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory
             .parse(f);
 
@@ -100,7 +103,8 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
     public void testPartitionJobWithFileExceedingMaxByteSizeLimit()
         throws IOException, XmlException, JobScopingException {
         final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/transfer-mixedfiles.xml").getFile();
+            "/org/dataminx/dts/batch/transfer-mixedfiles"
+                + getTestFilePostfix() + ".xml").getFile();
         final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory
             .parse(f);
 
@@ -114,7 +118,8 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
     public void testPartitionJobWithMixedFilesBasedOnMaxByteSize()
         throws IOException, XmlException, JobScopingException {
         final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/transfer-mixedfiles.xml").getFile();
+            "/org/dataminx/dts/batch/transfer-mixedfiles"
+                + getTestFilePostfix() + ".xml").getFile();
         final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory
             .parse(f);
 

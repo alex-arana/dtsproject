@@ -1,5 +1,6 @@
 package org.dataminx.dts.batch;
 
+import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -54,7 +55,8 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
     public void testPartitionWith1File() throws IOException, XmlException,
         JobScopingException {
         final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/transfer-1file.xml").getFile();
+            "/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()
+                + ".xml").getFile();
         final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory
             .parse(f);
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
@@ -81,7 +83,8 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
     public void testNegativeMaxTotalFileNumPerStepLimit() throws IOException,
         XmlException, JobScopingException {
         final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/transfer-1file.xml").getFile();
+            "/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()
+                + ".xml").getFile();
         final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory
             .parse(f);
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
@@ -95,7 +98,8 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
     public void testNegativeMaxTotalByteSizePerStepLimit() throws IOException,
         XmlException, JobScopingException {
         final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/transfer-1file.xml").getFile();
+            "/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()
+                + ".xml").getFile();
         final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory
             .parse(f);
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();

@@ -1,5 +1,6 @@
 package org.dataminx.dts.batch;
 
+import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -42,8 +43,8 @@ public class QuickBulkCopyJobIntegrationTest extends
 
     @BeforeClass
     public void init() throws Exception {
-        final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/testjob.xml").getFile();
+        final File f = new ClassPathResource("/org/dataminx/dts/batch/testjob"
+            + getTestFilePostfix() + ".xml").getFile();
         mDtsJob = JobDefinitionDocument.Factory.parse(f);
         assertNotNull(mDtsJob);
     }
