@@ -16,10 +16,10 @@ si.jms.cacheProducers=false
 si.jms.jobSubmitQueueName=broker.job.submission.queue
 
 # uncomment this if the WS is integrating directly to the workernode manager
-#si.jms.jobSubmitQueueName=dts.job.submit.queue
+#si.jms.jobSubmitQueueName=broker.default.output.queue
 
 si.jms.jobEventQueueName=dts.job.event.queue
-si.jms.jobControlTopicName=dts.job.control.queue
+si.jms.jobControlQueueName=dts.job.control.queue
 
 
 

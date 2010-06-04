@@ -43,6 +43,7 @@ import org.dataminx.dts.common.jms.JobQueueSender;
 import org.dataminx.dts.common.model.JobStatus;
 import org.dataminx.dts.common.util.SchemaUtils;
 import org.dataminx.dts.common.ws.InvalidJobDefinitionException;
+import org.dataminx.dts.common.ws.JobStatusUpdateException;
 import org.dataminx.dts.common.ws.NonExistentJobException;
 import org.dataminx.dts.ws.model.Job;
 import org.dataminx.dts.ws.repo.JobDao;
@@ -80,7 +81,9 @@ public class DataTransferServiceImpl implements DataTransferService,
     private static final String CN_EQUALS = "CN=";
 
     /** The submit job message sender. */
-    private JobQueueSender mMessageSender;
+    private JobQueueSender mJobSubmitMessageSender;
+
+    private JobQueueSender mJobControlMessageSender;
 
     /** The job repository for this DTS implementation. */
     private JobDao mJobRepository;
@@ -160,7 +163,7 @@ public class DataTransferServiceImpl implements DataTransferService,
 
         // TODO: decide if we are going to add any JMS Properties to the message we are sending
         // to the queue like routingHeader
-        mMessageSender.doSend(newJobResourceKey, result.toString());
+        mJobSubmitMessageSender.doSend(newJobResourceKey, result.toString());
 
         // let's also set the status and queued time if we reach this point as we can safely assume that
         // no fault was sent back to the client at this point
@@ -190,9 +193,36 @@ public class DataTransferServiceImpl implements DataTransferService,
             throw new NonExistentJobException("Job doesn't exist.");
         }
 
+        if (!(foundJob.getStatus().equals(JobStatus.CREATED)
+            || foundJob.getStatus().equals(JobStatus.SCHEDULED)
+            || foundJob.getStatus().equals(JobStatus.SUSPENDED) || foundJob
+            .getStatus().equals(JobStatus.TRANSFERRING))) {
+            throw new JobStatusUpdateException(
+                "Job "
+                    + jobResourceKey
+                    + " cannot be cancelled as it has already completed, failed, or cancelled.");
+        }
+
         foundJob.setStatus(JobStatus.DONE);
         mJobRepository.saveOrUpdate(foundJob);
 
+        // Get the message payload ready for consumption by the JMS layer
+
+        // After the switch to XMLBeans, the Result object has always been a StreamResult instead
+        // of a DomResult. So we'll just hand a StringResult object as a parameter to marshal()
+        final Result result = new StringResult();
+
+        // TODO: consider rework on this try-catch block
+        try {
+            mMarshaller.marshal(cancelJobRequest, result);
+        }
+        catch (final IOException e) {
+            throw new InvalidJobDefinitionException(e.fillInStackTrace());
+        }
+
+        // TODO: decide if we are going to add any JMS Properties to the message we are sending
+        // to the queue like routingHeader
+        mJobControlMessageSender.doSend(jobResourceKey, result.toString());
     }
 
     /**
@@ -212,10 +242,41 @@ public class DataTransferServiceImpl implements DataTransferService,
             throw new NonExistentJobException("Job doesn't exist.");
         }
 
+        if (foundJob.getStatus().equals(JobStatus.SUSPENDED)) {
+            throw new JobStatusUpdateException(
+                "Job "
+                    + jobResourceKey
+                    + " cannot be suspended as it is already in the suspended state.");
+        }
+        else if (!(foundJob.getStatus().equals(JobStatus.CREATED)
+            || foundJob.getStatus().equals(JobStatus.SCHEDULED) || foundJob
+            .getStatus().equals(JobStatus.TRANSFERRING))) {
+            throw new JobStatusUpdateException(
+                "Job "
+                    + jobResourceKey
+                    + " cannot be suspended as it is has already completed, failed, or cancelled.");
+        }
+
         foundJob.setStatus(JobStatus.SUSPENDED);
         mJobRepository.saveOrUpdate(foundJob);
 
-        // TODO: send the suspend job to the JMS layer...
+        // Get the message payload ready for consumption by the JMS layer
+
+        // After the switch to XMLBeans, the Result object has always been a StreamResult instead
+        // of a DomResult. So we'll just hand a StringResult object as a parameter to marshal()
+        final Result result = new StringResult();
+
+        // TODO: consider rework on this try-catch block
+        try {
+            mMarshaller.marshal(suspendJobRequest, result);
+        }
+        catch (final IOException e) {
+            throw new InvalidJobDefinitionException(e.fillInStackTrace());
+        }
+
+        // TODO: decide if we are going to add any JMS Properties to the message we are sending
+        // to the queue like routingHeader
+        mJobControlMessageSender.doSend(jobResourceKey, result.toString());
     }
 
     /**
@@ -235,10 +296,31 @@ public class DataTransferServiceImpl implements DataTransferService,
             throw new NonExistentJobException("Job doesn't exist.");
         }
 
+        if (!foundJob.getStatus().equals(JobStatus.SUSPENDED)) {
+            throw new JobStatusUpdateException("Job " + jobResourceKey
+                + " cannot be resumed as it has not been suspended.");
+        }
+
         foundJob.setStatus(JobStatus.TRANSFERRING);
         mJobRepository.saveOrUpdate(foundJob);
 
-        // TODO: send the resume job to the JMS layer...
+        // Get the message payload ready for consumption by the JMS layer
+
+        // After the switch to XMLBeans, the Result object has always been a StreamResult instead
+        // of a DomResult. So we'll just hand a StringResult object as a parameter to marshal()
+        final Result result = new StringResult();
+
+        // TODO: consider rework on this try-catch block
+        try {
+            mMarshaller.marshal(resumeJobRequest, result);
+        }
+        catch (final IOException e) {
+            throw new InvalidJobDefinitionException(e.fillInStackTrace());
+        }
+
+        // TODO: decide if we are going to add any JMS Properties to the message we are sending
+        // to the queue like routingHeader
+        mJobControlMessageSender.doSend(jobResourceKey, result.toString());
     }
 
     /**
@@ -284,8 +366,14 @@ public class DataTransferServiceImpl implements DataTransferService,
 
     }
 
-    public void setJobQueueSender(final JobQueueSender jobQueueSender) {
-        mMessageSender = jobQueueSender;
+    public void setJobSubmitQueueSender(
+        final JobQueueSender jobSubmitQueueSender) {
+        mJobSubmitMessageSender = jobSubmitQueueSender;
+    }
+
+    public void setJobControlQueueSender(
+        final JobQueueSender jobControlQueueSender) {
+        mJobControlMessageSender = jobControlQueueSender;
     }
 
     public void setJobRepository(final JobDao jobRepository) {
@@ -301,8 +389,11 @@ public class DataTransferServiceImpl implements DataTransferService,
      */
     public void afterPropertiesSet() throws Exception {
         Assert
-            .notNull(mMessageSender,
+            .notNull(mJobSubmitMessageSender,
                 "A JobSubmitQueueSender needs to be configured for the DataTransferService.");
+        Assert
+            .notNull(mJobControlMessageSender,
+                "A JobControlMessageSender needs to be configured for the DataTransferService.");
         Assert.notNull(mJobRepository,
             "A JobDao needs to be configured for the DataTransferService.");
         Assert
