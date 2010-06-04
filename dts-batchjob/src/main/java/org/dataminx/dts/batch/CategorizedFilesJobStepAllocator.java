@@ -78,7 +78,8 @@ public class CategorizedFilesJobStepAllocator implements DtsJobStepAllocator,
             // has reached the max total number of files per step limit OR the size of the file we are going
             // to add will exceed the max size in bytes of all the files per step limit)
             if (mTmpBigFilesDtsJobStep != null
-                && (mTmpBigFilesDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit || mTmpBigFilesDtsJobStep
+                && (mTmpBigFilesDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit
+                    || mTmpBigFilesDtsJobStep
                     .getCurrentTotalByteSize()
                     + dataTransferUnit.getSize() >= maxTotalByteSizePerStepLimit)) {
                 mSteps.add(mTmpBigFilesDtsJobStep);
@@ -98,7 +99,8 @@ public class CategorizedFilesJobStepAllocator implements DtsJobStepAllocator,
             // has reached the max total number of files per step limit OR the size of the file we are going
             // to add will exceed the max size in bytes of all the files per step limit)
             if (mTmpSmallFilesDtsJobStep != null
-                && (mTmpSmallFilesDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit || mTmpSmallFilesDtsJobStep
+                && (mTmpSmallFilesDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit
+                    || mTmpSmallFilesDtsJobStep
                     .getCurrentTotalByteSize()
                     + dataTransferUnit.getSize() >= maxTotalByteSizePerStepLimit)) {
                 mSteps.add(mTmpSmallFilesDtsJobStep);

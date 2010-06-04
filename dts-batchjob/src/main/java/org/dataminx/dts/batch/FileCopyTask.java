@@ -276,7 +276,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
     private DtsVfsUtil mDtsVfsUtil;
 
     /** The list of names of steps to skip. */
-    private List<String> suspendedStepToSkip;
+    private List<String> mSuspendedStepToSkip;
 
     /** A reference to the input DTS job request. */
     private SubmitJobRequest mSubmitJobRequest;
@@ -354,19 +354,19 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
                 mExecutionContextCleaner.removeStepExecutionContextEntry(
                     stepExecution, DTS_DATA_TRANSFER_STEP_KEY);
             }
-            if (suspendedStepToSkip != null) {
+            if (mSuspendedStepToSkip != null) {
                 LOGGER
                     .debug("^^^^^**** Setting suspended step to skip again to: "
-                        + suspendedStepToSkip + " ****^^^^^");
+                        + mSuspendedStepToSkip + " ****^^^^^");
 
                 stepExecution.getJobExecution().getExecutionContext().put(
-                    LAST_COMPLETED_SUSPENDED_STEP, suspendedStepToSkip);
+                    LAST_COMPLETED_SUSPENDED_STEP, mSuspendedStepToSkip);
             }
         }
 
         if (stepExecution.getStatus().equals(BatchStatus.STOPPED)
             && finishedTransfer) {
-            if (suspendedStepToSkip == null) {
+            if (mSuspendedStepToSkip == null) {
 
                 // this condition gets satisfied the first time a suspend signal is sent
                 // and the current step running at the time the suspend signal is sent finishes
@@ -385,20 +385,20 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
                     // check if this has been resumed by at least once
                     if (mJobOperator.getExecutions(
                         stepExecution.getJobExecution().getJobId()).size() > 1
-                        && suspendedStepToSkip.size() < mJobOperator
+                        && mSuspendedStepToSkip.size() < mJobOperator
                             .getExecutions(
                                 stepExecution.getJobExecution().getJobId())
                             .size()) {
-                        suspendedStepToSkip.add(stepExecution.getStepName());
+                        mSuspendedStepToSkip.add(stepExecution.getStepName());
                     }
                     // this is called when the succeeding steps after the first step that has finished
                     // when a job gets suspended, is called
                     LOGGER
                         .debug("^^^^^**** Setting suspended step to skip again to: "
-                            + suspendedStepToSkip + " ****^^^^^");
+                            + mSuspendedStepToSkip + " ****^^^^^");
 
                     stepExecution.getJobExecution().getExecutionContext().put(
-                        LAST_COMPLETED_SUSPENDED_STEP, suspendedStepToSkip);
+                        LAST_COMPLETED_SUSPENDED_STEP, mSuspendedStepToSkip);
                 }
                 catch (final NoSuchJobInstanceException e) {
                     LOGGER.debug("This line shouldn't be called");
@@ -419,11 +419,11 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
         LOGGER.debug("vvvvv**** FileCopyTask.beforeStep() is called by step "
             + stepExecution.getStepName() + " ****vvvvv");
 
-        suspendedStepToSkip = (List) stepExecution.getJobExecution()
+        mSuspendedStepToSkip = (List) stepExecution.getJobExecution()
             .getExecutionContext().get(LAST_COMPLETED_SUSPENDED_STEP);
 
         LOGGER.debug("Name of the suspended steps to skip: "
-            + suspendedStepToSkip);
+            + mSuspendedStepToSkip);
 
         finishedTransfer = false;
     }
@@ -442,8 +442,8 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
         final StepContext stepContext = chunkContext.getStepContext();
         LOGGER.info("Executing copy step: " + stepContext.getStepName());
 
-        if (suspendedStepToSkip != null
-            && suspendedStepToSkip.contains(stepContext.getStepName())) {
+        if (mSuspendedStepToSkip != null
+            && mSuspendedStepToSkip.contains(stepContext.getStepName())) {
             // let's also remove LAST_COMPLETED_SUSPENDED_STEP as we won't be needing it anymore
             //stepContext.getStepExecution().getJobExecution()
             //    .getExecutionContext().remove(LAST_COMPLETED_SUSPENDED_STEP);

@@ -62,7 +62,7 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
     @SuppressWarnings("unchecked")
     private static final Map<String, String> DTS_JOB_REGISTRY = MapUtils
         .putAll(new HashMap(), new String[][] {{
-            SubmitJobRequestDocument.class.getName(), "dtsFileTransferJob"}});
+        SubmitJobRequestDocument.class.getName(), "dtsFileTransferJob"}});
 
     /** A reference to the Spring Batch Job repository. */
     private JobRepository mJobRepository;
