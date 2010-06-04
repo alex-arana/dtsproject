@@ -120,7 +120,8 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
     public void testNullJobResourceKeyParameter() throws IOException,
         XmlException, JobScopingException {
         final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/transfer-1file.xml").getFile();
+            "/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()
+                + ".xml").getFile();
         final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory
             .parse(f);
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();

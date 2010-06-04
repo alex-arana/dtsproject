@@ -58,7 +58,7 @@ import org.springframework.util.Assert;
  * of the JobPartitioningStrategy. The application context for this module wires up the method
  * implementation to the createDtsJobStepAllocator based on the DtsJobStepAllocator the application
  * will to use.
- * 
+ *
  * @author Gerson Galang
  */
 public abstract class AbstractJobPartitioningStrategy implements
@@ -276,8 +276,8 @@ public abstract class AbstractJobPartitioningStrategy implements
                         .getFileSystem().getRoot().getURL().toString();
 
                     // update the max number of total files to be transferred for the
-                    // given source and/or target based on the number of files to be 
-                    // transferred between the source and target so we can use the 
+                    // given source and/or target based on the number of files to be
+                    // transferred between the source and target so we can use the
                     // values for finding out the number of FileSystemManagers we can cache
                     if (sourceTargetMaxTotalFilesToTransfer
                         .containsKey(sourceParentRootStr)
@@ -364,7 +364,7 @@ public abstract class AbstractJobPartitioningStrategy implements
         finally {
             // Always, immediately close the file system manager so FileCopyTask will be able to use all of the
             // available connections. Define this in finally so that we do not
-            // leave hanging connections if a scoping error occurs. 
+            // leave hanging connections if a scoping error occurs.
             if (fileSystemManager != null) {
                 ((DefaultFileSystemManager) fileSystemManager).close();
             }
