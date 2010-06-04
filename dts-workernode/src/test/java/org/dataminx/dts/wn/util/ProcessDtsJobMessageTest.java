@@ -28,6 +28,7 @@
 package org.dataminx.dts.wn.util;
 
 import static org.apache.commons.lang.SystemUtils.LINE_SEPARATOR;
+import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
 import static org.dataminx.dts.common.xml.XmlUtils.documentToString;
 
 import java.io.File;
@@ -71,8 +72,8 @@ public class ProcessDtsJobMessageTest extends AbstractTestNGSpringContextTests {
 
     //@Test
     public void submitDtsJobAsDocument() throws Exception {
-        final File file = new ClassPathResource("minx-dts.xml", getClass())
-            .getFile();
+        final File file = new ClassPathResource("minx-dts"
+            + getTestFilePostfix() + ".xml", getClass()).getFile();
         final DocumentBuilderFactory docFactory = DocumentBuilderFactory
             .newInstance();
         docFactory.setNamespaceAware(true);

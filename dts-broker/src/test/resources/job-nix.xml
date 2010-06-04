@@ -16,19 +16,14 @@
       </jsdl1:JobIdentification>
       <jsdl:DataTransfer>
         <jsdl:Source>
-          <jsdl1:URI>ftp://dm11/pub/Ubuntu/LiveCD</jsdl1:URI>
-          <jsdl:Credential>
-            <oas:UsernameToken>
-              <oas:Username>gerson</oas:Username>
-              <oas:PasswordString>Pru9A5tA</oas:PasswordString>
-            </oas:UsernameToken>
-          </jsdl:Credential>
+          <jsdl1:URI>file:///etc/hosts</jsdl1:URI>
         </jsdl:Source>
         <jsdl:Target>
-          <jsdl1:URI>tmp://DataMINX-dude/minx-dts</jsdl1:URI>
+          <jsdl1:URI>tmp://</jsdl1:URI>
         </jsdl:Target>
       </jsdl:DataTransfer>
       <jsdl:TransferRequirements>
+        <dmi:StartNotBefore>2010-03-11T17:50:00</dmi:StartNotBefore>
         <dmi:MaxAttempts>0</dmi:MaxAttempts>
         <jsdl1:CreationFlag>overwrite</jsdl1:CreationFlag>
       </jsdl:TransferRequirements>

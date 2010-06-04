@@ -28,6 +28,7 @@
 package org.dataminx.dts.wn.jms;
 
 import static org.apache.commons.lang.SystemUtils.LINE_SEPARATOR;
+import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -36,12 +37,14 @@ import static org.junit.Assert.assertThat;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.UUID;
+
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
+
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.batch.DtsJob;
 import org.dataminx.dts.batch.DtsJobFactory;
@@ -90,28 +93,36 @@ public class DtsMessageConverterTest extends UnitilsTestNG {
      */
     @Test
     public void testFromMessage() throws Exception {
-        final CancelJobRequestDocument doc = CancelJobRequestDocument.Factory.newInstance();
+        final CancelJobRequestDocument doc = CancelJobRequestDocument.Factory
+            .newInstance();
         final CancelJobRequest request = doc.addNewCancelJobRequest();
         final String dtsJobId = "dts_001";
         request.setJobResourceKey(dtsJobId);
         final Logger logger = LoggerFactory.getLogger(getClass());
         if (logger.isDebugEnabled()) {
             final String dtsJobRequest = doc.xmlText();
-            logger.debug(String.format("submitJobCancelRequestAsText ['%s']:%s%s",
-                dtsJobId, LINE_SEPARATOR, dtsJobRequest));
+            logger.debug(String.format(
+                "submitJobCancelRequestAsText ['%s']:%s%s", dtsJobId,
+                LINE_SEPARATOR, dtsJobRequest));
         }
 
         final Document document = XmlUtils.newDocument();
-        final Resource xml = new ClassPathResource("/org/dataminx/dts/wn/util/minx-dts.xml");
-        XmlUtils.transform(new StreamSource(xml.getInputStream()), new DOMResult(document));
+        final Resource xml = new ClassPathResource(
+            "/org/dataminx/dts/wn/util/minx-dts" + getTestFilePostfix()
+                + ".xml");
+        XmlUtils.transform(new StreamSource(xml.getInputStream()),
+            new DOMResult(document));
 
         final String jobId = UUID.randomUUID().toString();
-        final SubmitJobRequestDocument jobRequest = SubmitJobRequestDocument.Factory.newInstance();
-        mockPayloadTransformer.onceReturns(jobRequest).transformPayload(document);
+        final SubmitJobRequestDocument jobRequest = SubmitJobRequestDocument.Factory
+            .newInstance();
+        mockPayloadTransformer.onceReturns(jobRequest).transformPayload(
+            document);
         final DtsJob dtsJob = MockUnitils.createDummy(DtsJob.class);
         mockJobFactory.returns(dtsJob).createJob(jobId, jobRequest);
 
-        final Mock<ObjectMessage> message = MockUnitils.createMock(ObjectMessage.class);
+        final Mock<ObjectMessage> message = MockUnitils
+            .createMock(ObjectMessage.class);
         message.returns(jobId).getJMSCorrelationID();
         message.returns(document).getObject();
         final Object result = mConverter.fromMessage(message.getMock());
@@ -126,14 +137,18 @@ public class DtsMessageConverterTest extends UnitilsTestNG {
      */
     @Test
     public void testToMessage() throws Exception {
-        final Resource xml = new ClassPathResource("/org/dataminx/dts/wn/util/minx-dts.xml");
-        final SubmitJobRequestDocument document = SubmitJobRequestDocument.Factory.parse(xml.getInputStream());
+        final Resource xml = new ClassPathResource(
+            "/org/dataminx/dts/wn/util/minx-dts" + getTestFilePostfix()
+                + ".xml");
+        final SubmitJobRequestDocument document = SubmitJobRequestDocument.Factory
+            .parse(xml.getInputStream());
         mockMarshaller.returns(Boolean.TRUE).supports(document.getClass());
 
         // modify the internal state when the marshal() method is invoked
         final MockBehavior behaviour = new MockBehavior() {
 
-            public Object execute(final ProxyInvocation proxyInvocation) throws Throwable {
+            public Object execute(final ProxyInvocation proxyInvocation)
+                throws Throwable {
                 final List<Object> arguments = proxyInvocation.getArguments();
                 final XmlObject xmlObject = (XmlObject) arguments.get(0);
                 final StringResult result = (StringResult) arguments.get(1);
@@ -148,7 +163,8 @@ public class DtsMessageConverterTest extends UnitilsTestNG {
         final Mock<Session> session = MockUnitils.createMock(Session.class);
         final TextMessage message = MockUnitils.createDummy(TextMessage.class);
         session.returns(message).createTextMessage(document.xmlText());
-        final Message result = mConverter.toMessage(document, session.getMock());
+        final Message result = mConverter
+            .toMessage(document, session.getMock());
 
         assertNotNull(result);
         assertSame(result, message);
