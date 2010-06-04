@@ -3,6 +3,8 @@
  */
 package org.dataminx.dts.broker.si;
 
+import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
+
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.springframework.core.io.ClassPathResource;
@@ -17,10 +19,10 @@ import org.unitils.inject.annotation.TestedObject;
  *
  * @author hnguyen
  */
-@Test(groups="testng-unit-tests")
+@Test(groups = "testng-unit-tests")
 public class XmlPayloadDelayExtractorTest extends UnitilsTestNG {
 
-    private static final String QUERY_STR="declare namespace dmi='http://schemas.ogf.org/dmi/2008/05/dmi';$this//dmi:StartNotBefore";
+    private static final String QUERY_STR = "declare namespace dmi='http://schemas.ogf.org/dmi/2008/05/dmi';$this//dmi:StartNotBefore";
     private static final String EXPECTED = "2010-03-11T17:50:00";
     @TestedObject
     private XmlPayloadDelayExtractor mExtractor;
@@ -28,9 +30,11 @@ public class XmlPayloadDelayExtractorTest extends UnitilsTestNG {
     @Test
     public void testExtractDelay() throws Exception {
         mExtractor = new XmlPayloadDelayExtractor(QUERY_STR);
-        final Resource xml = new ClassPathResource("/job.xml");
-        XmlObject targetXml = SubmitJobRequestDocument.Factory.parse(xml.getInputStream()).getSubmitJobRequest();
-        String delay = mExtractor.extractDelay(targetXml);
+        final Resource xml = new ClassPathResource("/job"
+            + getTestFilePostfix() + ".xml");
+        final XmlObject targetXml = SubmitJobRequestDocument.Factory.parse(
+            xml.getInputStream()).getSubmitJobRequest();
+        final String delay = mExtractor.extractDelay(targetXml);
         Assert.assertEquals(delay, EXPECTED);
     }
 }

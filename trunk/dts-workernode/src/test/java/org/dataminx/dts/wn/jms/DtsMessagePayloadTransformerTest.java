@@ -27,17 +27,17 @@
  */
 package org.dataminx.dts.wn.jms;
 
+import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
-import org.dataminx.dts.common.xml.XmlUtils;
-
-
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.xmlbeans.XmlObject;
+import org.dataminx.dts.common.xml.XmlUtils;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -64,15 +64,19 @@ public class DtsMessagePayloadTransformerTest {
      */
     @Test
     public void testDtsMessagePayloadTransformer() {
-        final Unmarshaller unmarshaller = MockUnitils.createDummy(Unmarshaller.class);
-        final DtsMessagePayloadTransformer transformer = new DtsMessagePayloadTransformer(unmarshaller);
+        final Unmarshaller unmarshaller = MockUnitils
+            .createDummy(Unmarshaller.class);
+        final DtsMessagePayloadTransformer transformer = new DtsMessagePayloadTransformer(
+            unmarshaller);
         assertNotNull(transformer);
     }
 
     @BeforeMethod
     public void setUp() {
-        mResource = new ClassPathResource("/org/dataminx/dts/wn/util/minx-dts.xml");
-        mTransformer = new DtsMessagePayloadTransformer(new XmlBeansMarshaller());
+        mResource = new ClassPathResource("/org/dataminx/dts/wn/util/minx-dts"
+            + getTestFilePostfix() + ".xml");
+        mTransformer = new DtsMessagePayloadTransformer(
+            new XmlBeansMarshaller());
     }
 
     /**
@@ -81,9 +85,12 @@ public class DtsMessagePayloadTransformerTest {
     @Test
     public void testTransformPayloadDocument() throws Exception {
         final Document document = XmlUtils.newDocument();
-        XmlUtils.transform(new StreamSource(mResource.getInputStream()), new DOMResult(document));
-        assertThat("Unable to transform a payload of type 'org.w3c.Document' to a DTS schema type",
-            mTransformer.transformPayload(document), instanceOf(XmlObject.class));
+        XmlUtils.transform(new StreamSource(mResource.getInputStream()),
+            new DOMResult(document));
+        assertThat(
+            "Unable to transform a payload of type 'org.w3c.Document' to a DTS schema type",
+            mTransformer.transformPayload(document),
+            instanceOf(XmlObject.class));
     }
 
     /**
@@ -92,8 +99,10 @@ public class DtsMessagePayloadTransformerTest {
     @Test
     public void testTransformPayloadString() throws Exception {
         final String xmlAsString = IOUtils.toString(mResource.getInputStream());
-        assertThat("Unable to transform a payload of type 'java.lang.String' to a DTS schema type",
-            mTransformer.transformPayload(xmlAsString), instanceOf(XmlObject.class));
+        assertThat(
+            "Unable to transform a payload of type 'java.lang.String' to a DTS schema type",
+            mTransformer.transformPayload(xmlAsString),
+            instanceOf(XmlObject.class));
     }
 
     /**
@@ -101,8 +110,10 @@ public class DtsMessagePayloadTransformerTest {
      */
     @Test
     public void testTransformPayloadXmlBeans() throws Exception {
-        final SubmitJobRequestDocument xmlBean = SubmitJobRequestDocument.Factory.parse(mResource.getInputStream());
-        assertThat(mTransformer.transformPayload(xmlBean), instanceOf(XmlObject.class));
+        final SubmitJobRequestDocument xmlBean = SubmitJobRequestDocument.Factory
+            .parse(mResource.getInputStream());
+        assertThat(mTransformer.transformPayload(xmlBean),
+            instanceOf(XmlObject.class));
     }
 
     /**
@@ -113,8 +124,10 @@ public class DtsMessagePayloadTransformerTest {
      */
     @Test
     public void testTransformPayloadXmlBeansDom() throws Exception {
-        final SubmitJobRequestDocument xmlBean = SubmitJobRequestDocument.Factory.parse(mResource.getInputStream());
-        assertThat(mTransformer.transformPayload(xmlBean.getDomNode()), instanceOf(XmlObject.class));
+        final SubmitJobRequestDocument xmlBean = SubmitJobRequestDocument.Factory
+            .parse(mResource.getInputStream());
+        assertThat(mTransformer.transformPayload(xmlBean.getDomNode()),
+            instanceOf(XmlObject.class));
     }
 
     /**
@@ -123,6 +136,7 @@ public class DtsMessagePayloadTransformerTest {
     @Test(expectedExceptions = MessagingException.class)
     public void testTransformPayloadError() throws Exception {
         final byte[] bytes = IOUtils.toByteArray(mResource.getInputStream());
-        assertThat(mTransformer.transformPayload(bytes), instanceOf(XmlObject.class));
+        assertThat(mTransformer.transformPayload(bytes),
+            instanceOf(XmlObject.class));
     }
 }
