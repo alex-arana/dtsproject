@@ -25,13 +25,12 @@ import org.oasisOpen.docs.wss.x2004.x01.oasis200401WssWssecuritySecext10.Passwor
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.integration.channel.ChannelInterceptor;
 import org.springframework.integration.channel.interceptor.ChannelInterceptorAdapter;
 import org.springframework.integration.core.Message;
 import org.springframework.integration.core.MessageChannel;
 
 /**
- * <p>A {@link ChannelInterceptor} that encrypts sensitive information in the message. The encryption
+ * <p>A {@link org.springframework.integration.channel.ChannelInterceptor} that encrypts sensitive information in the message. The encryption
  * algorithm can be configured in an external configuration file</p>
  * <p>It should be noted that no actions will take place if sensitive information has been encrypted such
  * as those with prefix cleartext:xxxxx (@see DummyEncrypter)</p>
@@ -59,11 +58,8 @@ public class DtsSecurityInterceptor extends ChannelInterceptorAdapter  implement
             SubmitJobRequestDocument document = (SubmitJobRequestDocument)payload;
             SubmitJobRequest request = document.getSubmitJobRequest();
             List<SourceTargetType> sourceAndTargets = getAllSourceOrTarget(request);
-            LOG.debug("lvl 1");
             for (SourceTargetType sourceOrTarget:sourceAndTargets) {
-                LOG.debug("lvl 2");
                 if (sourceOrTarget instanceof MinxSourceTargetType) {
-                    LOG.debug("lvl 3");
                     MinxSourceTargetType minxSourceTarget = (MinxSourceTargetType)sourceOrTarget;
                     CredentialType credential = minxSourceTarget.getCredential();
                     if (credential != null) {
