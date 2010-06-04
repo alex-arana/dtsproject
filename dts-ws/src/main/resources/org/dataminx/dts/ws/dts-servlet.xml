@@ -102,15 +102,22 @@
 
   <bean id="dataTransferService" class="org.dataminx.dts.ws.service.DataTransferServiceImpl">
     <description>This bean is our "business" service.</description>
-    <property name="jobQueueSender" ref="mQueueSender" />
+    <property name="jobSubmitQueueSender" ref="jobSubmitQueueSender" />
+    <property name="jobControlQueueSender" ref="jobControlQueueSender" />
     <property name="jobRepository" ref="jobRepository" />
     <property name="marshaller" ref="marshaller" />
   </bean>
 
-  <!-- Message Sender -->
-  <bean id="mQueueSender" class="org.dataminx.dts.common.jms.JobQueueSender">
-    <property name="mQueue" ref="jmsJobSubmitQueue"/>
-    <property name="mJmsTemplate" ref="jmsTemplate"/>
+  <!-- Job Submit Message Sender -->
+  <bean id="jobSubmitQueueSender" class="org.dataminx.dts.common.jms.JobQueueSender">
+    <property name="queue" ref="jmsJobSubmitQueue"/>
+    <property name="jmsTemplate" ref="jmsTemplate"/>
+  </bean>
+  
+  <!-- Job Control Message Sender -->
+  <bean id="jobControlQueueSender" class="org.dataminx.dts.common.jms.JobQueueSender">
+    <property name="queue" ref="jmsJobControlQueue"/>
+    <property name="jmsTemplate" ref="jmsTemplate"/>
   </bean>
 
   <!-- Configure XML Marshaller -->

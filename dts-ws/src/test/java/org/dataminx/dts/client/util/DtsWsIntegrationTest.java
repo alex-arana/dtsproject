@@ -27,6 +27,8 @@
  */
 package org.dataminx.dts.client.util;
 
+import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
+
 import java.io.File;
 
 import org.dataminx.dts.ws.client.DataTransferServiceClient;
@@ -45,7 +47,7 @@ import org.testng.annotations.Test;
  *
  * @author Gerson Galang
  */
-@ContextConfiguration(locations = { "/org/dataminx/dts/ws/client-context.xml" })
+@ContextConfiguration(locations = {"/org/dataminx/dts/ws/client-context.xml"})
 public class DtsWsIntegrationTest extends AbstractTestNGSpringContextTests {
 
     /** The DTS WS client. */
@@ -62,7 +64,8 @@ public class DtsWsIntegrationTest extends AbstractTestNGSpringContextTests {
      */
     @BeforeClass
     public void parseDtsJobDef() throws Exception {
-        final File f = new ClassPathResource("ws-minx-dts.xml").getFile();
+        final File f = new ClassPathResource("ws-minx-dts"
+            + getTestFilePostfix() + ".xml").getFile();
         mDtsJob = JobDefinitionDocument.Factory.parse(f);
         Assert.assertNotNull(mDtsJob);
     }

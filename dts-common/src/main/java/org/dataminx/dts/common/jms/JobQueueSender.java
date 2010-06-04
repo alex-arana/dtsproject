@@ -32,11 +32,11 @@ public class JobQueueSender {
     private JmsTemplate mJmsTemplate;
 
     /**
-     * Sets the job submit queue.
+     * Sets the queue to be used by this message sender.
      *
      * @param queue the job submit queue
      */
-    public void setmQueue(final Queue queue) {
+    public void setQueue(final Queue queue) {
         mQueue = queue;
     }
 
@@ -45,7 +45,7 @@ public class JobQueueSender {
      *
      * @param jmsTemplate the JMS Template
      */
-    public void setmJmsTemplate(final JmsTemplate jmsTemplate) {
+    public void setJmsTemplate(final JmsTemplate jmsTemplate) {
         mJmsTemplate = jmsTemplate;
     }
 
