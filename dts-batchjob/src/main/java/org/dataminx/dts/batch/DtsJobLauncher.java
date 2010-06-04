@@ -27,15 +27,14 @@
  */
 package org.dataminx.dts.batch;
 
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.common.util.SchemaUtils;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.converter.DefaultJobParametersConverter;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
@@ -91,12 +90,13 @@ public class DtsJobLauncher extends SimpleJobLauncher {
             .getAuditableString(dtsJobRequest);
         LOGGER.debug("request payload:\n" + auditableRequest);
 
+        long maxAttempts = SchemaUtils.getMaxAttempts(dtsJobRequest.getSubmitJobRequest());
         // invoke the job factory to create a new job instance
         final DtsJob dtsJob = mJobFactory.createJob(jobId, dtsJobRequest);
-
-        return run(dtsJob, new DefaultJobParametersConverter()
-            .getJobParameters(new Properties()));
+        JobParameters paras = new JobParametersBuilder().addLong("maxAttempts", maxAttempts).toJobParameters();
+        return run(dtsJob, paras);
     }
+
 
     public void setDtsJobFactory(final DtsJobFactory jobFactory) {
         mJobFactory = jobFactory;

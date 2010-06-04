@@ -33,11 +33,9 @@ import static org.dataminx.dts.common.xml.XmlUtils.DEFAULT_TRANSFORMER_OUTPUT_PR
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.common.xml.XmlUtils;
@@ -175,5 +173,19 @@ public final class SchemaUtils {
             }
         }
         return result;
+    }
+
+    public static long getMaxAttempts(final SubmitJobRequest submitJobRequest) {
+        Assert.notNull(submitJobRequest);
+        final JobDefinitionType jobDefinition = submitJobRequest.getJobDefinition();
+        if (jobDefinition != null) {
+            final JobDescriptionType jobDescription = jobDefinition.getJobDescription();
+            if (jobDescription instanceof MinxJobDescriptionType) {
+                final MinxJobDescriptionType minxJobDescription = (MinxJobDescriptionType) jobDescription;
+                return minxJobDescription.getTransferRequirements().getMaxAttempts();
+            }
+        }
+        return 0;
+
     }
 }
