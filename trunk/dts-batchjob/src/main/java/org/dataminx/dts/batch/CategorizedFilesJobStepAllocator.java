@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.testng.Assert;
+import org.springframework.util.Assert;
 
 /**
  * A JobStepAllocator that groups files based on their sizes.
@@ -78,8 +78,7 @@ public class CategorizedFilesJobStepAllocator implements DtsJobStepAllocator,
             // has reached the max total number of files per step limit OR the size of the file we are going
             // to add will exceed the max size in bytes of all the files per step limit)
             if (mTmpBigFilesDtsJobStep != null
-                && (mTmpBigFilesDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit
-                    || mTmpBigFilesDtsJobStep
+                && (mTmpBigFilesDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit || mTmpBigFilesDtsJobStep
                     .getCurrentTotalByteSize()
                     + dataTransferUnit.getSize() >= maxTotalByteSizePerStepLimit)) {
                 mSteps.add(mTmpBigFilesDtsJobStep);
@@ -99,8 +98,7 @@ public class CategorizedFilesJobStepAllocator implements DtsJobStepAllocator,
             // has reached the max total number of files per step limit OR the size of the file we are going
             // to add will exceed the max size in bytes of all the files per step limit)
             if (mTmpSmallFilesDtsJobStep != null
-                && (mTmpSmallFilesDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit
-                    || mTmpSmallFilesDtsJobStep
+                && (mTmpSmallFilesDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit || mTmpSmallFilesDtsJobStep
                     .getCurrentTotalByteSize()
                     + dataTransferUnit.getSize() >= maxTotalByteSizePerStepLimit)) {
                 mSteps.add(mTmpSmallFilesDtsJobStep);
@@ -170,7 +168,7 @@ public class CategorizedFilesJobStepAllocator implements DtsJobStepAllocator,
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.assertEquals(mBigFileSize > 0, true,
+        Assert.isTrue(mBigFileSize > 0,
             "Big file size should have a positive value");
 
     }
