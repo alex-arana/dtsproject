@@ -11,9 +11,9 @@ import org.dataminx.dts.DtsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 /**
- * Command-line runner to launch DTS MessageBroker
- *
+ * Command-line runner to launch DTS MessageBroker.
  * @author hnguyen
  */
 public class BrokerCommandLineRunner {
@@ -28,8 +28,13 @@ public class BrokerCommandLineRunner {
     /** Internal application logger. */
     private static final Logger LOG = LoggerFactory.getLogger(BrokerCommandLineRunner.class);
 
+    /** config directory */
     private final File mConfigDir;
 
+    /**
+     * Constructor that accepts an absolute path to config directory.
+     * @param configDir
+     */
     public BrokerCommandLineRunner(String configDir) {
         if (StringUtils.isNotBlank(configDir)) {
             mConfigDir = new File(configDir);
@@ -57,6 +62,9 @@ public class BrokerCommandLineRunner {
 
     }
 
+    /**
+     * Initialises Spring ApplicationContext and auto-starts.
+     */
     public void run() {
         final String[] classpath = getSpringClasspath();
         final ClassPathXmlApplicationContext context =

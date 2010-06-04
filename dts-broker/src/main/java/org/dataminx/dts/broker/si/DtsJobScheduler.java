@@ -18,7 +18,6 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.core.Message;
 import org.springframework.integration.handler.DelayHandler;
 import org.springframework.integration.message.MessageBuilder;
-import org.springframework.integration.xml.transformer.XmlPayloadUnmarshallingTransformer;
 
 /**
  * An {@link Handler} that processes the incoming message and output an message that can be
@@ -29,18 +28,16 @@ import org.springframework.integration.xml.transformer.XmlPayloadUnmarshallingTr
  */
 @MessageEndpoint("brokerJobSubmissionChannel")
 public class DtsJobScheduler {
+
     /** A reference to the internal logger object. */
-    private static final Logger LOG = LoggerFactory
-        .getLogger(DtsJobScheduler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DtsJobScheduler.class);
+
+    private static final String TIME_IN_THE_PAST = "2010-03-11T17:50:00";
 
     /** Extracting delay information from the message payload object*/
     @Autowired
     @Qualifier("xmlPayloadDelayExtractor")
-    private DelayExtractor extractor;
-
-    @Autowired
-    @Qualifier("dtsMessagePayloadTransformer")
-    private XmlPayloadUnmarshallingTransformer transformer;
+    private DelayExtractor mExtractor;
 
     public String getDelayHeaderName() {
         return delayHeaderName;
@@ -64,32 +61,23 @@ public class DtsJobScheduler {
     @ServiceActivator
     public Message<?> schedule(final Message<?> message) {
 
-        final String auditableRequest = SchemaUtils.getAuditableString(message
-            .getPayload());
+        final String auditableRequest = SchemaUtils.getAuditableString(message.getPayload());
 
         LOG.debug(auditableRequest);
-        final String delay = extractor.extractDelay(message.getPayload());
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Found delay transfer requirement: " + delay);
-            LOG.debug("All headers: " + message.getHeaders().toString());
-        }
-        try {
-            final Calendar cal = DatatypeConverter.parseDateTime(delay);
-            final Date tillDate = cal.getTime();
-            return buildMessageWithNewHeader(message, tillDate);
-        }
-        catch (final IllegalArgumentException e) {
-            LOG.warn("Delay is not xsd:datetime formatted");
-            return buildMessageWithNewHeader(message, delay);
-        }
+        String delay = mExtractor.extractDelay(message.getPayload());
+        delay = (delay != null)? delay : TIME_IN_THE_PAST;
+
+        LOG.debug("Scheduled time to start the job " + delay);
+        final Calendar cal = DatatypeConverter.parseDateTime(delay);
+        final Date tillDate = cal.getTime();
+        return buildMessageWithNewHeader(message, tillDate);
+
     }
 
     /* Constructs a new message with approriate header name/value for {@link DelayHandler} to process */
-    private Message<?> buildMessageWithNewHeader(final Message<?> message,
-        final Object headerValue) {
-        return MessageBuilder.fromMessage(message).setHeader(delayHeaderName,
-            headerValue).build();
+    private Message<?> buildMessageWithNewHeader(final Message<?> message, final Object headerValue) {
+        return MessageBuilder.fromMessage(message).setHeader(delayHeaderName, headerValue).build();
     }
 
 }
