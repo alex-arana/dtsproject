@@ -90,13 +90,15 @@ public class DtsJobLauncher extends SimpleJobLauncher {
             .getAuditableString(dtsJobRequest);
         LOGGER.debug("request payload:\n" + auditableRequest);
 
-        long maxAttempts = SchemaUtils.getMaxAttempts(dtsJobRequest.getSubmitJobRequest());
+        final long maxAttempts = SchemaUtils.getMaxAttempts(dtsJobRequest
+            .getSubmitJobRequest());
         // invoke the job factory to create a new job instance
-        final DtsJob dtsJob = mJobFactory.createJob(jobId, dtsJobRequest);
-        JobParameters paras = new JobParametersBuilder().addLong("maxAttempts", maxAttempts).toJobParameters();
+        final DtsFileTransferJob dtsJob = mJobFactory.createJob(jobId,
+            dtsJobRequest);
+        final JobParameters paras = new JobParametersBuilder().addLong(
+            "maxAttempts", maxAttempts).toJobParameters();
         return run(dtsJob, paras);
     }
-
 
     public void setDtsJobFactory(final DtsJobFactory jobFactory) {
         mJobFactory = jobFactory;

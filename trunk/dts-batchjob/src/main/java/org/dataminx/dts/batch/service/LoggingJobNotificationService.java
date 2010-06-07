@@ -29,7 +29,7 @@ package org.dataminx.dts.batch.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataminx.dts.batch.DtsJob;
+import org.dataminx.dts.batch.DtsFileTransferJob;
 import org.dataminx.dts.common.model.JobStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
@@ -58,7 +58,8 @@ public class LoggingJobNotificationService implements JobNotificationService {
     /**
      * {@inheritDoc}
      */
-    public void notifyJobProgress(final DtsJob dtsJob, final String message) {
+    public void notifyJobProgress(final DtsFileTransferJob dtsJob,
+        final String message) {
         LOGGER.debug("DtsBulkCopyJobCliRunner notifyJobProgress()");
     }
 
@@ -81,7 +82,8 @@ public class LoggingJobNotificationService implements JobNotificationService {
     /**
      * {@inheritDoc}
      */
-    public void notifyJobStatus(final DtsJob dtsJob, final JobStatus jobStatus) {
+    public void notifyJobStatus(final DtsFileTransferJob dtsJob,
+        final JobStatus jobStatus) {
         LOGGER.debug("DtsBulkCopyJobCliRunner notifyJobStatus()");
     }
 

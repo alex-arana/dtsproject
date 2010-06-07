@@ -62,7 +62,7 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
     @SuppressWarnings("unchecked")
     private static final Map<String, String> DTS_JOB_REGISTRY = MapUtils
         .putAll(new HashMap(), new String[][] {{
-        SubmitJobRequestDocument.class.getName(), "dtsFileTransferJob"}});
+            SubmitJobRequestDocument.class.getName(), "dtsFileTransferJob"}});
 
     /** A reference to the Spring Batch Job repository. */
     private JobRepository mJobRepository;
@@ -76,7 +76,8 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
     /**
      * {@inheritDoc}
      */
-    public DtsJob createJob(final String jobId, final Object criteria) {
+    public DtsFileTransferJob createJob(final String jobId,
+        final Object criteria) {
         // obtain the name of the DTS job that is going to handle this request
         Assert.notNull(criteria,
             "Criteria element cannot be null in call to DTS job factory.");
@@ -112,8 +113,8 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
         // The spring batch job could use this to resolve the creds.
 
         // create a new instance of the job using the spring bean factory
-        return (DtsJob) mBeanFactory.getBean(dtsJobName, new Object[] {jobId,
-            criteria, mJobRepository, mCredentialStore});
+        return (DtsFileTransferJob) mBeanFactory.getBean(dtsJobName,
+            new Object[] {jobId, criteria, mJobRepository, mCredentialStore});
     }
 
     /**

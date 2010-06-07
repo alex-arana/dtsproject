@@ -46,7 +46,7 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.xmlbeans.XmlObject;
-import org.dataminx.dts.batch.DtsJob;
+import org.dataminx.dts.batch.DtsFileTransferJob;
 import org.dataminx.dts.batch.DtsJobFactory;
 import org.dataminx.dts.common.xml.XmlUtils;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
@@ -118,7 +118,8 @@ public class DtsMessageConverterTest extends UnitilsTestNG {
             .newInstance();
         mockPayloadTransformer.onceReturns(jobRequest).transformPayload(
             document);
-        final DtsJob dtsJob = MockUnitils.createDummy(DtsJob.class);
+        final DtsFileTransferJob dtsJob = MockUnitils
+            .createDummy(DtsFileTransferJob.class);
         mockJobFactory.returns(dtsJob).createJob(jobId, jobRequest);
 
         final Mock<ObjectMessage> message = MockUnitils
