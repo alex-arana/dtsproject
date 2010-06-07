@@ -31,11 +31,13 @@ import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_DETAILS
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_RESOURCE_KEY;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataminx.dts.batch.service.JobNotificationService;
 import org.dataminx.dts.common.model.JobStatus;
 import org.dataminx.dts.common.util.CredentialStore;
 import org.dataminx.dts.common.util.StopwatchTimer;
@@ -52,13 +54,16 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.JobInterruptedException;
+import org.springframework.batch.core.JobParametersIncrementer;
 import org.springframework.batch.core.StartLimitExceededException;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.job.SimpleJob;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -68,11 +73,27 @@ import org.springframework.util.ObjectUtils;
  * @author Alex Arana
  * @author Gerson Galang
  */
-public class DtsFileTransferJob extends DtsJob implements InitializingBean {
+public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
 
     /** The logger. */
     private static final Log LOGGER = LogFactory
         .getLog(DtsFileTransferJob.class);
+
+    /** The unique DTS job identifier. */
+    private final String mJobId;
+
+    /** The time in milliseconds when the job started executing. */
+    private long mStartTime;
+
+    /** The time in milliseconds when the job completed executing. */
+    private long mCompletedTime;
+
+    /** A reference to the application's job notification service. */
+    @Autowired
+    private JobNotificationService mJobNotificationService;
+
+    /** A reference to the JobPartitioningStrategy. */
+    private JobPartitioningStrategy mJobPartitioningStrategy;
 
     /** Holds the information about the job request. */
     private final SubmitJobRequest mJobRequest;
@@ -104,7 +125,7 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
         final SubmitJobRequestDocument jobRequest,
         final JobRepository jobRepository, final CredentialStore credentialStore) {
 
-        super(jobId);
+        mJobId = jobId;
         Assert
             .notNull(jobRequest,
                 "Cannot construct a DTS submit job without the required job details.");
@@ -112,6 +133,73 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
         setJobRepository(jobRepository);
 
         applyCredentialFiltering(credentialStore);
+    }
+
+    /**
+     * Returns the time when this job started executing.
+     *
+     * @return job's execution start time in milliseconds
+     */
+    public long getStartTime() {
+        return mStartTime;
+    }
+
+    /**
+     * Convenience method that sets the job start time using the DTS
+     * WorkerNode's current time.
+     */
+    public void registerStartTime() {
+        mStartTime = Calendar.getInstance().getTime().getTime();
+    }
+
+    public long getCompletedTime() {
+        return mCompletedTime;
+    }
+
+    /**
+     * Convenience method that sets the job completed time using the DTS
+     * WorkerNode's current time.
+     */
+    public void registerCompletedTime() {
+        mCompletedTime = Calendar.getInstance().getTime().getTime();
+    }
+
+    /**
+     * Returns the ID that uniquely identifies this job.
+     *
+     * @return Job ID
+     */
+    public String getJobId() {
+        return mJobId;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isRestartable() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public JobParametersIncrementer getJobParametersIncrementer() {
+        return null;
+    }
+
+    public JobNotificationService getJobNotificationService() {
+        return mJobNotificationService;
+    }
+
+    public JobPartitioningStrategy getJobPartitioningStrategy() {
+        return mJobPartitioningStrategy;
+    }
+
+    public void setJobPartitioningStrategy(
+        final JobPartitioningStrategy jobPartitioningStrategy) {
+        mJobPartitioningStrategy = jobPartitioningStrategy;
     }
 
     /**
@@ -306,7 +394,6 @@ public class DtsFileTransferJob extends DtsJob implements InitializingBean {
     /**
      * {@inheritDoc}
      */
-    @Override
     public String getDescription() {
         String description = null;
         final JobIdentificationType jobIdentification = getJobIdentification();

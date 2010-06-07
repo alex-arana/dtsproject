@@ -27,7 +27,7 @@
  */
 package org.dataminx.dts.batch.service;
 
-import org.dataminx.dts.batch.DtsJob;
+import org.dataminx.dts.batch.DtsFileTransferJob;
 import org.dataminx.dts.common.model.JobStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
@@ -59,7 +59,7 @@ public interface JobNotificationService {
      * @param dtsJob An active DTS Job instance
      * @param message A progress message to send
      */
-    void notifyJobProgress(DtsJob dtsJob, String message);
+    void notifyJobProgress(DtsFileTransferJob dtsJob, String message);
 
     /**
      * Posts a message on the Job Event queue informing of the progress in a currently active DTS operation.
@@ -89,7 +89,7 @@ public interface JobNotificationService {
      * @param dtsJob An active DTS Job instance
      * @param jobStatus DTS Job Status
      */
-    void notifyJobStatus(DtsJob dtsJob, JobStatus jobStatus);
+    void notifyJobStatus(DtsFileTransferJob dtsJob, JobStatus jobStatus);
 
     /**
      * Posts an error message event on the JMS Job Event queue concerning a DTS Job step.

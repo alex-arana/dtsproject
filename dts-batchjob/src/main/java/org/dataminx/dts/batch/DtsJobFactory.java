@@ -41,5 +41,5 @@ public interface DtsJobFactory {
      * @param criteria Criteria for creating a DTS Job
      * @return A new instance of {@link DtsJob}
      */
-    DtsJob createJob(String jobId, Object criteria);
+    DtsFileTransferJob createJob(String jobId, Object criteria);
 }
