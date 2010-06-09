@@ -31,24 +31,18 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.UUID;
-
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
 
 /**
  * Implementation of the {@link DtsWorkerNodeInformationService} interface.
  *
  * @author Alex Arana
  */
-@Service("dtsWorkerNodeInformationServiceImpl")
-@Scope("singleton")
 public class DtsWorkerNodeInformationServiceImpl implements
     DtsWorkerNodeInformationService {
 
     /** String returned from {@link #getHostname()} when the localhost cannot be resolved. */
     public static final String UNKNOWN_HOST = "unknown";
- 
+
     private String mInstanceId;
 
     /**
@@ -80,7 +74,7 @@ public class DtsWorkerNodeInformationServiceImpl implements
      * Return the WorkNodeID
      */
     public String getInstanceId() {
-     
+
         return mInstanceId;
     }
 

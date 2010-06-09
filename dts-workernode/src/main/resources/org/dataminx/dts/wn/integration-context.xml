@@ -20,6 +20,7 @@
   <!-- Defines a point-to-point channel for receiving DTS job requests. -->
   <channel id="dtsJobRequests"/>
   <channel id="dtsJobEvents"/>
+  <channel id="dtsClientEvents"/>
   <channel id="dtsJobExecutions"/>
   <channel id="dtsJobControls"/>
 
@@ -35,8 +36,6 @@
     <beans:property name="transformer" ref="dtsMessagePayloadTransformer"/>
   </beans:bean>
   
-  <service-activator input-channel="dtsJobControls"
-                     ref="workerNodeManager"/>
   <!--
   Define our own Polling inbound JMS channel adapter for the DTS job submission queue.
   The inbound adapter means we are receiving from JMS and placing an instance of
@@ -70,79 +69,39 @@
     <beans:property name="maxBatchJobNumer" value="${wn.manager.maxBatchJobNumber}"/>
   </beans:bean>
   
-  <beans:bean id="jobOperator" class="org.springframework.batch.core.launch.support.SimpleJobOperator">
-    <beans:property name="jobExplorer">
-        <beans:bean class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">
-            <beans:property name="dataSource" ref="dataSource" />
-        </beans:bean>
-    </beans:property>
-    <beans:property name="jobRegistry" ref="jobRegistry"/>
-    <beans:property name="jobRepository" ref="jobRepository" />
-    <beans:property name="jobLauncher" ref="dtsJobLauncher" />
-  </beans:bean>
-  
-  <beans:bean id="jobRegistry" class="org.springframework.batch.core.configuration.support.MapJobRegistry"/>
   <beans:bean id="jobRegistryBeanPostProcessor" class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">
     <beans:property name="jobRegistry" ref="jobRegistry"/>
   </beans:bean>
 
-  <beans:bean id="dtsWorkerNodeInformationServiceImpl" class="org.dataminx.dts.wn.DtsWorkerNodeInformationServiceImpl">
+  <beans:bean id="dtsWorkerNodeInformationService" class="org.dataminx.dts.wn.DtsWorkerNodeInformationServiceImpl">
     <beans:property name="workerNodeID" value="${wn.id}"/>
   </beans:bean>
-  <!--
-    Defines an inbound JMS channel adapter for the DTS job submission queue.
-    The inbound adapter means we are receiving from JMS and placing an instance of
-    org.springframework.integration.core.Message on the configured channel.
-  
-  <jms:message-driven-channel-adapter
-      channel="dtsJobRequests"
-      connection-factory="jmsConnectionFactory"
-      destination="jmsJobSubmitQueue"
-      message-converter="dtsMessageConverter"
-      transaction-manager="jmsTransactionManager"
-      />
-  -->
-  <!--
-    Defines an outbound JMS channel adapter for DTS job events and progress
-    notifications.
-    TODO: this has not yet been integrated with JobNotificationService and
-    a newly required filter for un-marshalling+validating JobSubmitRequests
-    (un-marshall/validation errors will need to be sent to the 'dtsJobEvents'
-    channel rather than direclty sent to JMS queue).
-    (worker node should always use channel adapters rather than directly
-    sending/recieving messages to/from message sources/targets)
-  -->
-   <!--
-   <jms:outbound-channel-adapter
-      channel="dtsJobEvents"
-      connection-factory="jmsConnectionFactory"
-      destination="jmsJobEventQueue"
-      />
-   -->
-   <jms:outbound-channel-adapter
-      channel="dtsJobEvents"
-      jms-template="jmsJobEventQueueConvertableJmsTemplate"
-   />
+
+  <jms:outbound-channel-adapter
+    channel="dtsClientEvents"
+    jms-template="jmsJobEventQueueConvertableJmsTemplate"
+  />
      
-   <!--
-   A MessageChannelTemplate for the 'dtsJobEvents' channel that can be injected
-   into application code in order to send/recieve messages from this channel.
-   -->
-   <beans:bean id="dtsJobEventsChannelTemplate"
-        class="org.springframework.integration.channel.MessageChannelTemplate">
+  <!--
+  A MessageChannelTemplate for the 'dtsJobEvents' channel that can be injected
+  into application code in order to send/recieve messages from this channel.
+  -->
+  <beans:bean id="dtsJobEventsChannelTemplate"
+       class="org.springframework.integration.channel.MessageChannelTemplate">
     <beans:constructor-arg ref="dtsJobEvents"/>
-   </beans:bean>
+  </beans:bean>
 
 
-   <beans:bean id="jobNotificationService"
-        class="org.dataminx.dts.wn.service.WorkerNodeJobNotificationService">
-     <beans:property name="channelTemplate" ref="dtsJobEventsChannelTemplate"/>
-   </beans:bean>
+  <beans:bean id="jobNotificationService"
+    class="org.dataminx.dts.wn.service.WorkerNodeJobNotificationService">
+    <beans:property name="workerNodeInformationService" ref="dtsWorkerNodeInformationService"/>
+    <beans:property name="channelTemplate" ref="dtsJobEventsChannelTemplate"/>
+  </beans:bean>
   
   <!--
-  The spring batch JobLaunchingMessageHandler requires an implementatioin of
+  The spring batch JobLaunchingMessageHandler requires an implementation of
   the 'JobLauncher' interface (dtsJobLauncher). This message handler already
-  provides us with an annontated service method:
+  provides us with an annotated service method:
   '@ServiceActivator
   public JobExecution launch(JobLaunchRequest request)'
   -->
@@ -151,6 +110,27 @@
     <beans:constructor-arg index="0" ref="dtsJobLauncher"/>
   </beans:bean>
 
+  <beans:bean id="controlRequestHandler" class="org.dataminx.dts.wn.ControlRequestHandler">
+    <beans:property name="workerNodeManager" ref="workerNodeManager"/>
+    <beans:property name="jobRestartStrategy" ref="immediateJobRestartStrategy"/>
+  </beans:bean>
+  
+  
+  <beans:bean id="batchJobUpdateHandler" class="org.dataminx.dts.wn.BatchJobUpdateHandler">
+    <beans:property name="jobRepository" ref="jobRepository"/>
+    <beans:property name="jobExplorer" ref="jobExplorer"/>
+    <beans:property name="jobRestartStrategy" ref="delayJobRestartStrategy"/>
+  </beans:bean>
+  
+  <beans:bean id="immediateJobRestartStrategy" class="org.dataminx.dts.wn.DelayJobRestartStrategy">
+    <beans:constructor-arg index="0" ref="workerNodeManager"/>
+    <beans:constructor-arg index="1" value="0"/>
+  </beans:bean>    
+
+  <beans:bean id="delayJobRestartStrategy" class="org.dataminx.dts.wn.DelayJobRestartStrategy">
+    <beans:constructor-arg index="0" ref="workerNodeManager"/>
+    <beans:constructor-arg index="1" value="2000"/>
+  </beans:bean>  
   <!--
   Service Activator - the service activator is the endpoint type for connecting
   any Spring managed object so that it may play the role of a service.
@@ -159,6 +139,13 @@
                      output-channel="dtsJobExecutions"
                      ref="dtsJobRequestHandler"/>
 
+  <service-activator input-channel="dtsJobControls"
+                     ref="controlRequestHandler"/>
+                     
+  <service-activator input-channel="dtsJobEvents"
+                     output-channel="dtsClientEvents"
+                     ref="batchJobUpdateHandler"/>
+                     
   <logging-channel-adapter channel="dtsJobExecutions"/>
 
   <!--
@@ -177,8 +164,13 @@
   </beans:bean>
 
   <beans:bean id="dtsMessagePayloadTransformer"
-              class="org.dataminx.dts.wn.jms.DtsMessagePayloadTransformer">
+              class="org.dataminx.dts.common.jms.DtsMessagePayloadTransformer">
     <beans:constructor-arg index="0" ref="dtsMarshaller"/>
   </beans:bean>
 
+  <beans:bean id="dtsMessageConverter" class="org.dataminx.dts.wn.jms.DtsMessageConverter">
+    <beans:property name="jobFactory" ref="dtsJobFactory"/>
+    <beans:property name="marshaller" ref="dtsMarshaller"/>
+    <beans:property name="transformer" ref="dtsMessagePayloadTransformer"/>
+  </beans:bean>
 </beans:beans>

@@ -31,7 +31,7 @@
   </bean>
 
   <bean id="dtsMessagePayloadTransformer"
-              class="org.dataminx.dts.wn.jms.DtsMessagePayloadTransformer">
+              class="org.dataminx.dts.common.jms.DtsMessagePayloadTransformer">
     <constructor-arg index="0" ref="dtsMarshaller"/>
   </bean>
 

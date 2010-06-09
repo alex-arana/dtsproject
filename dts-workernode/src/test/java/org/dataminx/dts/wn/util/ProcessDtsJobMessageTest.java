@@ -56,6 +56,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.Test;
 import org.w3c.dom.Document;
 
 /**
@@ -87,7 +88,7 @@ public class ProcessDtsJobMessageTest extends AbstractTestNGSpringContextTests {
         mJmsQueueSender.doSend(generateNewJobId(), dtsJob);
     }
 
-    //@Test
+    @Test
     public void submitDtsJobAsText() throws Exception {
         final SubmitJobRequestDocument root = SubmitJobRequestDocument.Factory
             .newInstance();
@@ -137,7 +138,7 @@ public class ProcessDtsJobMessageTest extends AbstractTestNGSpringContextTests {
         mJmsQueueSender.doSend(dtsJobId, root.xmlText());
     }
 
-    //@Test
+    @Test
     public void submitJobCancelRequestAsText() {
         final CancelJobRequestDocument document = CancelJobRequestDocument.Factory
             .newInstance();
