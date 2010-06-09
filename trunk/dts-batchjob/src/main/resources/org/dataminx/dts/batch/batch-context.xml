@@ -15,7 +15,7 @@
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
-  <import resource="file:${user.home}/.dataminx/*-context.xml"/>
+  <import resource="file:${dataminx.dir}/*-context.xml"/>
 <!-- 
   <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource">
     <property name="driverClassName" value="${batch.jdbc.driver}" />
