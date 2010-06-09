@@ -107,7 +107,12 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
      *
      */
     public void afterPropertiesSet() throws Exception {
-
+        // restart all running execution
+        for (String jobName : this.getJobNames()) {
+            for (Long execId: this.getRunningExecutions(jobName)) {
+                this.restart(execId);
+            }
+        }
         LOG.debug("afterPropertiesSet()");
     }
 
