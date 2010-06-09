@@ -34,9 +34,9 @@ import static org.junit.Assert.assertThat;
 
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.xmlbeans.XmlObject;
+import org.dataminx.dts.common.jms.DtsMessagePayloadTransformer;
 import org.dataminx.dts.common.xml.XmlUtils;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.springframework.core.io.ClassPathResource;

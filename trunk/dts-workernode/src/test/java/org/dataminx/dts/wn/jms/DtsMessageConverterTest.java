@@ -37,17 +37,16 @@ import static org.junit.Assert.assertThat;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.UUID;
-
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
-
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.batch.DtsFileTransferJob;
 import org.dataminx.dts.batch.DtsJobFactory;
+import org.dataminx.dts.common.jms.DtsMessagePayloadTransformer;
 import org.dataminx.dts.common.xml.XmlUtils;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;

@@ -32,7 +32,6 @@ import static org.dataminx.dts.common.xml.XmlUtils.newDocument;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Properties;
-
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -42,10 +41,10 @@ import javax.jms.TextMessage;
 import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
-
 import org.apache.commons.lang.StringUtils;
 import org.dataminx.dts.batch.DtsFileTransferJob;
 import org.dataminx.dts.batch.DtsJobFactory;
+import org.dataminx.dts.common.jms.DtsMessagePayloadTransformer;
 import org.dataminx.dts.common.util.SchemaUtils;
 import org.dataminx.dts.common.xml.ByteArrayResult;
 import org.dataminx.schemas.dts.x2009.x07.messages.InvalidJobDefinitionFaultDocument;
@@ -105,7 +104,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
     private Marshaller mMarshaller;
 
     /**
-     * Component used to transform input DTS Documents into Java objects 
+     * Component used to transform input DTS Documents into Java objects
      * (unmarshaller = XML -to-> java content objects).
      */
     @Autowired

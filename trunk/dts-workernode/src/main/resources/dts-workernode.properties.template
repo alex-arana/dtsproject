@@ -24,7 +24,7 @@ si.jms.jobControlQueueName = dts.job.control.queue
 # control logic for workernode manager
 wn.manager.maxBatchJobNumber = 1
 
-#default worker node ID in format: DtsWorkerNode + hostname + UUID
+#default w5horker node ID in format: DtsWorkerNode + hostname + UUID
 wn.id=DtsWorkerNodemyhostname001
 
 
