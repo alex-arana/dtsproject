@@ -25,30 +25,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dataminx.dts.ws.validator;
+package org.dataminx.dts.common.validator;
 
 import org.springframework.validation.Validator;
 
 /**
- * The DtsJobDefinitionValidator Interface. This will be used to force all its sub interfaces and implementations
- * to use JobIdentification and SourceTarget Validators.
+ * The SourceTargetValidator Interface.
  *
  * @author Gerson Galang
  */
-public interface DtsJobDefinitionValidator extends Validator {
-
-    /**
-     * Sets the job identification validator.
-     *
-     * @param jobIdentificationValidator the new job identification validator
-     */
-    void setJobIdentificationValidator(JobIdentificationValidator jobIdentificationValidator);
-
-    /**
-     * Sets the source target validator.
-     *
-     * @param sourceTargetValidator the new source target validator
-     */
-    void setSourceTargetValidator(SourceTargetValidator sourceTargetValidator);
+public interface SourceTargetValidator extends Validator {
 
 }

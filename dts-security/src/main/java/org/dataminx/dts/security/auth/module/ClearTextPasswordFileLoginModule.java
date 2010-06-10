@@ -42,6 +42,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
+ * The ClearTextPasswordFileLoginModule is an implementation of {@link javax.security.auth.spi.LoginModule} which
+ * provides for clear text password authentication mechanism.
  *
  * @author Gerson Galang
  */

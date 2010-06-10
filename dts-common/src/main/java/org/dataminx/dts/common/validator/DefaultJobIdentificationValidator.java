@@ -25,15 +25,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dataminx.dts.ws.validator;
+package org.dataminx.dts.common.validator;
 
-import org.springframework.validation.Validator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
+import org.springframework.validation.Errors;
 
 /**
- * The SourceTargetValidator Interface.
+ * The default JobIdentificationValidator implementation.
  *
  * @author Gerson Galang
  */
-public interface SourceTargetValidator extends Validator {
+public class DefaultJobIdentificationValidator implements JobIdentificationValidator {
+    /** The logger. */
+    private static final Log LOGGER = LogFactory.getLog(DefaultJobIdentificationValidator.class);
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean supports(Class clazz) {
+        return JobIdentificationType.class.isAssignableFrom(clazz);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void validate(Object object, Errors errors) {
+        //ValidationUtils.rejectIfEmpty(errors, "jobName", "jobIdentification.jobName.empty");
+        JobIdentificationType jobIdentificationType = (JobIdentificationType) object;
+        if (jobIdentificationType.getJobName().trim().equals("")) {
+            errors.rejectValue("jobName", "jobIdentification.jobName.empty");
+        }
+    }
 
 }

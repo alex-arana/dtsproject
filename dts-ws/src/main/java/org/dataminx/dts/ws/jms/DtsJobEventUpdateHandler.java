@@ -46,7 +46,7 @@ import org.springframework.integration.core.Message;
 
 /**
  * The Handler for all the Job Event Update messages coming from the Worker
- * Node.
+ * Node Manager.
  *
  * @author Gerson Galang
  */

@@ -33,6 +33,9 @@ import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 
 /**
+ * This class represents the MyProxy credential which is basically a GSSCredential. It extends
+ * from the BasicPrivateCredential so username and password to access the credential from the
+ * MyProxy repository can be done by providing the username and password.
  *
  * @author Gerson Galang
  */

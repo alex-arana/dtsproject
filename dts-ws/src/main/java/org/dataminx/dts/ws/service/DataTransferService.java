@@ -38,7 +38,7 @@ import org.dataminx.schemas.dts.x2009.x07.messages.SuspendJobRequestDocument;
 /**
  * This specifies the operations supported by the Data Transfer Service WS. The
  * reason why the methods take in the Request objects is because they are needed
- * by the Worker Node and there's no easy way of getting the Request objects
+ * by the Worker Node Manager and there's no easy way of getting the Request objects
  * from their child elements.
  *
  * @author Gerson Galang

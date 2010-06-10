@@ -27,24 +27,20 @@
  */
 package org.dataminx.dts.common.ws;
 
-import java.util.Date;
+import org.dataminx.dts.DtsException;
 
 /**
  * The DtsFaultException is the base class of all the fault related exceptions that can be thrown by the DTS WS.
  *
  * @author Gerson Galang
  */
-public class DtsFaultException extends RuntimeException {
-
-    /** The timestamp. */
-    private Date mTimestamp;
+public class DtsFaultException extends DtsException {
 
     /**
      * Constructs an instance of {@link DtsFaultException}.
      */
     public DtsFaultException() {
         super();
-        setTimestamp(new Date());
     }
 
     /**
@@ -54,7 +50,6 @@ public class DtsFaultException extends RuntimeException {
      */
     public DtsFaultException(final String msg) {
         super(msg);
-        setTimestamp(new Date());
     }
 
     /**
@@ -65,7 +60,6 @@ public class DtsFaultException extends RuntimeException {
      */
     public DtsFaultException(final String msg, final Throwable cause) {
         super(msg, cause);
-        setTimestamp(new Date());
     }
 
     /**
@@ -75,24 +69,6 @@ public class DtsFaultException extends RuntimeException {
      */
     public DtsFaultException(final Throwable cause) {
         super(cause);
-        setTimestamp(new Date());
     }
 
-    /**
-     * Sets the timestamp on when the fault occurred.
-     *
-     * @param timestamp the timestamp
-     */
-    public void setTimestamp(final Date timestamp) {
-        mTimestamp = timestamp;
-    }
-
-    /**
-     * Returns the date on when the fault/exception was thrown on the DTS Web Service.
-     *
-     * @return the date on when the fault/exception was thrown on the DTS Web Service
-     */
-    public Date getTimestamp() {
-        return mTimestamp;
-    }
 }

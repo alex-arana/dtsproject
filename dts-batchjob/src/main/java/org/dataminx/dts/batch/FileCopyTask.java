@@ -70,8 +70,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
- * {@link Tasklet}-oriented version of the DTS file transfer job implementation. It is expected that the item-oriented
- * version of this operation will become the preferred implementation.
+ * {@link Tasklet}-oriented version of the DTS file transfer job implementation.
  * <p>
  * It is a requirement that the {@link DataTransferType} input to this class be either injected or set manually prior to
  * its {@link #execute(StepContribution, ChunkContext)} method being called.

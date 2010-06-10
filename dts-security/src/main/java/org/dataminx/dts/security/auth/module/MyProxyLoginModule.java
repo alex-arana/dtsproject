@@ -41,6 +41,8 @@ import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 
 /**
+ * The MyProxyLoginModule is an implementation of {@link javax.security.auth.spi.LoginModule} which
+ * provides for myproxy authentication mechanism.
  *
  * @author Gerson Galang
  */

@@ -27,12 +27,14 @@
  */
 package org.dataminx.dts.common.ws;
 
+import org.dataminx.dts.DtsException;
+
 /**
  * An exception that is thrown if the job failed to meet the minimum validity requirements.
  *
  * @author Gerson Galang
  */
-public class InvalidJobDefinitionException extends DtsFaultException {
+public class InvalidJobDefinitionException extends DtsException {
 
     /**
      * Constructs an instance of {@link InvalidJobDefinitionException}.
@@ -46,7 +48,7 @@ public class InvalidJobDefinitionException extends DtsFaultException {
      *
      * @param msg the exception message
      */
-    public InvalidJobDefinitionException(String msg) {
+    public InvalidJobDefinitionException(final String msg) {
         super(msg);
     }
 
@@ -56,7 +58,7 @@ public class InvalidJobDefinitionException extends DtsFaultException {
      * @param msg the exception message
      * @param cause the error or exception that cause this exception to be thrown
      */
-    public InvalidJobDefinitionException(String msg, Throwable cause) {
+    public InvalidJobDefinitionException(final String msg, final Throwable cause) {
         super(msg, cause);
     }
 
@@ -65,7 +67,7 @@ public class InvalidJobDefinitionException extends DtsFaultException {
      *
      * @param cause the error or exception that cause this exception to be thrown
      */
-    public InvalidJobDefinitionException(Throwable cause) {
+    public InvalidJobDefinitionException(final Throwable cause) {
         super(cause);
     }
 

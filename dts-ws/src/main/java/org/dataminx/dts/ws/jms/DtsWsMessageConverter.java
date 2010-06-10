@@ -20,11 +20,7 @@ import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 
 /**
- * This class is a dual-purpose messaging converter:
- * <ul>
- * <li>Converts an incoming JMS message into a DTS Job definition.
- * <li>Converts a supported JAXB2 entity into an outgoing JMS message.
- * </ul>
+ * This class converts an incoming JMS message into a JobEventUpdateRequest object.
  *
  * @author Alex Arana
  * @author Gerson Galang

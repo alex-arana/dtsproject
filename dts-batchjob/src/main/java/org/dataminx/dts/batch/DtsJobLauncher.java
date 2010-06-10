@@ -27,9 +27,15 @@
  */
 package org.dataminx.dts.batch;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.common.util.SchemaUtils;
+import org.dataminx.dts.common.validator.DtsJobDefinitionValidator;
+import org.dataminx.dts.common.ws.InvalidJobDefinitionException;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.batch.core.JobExecution;
@@ -39,6 +45,9 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.context.MessageSource;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.MapBindingResult;
 
 /**
  * This is the Spring Batch Launcher for the DTS Worker Node.
@@ -53,6 +62,18 @@ public class DtsJobLauncher extends SimpleJobLauncher {
 
     /** A reference to the DtsJobFactory. */
     private DtsJobFactory mJobFactory;
+
+    /**
+     * The validator to be used in checking for the validity of the submitted
+     * DTS job.
+     */
+    private DtsJobDefinitionValidator mDtsJobDefinitionValidator;
+
+    /**
+     * The reference to the message resolver so that validation error messages
+     * are taken from a ResourceBundle.
+     */
+    private MessageSource mMessageSource;
 
     /**
      * Constructs a new instance of {@link DtsJobLauncher}.
@@ -75,7 +96,27 @@ public class DtsJobLauncher extends SimpleJobLauncher {
      */
     public JobExecution run(final String jobId, final JobDefinitionDocument job)
         throws JobExecutionAlreadyRunningException, JobRestartException,
-        JobInstanceAlreadyCompleteException {
+        JobInstanceAlreadyCompleteException, InvalidJobDefinitionException {
+
+        final MapBindingResult errors = new MapBindingResult(new HashMap(),
+            "jobDefinitionErrors");
+
+        mDtsJobDefinitionValidator.validate(job.getJobDefinition(), errors);
+
+        if (errors.hasErrors()) {
+            //FieldError error = errors.getFieldError("jobIdentification.jobName");
+            final List<FieldError> fieldErrors = errors.getFieldErrors();
+            final StringBuffer validationErrors = new StringBuffer();
+            String validationErrorMessage = "";
+            for (final FieldError fieldError : fieldErrors) {
+                validationErrorMessage = mMessageSource.getMessage(fieldError,
+                    Locale.getDefault());
+                validationErrors.append(validationErrorMessage).append("\n");
+            }
+            throw new InvalidJobDefinitionException("Invalid job request\n"
+                + validationErrors);
+        }
+
         final SubmitJobRequestDocument dtsJobRequest = SubmitJobRequestDocument.Factory
             .newInstance();
         //SubmitJobRequest submitJobRequest =
@@ -102,5 +143,25 @@ public class DtsJobLauncher extends SimpleJobLauncher {
 
     public void setDtsJobFactory(final DtsJobFactory jobFactory) {
         mJobFactory = jobFactory;
+    }
+
+    /**
+     * Sets the {@link DtsJobDefinitionValidator}.
+     *
+     * @param dtsJobDefinitionValidator the {@link DtsJobDefinitionValidator} to
+     *        use
+     */
+    public void setDtsJobDefinitionValidator(
+        final DtsJobDefinitionValidator dtsJobDefinitionValidator) {
+        mDtsJobDefinitionValidator = dtsJobDefinitionValidator;
+    }
+
+    /**
+     * Sets the {@link MessageSource}.
+     *
+     * @param messageSource the {@link MessageSource} to use
+     */
+    public void setMessageSource(final MessageSource messageSource) {
+        mMessageSource = messageSource;
     }
 }

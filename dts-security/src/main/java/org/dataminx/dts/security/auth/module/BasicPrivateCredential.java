@@ -28,6 +28,8 @@
 package org.dataminx.dts.security.auth.module;
 
 /**
+ * This class represents the most basic type of credential authentication where in a username and
+ * password are provided.
  *
  * @author Gerson Galang
  */
