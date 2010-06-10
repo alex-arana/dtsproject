@@ -27,6 +27,8 @@
  */
 package org.dataminx.dts;
 
+import java.util.Date;
+
 /**
  * <p>DtsException</p>
  * <p>Description: Base exception class for the DTS package.</p>
@@ -34,11 +36,16 @@ package org.dataminx.dts;
  * @author Alex Arana
  */
 public class DtsException extends RuntimeException {
+
+    /** The timestamp. */
+    private Date mTimestamp;
+
     /**
      * Constructs an instance of {@link DtsException}.
      */
     public DtsException() {
         super();
+        setTimestamp(new Date());
     }
 
     /**
@@ -48,6 +55,7 @@ public class DtsException extends RuntimeException {
      */
     public DtsException(final String message) {
         super(message);
+        setTimestamp(new Date());
     }
 
     /**
@@ -58,6 +66,7 @@ public class DtsException extends RuntimeException {
      */
     public DtsException(final String message, final Throwable cause) {
         super(message, cause);
+        setTimestamp(new Date());
     }
 
     /**
@@ -67,5 +76,24 @@ public class DtsException extends RuntimeException {
      */
     public DtsException(final Throwable cause) {
         super(cause);
+        setTimestamp(new Date());
+    }
+
+    /**
+     * Sets the timestamp on when the fault occurred.
+     *
+     * @param timestamp the timestamp
+     */
+    public void setTimestamp(final Date timestamp) {
+        mTimestamp = timestamp;
+    }
+
+    /**
+     * Returns the date on when the fault/exception was thrown on the DTS Web Service.
+     *
+     * @return the date on when the fault/exception was thrown on the DTS Web Service
+     */
+    public Date getTimestamp() {
+        return mTimestamp;
     }
 }

@@ -47,6 +47,8 @@ import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.security.auth.callback.PassiveCallbackHandler;
 
 /**
+ * This abstract class implements the <code>javax.security.auth.spi.LoginModule</code> but leaves the implementation
+ * of the <code>authenticate</code> method's implementation to its subclasses.
  *
  * @author Gerson Galang
  */

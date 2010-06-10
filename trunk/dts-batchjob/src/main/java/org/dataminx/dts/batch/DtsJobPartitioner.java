@@ -43,8 +43,7 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link Partitioner} that can split a
- * {@link SubmitJobRequest} into smaller units of work that can subsequently be
- * be either parallelised or delegated to remote chunk processors.
+ * {@link SubmitJobRequest} into smaller units of work.
  * <p>
  * Put in another way, it is the responsibility of this class to generate
  * instances of {@link ExecutionContext} that can act as input parameters to new

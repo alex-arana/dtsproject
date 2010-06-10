@@ -25,38 +25,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dataminx.dts.ws.validator;
+package org.dataminx.dts.common.validator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
-import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
 /**
- * The default JobIdentificationValidator implementation.
+ * The DtsJobDefinitionValidator Interface. This will be used to force all its sub interfaces and implementations
+ * to use JobIdentification and SourceTarget Validators.
  *
  * @author Gerson Galang
  */
-public class DefaultJobIdentificationValidator implements JobIdentificationValidator {
-    /** The logger. */
-    private static final Log LOGGER = LogFactory.getLog(DefaultJobIdentificationValidator.class);
+public interface DtsJobDefinitionValidator extends Validator {
 
     /**
-     * {@inheritDoc}
+     * Sets the job identification validator.
+     *
+     * @param jobIdentificationValidator the new job identification validator
      */
-    public boolean supports(Class clazz) {
-        return JobIdentificationType.class.isAssignableFrom(clazz);
-    }
+    void setJobIdentificationValidator(JobIdentificationValidator jobIdentificationValidator);
 
     /**
-     * {@inheritDoc}
+     * Sets the source target validator.
+     *
+     * @param sourceTargetValidator the new source target validator
      */
-    public void validate(Object object, Errors errors) {
-        //ValidationUtils.rejectIfEmpty(errors, "jobName", "jobIdentification.jobName.empty");
-        JobIdentificationType jobIdentificationType = (JobIdentificationType) object;
-        if (jobIdentificationType.getJobName().trim().equals("")) {
-            errors.rejectValue("jobName", "jobIdentification.jobName.empty");
-        }
-    }
+    void setSourceTargetValidator(SourceTargetValidator sourceTargetValidator);
 
 }

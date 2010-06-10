@@ -63,7 +63,7 @@ import org.springframework.xml.transform.StringResult;
 
 /**
  * The Data Transfer Service Implementation. This class interacts with the DTS
- * domain layer and hands over the submitted jobs to the DTS Messaging System
+ * Job repository and hands over the submitted jobs to the DTS Messaging System
  * which then forwards them to the DTS Worker Nodes.
  *
  * @author Gerson Galang
