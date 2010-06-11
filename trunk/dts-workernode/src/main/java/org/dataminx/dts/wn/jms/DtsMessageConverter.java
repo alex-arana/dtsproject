@@ -31,6 +31,11 @@ import static org.dataminx.dts.common.xml.XmlUtils.newDocument;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
@@ -116,43 +121,54 @@ public class DtsMessageConverter extends SimpleMessageConverter {
     private MessageChannelTemplate mChannelTemplate;
 
     /**
+     * Injected list of expected class names that will be transformed according
+     * to our xml marshalling, e.g. "org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument"
+     */
+    private List<String> mExpectedTypes;
+
+    /**
      * {@inheritDoc}
      */
     @Override
-    public Object fromMessage(final Message message) throws JMSException,
-        MessageConversionException {
+    public Object fromMessage(final Message message) throws JMSException, MessageConversionException {
         final String jobId = message.getJMSCorrelationID();
         LOG.info("A new JMS message has been received: " + jobId);
-
         final Object payload = extractMessagePayload(message);
-        LOG.debug(String.format(
-            "Finished reading message payload of type: '%s'", payload
-                .getClass().getName()));
+        LOG.debug(String.format("Finished reading message payload of type: '%s'", payload.getClass().getName()));
 
         Object dtsJobRequest = null;
 
         // convert the payload into a DTS job definition XML. If an un-marshalling
         // error occurs, then we need to notify the JobEventQueue with an error.
         // un-marshall here.
-        try {
-            dtsJobRequest = mTransformer.transformPayload(payload);
+        try
+        {
+        dtsJobRequest = mTransformer.transformPayload(payload);
+
+        String incomeRequestTypeName=dtsJobRequest.getClass().getName();
+        if (!mExpectedTypes.contains(incomeRequestTypeName))
+            throw new Exception(incomeRequestTypeName+" is not a DTSJobRequest Message");
         }
-        catch (final Exception e) {
-            LOG.debug("Invalid XML payload: " + e.getMessage());
-            final InvalidJobDefinitionFaultDocument document = InvalidJobDefinitionFaultDocument.Factory
-                .newInstance();
-            final InvalidJobDefinitionFaultType InvalidJobDefinitionFaultDetail = document
-                .addNewInvalidJobDefinitionFault();
+        catch(Exception e){
+            LOG.debug("Invalid XML payload: "+e.getMessage());
+            final InvalidJobDefinitionFaultDocument document = InvalidJobDefinitionFaultDocument.Factory.newInstance();
+            final InvalidJobDefinitionFaultType InvalidJobDefinitionFaultDetail = document.addNewInvalidJobDefinitionFault();
             InvalidJobDefinitionFaultDetail.setMessage(e.getMessage());
-            //mJobEventQueueSender.doSend(jobId, document);
 
             // TODO: Note, we also need to copy all the other jms headers into the SI message!!
             // consider the given ClientID property that the client uses to filter
             // messages intended only for them. Here we need to 'turn-around' the message headers even
             // if we dont understand them, e.g. consider the JMS.REPLY_TO header).
-            // msg.putHeader("ClientID", message.getStringProperty("ClientID");
-            final org.springframework.integration.core.Message<InvalidJobDefinitionFaultDocument> msg = MessageBuilder
-                .withPayload(document).setCorrelationId(jobId).build();
+            Map<String, Object> jmsMsgHeaders = new LinkedHashMap<String, Object>();
+            Enumeration jmsMsgProperyNames = message.getPropertyNames();
+            if (jmsMsgProperyNames != null){
+                while(jmsMsgProperyNames.hasMoreElements()){
+                    String pName = (String)jmsMsgProperyNames.nextElement();
+                    jmsMsgHeaders.put(pName, message.getStringProperty(pName));
+                }
+            }
+            MessageBuilder<InvalidJobDefinitionFaultDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(jmsMsgHeaders);
+            org.springframework.integration.core.Message<InvalidJobDefinitionFaultDocument> msg = msgbuilder.setCorrelationId(jobId).build();
             mChannelTemplate.send(msg);
 
             // Here we need to return null rather than throw a new MessageConversionException
@@ -162,18 +178,14 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         }
 
         if (LOG.isDebugEnabled()) {
-            final String auditable = SchemaUtils
-                .getAuditableString(dtsJobRequest);
+            final String auditable = SchemaUtils.getAuditableString(dtsJobRequest);
             if (StringUtils.isNotBlank(auditable)) {
-                LOG
-                    .debug("transformed JMS message payload to DTS schema instance:\n"
-                        + auditable);
+                LOG.debug("transformed JMS message payload to DTS schema instance:\n" + auditable);
             }
         }
 
         // invoke the job factory to create a new job instance
-        final DtsFileTransferJob dtsJob = mJobFactory.createJob(jobId,
-            dtsJobRequest);
+        final DtsFileTransferJob dtsJob = mJobFactory.createJob(jobId, dtsJobRequest);
         LOG.info("Launching DTS Job: " + dtsJob);
 
         // finally add any additional parameters and return the job request to the framework
@@ -183,10 +195,16 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         // e.g. the client would use the ClientID property to filter their own
         // messages from the dtsJobEvents queue.
         final Properties properties = new Properties();
-        //properties.setProperty("ClientID", message.getStringProperty("ClientID"));
-        return new JobLaunchRequest(dtsJob, new DefaultJobParametersConverter()
-            .getJobParameters(properties));
+        Enumeration jmsMsgProperyNames = message.getPropertyNames();
+        if (jmsMsgProperyNames != null){
+            while(jmsMsgProperyNames.hasMoreElements()){
+                  String pName = (String)jmsMsgProperyNames.nextElement();
+                  properties.setProperty(pName, message.getStringProperty(pName));
+            }
+        }
+        return new JobLaunchRequest(dtsJob, new DefaultJobParametersConverter().getJobParameters(properties));
     }
+
 
     /**
      * {@inheritDoc}
@@ -328,5 +346,9 @@ public class DtsMessageConverter extends SimpleMessageConverter {
      */
     public void setchannelTemplate(final MessageChannelTemplate mChannelTemplate) {
         this.mChannelTemplate = mChannelTemplate;
+    }
+
+    public void setmExpectedTypes(List<String> expectedTypes){
+        this.mExpectedTypes = expectedTypes;
     }
 }
