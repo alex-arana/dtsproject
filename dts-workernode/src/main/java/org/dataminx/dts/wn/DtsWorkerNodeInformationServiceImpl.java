@@ -44,6 +44,8 @@ public class DtsWorkerNodeInformationServiceImpl implements
     public static final String UNKNOWN_HOST = "unknown";
 
     private String mInstanceId;
+    
+    private String mWorkerNodeIDMessageHeaderName;
 
     /**
      * Gets the host name for this IP address. If this method fails to resolve the name of the localhost it returns
@@ -78,8 +80,18 @@ public class DtsWorkerNodeInformationServiceImpl implements
         return mInstanceId;
     }
 
+    public String getWorkerNodeIDMessageHeaderName(){
+
+        return mWorkerNodeIDMessageHeaderName;
+    }
+
     public void setworkerNodeID(String workerNodeID){
 
         mInstanceId=workerNodeID;
+    }
+
+    public void setworkerNodeIDMessageHeaderName(String workerNodeIDMessageHeaderName){
+
+        mWorkerNodeIDMessageHeaderName= workerNodeIDMessageHeaderName;
     }
 }

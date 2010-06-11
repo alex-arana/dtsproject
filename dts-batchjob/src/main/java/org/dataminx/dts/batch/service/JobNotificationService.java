@@ -69,7 +69,7 @@ public interface JobNotificationService {
      * @param volumeTransferred amount of data in bytes that has already been transferred
      */
     void notifyJobProgress(String jobId, int filesTransferred,
-        long volumeTransferred);
+        long volumeTransferred, final StepExecution stepExecution);
 
     /**
      * Posts a message on the Job Event queue informing of the file and volume details of the data that will be
@@ -79,7 +79,7 @@ public interface JobNotificationService {
      * @param filesTotal total number of files that will be transferred
      * @param volumeTotal total size in bytes of all the files that will be transferred
      */
-    void notifyJobScope(String jobId, int filesTotal, long volumeTotal);
+    void notifyJobScope(String jobId, int filesTotal, long volumeTotal, final StepExecution stepExecution);
 
     /**
      * Posts a status message on the Job Event queue concerning a currently active DTS operation.
@@ -89,7 +89,7 @@ public interface JobNotificationService {
      * @param dtsJob An active DTS Job instance
      * @param jobStatus DTS Job Status
      */
-    void notifyJobStatus(DtsFileTransferJob dtsJob, JobStatus jobStatus);
+    void notifyJobStatus(DtsFileTransferJob dtsJob, JobStatus jobStatus, JobExecution jobExecution);
 
     /**
      * Posts an error message event on the JMS Job Event queue concerning a DTS Job step.

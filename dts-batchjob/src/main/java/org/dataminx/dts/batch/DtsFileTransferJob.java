@@ -310,7 +310,7 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
         // TODO determine exactly what job notifications we need to return and
         // when
         getJobNotificationService().notifyJobStatus(this,
-            JobStatus.TRANSFERRING);
+            JobStatus.TRANSFERRING, execution);
 
         // first, store the DTS job request object in the job execution context
         final ExecutionContext context = execution.getExecutionContext();
@@ -383,7 +383,7 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
 
             // TODO move this somewhere it always gets called
             registerCompletedTime();
-            getJobNotificationService().notifyJobStatus(this, JobStatus.DONE);
+            getJobNotificationService().notifyJobStatus(this, JobStatus.DONE, execution);
         }
         else {
             execution.setStatus(BatchStatus.FAILED);

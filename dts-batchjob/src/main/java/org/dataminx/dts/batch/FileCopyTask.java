@@ -348,7 +348,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
             // job has not been stopped ie it has completed/finished running
             if (stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
                 mJobNotificationService.notifyJobProgress(dtsJobId,
-                    mBatchTotalFiles, mBatchVolumeSize);
+                    mBatchTotalFiles, mBatchVolumeSize, stepExecution);
 
                 mExecutionContextCleaner.removeStepExecutionContextEntry(
                     stepExecution, DTS_DATA_TRANSFER_STEP_KEY);

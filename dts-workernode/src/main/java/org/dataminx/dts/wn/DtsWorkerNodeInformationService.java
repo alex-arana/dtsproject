@@ -41,6 +41,9 @@ public interface DtsWorkerNodeInformationService {
      */
     String getInstanceId();
 
+
+    String getWorkerNodeIDMessageHeaderName();
+
     /**
      * Returns the current transaction time.
      *

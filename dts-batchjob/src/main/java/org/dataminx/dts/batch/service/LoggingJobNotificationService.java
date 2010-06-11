@@ -67,7 +67,7 @@ public class LoggingJobNotificationService implements JobNotificationService {
      * {@inheritDoc}
      */
     public void notifyJobProgress(final String jobId,
-        final int filesTransferred, final long volumeTransferred) {
+        final int filesTransferred, final long volumeTransferred, final StepExecution stepExecution) {
         LOGGER.debug("DtsBulkCopyJobCliRunner notifyJobProgress()");
     }
 
@@ -75,7 +75,7 @@ public class LoggingJobNotificationService implements JobNotificationService {
      * {@inheritDoc}
      */
     public void notifyJobScope(final String jobId, final int filesTotal,
-        final long volumeTotal) {
+        final long volumeTotal, final StepExecution stepExecution) {
         LOGGER.debug("DtsBulkCopyJobCliRunner notifyJobScope()");
     }
 
@@ -83,7 +83,7 @@ public class LoggingJobNotificationService implements JobNotificationService {
      * {@inheritDoc}
      */
     public void notifyJobStatus(final DtsFileTransferJob dtsJob,
-        final JobStatus jobStatus) {
+        final JobStatus jobStatus, JobExecution jobExecution) {
         LOGGER.debug("DtsBulkCopyJobCliRunner notifyJobStatus()");
     }
 
