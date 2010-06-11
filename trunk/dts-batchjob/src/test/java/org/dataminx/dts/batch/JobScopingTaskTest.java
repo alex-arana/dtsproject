@@ -76,9 +76,9 @@ public class JobScopingTaskTest {
 
         final RepeatStatus taskStatus = jobScopingTask.execute(null,
             mChunkContext);
-
+        final StepExecution stepExecution = mChunkContext.getStepContext().getStepExecution();
         verify(mJobNotificationService).notifyJobScope(anyString(), anyInt(),
-            anyLong());
+            anyLong(),stepExecution);
 
         assertNotNull(stepContext.getStepExecution().getExecutionContext().get(
             DTS_JOB_DETAILS));

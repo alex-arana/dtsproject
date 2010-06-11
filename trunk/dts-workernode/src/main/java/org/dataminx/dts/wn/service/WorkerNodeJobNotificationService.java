@@ -30,6 +30,10 @@ package org.dataminx.dts.wn.service;
 import static org.dataminx.dts.common.util.DateUtils.toCalendar;
 
 import java.math.BigInteger;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.dataminx.dts.batch.DtsFileTransferJob;
@@ -49,6 +53,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.channel.MessageChannelTemplate;
@@ -130,8 +136,21 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
             // ClientID given by the client that the client uses to filter their own 
             // messages.
             //String clientid = jobExecution.getExecutionContext().getString("ClientID");
-            final Message<FireUpJobErrorEventDocument> msg = MessageBuilder
-                .withPayload(document).setCorrelationId(jobId).build();
+
+            Map<String, Object> jmsMsgHeaders = new LinkedHashMap<String, Object>();
+            final JobParameters jobParameters = jobExecution.getJobInstance().getJobParameters();
+            if (jobParameters != null){
+                Map<String, JobParameter> allParameters = jobParameters.getParameters();
+                Set<String> ap = allParameters.keySet();
+                Iterator<String> iterator = ap.iterator();
+                while(iterator.hasNext()){
+                     String key = iterator.next();
+                     jmsMsgHeaders.put(key,  allParameters.get(key));
+             }
+            }
+            jmsMsgHeaders.put(mdtsWorkerNodeInformationService.getWorkerNodeIDMessageHeaderName(), mdtsWorkerNodeInformationService.getInstanceId());
+            MessageBuilder<FireUpJobErrorEventDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(jmsMsgHeaders);
+            final Message<FireUpJobErrorEventDocument> msg = msgbuilder.setCorrelationId(jobId).build();
             mChannelTemplate.send(msg);
         }
     }
@@ -168,13 +187,21 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
                 errorDetails.addFailureTrace(ExceptionUtils
                     .getFullStackTrace(failure));
             }
-
-            // Previously, we sent directly to the JMS queue rather than to
-            // a spring integration channel.
-            //mJobEventQueueSender.doSend(jobId, document);
-
-            final Message<FireUpStepFailureEventDocument> msg = MessageBuilder
-                .withPayload(document).setCorrelationId(jobId).build();
+            
+            Map<String, Object> jmsMsgHeaders = new LinkedHashMap<String, Object>();
+            final JobParameters jobParameters = stepExecution.getJobParameters();
+            if (jobParameters != null){
+                Map<String, JobParameter> allParameters = jobParameters.getParameters();
+                Set<String> ap = allParameters.keySet();
+                Iterator<String> iterator = ap.iterator();
+                while(iterator.hasNext()){
+                     String key = iterator.next();
+                     jmsMsgHeaders.put(key,  allParameters.get(key));
+             }
+            }
+            jmsMsgHeaders.put(mdtsWorkerNodeInformationService.getWorkerNodeIDMessageHeaderName(), mdtsWorkerNodeInformationService.getInstanceId());
+            MessageBuilder<FireUpStepFailureEventDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(jmsMsgHeaders);
+            final Message<FireUpStepFailureEventDocument> msg = msgbuilder.setCorrelationId(jobId).build();
             mChannelTemplate.send(msg);
         }
     }
@@ -193,7 +220,7 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
      * {@inheritDoc}
      */
     public void notifyJobStatus(final DtsFileTransferJob dtsJob,
-        final JobStatus jobStatus) {
+        final JobStatus jobStatus, final JobExecution jobExecution) {
         Assert.notNull(dtsJob);
         final String jobId = dtsJob.getJobId();
         LOG.info(String.format("DTS Job '%s' status notification: %s", jobId,
@@ -226,12 +253,20 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
                 break;
         }
 
-        // Previously, we sent directly to the JMS queue rather than to
-        // a spring integration channel.
-        //mJobEventQueueSender.doSend(jobId, document);
-
-        final Message<JobEventUpdateRequestDocument> msg = MessageBuilder
-            .withPayload(document).setCorrelationId(jobId).build();
+        Map<String, Object> jmsMsgHeaders = new LinkedHashMap<String, Object>();
+            final JobParameters jobParameters = jobExecution.getJobInstance().getJobParameters();
+            if (jobParameters != null){
+                Map<String, JobParameter> allParameters = jobParameters.getParameters();
+                Set<String> ap = allParameters.keySet();
+                Iterator<String> iterator = ap.iterator();
+                while(iterator.hasNext()){
+                     String key = iterator.next();
+                     jmsMsgHeaders.put(key,  allParameters.get(key));
+             }
+            }
+            jmsMsgHeaders.put(mdtsWorkerNodeInformationService.getWorkerNodeIDMessageHeaderName(), mdtsWorkerNodeInformationService.getInstanceId());
+            MessageBuilder<JobEventUpdateRequestDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(jmsMsgHeaders);
+           final Message<JobEventUpdateRequestDocument> msg = msgbuilder.setCorrelationId(jobId).build();
         mChannelTemplate.send(msg);
     }
 
@@ -239,7 +274,7 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
      * {@inheritDoc}
      */
     public void notifyJobProgress(final String jobId,
-        final int filesTransferred, final long volumeTransferred) {
+        final int filesTransferred, final long volumeTransferred, final StepExecution stepExecution) {
         Assert.notNull(jobId);
         LOG.info(String.format("DTS Job '%s' progress notification", jobId));
 
@@ -259,12 +294,20 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
             .valueOf(volumeTransferred));
         jobEventDetail.setStatus(StatusValueType.TRANSFERRING);
 
-        // Previously, we sent directly to the JMS queue rather than to
-        // a spring integration channel.
-        //mJobEventQueueSender.doSend(jobId, document);
-
-        final Message<JobEventUpdateRequestDocument> msg = MessageBuilder
-            .withPayload(document).setCorrelationId(jobId).build();
+        Map<String, Object> jmsMsgHeaders = new LinkedHashMap<String, Object>();
+            final JobParameters jobParameters = stepExecution.getJobParameters();
+            if (jobParameters != null){
+                Map<String, JobParameter> allParameters = jobParameters.getParameters();
+                Set<String> ap = allParameters.keySet();
+                Iterator<String> iterator = ap.iterator();
+                while(iterator.hasNext()){
+                     String key = iterator.next();
+                     jmsMsgHeaders.put(key,  allParameters.get(key));
+             }
+            }
+            jmsMsgHeaders.put(mdtsWorkerNodeInformationService.getWorkerNodeIDMessageHeaderName(), mdtsWorkerNodeInformationService.getInstanceId());
+            MessageBuilder<JobEventUpdateRequestDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(jmsMsgHeaders);
+            final Message<JobEventUpdateRequestDocument> msg = msgbuilder.setCorrelationId(jobId).build();
         mChannelTemplate.send(msg);
     }
 
@@ -272,7 +315,7 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
      * {@inheritDoc}
      */
     public void notifyJobScope(final String jobId, final int filesTotal,
-        final long volumeTotal) {
+        final long volumeTotal, final StepExecution stepExecution) {
         Assert.notNull(jobId);
         LOG.info(String.format("DTS Job '%s' job scope notification", jobId));
 
@@ -290,12 +333,20 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
         jobEventDetail.setVolumeTotal(BigInteger.valueOf(volumeTotal));
         jobEventDetail.setStatus(StatusValueType.TRANSFERRING);
 
-        // Previously, we sent directly to the JMS queue rather than to
-        // a spring integration channel.
-        //mJobEventQueueSender.doSend(jobId, document);
-
-        final Message<JobEventUpdateRequestDocument> msg = MessageBuilder
-            .withPayload(document).setCorrelationId(jobId).build();
+        Map<String, Object> jmsMsgHeaders = new LinkedHashMap<String, Object>();
+            final JobParameters jobParameters = stepExecution.getJobParameters();
+            if (jobParameters != null){
+                Map<String, JobParameter> allParameters = jobParameters.getParameters();
+                Set<String> ap = allParameters.keySet();
+                Iterator<String> iterator = ap.iterator();
+                while(iterator.hasNext()){
+                     String key = iterator.next();
+                     jmsMsgHeaders.put(key,  allParameters.get(key));
+             }
+            }
+            jmsMsgHeaders.put(mdtsWorkerNodeInformationService.getWorkerNodeIDMessageHeaderName(), mdtsWorkerNodeInformationService.getInstanceId());
+            MessageBuilder<JobEventUpdateRequestDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(jmsMsgHeaders);
+           final Message<JobEventUpdateRequestDocument> msg = msgbuilder.setCorrelationId(jobId).build();
         mChannelTemplate.send(msg);
     }
 

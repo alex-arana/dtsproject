@@ -99,9 +99,10 @@ public class JobScopingTask implements Tasklet, StepExecutionListener,
             .partitionTheJob(mSubmitJobRequest.getJobDefinition(),
                 mJobResourceKey);
 
+        final StepExecution stepExecution = chunkContext.getStepContext().getStepExecution();
         // update the WS with the details gathered by the job scoping process
         mJobNotificationService.notifyJobScope(jobDetails.getJobId(),
-            jobDetails.getTotalFiles(), jobDetails.getTotalBytes());
+            jobDetails.getTotalFiles(), jobDetails.getTotalBytes(), stepExecution);
 
         // store the jobDetails in the step execution context. these will get
         // promoted to the Job execution context by the jobScopingTaskPromotionListener
