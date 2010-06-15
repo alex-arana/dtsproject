@@ -148,6 +148,14 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         String incomeRequestTypeName=dtsJobRequest.getClass().getName();
         if (!mExpectedTypes.contains(incomeRequestTypeName))
             throw new Exception(incomeRequestTypeName+" is not a DTSJobRequest Message");
+
+        // validate (see DtsJobLauncher)
+        // also maxAttempts 
+        //org.dataminx.schemas.dts.x2009.x07.messages.impl.SubmitJobRequestDocumentImpl transdoc =
+        //        (org.dataminx.schemas.dts.x2009.x07.messages.impl.SubmitJobRequestDocumentImpl)dtsJobRequest;
+        //org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType validatethis = transdoc.getSubmitJobRequest().getJobDefinition();
+        // mDtsJobDefinitionValidator.validate(job.getJobDefinition(), errors);
+
         }
         catch(Exception e){
             LOG.debug("Invalid XML payload: "+e.getMessage());
