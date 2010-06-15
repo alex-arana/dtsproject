@@ -130,6 +130,10 @@ public class FileCopyingServiceImpl implements FileCopyingService,
         FileObject targetFO = null;
 
         try {
+            // could we simply resolve 
+            //sourceFO = sourceFileSystemManager.resolveFile(sourceURI);
+            //targetFO = targetFileSystemManager.resolveFile(targetURI);
+
             sourceFO = sourceFileSystemManager.resolveFile(sourceURI,
                 mDtsVfsUtil.getFileSystemOptions(source, mEncrypter));
             targetFO = targetFileSystemManager.resolveFile(targetURI,
