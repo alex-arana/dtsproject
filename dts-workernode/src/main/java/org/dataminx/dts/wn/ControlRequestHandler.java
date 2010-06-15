@@ -31,6 +31,9 @@ public class ControlRequestHandler {
 
     @ServiceActivator
     public void handleControlRequest(Message<?> message) {
+        // this service activator has null return value, therefore, no confirmations
+        // can be sent to the dtsJobEvents !
+        
         final Object controlRequest = message.getPayload();
         if (controlRequest instanceof CancelJobRequestDocument) {
             final CancelJobRequest cancelRequest = ((CancelJobRequestDocument)controlRequest).getCancelJobRequest();
@@ -43,6 +46,11 @@ public class ControlRequestHandler {
                         for (Long execId:mWorkerNodeManager.getRunningExecutions(jobName)) {
                             mWorkerNodeManager.stop(execId);
                         }
+                        // do we need to return some confirmation that the job
+                        // was stopped ok here ?
+                        // Also, do we need to resond if any of the exceptions
+                        // are caught below.
+
                     } catch (NoSuchJobException e) {
                         LOG.debug(e.getMessage());
                     } catch (JobExecutionNotRunningException e) {
@@ -57,6 +65,12 @@ public class ControlRequestHandler {
             final String jobResumed = resumeRequest.getJobResourceKey();
             LOG.debug("Received a resume job request for " + jobResumed);
             mWorkerNodeManager.restartJob(jobResumed);
+            // do we need to return some confirmation that the job was resumed
+            // ok here ?
+            // Also, restartJob seems to swallow all exceptions -
+            // shouldn't this class catch any exception and respond to the
+            // client accordingly ?
+
         }
     }
 
