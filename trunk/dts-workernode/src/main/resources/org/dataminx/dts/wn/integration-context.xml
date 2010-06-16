@@ -21,16 +21,21 @@
  <!--
    <channel id="dtsJobRequests">
         <interceptors>
-            <beans:ref bean="dtsJobRequestMessageValidatingInterceptor" />
+            <beans:ref bean="dtsWorkerNodeJobRequestValidatingInterceptor" />
         </interceptors>
     </channel>
 
-    <beans:bean id="dtsJobRequestMessageValidatingInterceptor" class="org.dataminx.dts.wn.dtsMessageValidatingInterceptor">
-        <beans:property name="mExpectedTypes">
+    <beans:bean id="dtsWorkerNodeJobRequestValidatingInterceptor" class="org.dataminx.dts.wn.jms.DtsWorkerNodeJobRequestValidatingInterceptor">
+        <beans:property name="dtsJobDefinitionValidator" ref="dtsJobDefinitionValidator"/>
+    </beans:bean>
+    -->
+
+    <!--<beans:bean id="dtsJobRequestMessageValidatingInterceptor" class="org.dataminx.dts.wn.jms.DtsWorkerNodeJobRequestValidatingInterceptor">
+       <beans:property name="mExpectedTypes">
             <beans:list>
                 <beans:value>org.dataminx.schemas.dts.x2009.x07.messages.impl.SubmitJobRequestDocumentImpl</beans:value>
             </beans:list>
-        </beans:property>
+        </beans:property>  
         <beans:property name="channelTemplate" ref="dtsEventsChannelTemplate"/>
     </beans:bean>
 
@@ -40,7 +45,7 @@
         </interceptors>
     </channel>
 
-    <beans:bean id="dtsControlRequestMessageValidatingInterceptor" class="org.dataminx.dts.wn.dtsMessageValidatingInterceptor">
+    <beans:bean id="dtsControlRequestMessageValidatingInterceptor" class="org.dataminx.dts.wn.jms.DtsWorkerNodeJobRequestValidatingInterceptor">
         <beans:property name="mExpectedTypes">
             <beans:list>
                 <beans:value>org.dataminx.schemas.dts.x2009.x07.messages.impl.CancelJobRequestDocumentImpl</beans:value>
@@ -52,7 +57,7 @@
         </beans:property>
         <beans:property name="channelTemplate" ref="dtsEventsChannelTemplate"/>
     </beans:bean>
--->
+    -->
     <channel id="dtsJobRequests"/>
     <channel id="dtsControlRequests"/>
     <channel id="dtsJobEvents"/>
@@ -151,11 +156,18 @@
         jms-template="jmsJobEventQueueConvertableJmsTemplate"
         />
 
-    <jms:message-driven-channel-adapter
+  <!--  <jms:message-driven-channel-adapter
         channel="dtsControlRequests"
         connection-factory="jmsConnectionFactory"
         destination="jmsJobControlQueue"
         message-converter="dtsControlMessageConverter"
+        transaction-manager="jmsTransactionManager"
+        />
+  -->
+        <jms:message-driven-channel-adapter
+        channel="dtsControlRequests"
+        connection-factory="jmsConnectionFactory"
+        destination="jmsJobControlQueue"
         transaction-manager="jmsTransactionManager"
         />
 
@@ -238,12 +250,17 @@
    <!-- <beans:bean id="headerMappingMessageConverter" class="org.springframework.integration.jms.HeaderMappingMessageConverter"></beans:bean>-->
 
     <beans:bean id="dtsMessageConverter" class="org.dataminx.dts.wn.jms.DtsMessageConverter">
-    <beans:property name="transformer" ref="dtsMessagePayloadTransformer"/>
-    <beans:property name="mExpectedTypes">
+      <beans:property name="transformer" ref="dtsMessagePayloadTransformer"/>
+      <beans:property name="messageSource" ref="messageSource" />
+      <beans:property name="dtsJobDefinitionValidator" ref="dtsJobDefinitionValidator"/>
+
+   <!--
+   <beans:property name="mExpectedTypes">
             <beans:list>
                 <beans:value>org.dataminx.schemas.dts.x2009.x07.messages.impl.SubmitJobRequestDocumentImpl</beans:value>
             </beans:list>
-        </beans:property>
+   </beans:property>
+   -->
   </beans:bean>
 
   <beans:bean id="dtsControlMessageConverter" class="org.dataminx.dts.wn.jms.DtsControlMessageConverter">
