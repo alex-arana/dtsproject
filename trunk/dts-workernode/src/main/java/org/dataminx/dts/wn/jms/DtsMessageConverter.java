@@ -93,7 +93,7 @@ import org.springframework.xml.transform.StringResult;
 public class DtsMessageConverter extends SimpleMessageConverter {
 
     /** Internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(DtsMessageConverter_toDepricate.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DtsMessageConverter.class);
     /**
      * Default format of outgoing messages.
      */
