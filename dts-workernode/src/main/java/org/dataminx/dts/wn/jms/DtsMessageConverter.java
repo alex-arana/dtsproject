@@ -143,11 +143,16 @@ public class DtsMessageConverter extends SimpleMessageConverter {
      */
     @Override
     public Object fromMessage(final Message message) throws JMSException, MessageConversionException {
-        String jobId = message.getJMSCorrelationID();
-        // get the job id from the correlation id, create if null.
-        if (jobId == null) {
-            jobId = UUID.randomUUID().toString();
-        }
+        
+        String jobId = null;    
+        // Try to get the job id from the correlation id or JMSMessageID first. If they are not available, to create it with UUID.randomUUID().toString().
+        if ((message.getJMSCorrelationID() != null )&&(!message.getJMSCorrelationID().equals("")))
+           jobId = message.getJMSCorrelationID();
+        else if((message.getJMSMessageID() != null )&&(!message.getJMSMessageID().equals("")))
+           jobId = message.getJMSMessageID();
+        else
+           jobId = UUID.randomUUID().toString();
+        
         LOG.info("A new JMS message has been received: " + jobId);
         final Object payload = extractMessagePayload(message);
         LOG.debug(String.format("Finished reading message payload of type: '%s'", payload.getClass().getName()));
@@ -200,6 +205,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
             // get the max attemtps and add to the properties
             final long maxAttempts = SchemaUtils.getMaxAttempts(dtsJobRequest.getSubmitJobRequest());
             headerProperties.put("maxAttempts", String.valueOf(maxAttempts));
+            headerProperties.put(org.springframework.integration.jms.JmsHeaders.CORRELATION_ID, jobId);
             // invoke the job factory to create a new job instance
             final DtsFileTransferJob dtsJob = mJobFactory.createJob(jobId, dtsJobRequest);
             LOG.info("Creating JobLaunchRequest with DTS Job");

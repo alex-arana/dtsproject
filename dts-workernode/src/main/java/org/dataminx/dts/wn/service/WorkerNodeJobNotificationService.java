@@ -291,7 +291,6 @@ public class WorkerNodeJobNotificationService <T> implements JobNotificationServ
             }
         }
         springIntegMsgHeaders.put(mdtsWorkerNodeInformationService.getWorkerNodeIDMessageHeaderName(), mdtsWorkerNodeInformationService.getInstanceId());
-        springIntegMsgHeaders.put(org.springframework.integration.jms.JmsHeaders.CORRELATION_ID, jobId);
         return springIntegMsgHeaders;
     }
 }
