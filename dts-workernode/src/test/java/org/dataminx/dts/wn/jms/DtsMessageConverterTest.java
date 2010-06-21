@@ -29,10 +29,8 @@ package org.dataminx.dts.wn.jms;
 
 import static org.apache.commons.lang.SystemUtils.LINE_SEPARATOR;
 import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertSame;
 
 import java.io.StringWriter;
 import java.util.List;
@@ -84,6 +82,7 @@ public class DtsMessageConverterTest extends UnitilsTestNG {
     @InjectIntoByType
     private Mock<Marshaller> mockMarshaller;
 
+
     @TestedObject
     private DtsMessageConverter mConverter;
 
@@ -127,7 +126,7 @@ public class DtsMessageConverterTest extends UnitilsTestNG {
         message.returns(document).getObject();
         final Object result = mConverter.fromMessage(message.getMock());
         assertNotNull(result);
-        assertThat(result, instanceOf(JobLaunchRequest.class));
+        //assertThat(result, instanceOf(JobLaunchRequest.class));
         assertSame(dtsJob, ((JobLaunchRequest) result).getJob());
     }
 

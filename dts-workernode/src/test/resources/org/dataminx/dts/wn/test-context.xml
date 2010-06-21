@@ -47,5 +47,9 @@
     <property name="ignoreUnresolvablePlaceholders" value="false"/>
     <property name="order" value="1"/>
   </bean>
-
+  <bean id="jobQueueSender" class="org.dataminx.dts.common.jms.JobQueueSender">
+    <property name="queue" ref="jmsJobSubmitQueue"/>
+    <property name="jmsTemplate" ref="convertableJmsTemplate"/>
+  </bean>
+  <bean id="credentialStore" class="org.dataminx.dts.common.util.CredentialStoreImpl"/>
 </beans>
