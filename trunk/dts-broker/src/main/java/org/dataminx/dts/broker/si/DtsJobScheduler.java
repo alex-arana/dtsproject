@@ -20,9 +20,11 @@ import org.springframework.integration.handler.DelayHandler;
 import org.springframework.integration.message.MessageBuilder;
 
 /**
- * An {@link Handler} that processes the incoming message and output an message that can be
+ * <p>An {@link Handler} that processes the incoming message and output an message that can be
  * scheduled by the {@link DelayHandler}. Other implementation can do the scheduling by itself
- * instead of relying on {@link DelayHandler}.
+ * instead of relying on {@link DelayHandler}.</p>
+ * <p>Right now this only handles StartNotBefore but not StartNoLaterThan element in the
+ * TransferRequirement element of the schema</p>
  *
  * @author hnguyen
  */

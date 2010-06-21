@@ -29,11 +29,19 @@ public class ControlRequestHandler {
     /** job restart strategy */
     private JobRestartStrategy mJobRestartStrategy;
 
+    /**
+     * Handles all different control message types sent from the broker or job submit queue. Depending on
+     * which control messages, the handler will call cancel, or restart functionality of {@link WorkerNodeManager}
+     * class. It is worth noting that this handler doesn't handle errors that this stage because normal errors
+     * will be dealt with via the JobNotificationService route. However, there are error cases that need
+     * handling here such as dealiing with jobid that is not existed (implementation needed here)
+     * @param message
+     */
     @ServiceActivator
     public void handleControlRequest(Message<?> message) {
         // this service activator has null return value, therefore, no confirmations
         // can be sent to the dtsJobEvents !
-        
+
         final Object controlRequest = message.getPayload();
         if (controlRequest instanceof CancelJobRequestDocument) {
             final CancelJobRequest cancelRequest = ((CancelJobRequestDocument)controlRequest).getCancelJobRequest();
