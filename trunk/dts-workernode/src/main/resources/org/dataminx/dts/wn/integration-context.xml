@@ -96,6 +96,10 @@
         <beans:property name="maxBatchJobNumer" value="${wn.manager.maxBatchJobNumber}"/>
     </beans:bean>
 
+    <beans:bean id="dtsJobFactory" class="org.dataminx.dts.batch.DtsJobFactoryImpl">
+        <beans:property name="jobRepository" ref="jobRepository"/>
+        <beans:property name="credentialStore" ref="credentialStore"/>
+    </beans:bean>
     <beans:bean id="jobOperator" class="org.springframework.batch.core.launch.support.SimpleJobOperator">
         <beans:property name="jobExplorer">
             <beans:bean class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">
@@ -251,9 +255,11 @@
 
     <beans:bean id="dtsMessageConverter" class="org.dataminx.dts.wn.jms.DtsMessageConverter">
       <beans:property name="transformer" ref="dtsMessagePayloadTransformer"/>
+      <beans:property name="marshaller" ref="dtsMarshaller"/>
       <beans:property name="messageSource" ref="messageSource" />
       <beans:property name="dtsJobDefinitionValidator" ref="dtsJobDefinitionValidator"/>
-
+      <beans:property name="jobFactory" ref="dtsJobFactory"/>
+      <beans:property name="channelTemplate" ref="dtsEventsChannelTemplate"/>
    <!--
    <beans:property name="mExpectedTypes">
             <beans:list>
@@ -264,6 +270,7 @@
   </beans:bean>
 
   <beans:bean id="dtsControlMessageConverter" class="org.dataminx.dts.wn.jms.DtsControlMessageConverter">
+    <beans:property name="marshaller" ref="dtsMarshaller"/>
     <beans:property name="transformer" ref="dtsMessagePayloadTransformer"/>
     <beans:property name="mExpectedTypes">
             <beans:list>
@@ -273,7 +280,8 @@
                 <beans:value>org.dataminx.schemas.dts.x2009.x07.messages.impl.GetJobDetailsRequestDocumentImpl</beans:value>
                 <beans:value>org.dataminx.schemas.dts.x2009.x07.messages.impl.GetJobStatusRequestDocumentImpl</beans:value>
             </beans:list>
-        </beans:property>
+    </beans:property>
+    <beans:property name="channelTemplate" ref="dtsEventsChannelTemplate"/> 
   </beans:bean>
 
 </beans:beans>

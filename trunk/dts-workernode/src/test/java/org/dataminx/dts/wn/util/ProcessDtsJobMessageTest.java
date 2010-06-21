@@ -33,10 +33,8 @@ import static org.dataminx.dts.common.xml.XmlUtils.documentToString;
 
 import java.io.File;
 import java.util.UUID;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.dataminx.dts.common.jms.JobQueueSender;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
@@ -68,7 +66,7 @@ import org.w3c.dom.Document;
 @ContextConfiguration
 public class ProcessDtsJobMessageTest extends AbstractTestNGSpringContextTests {
     @Autowired
-    @Qualifier("mQueueSender")
+    @Qualifier("jobQueueSender")
     private JobQueueSender mJmsQueueSender;
 
     //@Test

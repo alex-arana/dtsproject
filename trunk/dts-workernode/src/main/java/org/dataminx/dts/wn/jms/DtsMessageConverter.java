@@ -64,8 +64,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.converter.DefaultJobParametersConverter;
 import org.springframework.batch.integration.launch.JobLaunchRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.integration.channel.MessageChannelTemplate;
 import org.springframework.integration.message.MessageBuilder;
@@ -106,21 +104,17 @@ public class DtsMessageConverter extends SimpleMessageConverter {
     /**
      * A reference to the DTS Job factory.
      */
-    @Autowired
     private DtsJobFactory mJobFactory;
+
     /** Component used to marshall Java object graphs into XML. */
-    @Autowired
-    @Qualifier("dtsMarshaller")
     private Marshaller mMarshaller;
     /**
      * Component used to transform input DTS Documents into Java objects
      * (unmarshaller = XML -to-> java content objects).
      */
-    @Autowired
-    @Qualifier("dtsMessagePayloadTransformer")
     private DtsMessagePayloadTransformer mTransformer;
     /** A reference to the ChannelTemplate object. */
-    @Autowired
+
     private MessageChannelTemplate mChannelTemplate;
     /**
      * Injected list of expected class names that will be transformed according
@@ -143,8 +137,8 @@ public class DtsMessageConverter extends SimpleMessageConverter {
      */
     @Override
     public Object fromMessage(final Message message) throws JMSException, MessageConversionException {
-        
-        String jobId = null;    
+
+        String jobId = null;
         // Try to get the job id from the correlation id or JMSMessageID first. If they are not available, to create it with UUID.randomUUID().toString().
         if ((message.getJMSCorrelationID() != null )&&(!message.getJMSCorrelationID().equals("")))
            jobId = message.getJMSCorrelationID();
@@ -152,7 +146,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
            jobId = message.getJMSMessageID();
         else
            jobId = UUID.randomUUID().toString();
-        
+
         LOG.info("A new JMS message has been received: " + jobId);
         final Object payload = extractMessagePayload(message);
         LOG.debug(String.format("Finished reading message payload of type: '%s'", payload.getClass().getName()));
@@ -382,12 +376,15 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         XML_TEXT
     }
 
+    public void setMarshaller(Marshaller marshaller) {
+        this.mMarshaller = marshaller;
+    }
     /**
      * Inject a message channel template for the Job Event queue
      *
      * @param mChannelTemplate
      */
-    public void setchannelTemplate(final MessageChannelTemplate mChannelTemplate) {
+    public void setChannelTemplate(final MessageChannelTemplate mChannelTemplate) {
         this.mChannelTemplate = mChannelTemplate;
     }
 
@@ -412,5 +409,9 @@ public class DtsMessageConverter extends SimpleMessageConverter {
      */
     public void setMessageSource(final MessageSource messageSource) {
         mMessageSource = messageSource;
+    }
+
+    public void setJobFactory(DtsJobFactory jobFactory) {
+        this.mJobFactory = jobFactory;
     }
 }

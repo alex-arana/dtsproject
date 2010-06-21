@@ -1,31 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<submitJobRequest xmlns="http://schemas.dataminx.org/dts/2009/07/messages"
-    xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:dmi="http://schemas.ogf.org/dmi/2008/05/dmi"
-    xmlns:oas="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
-    xsi:noNamespaceSchemaLocation="minx-dts-messages.xsd">
-
-  <JobDefinition>
-    <jsdl1:JobDescription xsi:type="jsdl:MinxJobDescriptionType" xmlns:jsdl="http://schemas.dataminx.org/dts/2009/07/jsdl" xmlns:jsdl1="http://schemas.ggf.org/jsdl/2005/11/jsdl">
-      <jsdl1:JobIdentification>
-        <jsdl1:JobName>DTS_JOB_ID</jsdl1:JobName>
-        <jsdl1:Description>Copies the DataMINX Logo from a HTTP source to a local folder</jsdl1:Description>
-        <jsdl1:JobAnnotation>DTS Job Annotation</jsdl1:JobAnnotation>
-        <jsdl1:JobProject>DataMINX File Upload</jsdl1:JobProject>
-      </jsdl1:JobIdentification>
-      <jsdl:DataTransfer>
-        <jsdl:Source>
-          <jsdl1:URI>file:///C:/Windows/notepad.exe</jsdl1:URI>
-        </jsdl:Source>
-        <jsdl:Target>
-          <jsdl1:URI>tmp://</jsdl1:URI>
-        </jsdl:Target>
-      </jsdl:DataTransfer>
-      <jsdl:TransferRequirements>
+<mes:submitJobRequest xmlns:mes="http://schemas.dataminx.org/dts/2009/07/messages">
+  <mes:JobDefinition xmlns:dmi="http://schemas.ogf.org/dmi/2008/05/dmi"
+    xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl" xmlns:mjsdl="http://schemas.dataminx.org/dts/2009/07/jsdl"
+    xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <jsdl:JobDescription xsi:type="mjsdl:MinxJobDescriptionType">
+      <jsdl:JobIdentification>
+        <jsdl:JobName>testjob</jsdl:JobName>
+        <jsdl:Description>Gerson's Job</jsdl:Description>
+        <jsdl:JobAnnotation>Gerson's Job Annotation</jsdl:JobAnnotation>
+        <jsdl:JobProject>apollo33</jsdl:JobProject>
+      </jsdl:JobIdentification>
+      <mjsdl:DataTransfer>
+        <mjsdl:Source>
+          <jsdl1:URI xmlns:jsdl1="http://schemas.ggf.org/jsdl/2005/11/jsdl">file://etc/passwd</jsdl1:URI>
+        </mjsdl:Source>
+        <mjsdl:Target>
+          <jsdl1:URI xmlns:jsdl1="http://schemas.ggf.org/jsdl/2005/11/jsdl">file://tmp/hello.pass
+          </jsdl1:URI>
+        </mjsdl:Target>
+      </mjsdl:DataTransfer>
+      <mjsdl:TransferRequirements>
         <dmi:MaxAttempts>0</dmi:MaxAttempts>
-        <jsdl1:CreationFlag>overwrite</jsdl1:CreationFlag>
-      </jsdl:TransferRequirements>
-    </jsdl1:JobDescription>
-  </JobDefinition>
-</submitJobRequest>
+        <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+      </mjsdl:TransferRequirements>
+    </jsdl:JobDescription>
+  </mes:JobDefinition>
+</mes:submitJobRequest>

@@ -29,8 +29,6 @@ package org.dataminx.dts.wn.jms;
 
 import static org.dataminx.dts.common.xml.XmlUtils.newDocument;
 
-import org.dataminx.dts.common.xml.ByteArrayResult;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -47,23 +45,19 @@ import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
 import org.dataminx.dts.common.jms.DtsMessagePayloadTransformer;
+import org.dataminx.dts.common.xml.ByteArrayResult;
+import org.dataminx.schemas.dts.x2009.x07.messages.CustomFaultDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.CustomFaultType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.integration.channel.MessageChannelTemplate;
+import org.springframework.integration.message.MessageBuilder;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.XmlMappingException;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.xml.transform.StringResult;
-
-
-import org.dataminx.schemas.dts.x2009.x07.messages.CustomFaultDocument;
-import org.dataminx.schemas.dts.x2009.x07.messages.CustomFaultType;
-import org.springframework.integration.message.MessageBuilder;
-import org.springframework.integration.channel.MessageChannelTemplate;
 
 
 
@@ -77,7 +71,6 @@ import org.springframework.integration.channel.MessageChannelTemplate;
  * @author Alex Arana
  * @author hnguyen
  */
-@Component("dtsControlMessageConverter")
 public class DtsControlMessageConverter extends SimpleMessageConverter {
     /** Internal logger object. */
     private static final Logger LOG = LoggerFactory.getLogger(DtsMessageConverter.class);
@@ -89,20 +82,15 @@ public class DtsControlMessageConverter extends SimpleMessageConverter {
 
 
     /** Component used to marshall Java object graphs into XML. */
-    @Autowired
-    @Qualifier("dtsMarshaller")
     private Marshaller mMarshaller;
 
     /**
      * Component used to transform input DTS Documents into Java objects
      * (unmarshaller = XML -to-> java content objects).
      */
-    @Autowired
-    @Qualifier("dtsMessagePayloadTransformer")
     private DtsMessagePayloadTransformer mTransformer;
 
      /** A reference to the ChannelTemplate object. */
-    @Autowired
     private MessageChannelTemplate mChannelTemplate;
 
     /**
@@ -293,10 +281,15 @@ public class DtsControlMessageConverter extends SimpleMessageConverter {
      *
      * @param mChannelTemplate
      */
-    public void setchannelTemplate(final MessageChannelTemplate mChannelTemplate) {
+    public void setChannelTemplate(final MessageChannelTemplate mChannelTemplate) {
         this.mChannelTemplate = mChannelTemplate;
     }
     public void setmExpectedTypes(List<String> expectedTypes){
         this.mExpectedTypes = expectedTypes;
+    }
+
+    public void setMarshaller(Marshaller marshaller) {
+        this.mMarshaller = marshaller;
+
     }
 }

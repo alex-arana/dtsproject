@@ -123,6 +123,7 @@ public class WorkerNodeManager implements JobOperator, WorkerNodeJobPollable, In
     public void destroy() throws Exception {
 
         LOG.debug("destroy()");
+
     }
 
     /* (non-Javadoc)
