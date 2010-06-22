@@ -148,7 +148,8 @@ public abstract class AbstractJobPartitioningStrategy implements
      * {@inheritDoc}
      */
     public DtsJobDetails partitionTheJob(final JobDefinitionType jobDefinition,
-        final String jobResourceKey) throws JobScopingException {
+        final String jobResourceKey, final String jobTag)
+        throws JobScopingException {
         Assert.hasText(jobResourceKey,
             "JobResourceKey should not be null or empty.");
         Assert.notNull(jobDefinition, "JobDefinitionType should not be null.");
@@ -176,6 +177,7 @@ public abstract class AbstractJobPartitioningStrategy implements
 
             jobDetails.setJobDefinition(jobDefinition);
             jobDetails.setJobId(jobResourceKey);
+            jobDetails.setJobTag(jobTag);
 
             // get the Map that holds the maximum number of files to be transferred
             // from each Source Map<Source URI (String), number of files (Integer)>.

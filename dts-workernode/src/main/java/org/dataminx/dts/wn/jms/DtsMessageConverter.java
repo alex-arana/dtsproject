@@ -39,6 +39,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -48,6 +49,7 @@ import javax.jms.TextMessage;
 import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.batch.DtsFileTransferJob;
@@ -91,7 +93,8 @@ import org.springframework.xml.transform.StringResult;
 public class DtsMessageConverter extends SimpleMessageConverter {
 
     /** Internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(DtsMessageConverter.class);
+    private static final Logger LOG = LoggerFactory
+        .getLogger(DtsMessageConverter.class);
     /**
      * Default format of outgoing messages.
      */
@@ -136,26 +139,43 @@ public class DtsMessageConverter extends SimpleMessageConverter {
      * {@inheritDoc}
      */
     @Override
-    public Object fromMessage(final Message message) throws JMSException, MessageConversionException {
-
+    public Object fromMessage(final Message message) throws JMSException,
+        MessageConversionException {
+        String jobTag = null;
         String jobId = null;
-        // Try to get the job id from the correlation id or JMSMessageID first. If they are not available, to create it with UUID.randomUUID().toString().
-        if ((message.getJMSCorrelationID() != null )&&(!message.getJMSCorrelationID().equals("")))
-           jobId = message.getJMSCorrelationID();
-        else if((message.getJMSMessageID() != null )&&(!message.getJMSMessageID().equals("")))
-           jobId = message.getJMSMessageID();
-        else
-           jobId = UUID.randomUUID().toString();
+
+        // Try to get the job id from the correlation id or JMSMessageID first. If they are 
+        // not available, to create it with UUID.randomUUID().toString().
+        if (message.getJMSCorrelationID() != null
+            && !message.getJMSCorrelationID().equals("")) {
+            jobId = message.getJMSCorrelationID();
+            jobTag = UUID.randomUUID().toString();
+        }
+        else if (message.getJMSMessageID() != null
+            && !message.getJMSMessageID().equals("")) {
+            jobId = message.getJMSMessageID();
+            jobTag = UUID.randomUUID().toString();
+        }
+        else {
+            jobId = UUID.randomUUID().toString();
+
+            // we'll make the value of jobTag to be the same as jobId if we are
+            // setting it ourselves
+            jobTag = jobId;
+        }
 
         LOG.info("A new JMS message has been received: " + jobId);
         final Object payload = extractMessagePayload(message);
-        LOG.debug(String.format("Finished reading message payload of type: '%s'", payload.getClass().getName()));
+        LOG.debug(String.format(
+            "Finished reading message payload of type: '%s'", payload
+                .getClass().getName()));
 
         // convert the payload into a DTS job definition XML. If an un-marshalling
         // error occurs, then we need to notify the JobEventQueue with an error.
         // un-marshall here.
         try {
-            XmlObject expectedXML = (XmlObject) mTransformer.transformPayload(payload);
+            final XmlObject expectedXML = (XmlObject) mTransformer
+                .transformPayload(payload);
             if (!(expectedXML instanceof SubmitJobRequestDocument)) {
                 throw new Exception("Invaild XML Payload");
             }
@@ -164,9 +184,10 @@ public class DtsMessageConverter extends SimpleMessageConverter {
             //if (!mExpectedTypes.contains(incomeRequestTypeName)) {
             //    throw new Exception(incomeRequestTypeName + " is not a DTSJobRequest Message");
             //}
-            SubmitJobRequestDocument dtsJobRequest = (SubmitJobRequestDocument) expectedXML;
-            SubmitJobRequest job = dtsJobRequest.getSubmitJobRequest();
-            final MapBindingResult errors = new MapBindingResult(new HashMap(), "jobDefinitionErrors");
+            final SubmitJobRequestDocument dtsJobRequest = (SubmitJobRequestDocument) expectedXML;
+            final SubmitJobRequest job = dtsJobRequest.getSubmitJobRequest();
+            final MapBindingResult errors = new MapBindingResult(new HashMap(),
+                "jobDefinitionErrors");
             mDtsJobDefinitionValidator.validate(job.getJobDefinition(), errors);
             if (errors.hasErrors()) {
                 //FieldError error = errors.getFieldError("jobIdentification.jobName");
@@ -174,17 +195,21 @@ public class DtsMessageConverter extends SimpleMessageConverter {
                 final StringBuffer validationErrors = new StringBuffer();
                 String validationErrorMessage = "";
                 for (final FieldError fieldError : fieldErrors) {
-                    validationErrorMessage = mMessageSource.getMessage(fieldError,
-                            Locale.getDefault());
-                    validationErrors.append(validationErrorMessage).append("\n");
+                    validationErrorMessage = mMessageSource.getMessage(
+                        fieldError, Locale.getDefault());
+                    validationErrors.append(validationErrorMessage)
+                        .append("\n");
                 }
                 throw new Exception("Invalid job request\n" + validationErrors);
             }
 
             if (LOG.isDebugEnabled()) {
-                final String auditable = SchemaUtils.getAuditableString(dtsJobRequest);
+                final String auditable = SchemaUtils
+                    .getAuditableString(dtsJobRequest);
                 if (StringUtils.isNotBlank(auditable)) {
-                    LOG.debug("transformed JMS message payload to DTS schema instance:\n" + auditable);
+                    LOG
+                        .debug("transformed JMS message payload to DTS schema instance:\n"
+                            + auditable);
                 }
             }
 
@@ -194,40 +219,54 @@ public class DtsMessageConverter extends SimpleMessageConverter {
             // this property when sending event notifications back to the client.
             // e.g. the client would use the ClientID property to filter their own
             // messages from the dtsJobEvents queue.
-            final Properties headerProperties = this.getJmsHeadersAsStringProperties(message);
+            final Properties headerProperties = this
+                .getJmsHeadersAsStringProperties(message);
 
             // get the max attemtps and add to the properties
-            final long maxAttempts = SchemaUtils.getMaxAttempts(dtsJobRequest.getSubmitJobRequest());
+            final long maxAttempts = SchemaUtils.getMaxAttempts(dtsJobRequest
+                .getSubmitJobRequest());
             headerProperties.put("maxAttempts", String.valueOf(maxAttempts));
-            headerProperties.put(org.springframework.integration.jms.JmsHeaders.CORRELATION_ID, jobId);
+            headerProperties.put(
+                org.springframework.integration.jms.JmsHeaders.CORRELATION_ID,
+                jobId);
             // invoke the job factory to create a new job instance
-            final DtsFileTransferJob dtsJob = mJobFactory.createJob(jobId, dtsJobRequest);
+            final DtsFileTransferJob dtsJob = mJobFactory.createJob(jobId,
+                jobTag, dtsJobRequest);
             LOG.info("Creating JobLaunchRequest with DTS Job");
-            return new JobLaunchRequest(dtsJob, new DefaultJobParametersConverter().getJobParameters(headerProperties));
+            return new JobLaunchRequest(dtsJob,
+                new DefaultJobParametersConverter()
+                    .getJobParameters(headerProperties));
 
-
-        } catch (Exception e) {
+        }
+        catch (final Exception e) {
             LOG.debug("Invalid XML payload: " + e.getMessage());
 
-            final InvalidJobDefinitionFaultDocument document = InvalidJobDefinitionFaultDocument.Factory.newInstance();
-            final InvalidJobDefinitionFaultType InvalidJobDefinitionFaultDetail = document.addNewInvalidJobDefinitionFault();
+            final InvalidJobDefinitionFaultDocument document = InvalidJobDefinitionFaultDocument.Factory
+                .newInstance();
+            final InvalidJobDefinitionFaultType InvalidJobDefinitionFaultDetail = document
+                .addNewInvalidJobDefinitionFault();
             InvalidJobDefinitionFaultDetail.setMessage(e.getMessage());
 
             // TODO: Note, we also need to copy all the other jms headers into the SI message!!
             // consider the given ClientID property that the client uses to filter
             // messages intended only for them. Here we need to 'turn-around' the message headers even
             // if we dont understand them, e.g. consider the JMS.REPLY_TO header).
-            Map<String, Object> jmsMsgHeaders = new LinkedHashMap<String, Object>();
-            Enumeration jmsMsgProperyNames = message.getPropertyNames();
+            final Map<String, Object> jmsMsgHeaders = new LinkedHashMap<String, Object>();
+            final Enumeration jmsMsgProperyNames = message.getPropertyNames();
             if (jmsMsgProperyNames != null) {
                 while (jmsMsgProperyNames.hasMoreElements()) {
-                    String pName = (String) jmsMsgProperyNames.nextElement();
+                    final String pName = (String) jmsMsgProperyNames
+                        .nextElement();
                     jmsMsgHeaders.put(pName, message.getStringProperty(pName));
                 }
             }
-            jmsMsgHeaders.put(org.springframework.integration.jms.JmsHeaders.CORRELATION_ID, jobId);
-            MessageBuilder<InvalidJobDefinitionFaultDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(jmsMsgHeaders);
-            org.springframework.integration.core.Message<InvalidJobDefinitionFaultDocument> msg = msgbuilder.setCorrelationId(jobId).build();
+            jmsMsgHeaders.put(
+                org.springframework.integration.jms.JmsHeaders.CORRELATION_ID,
+                jobId);
+            final MessageBuilder<InvalidJobDefinitionFaultDocument> msgbuilder = MessageBuilder
+                .withPayload(document).copyHeaders(jmsMsgHeaders);
+            final org.springframework.integration.core.Message<InvalidJobDefinitionFaultDocument> msg = msgbuilder
+                .setCorrelationId(jobId).build();
             mChannelTemplate.send(msg);
 
             // Here we need to return null rather than throw a new MessageConversionException
@@ -237,13 +276,15 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         }
     }
 
-    private Properties getJmsHeadersAsStringProperties(final Message message) throws JMSException {
+    private Properties getJmsHeadersAsStringProperties(final Message message)
+        throws JMSException {
         final Properties headerProperties = new Properties();
-        Enumeration jmsMsgProperyNames = message.getPropertyNames();
+        final Enumeration jmsMsgProperyNames = message.getPropertyNames();
         if (jmsMsgProperyNames != null) {
             while (jmsMsgProperyNames.hasMoreElements()) {
-                String pName = (String) jmsMsgProperyNames.nextElement();
-                headerProperties.setProperty(pName, message.getStringProperty(pName));
+                final String pName = (String) jmsMsgProperyNames.nextElement();
+                headerProperties.setProperty(pName, message
+                    .getStringProperty(pName));
             }
         }
         return headerProperties;
@@ -254,33 +295,35 @@ public class DtsMessageConverter extends SimpleMessageConverter {
      */
     @Override
     public Message toMessage(final Object object, final Session session)
-            throws JMSException, MessageConversionException {
+        throws JMSException, MessageConversionException {
 
         Assert.notNull(object);
         final Class<? extends Object> objectClass = object.getClass();
         if (!mMarshaller.supports(objectClass)) {
             throw new MessageConversionException(
-                    String.format(
-                    "Unable to convert object of type '%s' to a valid DTS Job update JMS message.",
-                    objectClass.getName()));
+                String
+                    .format(
+                        "Unable to convert object of type '%s' to a valid DTS Job update JMS message.",
+                        objectClass.getName()));
         }
 
         // convert the input schema entity to an object we can send back as the payload of a JMS message
         final Result result = createOutputResult();
         try {
             mMarshaller.marshal(object, result);
-        } catch (final XmlMappingException ex) {
+        }
+        catch (final XmlMappingException ex) {
             final String message = "An error has occurred marshalling the input object graph to an XML document: "
-                    + object;
-            LOG.error(message, ex);
-            throw new MessageConversionException(message, ex);
-        } catch (final IOException ex) {
-            final String message = "An I/O error has occurred marshalling the input object graph to an XML document: "
-                    + object;
+                + object;
             LOG.error(message, ex);
             throw new MessageConversionException(message, ex);
         }
-
+        catch (final IOException ex) {
+            final String message = "An I/O error has occurred marshalling the input object graph to an XML document: "
+                + object;
+            LOG.error(message, ex);
+            throw new MessageConversionException(message, ex);
+        }
 
         // use the base class implementation of this method to convert from the output XML to a JMS Message
         return super.toMessage(extractResultOutput(result), session);
@@ -328,21 +371,24 @@ public class DtsMessageConverter extends SimpleMessageConverter {
      * @throws JMSException if the incoming message is not of a supported message type
      */
     private Object extractMessagePayload(final Message message)
-            throws JMSException {
+        throws JMSException {
         final Object payload;
         if (message instanceof TextMessage) {
             final TextMessage textMessage = (TextMessage) message;
             payload = textMessage.getText();
-        } else if (message instanceof ObjectMessage) {
+        }
+        else if (message instanceof ObjectMessage) {
             final ObjectMessage objectMessage = (ObjectMessage) message;
             payload = objectMessage.getObject();
-        } else if (message instanceof BytesMessage) {
+        }
+        else if (message instanceof BytesMessage) {
             final BytesMessage bytesMessage = (BytesMessage) message;
             final byte[] bytes = new byte[(int) bytesMessage.getBodyLength()];
             bytesMessage.readBytes(bytes);
             final ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
             payload = new StreamSource(bis);
-        } else {
+        }
+        else {
             throw new MessageConversionException("Invalid message type...");
         }
         return payload;
@@ -376,9 +422,10 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         XML_TEXT
     }
 
-    public void setMarshaller(Marshaller marshaller) {
+    public void setMarshaller(final Marshaller marshaller) {
         this.mMarshaller = marshaller;
     }
+
     /**
      * Inject a message channel template for the Job Event queue
      *
@@ -398,7 +445,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
      *        use
      */
     public void setDtsJobDefinitionValidator(
-            final DtsJobDefinitionValidator dtsJobDefinitionValidator) {
+        final DtsJobDefinitionValidator dtsJobDefinitionValidator) {
         mDtsJobDefinitionValidator = dtsJobDefinitionValidator;
     }
 
@@ -411,7 +458,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         mMessageSource = messageSource;
     }
 
-    public void setJobFactory(DtsJobFactory jobFactory) {
+    public void setJobFactory(final DtsJobFactory jobFactory) {
         this.mJobFactory = jobFactory;
     }
 }

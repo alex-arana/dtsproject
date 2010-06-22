@@ -124,7 +124,7 @@ public class DtsFileTransferJobListener implements JobExecutionListener,
             mExecutionContextCleaner.removeJobExecutionContextEntry(
                 jobExecution, DTS_SUBMIT_JOB_REQUEST_KEY);
             removeJobStepFiles(jobExecution.getExecutionContext().getString(
-                DtsBatchJobConstants.DTS_JOB_RESOURCE_KEY));
+                DtsBatchJobConstants.DTS_JOB_TAG));
         }
     }
 
@@ -149,16 +149,16 @@ public class DtsFileTransferJobListener implements JobExecutionListener,
     /**
      * Removes the JobStepFiles from the Job Step directory after the job completes.
      *
-     * @param jobResourceKey the Job ID (aka JobResourceKey, Job UUID)
+     * @param jobTag the Job Tag
      */
-    private void removeJobStepFiles(final String jobResourceKey) {
+    private void removeJobStepFiles(final String jobTag) {
         LOGGER.debug("Deleting job step files.");
         final File jobStepDirectory = new File(System
             .getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY));
         final File[] jobStepFiles = jobStepDirectory
             .listFiles(new FilenameFilter() {
                 public boolean accept(final File dir, final String name) {
-                    if (name.startsWith(jobResourceKey) && name.endsWith("dts")) {
+                    if (name.startsWith(jobTag) && name.endsWith("dts")) {
                         return true;
                     }
                     return false;

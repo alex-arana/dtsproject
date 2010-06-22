@@ -73,6 +73,9 @@ public class DtsJobDetails implements Serializable {
     /** The job resource key. */
     private String mJobId;
 
+    /** The job tag. */
+    private String mJobTag;
+
     /** The list of files that have been excluded from the job and won't be transferred. */
     private List<String> mExcludedFiles = new ArrayList<String>();
 
@@ -115,6 +118,10 @@ public class DtsJobDetails implements Serializable {
         return mJobId;
     }
 
+    public String getJobTag() {
+        return mJobTag;
+    }
+
     public List<DtsJobStep> getJobSteps() {
         return mJobSteps;
     }
@@ -148,7 +155,7 @@ public class DtsJobDetails implements Serializable {
         for (final DtsJobStep jobStep : jobSteps) {
             final String filename = System
                 .getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY)
-                + "/" + mJobId + "-" + jobStep.getStepId() + ".dts";
+                + "/" + mJobTag + "-" + jobStep.getStepId() + ".dts";
             writeJobStepToFile(filename, jobStep);
             jobStep.setJobStepFilename(filename);
         }
@@ -166,6 +173,10 @@ public class DtsJobDetails implements Serializable {
 
     public void setJobId(final String jobId) {
         mJobId = jobId;
+    }
+
+    public void setJobTag(final String jobTag) {
+        mJobTag = jobTag;
     }
 
     public void setTotalBytes(final long totalBytes) {

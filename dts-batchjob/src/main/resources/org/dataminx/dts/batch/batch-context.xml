@@ -84,6 +84,7 @@
     <property name="jobPartitioningStrategy" ref="jobPartitioningStrategy" />
     <!-- job_resource_key == jobId == messageID == correlationID == same value -->
     <property name="jobResourceKey" value="#{jobExecutionContext[JOB_RESOURCE_KEY]}"/>
+    <property name="jobTag" value="#{jobExecutionContext[JOB_TAG]}"/>
     <property name="jobNotificationService" ref="jobNotificationService"/>
     <property name="executionContextCleaner" ref="executionContextCleaner"/>
   </bean>

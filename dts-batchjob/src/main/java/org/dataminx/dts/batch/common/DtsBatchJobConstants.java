@@ -41,6 +41,9 @@ public final class DtsBatchJobConstants {
     /** A job execution context key used to hold the Job Resource Key. */
     public static final String DTS_JOB_RESOURCE_KEY = "JOB_RESOURCE_KEY";
 
+    /** A job execution context key used to holdl the Job Tag. */
+    public static final String DTS_JOB_TAG = "JOB_TAG";
+
     /** A step execution context key used to hold a data staging element. */
     public static final String DTS_DATA_TRANSFER_STEP_KEY = "DATA_TRANSFER_STEP";
 

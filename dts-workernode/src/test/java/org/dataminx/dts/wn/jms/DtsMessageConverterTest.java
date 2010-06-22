@@ -35,12 +35,14 @@ import static org.testng.Assert.assertSame;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.UUID;
+
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
+
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.batch.DtsFileTransferJob;
 import org.dataminx.dts.batch.DtsJobFactory;
@@ -112,13 +114,14 @@ public class DtsMessageConverterTest extends UnitilsTestNG {
             new DOMResult(document));
 
         final String jobId = UUID.randomUUID().toString();
+        final String jobTag = jobId;
         final SubmitJobRequestDocument jobRequest = SubmitJobRequestDocument.Factory
             .newInstance();
         mockPayloadTransformer.onceReturns(jobRequest).transformPayload(
             document);
         final DtsFileTransferJob dtsJob = MockUnitils
             .createDummy(DtsFileTransferJob.class);
-        mockJobFactory.returns(dtsJob).createJob(jobId, jobRequest);
+        mockJobFactory.returns(dtsJob).createJob(jobId, jobTag, jobRequest);
 
         final Mock<ObjectMessage> message = MockUnitils
             .createMock(ObjectMessage.class);

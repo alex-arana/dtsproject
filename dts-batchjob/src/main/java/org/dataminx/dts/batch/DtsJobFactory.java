@@ -38,8 +38,10 @@ public interface DtsJobFactory {
      * Factory method for creating an instance of {@link DtsJob} based on a given object criteria.
      *
      * @param jobId Unique job identifier string
+     * @param tag Unique tag that maps to the original job identifier. The tag is used to get around
+     *        the naming scheme restrictions on the jobId
      * @param criteria Criteria for creating a DTS Job
      * @return A new instance of {@link DtsJob}
      */
-    DtsFileTransferJob createJob(String jobId, Object criteria);
+    DtsFileTransferJob createJob(String jobId, String tag, Object criteria);
 }

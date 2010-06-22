@@ -42,11 +42,12 @@ public interface JobPartitioningStrategy {
      *
      * @param jobDefinition the job definition document
      * @param jobResourceKey the job resource key
+     * @param jobTag the job tag
      * @return the details of the partitioned job as DtsJobDetails
      * @throws JobScopingException when any issues arise while the job is being partitioned
      */
     DtsJobDetails partitionTheJob(JobDefinitionType jobDefinition,
-        String jobResourceKey) throws JobScopingException;
+        String jobResourceKey, String jobTag) throws JobScopingException;
 
     /**
      * Sets the maximum total number of files to be applied as the limit to each job step by this partitioning strategy.

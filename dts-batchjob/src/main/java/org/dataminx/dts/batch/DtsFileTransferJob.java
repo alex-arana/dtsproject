@@ -29,6 +29,7 @@ package org.dataminx.dts.batch;
 
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_DETAILS;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_RESOURCE_KEY;
+import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_TAG;
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
 
 import java.util.Calendar;
@@ -82,6 +83,9 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
     /** The unique DTS job identifier. */
     private final String mJobId;
 
+    /** Job tag. */
+    private final String mTag;
+
     /** The time in milliseconds when the job started executing. */
     private long mStartTime;
 
@@ -117,15 +121,18 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
      * Constructs a new instance of <code>DtsSubmitJob</code> using the specified job request details.
      *
      * @param jobId Unique job identifier
+     * @param tag Unique tag that maps to the original job identifier. The tag is used to get around
+     *        the naming scheme restrictions on the jobId
      * @param jobRequest Job request details
      * @param jobRepository Job repository
      * @param credentialStore the credential store
      */
-    public DtsFileTransferJob(final String jobId,
+    public DtsFileTransferJob(final String jobId, final String tag,
         final SubmitJobRequestDocument jobRequest,
         final JobRepository jobRepository, final CredentialStore credentialStore) {
 
         mJobId = jobId;
+        mTag = tag;
         Assert
             .notNull(jobRequest,
                 "Cannot construct a DTS submit job without the required job details.");
@@ -171,6 +178,15 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
      */
     public String getJobId() {
         return mJobId;
+    }
+
+    /**
+     * Returns the job tag that does not have the naming restriction that the job ID has.
+     *
+     * @return the job tag
+     */
+    public String getTag() {
+        return mTag;
     }
 
     /**
@@ -316,6 +332,7 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
         final ExecutionContext context = execution.getExecutionContext();
         context.put(DTS_SUBMIT_JOB_REQUEST_KEY, mJobRequest);
         context.put(DTS_JOB_RESOURCE_KEY, getJobId());
+        context.put(DTS_JOB_TAG, getTag());
 
         LOGGER.info("Started the CheckRequirementsTask step at "
             + mStopwatchTimer.getFormattedElapsedTime());
@@ -383,7 +400,8 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
 
             // TODO move this somewhere it always gets called
             registerCompletedTime();
-            getJobNotificationService().notifyJobStatus(this, JobStatus.DONE, execution);
+            getJobNotificationService().notifyJobStatus(this, JobStatus.DONE,
+                execution);
         }
         else {
             execution.setStatus(BatchStatus.FAILED);

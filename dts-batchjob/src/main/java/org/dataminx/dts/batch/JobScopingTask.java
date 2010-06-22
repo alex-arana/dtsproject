@@ -76,6 +76,9 @@ public class JobScopingTask implements Tasklet, StepExecutionListener,
     /** The job resource key. */
     private String mJobResourceKey;
 
+    /** The job tag. */
+    private String mJobTag;
+
     /**
      * Scopes the job by partitioning it into a number steps that can be check-pointed.
      *
@@ -97,12 +100,14 @@ public class JobScopingTask implements Tasklet, StepExecutionListener,
         // partition the job and return partitioning results in the jobDetails
         final DtsJobDetails jobDetails = mJobPartitioningStrategy
             .partitionTheJob(mSubmitJobRequest.getJobDefinition(),
-                mJobResourceKey);
+                mJobResourceKey, mJobTag);
 
-        final StepExecution stepExecution = chunkContext.getStepContext().getStepExecution();
+        final StepExecution stepExecution = chunkContext.getStepContext()
+            .getStepExecution();
         // update the WS with the details gathered by the job scoping process
         mJobNotificationService.notifyJobScope(jobDetails.getJobId(),
-            jobDetails.getTotalFiles(), jobDetails.getTotalBytes(), stepExecution);
+            jobDetails.getTotalFiles(), jobDetails.getTotalBytes(),
+            stepExecution);
 
         // store the jobDetails in the step execution context. these will get
         // promoted to the Job execution context by the jobScopingTaskPromotionListener
@@ -127,6 +132,10 @@ public class JobScopingTask implements Tasklet, StepExecutionListener,
         mJobResourceKey = jobResourceKey;
     }
 
+    public void setJobTag(final String jobTag) {
+        mJobTag = jobTag;
+    }
+
     public void setJobNotificationService(
         final JobNotificationService jobNotificationService) {
         mJobNotificationService = jobNotificationService;
@@ -147,6 +156,8 @@ public class JobScopingTask implements Tasklet, StepExecutionListener,
             "JobPartitioningStrategy has not been set.");
         Assert.state(mJobResourceKey != null,
             "Unable to find the Job Resource Key in the execution context.");
+        Assert.state(mJobTag != null,
+            "Unable to find the Job Tag in the execution context.");
         Assert.state(mJobNotificationService != null,
             "JobNotificationService has not been set.");
         Assert.state(mExecutionContextCleaner != null,
