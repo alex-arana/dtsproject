@@ -41,6 +41,7 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.scope.context.StepContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -102,19 +103,19 @@ public class JobScopingTask implements Tasklet, StepExecutionListener,
             .partitionTheJob(mSubmitJobRequest.getJobDefinition(),
                 mJobResourceKey, mJobTag);
 
-        final StepExecution stepExecution = chunkContext.getStepContext()
-            .getStepExecution();
+        final StepContext stepContext = chunkContext.getStepContext();
+
         // update the WS with the details gathered by the job scoping process
         mJobNotificationService.notifyJobScope(jobDetails.getJobId(),
-            jobDetails.getTotalFiles(), jobDetails.getTotalBytes(),
-            stepExecution);
+            jobDetails.getTotalFiles(), jobDetails.getTotalBytes(), stepContext
+                .getStepExecution());
 
         // store the jobDetails in the step execution context. these will get
         // promoted to the Job execution context by the jobScopingTaskPromotionListener
         // so that the jobDetails will be available from the job.
-        final ExecutionContext stepContext = chunkContext.getStepContext()
+        final ExecutionContext stepExecutionContext = stepContext
             .getStepExecution().getExecutionContext();
-        stepContext.put(DTS_JOB_DETAILS, jobDetails);
+        stepExecutionContext.put(DTS_JOB_DETAILS, jobDetails);
 
         return RepeatStatus.FINISHED;
     }

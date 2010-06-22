@@ -4,8 +4,8 @@ import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_DETAILS
 import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +18,7 @@ import java.util.UUID;
 import org.dataminx.dts.batch.service.JobNotificationService;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -63,26 +64,30 @@ public class JobScopingTaskTest {
 
         final DtsJobDetails dtsJobDetails = new DtsJobDetails();
         final String jobId = UUID.randomUUID().toString();
-        final String jobTag = jobId;
         dtsJobDetails.setJobId(jobId);
-        dtsJobDetails.setJobTag(jobTag);
-        dtsJobDetails.setTotalBytes(anyLong());
-        dtsJobDetails.setTotalFiles(anyInt());
+        dtsJobDetails.setJobTag(jobId);
+        dtsJobDetails.setTotalBytes(123);
+        dtsJobDetails.setTotalFiles(123);
 
-        final StepContext stepContext = new StepContext(new StepExecution(
-            "123", new JobExecution(new Long(123))));
+        jobScopingTask.setJobTag(jobId);
+        jobScopingTask.setJobResourceKey(jobId);
 
-        when(
-            mJobPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(),
-                jobId, jobTag)).thenReturn(dtsJobDetails);
+        final StepExecution stepExecution = new StepExecution("123",
+            new JobExecution(new Long(123)));
+
+        final StepContext stepContext = new StepContext(stepExecution);
+
         when(mChunkContext.getStepContext()).thenReturn(stepContext);
+        when(
+            mJobPartitioningStrategy.partitionTheJob(
+                (JobDefinitionType) anyObject(), anyString(), anyString()))
+            .thenReturn(dtsJobDetails);
 
         final RepeatStatus taskStatus = jobScopingTask.execute(null,
             mChunkContext);
-        final StepExecution stepExecution = mChunkContext.getStepContext()
-            .getStepExecution();
+
         verify(mJobNotificationService).notifyJobScope(anyString(), anyInt(),
-            anyLong(), eq(stepExecution));
+            anyLong(), (StepExecution) anyObject());
 
         assertNotNull(stepContext.getStepExecution().getExecutionContext().get(
             DTS_JOB_DETAILS));
