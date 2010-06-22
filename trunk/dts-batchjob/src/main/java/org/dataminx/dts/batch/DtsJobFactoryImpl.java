@@ -76,7 +76,7 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
     /**
      * {@inheritDoc}
      */
-    public DtsFileTransferJob createJob(final String jobId,
+    public DtsFileTransferJob createJob(final String jobId, final String tag,
         final Object criteria) {
         // obtain the name of the DTS job that is going to handle this request
         Assert.notNull(criteria,
@@ -114,7 +114,8 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
 
         // create a new instance of the job using the spring bean factory
         return (DtsFileTransferJob) mBeanFactory.getBean(dtsJobName,
-            new Object[] {jobId, criteria, mJobRepository, mCredentialStore});
+            new Object[] {jobId, tag, criteria, mJobRepository,
+                mCredentialStore});
     }
 
     /**

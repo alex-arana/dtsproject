@@ -5,6 +5,7 @@ import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,7 +63,9 @@ public class JobScopingTaskTest {
 
         final DtsJobDetails dtsJobDetails = new DtsJobDetails();
         final String jobId = UUID.randomUUID().toString();
+        final String jobTag = jobId;
         dtsJobDetails.setJobId(jobId);
+        dtsJobDetails.setJobTag(jobTag);
         dtsJobDetails.setTotalBytes(anyLong());
         dtsJobDetails.setTotalFiles(anyInt());
 
@@ -71,14 +74,15 @@ public class JobScopingTaskTest {
 
         when(
             mJobPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(),
-                jobId)).thenReturn(dtsJobDetails);
+                jobId, jobTag)).thenReturn(dtsJobDetails);
         when(mChunkContext.getStepContext()).thenReturn(stepContext);
 
         final RepeatStatus taskStatus = jobScopingTask.execute(null,
             mChunkContext);
-        final StepExecution stepExecution = mChunkContext.getStepContext().getStepExecution();
+        final StepExecution stepExecution = mChunkContext.getStepContext()
+            .getStepExecution();
         verify(mJobNotificationService).notifyJobScope(anyString(), anyInt(),
-            anyLong(),stepExecution);
+            anyLong(), eq(stepExecution));
 
         assertNotNull(stepContext.getStepExecution().getExecutionContext().get(
             DTS_JOB_DETAILS));

@@ -63,8 +63,10 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
 
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(2);
+        final String jobId = UUID.randomUUID().toString();
+        final String jobTag = jobId;
         final DtsJobDetails jobDetails = mPartitioningStrategy.partitionTheJob(
-            mDtsJob.getJobDefinition(), UUID.randomUUID().toString());
+            mDtsJob.getJobDefinition(), jobId, jobTag);
 
         assertNotNull(jobDetails);
         assertEquals(jobDetails.getJobSteps().size(), 11);
@@ -88,8 +90,10 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
         mPartitioningStrategy
             .setMaxTotalFileNumPerStepLimit(maxTotalFileNumPerStepLimit);
+        final String jobId = UUID.randomUUID().toString();
+        final String jobTag = jobId;
         final DtsJobDetails jobDetails = mPartitioningStrategy.partitionTheJob(
-            mDtsJob.getJobDefinition(), UUID.randomUUID().toString());
+            mDtsJob.getJobDefinition(), jobId, jobTag);
 
         assertNotNull(jobDetails);
         assertEquals(jobDetails.getJobSteps().size(), expectedNumOfSteps);
@@ -110,8 +114,10 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
 
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_1MB);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(3);
-        mPartitioningStrategy.partitionTheJob(mDtsJob.getJobDefinition(), UUID
-            .randomUUID().toString());
+        final String jobId = UUID.randomUUID().toString();
+        final String jobTag = jobId;
+        mPartitioningStrategy.partitionTheJob(mDtsJob.getJobDefinition(),
+            jobId, jobTag);
     }
 
     @Test(groups = {"local-file-transfer-test"})
@@ -125,8 +131,10 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
 
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(3);
+        final String jobId = UUID.randomUUID().toString();
+        final String jobTag = jobId;
         final DtsJobDetails jobDetails = mPartitioningStrategy.partitionTheJob(
-            mDtsJob.getJobDefinition(), UUID.randomUUID().toString());
+            mDtsJob.getJobDefinition(), jobId, jobTag);
 
         assertNotNull(jobDetails);
         assertEquals(jobDetails.getJobSteps().size(), 5);

@@ -69,8 +69,10 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
 
         when(mDtsVfsUtil.createNewFsManager()).thenReturn(
             (DefaultFileSystemManager) fileSystemManager);
+        final String jobId = UUID.randomUUID().toString();
+        final String jobTag = jobId;
         final DtsJobDetails jobDetails = mPartitioningStrategy.partitionTheJob(
-            dtsJob.getJobDefinition(), UUID.randomUUID().toString());
+            dtsJob.getJobDefinition(), jobId, jobTag);
 
         assertNotNull(jobDetails);
         assertEquals(jobDetails.getJobSteps().size(), 1);
@@ -90,8 +92,10 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(-1);
-        mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), UUID
-            .randomUUID().toString());
+        final String jobId = UUID.randomUUID().toString();
+        final String jobTag = jobId;
+        mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), jobId,
+            jobTag);
     }
 
     @Test(groups = {"local-file-transfer-test"}, expectedExceptions = DtsException.class)
@@ -105,15 +109,18 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(-1);
-        mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), UUID
-            .randomUUID().toString());
+        final String jobId = UUID.randomUUID().toString();
+        final String jobTag = jobId;
+        mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), jobId,
+            jobTag);
     }
 
     @Test(groups = {"local-file-transfer-test"}, expectedExceptions = IllegalArgumentException.class)
     public void testNullJobDefinitionParameter() throws JobScopingException {
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
-        mPartitioningStrategy.partitionTheJob(null, UUID.randomUUID()
-            .toString());
+        final String jobId = UUID.randomUUID().toString();
+        final String jobTag = jobId;
+        mPartitioningStrategy.partitionTheJob(null, jobId, jobTag);
     }
 
     @Test(groups = {"local-file-transfer-test"}, expectedExceptions = IllegalArgumentException.class)
@@ -125,7 +132,8 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory
             .parse(f);
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
-        mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), null);
+        mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), null,
+            null);
     }
 
 }

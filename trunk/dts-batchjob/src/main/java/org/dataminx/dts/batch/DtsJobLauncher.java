@@ -30,6 +30,7 @@ package org.dataminx.dts.batch;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -133,8 +134,10 @@ public class DtsJobLauncher extends SimpleJobLauncher {
 
         final long maxAttempts = SchemaUtils.getMaxAttempts(dtsJobRequest
             .getSubmitJobRequest());
+
+        final String tag = UUID.randomUUID().toString();
         // invoke the job factory to create a new job instance
-        final DtsFileTransferJob dtsJob = mJobFactory.createJob(jobId,
+        final DtsFileTransferJob dtsJob = mJobFactory.createJob(jobId, tag,
             dtsJobRequest);
         final JobParameters paras = new JobParametersBuilder().addLong(
             "maxAttempts", maxAttempts).toJobParameters();
