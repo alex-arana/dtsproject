@@ -222,10 +222,9 @@ public abstract class AbstractJobPartitioningStrategy implements
                 // transferred to the target destination
                 FileObject sourceParent = null;
                 try {
-                    sourceParent = fileSystemManager.resolveFile(dataTransfer
-                        .getSource().getURI(), mDtsVfsUtil
-                        .getFileSystemOptions(dataTransfer.getSource(),
-                            mEncrypter));
+                    sourceParent = fileSystemManager.resolveFile(
+                        dataTransfer.getSource().getURI(),
+                        mDtsVfsUtil.getFileSystemOptions(dataTransfer.getSource(),mEncrypter));
 
                     if (!sourceParent.getContent().getFile().exists()
                         || !sourceParent.getContent().getFile().isReadable()) {
@@ -242,10 +241,9 @@ public abstract class AbstractJobPartitioningStrategy implements
 
                 FileObject targetParent = null;
                 try {
-                    targetParent = fileSystemManager.resolveFile(dataTransfer
-                        .getTarget().getURI(), mDtsVfsUtil
-                        .getFileSystemOptions(dataTransfer.getTarget(),
-                            mEncrypter));
+                    targetParent = fileSystemManager.resolveFile(
+                            dataTransfer.getTarget().getURI(),
+                            mDtsVfsUtil.getFileSystemOptions(dataTransfer.getTarget(),mEncrypter));
                 }
                 catch (final FileSystemException e) {
                     throw new JobScopingException(
@@ -257,10 +255,10 @@ public abstract class AbstractJobPartitioningStrategy implements
                     // calling createNewDataTransfer initialises the Step and adds
                     // the first source and target pair file to the list of files to be
                     // transferred by the step
-                    mDtsJobStepAllocator.createNewDataTransfer(sourceParent
-                        .getFileSystem().getRoot().getURL().toString(),
-                        targetParent.getFileSystem().getRoot().getURL()
-                            .toString(), mMaxTotalByteSizePerStepLimit,
+                    mDtsJobStepAllocator.createNewDataTransfer(
+                        sourceParent.getFileSystem().getRoot().getURL().toString(),
+                        targetParent.getFileSystem().getRoot().getURL().toString(),
+                        mMaxTotalByteSizePerStepLimit,
                         mMaxTotalFileNumPerStepLimit);
 
                     final CreationFlagEnumeration.Enum creationFlag = ((MinxJobDescriptionType) jobDescription)
@@ -415,6 +413,9 @@ public abstract class AbstractJobPartitioningStrategy implements
 
                 // check and see if the size of the file has exceeded the max size of files to be transferred
                 // by a step
+                // Don't we need to compare the mMaxTotalByteSizePerStepLimit against
+                // a running (i.e. accrued) byte total for the step rather than just against
+                // each separate file ?
                 if (sourceParent.getContent().getSize() > mMaxTotalByteSizePerStepLimit) {
                     throw new JobScopingException("file: "
                         + sourceParent.getName()
@@ -423,6 +424,7 @@ public abstract class AbstractJobPartitioningStrategy implements
                 }
 
                 if (!destinationParent.exists()) {
+                    // file to IMAGINARY
                     // Note that we are not supporting a single file transfer to
                     // a non-existent directory
                     // Any destinationParent which had a "/" at the end of it's
@@ -453,6 +455,10 @@ public abstract class AbstractJobPartitioningStrategy implements
                     final String newFilePath = destinationParent.getURL()
                         + FileName.SEPARATOR
                         + sourceParent.getName().getBaseName();
+
+                    // would be easier to resolve using existing FileObject and 
+                    // specifying a relative path, e.g:
+                    //final FileObject destinationChild = destinationParent.resolveFile(sourceParent.getName().getBaseName());
                     final FileObject destinationChild = destinationParent
                         .getFileSystem().getFileSystemManager().resolveFile(
                             newFilePath,
@@ -480,9 +486,20 @@ public abstract class AbstractJobPartitioningStrategy implements
             }
             else if (sourceParent.getType().equals(FileType.FOLDER)
                 && !mCancelled) {
-                // .. Dir to Dir
+
+                // .. Dir to Dir 
+                // May not be Dir to Dir, what about Dir to (existing) File ?
+                // in which case we should prob throw excetion (or exclude?)
+                //if(destinationParent.exists() && destinationParent.getType().equals(FileType.FILE)){
+                    // throw new JobScopingException("mkdir: destination exists but is not a directory");
+                    // or
+                    // mExcluded.add(sourceParent.getName().getFriendlyURI());
+                //} else {
 
                 // create the new object
+                // again may be easier to resolve using existing FileObject and 
+                // specifying a relative path, e.g:
+                //final FileObject destinationChild = destinationParent.resolveFile(sourceParent.getName().getBaseName());
                 final String newFolderPath = destinationParent.getURL()
                     + FileName.SEPARATOR + sourceParent.getName().getBaseName();
                 final FileObject destinationChild = destinationParent
