@@ -5,6 +5,7 @@
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
     <import resource="classpath:/org/dataminx/dts/wn/test-context.xml"/>
+    <import resource="classpath:/org/dataminx/dts/wn/integration-context.xml"/>
     <import resource="classpath:/org/dataminx/dts/wn/activemq/jms-context.xml"/>
-    <!-- <import resource="classpath:/org/dataminx/dts/batch/batch-context.xml"/> --> 
+    <import resource="classpath:/org/dataminx/dts/batch/batch-context.xml"/>
 </beans>
