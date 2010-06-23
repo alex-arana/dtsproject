@@ -19,37 +19,35 @@
     <context:exclude-filter type="assignable" expression="org.dataminx.dts.batch.service.FileCopyingServiceImpl"/>
   </context:component-scan>
 
-  <bean id="dtsMarshaller"
-              class="org.springframework.oxm.xmlbeans.XmlBeansMarshaller">
-    <property name="validating" value="true"/>
-    <property name="xmlOptions">
-      <bean class="org.apache.xmlbeans.XmlOptionsBean">
-        <property name="savePrettyPrint" value="true"/>
-        <property name="saveNamespacesFirst" value="true"/>
-      </bean>
-    </property>
-  </bean>
-
-  <bean id="dtsMessagePayloadTransformer"
-              class="org.dataminx.dts.common.jms.DtsMessagePayloadTransformer">
-    <constructor-arg index="0" ref="dtsMarshaller"/>
-  </bean>
-
   <bean id="applicationProperties"
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="locations">
       <list>
-        <value>file:///F:/java/minx-dts/config/dts-workernode.properties</value>
-        <value>file:///F:/java/minx-dts/config/dts-bulkcopyjob.properties</value>
+        <value>file:///${dataminx.dir}/dts-workernode.properties</value>
+        <value>file:///${dataminx.dir}/dts-bulkcopyjob.properties</value>
       </list>
     </property>
     <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
     <property name="ignoreUnresolvablePlaceholders" value="false"/>
     <property name="order" value="1"/>
   </bean>
+  
+  <!-- The task executor used by the Job Launcher specific to this module -->
+  <bean id="jobLauncherTaskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
+ 
   <bean id="jobQueueSender" class="org.dataminx.dts.common.jms.JobQueueSender">
     <property name="queue" ref="jmsJobSubmitQueue"/>
     <property name="jmsTemplate" ref="convertableJmsTemplate"/>
   </bean>
   <bean id="credentialStore" class="org.dataminx.dts.common.util.CredentialStoreImpl"/>
+  
+  <bean id="dtsJobDefinitionValidator" class="org.dataminx.dts.common.validator.DefaultDtsJobDefinitionValidator">
+    <property name="jobIdentificationValidator" ref="jobIdentificationValidator"/>
+    <property name="sourceTargetValidator" ref="sourceTargetValidator"/>
+  </bean>
+  
+  <bean id="jobIdentificationValidator" class="org.dataminx.dts.common.validator.DefaultJobIdentificationValidator"/>
+
+  <bean id="sourceTargetValidator" class="org.dataminx.dts.common.validator.DefaultSourceTargetValidator"/>
+  
 </beans>

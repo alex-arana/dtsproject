@@ -55,7 +55,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.channel.MessageChannelTemplate;
 import org.springframework.integration.core.Message;
 import org.springframework.integration.message.MessageBuilder;
@@ -68,45 +67,53 @@ import org.springframework.util.Assert;
  * @author Alex Arana
  * @author Gerson Galang
  */
-public class WorkerNodeJobNotificationService <T> implements JobNotificationService {
+public class WorkerNodeJobNotificationService implements JobNotificationService {
 
     /** Internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(WorkerNodeJobNotificationService.class);
+    private static final Logger LOG = LoggerFactory
+        .getLogger(WorkerNodeJobNotificationService.class);
+
     /** A reference to the DTS Worker Node information service. */
-    @Autowired
-    private DtsWorkerNodeInformationService mdtsWorkerNodeInformationService;
-    /** A reference to the Job Event Queue sender object. */
-    //@Autowired
-    //private JobEventQueueSender mJobEventQueueSender;
+    private DtsWorkerNodeInformationService mDtsWorkerNodeInformationService;
+
     /** A reference to the ChannelTemplate object. */
-    @Autowired
     private MessageChannelTemplate mChannelTemplate;
 
     /**
      * {@inheritDoc}
      */
     public void notifyJobError(final String jobId,
-            final JobExecution jobExecution) {
+        final JobExecution jobExecution) {
         Assert.notNull(jobId);
         Assert.notNull(jobExecution);
-        LOG.info(String.format("DTS Job '%s' error message notification", jobId));
+        LOG.info(String
+            .format("DTS Job '%s' error message notification", jobId));
 
         if (jobExecution.getStatus().isUnsuccessful()) {
             // convert to the relevant JAXB2 entity (FireUpJobErrorEvent)
             final ExitStatus exitStatus = jobExecution.getExitStatus();
 
-            final FireUpJobErrorEventDocument document = FireUpJobErrorEventDocument.Factory.newInstance();
-            final FireUpJobErrorEvent jobErrorEvent = document.addNewFireUpJobErrorEvent();
-            final JobErrorEventDetailType errorDetails = jobErrorEvent.addNewJobErrorEventDetail();
+            final FireUpJobErrorEventDocument document = FireUpJobErrorEventDocument.Factory
+                .newInstance();
+            final FireUpJobErrorEvent jobErrorEvent = document
+                .addNewFireUpJobErrorEvent();
+            final JobErrorEventDetailType errorDetails = jobErrorEvent
+                .addNewJobErrorEventDetail();
             jobErrorEvent.setJobResourceKey(jobId);
-            errorDetails.setWorkerNodeHost(mdtsWorkerNodeInformationService.getInstanceId());
-            errorDetails.setTimeOfOccurrence(toCalendar(mdtsWorkerNodeInformationService.getCurrentTime()));
+            errorDetails.setWorkerNodeHost(mDtsWorkerNodeInformationService
+                .getInstanceId());
+            errorDetails
+                .setTimeOfOccurrence(toCalendar(mDtsWorkerNodeInformationService
+                    .getCurrentTime()));
             errorDetails.setErrorMessage(exitStatus.getExitDescription());
 
             // add all failure stack traces to the outgoing message
-            for (final Throwable failure : jobExecution.getAllFailureExceptions()) {
-                errorDetails.setClassExceptionName(failure.getClass().getName());
-                errorDetails.addFailureTrace(ExceptionUtils.getFullStackTrace(failure));
+            for (final Throwable failure : jobExecution
+                .getAllFailureExceptions()) {
+                errorDetails
+                    .setClassExceptionName(failure.getClass().getName());
+                errorDetails.addFailureTrace(ExceptionUtils
+                    .getFullStackTrace(failure));
             }
 
             // Previously, we sent directly to the JMS queue rather than to 
@@ -123,10 +130,14 @@ public class WorkerNodeJobNotificationService <T> implements JobNotificationServ
             // messages.
             //String clientid = jobExecution.getExecutionContext().getString("ClientID");
 
-            final JobParameters jobParameters = jobExecution.getJobInstance().getJobParameters();
-            Map<String, Object> springIntegrationMsgHeaders = this.getHeaders(jobParameters, jobId);
-            MessageBuilder<FireUpJobErrorEventDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(springIntegrationMsgHeaders);
-            final Message<FireUpJobErrorEventDocument> msg = msgbuilder.setCorrelationId(jobId).build();
+            final JobParameters jobParameters = jobExecution.getJobInstance()
+                .getJobParameters();
+            final Map<String, Object> springIntegrationMsgHeaders = this
+                .getHeaders(jobParameters, jobId);
+            final MessageBuilder<FireUpJobErrorEventDocument> msgbuilder = MessageBuilder
+                .withPayload(document).copyHeaders(springIntegrationMsgHeaders);
+            final Message<FireUpJobErrorEventDocument> msg = msgbuilder
+                .setCorrelationId(jobId).build();
             mChannelTemplate.send(msg);
         }
     }
@@ -135,32 +146,43 @@ public class WorkerNodeJobNotificationService <T> implements JobNotificationServ
      * {@inheritDoc}
      */
     public void notifyStepFailures(final String jobId,
-            final StepExecution stepExecution) {
+        final StepExecution stepExecution) {
         Assert.notNull(jobId);
         Assert.notNull(stepExecution);
         if (stepExecution.getStatus().isUnsuccessful()) {
             // convert to the relevant schema entity (FireUpStepFailureEvent)
             final ExitStatus exitStatus = stepExecution.getExitStatus();
-            final FireUpStepFailureEventDocument document = FireUpStepFailureEventDocument.Factory.newInstance();
-            final FireUpStepFailureEvent stepFailureEvent = document.addNewFireUpStepFailureEvent();
-            final JobErrorEventDetailType errorDetails = stepFailureEvent.addNewJobErrorEventDetail();
+            final FireUpStepFailureEventDocument document = FireUpStepFailureEventDocument.Factory
+                .newInstance();
+            final FireUpStepFailureEvent stepFailureEvent = document
+                .addNewFireUpStepFailureEvent();
+            final JobErrorEventDetailType errorDetails = stepFailureEvent
+                .addNewJobErrorEventDetail();
             stepFailureEvent.setJobResourceKey(jobId);
-            errorDetails.setWorkerNodeHost(mdtsWorkerNodeInformationService.getInstanceId());
-            errorDetails.setTimeOfOccurrence(toCalendar(stepExecution.getStartTime()));
+            errorDetails.setWorkerNodeHost(mDtsWorkerNodeInformationService
+                .getInstanceId());
+            errorDetails.setTimeOfOccurrence(toCalendar(stepExecution
+                .getStartTime()));
             errorDetails.setErrorMessage(String.format(
-                    "An error has occurred during the execution of"
+                "An error has occurred during the execution of"
                     + " DTS Job step '%s': %s", stepExecution.getStepName(),
-                    exitStatus.getExitDescription()));
+                exitStatus.getExitDescription()));
 
             for (final Throwable failure : stepExecution.getFailureExceptions()) {
-                errorDetails.setClassExceptionName(failure.getClass().getName());
-                errorDetails.addFailureTrace(ExceptionUtils.getFullStackTrace(failure));
+                errorDetails
+                    .setClassExceptionName(failure.getClass().getName());
+                errorDetails.addFailureTrace(ExceptionUtils
+                    .getFullStackTrace(failure));
             }
-            
-            final JobParameters jobParameters = stepExecution.getJobParameters();
-            Map<String, Object> springIntegrationMsgHeaders = this.getHeaders(jobParameters, jobId);
-            MessageBuilder<FireUpStepFailureEventDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(springIntegrationMsgHeaders);
-            final Message<FireUpStepFailureEventDocument> msg = msgbuilder.setCorrelationId(jobId).build();
+
+            final JobParameters jobParameters = stepExecution
+                .getJobParameters();
+            final Map<String, Object> springIntegrationMsgHeaders = this
+                .getHeaders(jobParameters, jobId);
+            final MessageBuilder<FireUpStepFailureEventDocument> msgbuilder = MessageBuilder
+                .withPayload(document).copyHeaders(springIntegrationMsgHeaders);
+            final Message<FireUpStepFailureEventDocument> msg = msgbuilder
+                .setCorrelationId(jobId).build();
             mChannelTemplate.send(msg);
         }
     }
@@ -169,28 +191,32 @@ public class WorkerNodeJobNotificationService <T> implements JobNotificationServ
      * {@inheritDoc}
      */
     public void notifyJobProgress(final DtsFileTransferJob dtsJob,
-            final String message) {
+        final String message) {
         // TODO Implement this method or get rid of it
         throw new UnsupportedOperationException(
-                "Method notifyJobProgress() not yet implemented");
+            "Method notifyJobProgress() not yet implemented");
     }
 
     /**
      * {@inheritDoc}
      */
     public void notifyJobStatus(final DtsFileTransferJob dtsJob,
-            final JobStatus jobStatus, final JobExecution jobExecution) {
+        final JobStatus jobStatus, final JobExecution jobExecution) {
         Assert.notNull(dtsJob);
         final String jobId = dtsJob.getJobId();
         LOG.info(String.format("DTS Job '%s' status notification: %s", jobId,
-                jobStatus));
+            jobStatus));
 
         // convert to the relevant schema entity
-        final JobEventUpdateRequestDocument document = JobEventUpdateRequestDocument.Factory.newInstance();
-        final JobEventUpdateRequest jobEventUpdate = document.addNewJobEventUpdateRequest();
-        final JobEventDetailType jobEventDetail = jobEventUpdate.addNewJobEventDetail();
+        final JobEventUpdateRequestDocument document = JobEventUpdateRequestDocument.Factory
+            .newInstance();
+        final JobEventUpdateRequest jobEventUpdate = document
+            .addNewJobEventUpdateRequest();
+        final JobEventDetailType jobEventDetail = jobEventUpdate
+            .addNewJobEventDetail();
         jobEventUpdate.setJobResourceKey(jobId);
-        jobEventDetail.setWorkerNodeHost(mdtsWorkerNodeInformationService.getInstanceId());
+        jobEventDetail.setWorkerNodeHost(mDtsWorkerNodeInformationService
+            .getInstanceId());
         jobEventDetail.setActiveTime(toCalendar(dtsJob.getStartTime()));
         switch (jobStatus) {
             case TRANSFERRING:
@@ -198,7 +224,8 @@ public class WorkerNodeJobNotificationService <T> implements JobNotificationServ
                 break;
             case DONE:
                 jobEventDetail.setFinishedFlag(true);
-                jobEventDetail.setWorkerTerminatedTime(toCalendar(dtsJob.getCompletedTime()));
+                jobEventDetail.setWorkerTerminatedTime(toCalendar(dtsJob
+                    .getCompletedTime()));
                 jobEventDetail.setStatus(StatusValueType.DONE);
                 //TODO use the job's ExitStatus flag
                 //jobEventDetail.setSuccessFlag(dtsJob.getXXX());
@@ -210,11 +237,15 @@ public class WorkerNodeJobNotificationService <T> implements JobNotificationServ
         // here we need to extract the spring batch job parameters and
         // add them to the spring integ message headers.
 
-        final JobParameters jobParameters = jobExecution.getJobInstance().getJobParameters();
-        Map<String, Object> springIntegrationMsgHeaders = this.getHeaders(jobParameters, jobId);
-        
-        MessageBuilder<JobEventUpdateRequestDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(springIntegrationMsgHeaders);
-        final Message<JobEventUpdateRequestDocument> msg = msgbuilder.setCorrelationId(jobId).build();
+        final JobParameters jobParameters = jobExecution.getJobInstance()
+            .getJobParameters();
+        final Map<String, Object> springIntegrationMsgHeaders = this
+            .getHeaders(jobParameters, jobId);
+
+        final MessageBuilder<JobEventUpdateRequestDocument> msgbuilder = MessageBuilder
+            .withPayload(document).copyHeaders(springIntegrationMsgHeaders);
+        final Message<JobEventUpdateRequestDocument> msg = msgbuilder
+            .setCorrelationId(jobId).build();
         mChannelTemplate.send(msg);
     }
 
@@ -222,24 +253,34 @@ public class WorkerNodeJobNotificationService <T> implements JobNotificationServ
      * {@inheritDoc}
      */
     public void notifyJobProgress(final String jobId,
-            final int filesTransferred, final long volumeTransferred, final StepExecution stepExecution) {
+        final int filesTransferred, final long volumeTransferred,
+        final StepExecution stepExecution) {
         Assert.notNull(jobId);
         LOG.info(String.format("DTS Job '%s' progress notification", jobId));
 
         // convert to the relevant schema entity
-        final JobEventUpdateRequestDocument document = JobEventUpdateRequestDocument.Factory.newInstance();
-        final JobEventUpdateRequest jobEventUpdate = document.addNewJobEventUpdateRequest();
-        final JobEventDetailType jobEventDetail = jobEventUpdate.addNewJobEventDetail();
+        final JobEventUpdateRequestDocument document = JobEventUpdateRequestDocument.Factory
+            .newInstance();
+        final JobEventUpdateRequest jobEventUpdate = document
+            .addNewJobEventUpdateRequest();
+        final JobEventDetailType jobEventDetail = jobEventUpdate
+            .addNewJobEventDetail();
         jobEventUpdate.setJobResourceKey(jobId);
-        jobEventDetail.setWorkerNodeHost(mdtsWorkerNodeInformationService.getInstanceId());
-        jobEventDetail.setFilesTransferred(BigInteger.valueOf(filesTransferred));
-        jobEventDetail.setVolumeTransferred(BigInteger.valueOf(volumeTransferred));
+        jobEventDetail.setWorkerNodeHost(mDtsWorkerNodeInformationService
+            .getInstanceId());
+        jobEventDetail
+            .setFilesTransferred(BigInteger.valueOf(filesTransferred));
+        jobEventDetail.setVolumeTransferred(BigInteger
+            .valueOf(volumeTransferred));
         jobEventDetail.setStatus(StatusValueType.TRANSFERRING);
 
         final JobParameters jobParameters = stepExecution.getJobParameters();
-        Map<String, Object> springIntegrationMsgHeaders = this.getHeaders(jobParameters, jobId);
-        MessageBuilder<JobEventUpdateRequestDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(springIntegrationMsgHeaders);
-        final Message<JobEventUpdateRequestDocument> msg = msgbuilder.setCorrelationId(jobId).build();
+        final Map<String, Object> springIntegrationMsgHeaders = this
+            .getHeaders(jobParameters, jobId);
+        final MessageBuilder<JobEventUpdateRequestDocument> msgbuilder = MessageBuilder
+            .withPayload(document).copyHeaders(springIntegrationMsgHeaders);
+        final Message<JobEventUpdateRequestDocument> msg = msgbuilder
+            .setCorrelationId(jobId).build();
         mChannelTemplate.send(msg);
     }
 
@@ -247,50 +288,72 @@ public class WorkerNodeJobNotificationService <T> implements JobNotificationServ
      * {@inheritDoc}
      */
     public void notifyJobScope(final String jobId, final int filesTotal,
-            final long volumeTotal, final StepExecution stepExecution) {
+        final long volumeTotal, final StepExecution stepExecution) {
         Assert.notNull(jobId);
         LOG.info(String.format("DTS Job '%s' job scope notification", jobId));
 
         // convert to the relevant schema entity
-        final JobEventUpdateRequestDocument document = JobEventUpdateRequestDocument.Factory.newInstance();
-        final JobEventUpdateRequest jobEventUpdate = document.addNewJobEventUpdateRequest();
-        final JobEventDetailType jobEventDetail = jobEventUpdate.addNewJobEventDetail();
+        final JobEventUpdateRequestDocument document = JobEventUpdateRequestDocument.Factory
+            .newInstance();
+        final JobEventUpdateRequest jobEventUpdate = document
+            .addNewJobEventUpdateRequest();
+        final JobEventDetailType jobEventDetail = jobEventUpdate
+            .addNewJobEventDetail();
         jobEventUpdate.setJobResourceKey(jobId);
-        jobEventDetail.setWorkerNodeHost(mdtsWorkerNodeInformationService.getInstanceId());
+        jobEventDetail.setWorkerNodeHost(mDtsWorkerNodeInformationService
+            .getInstanceId());
         jobEventDetail.setFilesTotal(BigInteger.valueOf(filesTotal));
         jobEventDetail.setVolumeTotal(BigInteger.valueOf(volumeTotal));
         jobEventDetail.setStatus(StatusValueType.TRANSFERRING);
 
         final JobParameters jobParameters = stepExecution.getJobParameters();
-        Map<String, Object> springIntegrationMsgHeaders = this.getHeaders(jobParameters, jobId);
-        MessageBuilder<JobEventUpdateRequestDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(springIntegrationMsgHeaders);
-        final Message<JobEventUpdateRequestDocument> msg = msgbuilder.setCorrelationId(jobId).build();
+        final Map<String, Object> springIntegrationMsgHeaders = this
+            .getHeaders(jobParameters, jobId);
+        final MessageBuilder<JobEventUpdateRequestDocument> msgbuilder = MessageBuilder
+            .withPayload(document).copyHeaders(springIntegrationMsgHeaders);
+        final Message<JobEventUpdateRequestDocument> msg = msgbuilder
+            .setCorrelationId(jobId).build();
         mChannelTemplate.send(msg);
     }
 
     /**
-     * Inject a message channel template for the Job Event queue
+     * Inject a message channel template for the Job Event queue.
      * 
      * @param mChannelTemplate
      */
-    public void setchannelTemplate(final MessageChannelTemplate mChannelTemplate) {
-        this.mChannelTemplate = mChannelTemplate;
+    public void setChannelTemplate(final MessageChannelTemplate channelTemplate) {
+        mChannelTemplate = channelTemplate;
     }
+
+    /**
+     * Set the DtsWorkerNodeInformationService.
+     *
+     * @param dtsWorkerNodeInformationService
+     */
+    public void setDtsWorkerNodeInformationService(
+        final DtsWorkerNodeInformationService dtsWorkerNodeInformationService) {
+        mDtsWorkerNodeInformationService = dtsWorkerNodeInformationService;
+    }
+
     // Build SI msg headers which include a JMS CORRELATION_ID entry.
     // The JMS CORRELATION_ID entry may be set in another location so that the WorkerNodeJobNotificationService
     // class can completely disconnect from JMS.
-    private Map<String, Object> getHeaders(final JobParameters jobParameters, String jobId ){
-        Map<String, Object> springIntegMsgHeaders = new LinkedHashMap<String, Object>();
+    private Map<String, Object> getHeaders(final JobParameters jobParameters,
+        final String jobId) {
+        final Map<String, Object> springIntegMsgHeaders = new LinkedHashMap<String, Object>();
         //final JobParameters jobParameters = jobExecution.getJobInstance().getJobParameters();
         if (jobParameters != null) {
-            Map<String, JobParameter> allParameters = jobParameters.getParameters();
-            Iterator<String> iterator =  allParameters.keySet().iterator();
+            final Map<String, JobParameter> allParameters = jobParameters
+                .getParameters();
+            final Iterator<String> iterator = allParameters.keySet().iterator();
             while (iterator.hasNext()) {
-                String key = iterator.next();
+                final String key = iterator.next();
                 springIntegMsgHeaders.put(key, jobParameters.getString(key));
             }
         }
-        springIntegMsgHeaders.put(mdtsWorkerNodeInformationService.getWorkerNodeIDMessageHeaderName(), mdtsWorkerNodeInformationService.getInstanceId());
+        springIntegMsgHeaders.put(mDtsWorkerNodeInformationService
+            .getWorkerNodeIDMessageHeaderName(),
+            mDtsWorkerNodeInformationService.getInstanceId());
         return springIntegMsgHeaders;
     }
 }

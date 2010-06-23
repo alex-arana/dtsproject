@@ -5,6 +5,8 @@
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+           
+  <import resource="classpath:/org/dataminx/dts/batch/batch-context.xml"/>
 
   <!-- Enable Spring beans annotation support -->
   <context:annotation-config />
@@ -31,13 +33,15 @@
   </bean>
   
   <!-- The task executor used by the Job Launcher specific to this module -->
+  <bean id="jobLauncherTaskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
+<!--
   <bean id="jobLauncherTaskExecutor"
         class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
     <property name="corePoolSize" value="10"/>
     <property name="maxPoolSize" value="10"/>
   </bean>
-  
-  <bean id="jobNotificationService" class="org.dataminx.dts.wn.service.WorkerNodeJobNotificationService" />
+-->
+
 <!--
      This bean has to be declared outside of the batch-context.xml so that the calling module
      (which most of the time will be dts-workernode) will declare this on its own spring config
