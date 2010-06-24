@@ -53,7 +53,8 @@ public class DtsJobStep implements Serializable {
     private static final Logger LOGGER = LoggerFactory
         .getLogger(DtsJobStep.class);
 
-    /** A reference to the list of DtsDataTransferUnits. */
+    /** A reference to the list of DtsDataTransferUnits. 
+     * Note that this is transient so it will not be written to the batch context*/
     private transient List<DtsDataTransferUnit> mDataTransferUnits;
 
     /** The job step ID. */

@@ -112,13 +112,20 @@ public abstract class AbstractJobPartitioningStrategy implements
         throws FileSystemException {
         LOGGER.debug("addFilesToTransfer(\"" + source.getURL() + "\", \""
             + destination.getURL() + "\", " + dataTransferIndex + ")");
+        // update member vars
         mTotalSize += source.getContent().getSize();
         mTotalFiles++;
         mPerDataTransferTotalFiles++;
-        mDtsJobStepAllocator.addDataTransferUnit(new DtsDataTransferUnit(source
-            .getURL().toString(), destination.getURL().toString(),
-            dataTransferIndex, source.getContent().getSize()),
-            mMaxTotalByteSizePerStepLimit, mMaxTotalFileNumPerStepLimit);
+        // adds the new DtsDataTransferUnit to the current DtsJobStep (in jobStepAllocator)
+        // the dataTransferUnit represents a single file only transfer
+        mDtsJobStepAllocator.addDataTransferUnit(
+                new DtsDataTransferUnit(
+                    source.getURL().toString(),
+                    destination.getURL().toString(),
+                    dataTransferIndex,
+                    source.getContent().getSize()),
+                mMaxTotalByteSizePerStepLimit,
+                mMaxTotalFileNumPerStepLimit);
     }
 
     /**
@@ -179,9 +186,9 @@ public abstract class AbstractJobPartitioningStrategy implements
             jobDetails.setJobId(jobResourceKey);
             jobDetails.setJobTag(jobTag);
 
-            // get the Map that holds the maximum number of files to be transferred
+            // Get a ref to the JobDetails Map that holds the maximum number of files to be transferred
             // from each Source Map<Source URI (String), number of files (Integer)>.
-            // we need this max number of files to be transferred for each source
+            // We need this max number of files to be transferred for each source
             // so we can intelligently decide how many parallel threads we need to use
             // whenever we deal with the given source. knowing the number of parallel
             // threads to use means knowing the number of FileSystemManager connections
@@ -252,41 +259,77 @@ public abstract class AbstractJobPartitioningStrategy implements
                 }
 
                 try {
-                    // calling createNewDataTransfer initialises the Step and adds
-                    // the first source and target pair file to the list of files to be
-                    // transferred by the step
+
+                    // 1 JobStepAllocator  -has->  *DtsJobSteps
+                    // 1 DtsJobStep        -has->  *DtsDataTransferUnits
+                    //
+                    // Call createNewDataTransfer to initialise the current
+                    // allocator's step with the given byte-size and file-num
+                    // constraints (i.e. mDtsJobStepAllocator.mTmpDtsJobStep).
+                    // Thus, there is always at least ONE (often more) steps per dataTransfer element.
                     mDtsJobStepAllocator.createNewDataTransfer(
                         sourceParent.getFileSystem().getRoot().getURL().toString(),
                         targetParent.getFileSystem().getRoot().getURL().toString(),
                         mMaxTotalByteSizePerStepLimit,
                         mMaxTotalFileNumPerStepLimit);
 
+                    // Find out the number of files to be transferred for the given
+                    // source and target pair. also create the directory structure
+                    // on the target destination. Do this by:
+                    //
+                    // - Recurse/drill-down into each source to generate file-only transfers (DTUs)
+                    // - While recursing, create the directory structure on destination.
+                    // - For each file only transfer,
+                    //   Call this.addFilesToTransfer() which:
+                    //    Increments the following member vars:
+                    //       mTotalSize += sourceFile.getContent().getSize();
+                    //       mTotalFiles++;
+                    //       mPerDataTransferTotalFiles++;
+                    //    Calls jobStepAllocator.addDataTransferUnit which does the following:
+                    //    - if the current step's constraints have been or would be exceeded
+                    //      with the addition of the DTU to its list, then add the existing step
+                    //      to the allocator's step list and re-create the current step, then:
+                    //    - add the DTU to the allocator's current step 
+                    //
+                    // Thus the allocator Lists many steps, and each step Lists many DTUs !
+                    // and this can (potentially) require lots of memory to hold these collections.
+                    // Would it be better to save the Steps in the files WHILE recursivley
+                    // allocating/creating Steps rather than saving them all AFTER completing the
+                    // scoping as is done below with jobDetails.saveJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps();
+                    // It could really reduce mem footprint of the batch job if all the
+                    // collections did not need to be held in-memory at once.
+
                     final CreationFlagEnumeration.Enum creationFlag = ((MinxJobDescriptionType) jobDescription)
                         .getTransferRequirements().getCreationFlag();
-
-                    // find out the number of files to be transferred for the given
-                    // source and target pair. also create the directory structure
-                    // on the target destination
                     prepare(sourceParent, targetParent, dataTransferIndex,
                         creationFlag);
 
+                    // Update the max number of total files to be transferred for the
+                    // given source and/or target based on the number of files to be
+                    // transferred between the source and target so we can use the
+                    // values for finding out the number of FileSystemManagers we can cache.
+
+                    // get the sourceParentRootStr and targetParentRootStr which
+                    // represent the keys
                     final String sourceParentRootStr = sourceParent
                         .getFileSystem().getRoot().getURL().toString();
                     final String targetParentRootStr = targetParent
                         .getFileSystem().getRoot().getURL().toString();
 
-                    // update the max number of total files to be transferred for the
-                    // given source and/or target based on the number of files to be
-                    // transferred between the source and target so we can use the
-                    // values for finding out the number of FileSystemManagers we can cache
+                    // Could we replace the if/else block with the following two modified
+                    // method invocations? (need to check with Gerson):
+                    //this.updateOrPutSourceTargetMaxTotalFilesToTransfer(jobDetails.getSourceTargetMaxTotalFilesToTransfer(), sourceParentRootStr, mPerDataTransferTotalFiles);
+                    //this.updateOrPutSourceTargetMaxTotalFilesToTransfer(jobDetails.getSourceTargetMaxTotalFilesToTransfer(), targetParentRootStr, mPerDataTransferTotalFiles);
+
                     if (sourceTargetMaxTotalFilesToTransfer
                         .containsKey(sourceParentRootStr)
                         && sourceTargetMaxTotalFilesToTransfer
                             .containsKey(targetParentRootStr)) {
-                        updateSourceTargetMaxTotalFilesToTransfer(
+                        // update source, update target
+                        this.updateSourceTargetMaxTotalFilesToTransfer(
                             sourceTargetMaxTotalFilesToTransfer,
                             sourceParentRootStr, mPerDataTransferTotalFiles);
-                        updateSourceTargetMaxTotalFilesToTransfer(
+                        this.updateSourceTargetMaxTotalFilesToTransfer(
                             sourceTargetMaxTotalFilesToTransfer,
                             targetParentRootStr, mPerDataTransferTotalFiles);
                     }
@@ -294,7 +337,8 @@ public abstract class AbstractJobPartitioningStrategy implements
                         .containsKey(sourceParentRootStr)
                         && !sourceTargetMaxTotalFilesToTransfer
                             .containsKey(targetParentRootStr)) {
-                        updateSourceTargetMaxTotalFilesToTransfer(
+                        // update source, put target
+                        this.updateSourceTargetMaxTotalFilesToTransfer(
                             sourceTargetMaxTotalFilesToTransfer,
                             sourceParentRootStr, mPerDataTransferTotalFiles);
                         sourceTargetMaxTotalFilesToTransfer.put(
@@ -304,13 +348,15 @@ public abstract class AbstractJobPartitioningStrategy implements
                         .containsKey(sourceParentRootStr)
                         && sourceTargetMaxTotalFilesToTransfer
                             .containsKey(targetParentRootStr)) {
+                        // put source, update target
                         sourceTargetMaxTotalFilesToTransfer.put(
                             sourceParentRootStr, mPerDataTransferTotalFiles);
-                        updateSourceTargetMaxTotalFilesToTransfer(
+                        this.updateSourceTargetMaxTotalFilesToTransfer(
                             sourceTargetMaxTotalFilesToTransfer,
                             targetParentRootStr, mPerDataTransferTotalFiles);
                     }
                     else {
+                        // put source, put target
                         sourceTargetMaxTotalFilesToTransfer.put(
                             sourceParentRootStr, mPerDataTransferTotalFiles);
                         sourceTargetMaxTotalFilesToTransfer.put(
@@ -333,9 +379,9 @@ public abstract class AbstractJobPartitioningStrategy implements
                     throw e;
                 }
 
-                // get the current Step in the allocator to not accept anymore
-                // source-target pair file to process and have the new source-target
-                // pair files to be added to a new Step
+                // If the allocator's current step contains DTUs, then ensure
+                // that this is also added to the allocator's list of steps and
+                // close the allocation.
                 mDtsJobStepAllocator.closeNewDataTransfer();
 
             }
@@ -348,9 +394,17 @@ public abstract class AbstractJobPartitioningStrategy implements
                 LOGGER.debug(" - " + excluded);
             }
 
+            // update the jobDetails (a transfer object) from both member vars
+            // in this class and using the allocator's fields
             jobDetails.setExcludedFiles(mExcluded);
             jobDetails.setTotalBytes(mTotalSize);
             jobDetails.setTotalFiles(mTotalFiles);
+
+            // saveJobSteps() also sets the JobSteps in jobDetails thus maintaining 
+            // an in-mem collection of job steps (potentially requies lots of mem) 
+            // Would it be better to save each job step as they are
+            // created rather than having to hold all the info within mem as
+            // collections. 
             jobDetails
                 .saveJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps());
 
@@ -569,10 +623,35 @@ public abstract class AbstractJobPartitioningStrategy implements
      */
     private void updateSourceTargetMaxTotalFilesToTransfer(
         final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer,
-        final String parentRootStr, final int perDataTransferTotalFiles) {
+        final String parentRootStr, 
+        final int perDataTransferTotalFiles) {
+        //
         if (sourceTargetMaxTotalFilesToTransfer.get(parentRootStr) < perDataTransferTotalFiles) {
-            sourceTargetMaxTotalFilesToTransfer.put(parentRootStr,
-                perDataTransferTotalFiles);
+            sourceTargetMaxTotalFilesToTransfer.put(parentRootStr, perDataTransferTotalFiles);
+        }
+    }
+
+
+    /**
+     * Maybe replace above updateSourceTargetMaxTotalFilesToTransfer for easier
+     * invocation from within partitionTheJob
+     *
+     * @param sourceTargetMaxTotalFilesToTransfer
+     * @param parentRootStr
+     * @param perDataTransferTotalFiles
+     */
+    private void updateOrPutSourceTargetMaxTotalFilesToTransfer(
+        final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer,
+        final String parentRootStr,
+        final int perDataTransferTotalFiles) {
+        // if map does not contain key
+        //   or
+        // if map.get(key) < perDataTransferTotalFiles
+        //   then
+        // put/update key (initial-put or overwrite)
+        if( !sourceTargetMaxTotalFilesToTransfer.containsKey(parentRootStr) ||
+                sourceTargetMaxTotalFilesToTransfer.get(parentRootStr) < perDataTransferTotalFiles) {
+            sourceTargetMaxTotalFilesToTransfer.put(parentRootStr, perDataTransferTotalFiles);
         }
     }
 }

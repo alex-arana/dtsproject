@@ -62,9 +62,15 @@ public class MixedFilesJobStepAllocator implements DtsJobStepAllocator {
         final long maxTotalByteSizePerStepLimit,
         final int maxTotalFileNumPerStepLimit) {
 
-        // if mTmpDtsJobStep has already been initialised and (number of DataTransferUnits in the step
-        // has reached the max total number of files per step limit OR the size of the file we are going
-        // to add will exceed the max size in bytes of all the files per step limit)
+        // if (mTmpDtsJobStep has already been initialised, and the number of DataTransferUnits in the step
+        //   has reached the max total number of files per step limit OR the size of the file we are going
+        //   to add will exceed the max size in bytes of all the files per step limit, then) {
+        //    - add the current/existing mTmpDtsJobStep to the list of mSteps,
+        //    - re-init the current mTmpDtsJobStep
+        //    - add the given dataTransferUnit to the current mTmpDtsJobStep's dtu list
+        // } else
+        //    add the given dataTransferUnit to the current mTmpDtsJobStep' dtu list
+        //
         if (mTmpDtsJobStep != null
             && (mTmpDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit || mTmpDtsJobStep
                 .getCurrentTotalByteSize()
