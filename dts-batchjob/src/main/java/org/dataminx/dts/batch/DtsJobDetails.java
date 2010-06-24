@@ -160,6 +160,8 @@ public class DtsJobDetails implements Serializable {
             jobStep.setJobStepFilename(filename);
         }
 
+        // set this classes list of DtsJobSteps (should we do this because
+        // each step holds a List referencing many DTUs ! and this can (potentially) require lots of memory to hold these collections)
         mJobSteps = jobSteps;
     }
 
