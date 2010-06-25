@@ -186,7 +186,9 @@
   <!--
   We are going to partition our fileCopyStep, i.e. execute our step
   multiple times using a synchronous task-execution grid (gridSize=1).
-  The number of stepExecutions 
+  The number of stepExecutions is derived from the jobScoping task which
+  generates a list of DtsJobStep instances, thus:
+  numb of DtsJobSteps == numb of fileCopyStep partions.
   -->
   <bean id="partitioningStep"
         class="org.springframework.batch.core.partition.support.PartitionStep">
@@ -206,15 +208,17 @@
         we simply run fileCopyStep sequentially).
         -->
         <property name="step" ref="fileCopyStep"/>
-        <!-- Rely on the default gridSize of one (determines number of separate step executions to create
-        so it can be matched to the size of the thread pool in the TaskExecutor)-->
+        <!-- Rely on the default gridSize of one 
+        (determines number of separate step executions to create/run in parallel
+        (i.e. a parallel partition) so it can be matched to the size of the
+        thread pool in the TaskExecutor)-->
         <!--<property name="gridSize" value="1" />-->
       </bean>
     </property>
 
     <!--
     Use a generic implementation of StepExecutionSplitter that delegates to a
-    Partitioner to generate ExecutionContext instances.-->
+    Partitioner to generate the required number of Step ExecutionContext instances.-->
     <property name="stepExecutionSplitter">
       <bean class="org.springframework.batch.core.partition.support.SimpleStepExecutionSplitter">
         <constructor-arg ref="jobRepository"/>
