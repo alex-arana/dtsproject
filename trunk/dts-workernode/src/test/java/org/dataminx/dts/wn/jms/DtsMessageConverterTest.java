@@ -99,6 +99,7 @@ public class DtsMessageConverterTest {
     /**
      * Test method for {@link org.dataminx.dts.wn.jms.DtsMessageConverter#fromMessage(javax.jms.Message)}.
      */
+    /*
     @Test
     public void testFromMessage() throws Exception {
         mConverter = new DtsMessageConverter();
@@ -130,6 +131,12 @@ public class DtsMessageConverterTest {
         Assert.assertTrue(result instanceof JobLaunchRequest);
         Assert.assertSame(((JobLaunchRequest) result).getJob(), dtsJob);
     }
+    */
+
+    /**
+     * Test method for {@link org.dataminx.dts.wn.jms.DtsMessageConverter#fromMessage(javax.jms.Message)}.
+     * The implemetation of the fromMessage method will not return a JobLaunchRequest but call DtsJobLauncher.run() method diretly.
+     * /
 
     /**
      * Test method for
