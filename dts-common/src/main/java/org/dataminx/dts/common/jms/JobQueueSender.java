@@ -27,7 +27,6 @@ public class JobQueueSender {
 
     /** The job submit queue. */
     private Queue mQueue;
-
     /** A reference to the JMS template. */
     private JmsTemplate mJmsTemplate;
 
@@ -57,23 +56,26 @@ public class JobQueueSender {
      * @param message JMS message payload
      */
     public void doSend(final String jobId,
-        final Map<String, Object> jmsParameterMap, final Object message) {
+            final Map<String, Object> jmsParameterMap, final Object message) {
         mJmsTemplate.send(mQueue, new MessageCreator() {
+
             public Message createMessage(final Session session)
-                throws JMSException {
-                final MessageConverter messageConverter = mJmsTemplate
-                    .getMessageConverter();
+                    throws JMSException {
+                final MessageConverter messageConverter = mJmsTemplate.getMessageConverter();
                 final Message jmsMessage = messageConverter.toMessage(message,
-                    session);
+                        session);
                 jmsMessage.setJMSCorrelationID(jobId);
                 if (jmsParameterMap != null) {
                     if (jmsParameterMap.get(ROUTING_HEADER_KEY) != null
-                        && !jmsParameterMap.get(ROUTING_HEADER_KEY).toString()
-                            .trim().equals("")) {
+                            && !jmsParameterMap.get(ROUTING_HEADER_KEY).toString().trim().equals("")) {
                         jmsMessage.setStringProperty(ROUTING_HEADER_KEY,
-                            (String) jmsParameterMap.get(ROUTING_HEADER_KEY));
+                                (String) jmsParameterMap.get(ROUTING_HEADER_KEY));
                     }
-
+                    if (jmsParameterMap.get("ClientID") != null
+                            && !jmsParameterMap.get("ClientID").toString().trim().equals("")) {
+                        jmsMessage.setStringProperty("ClientID",
+                                (String) jmsParameterMap.get("ClientID"));
+                    }
                     // check for the other jms properties/parameters here...
                 }
                 return jmsMessage;
@@ -90,5 +92,4 @@ public class JobQueueSender {
     public void doSend(final String jobId, final Object message) {
         doSend(jobId, null, message);
     }
-
 }
