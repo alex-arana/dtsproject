@@ -99,11 +99,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
      * Default format of outgoing messages.
      */
     private OutputFormat mOutputFormat = OutputFormat.XML_TEXT;
-    /**
-     * A reference to the Job Event Queue sender object.
-     */
-    //@Autowired
-    //private JobEventQueueSender mJobEventQueueSender;
+
     /**
      * A reference to the DTS Job factory.
      */
@@ -177,7 +173,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
             final XmlObject expectedXML = (XmlObject) mTransformer
                 .transformPayload(payload);
             if (!(expectedXML instanceof SubmitJobRequestDocument)) {
-                throw new Exception("Invaild XML Payload");
+                throw new Exception("Invalid XML Payload");
             }
 
             //String incomeRequestTypeName = dtsJobRequest.getClass().getName();
@@ -309,6 +305,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
 
         // convert the input schema entity to an object we can send back as the payload of a JMS message
         final Result result = createOutputResult();
+
         try {
             mMarshaller.marshal(object, result);
         }
@@ -431,8 +428,8 @@ public class DtsMessageConverter extends SimpleMessageConverter {
      *
      * @param mChannelTemplate
      */
-    public void setChannelTemplate(final MessageChannelTemplate mChannelTemplate) {
-        this.mChannelTemplate = mChannelTemplate;
+    public void setChannelTemplate(final MessageChannelTemplate channelTemplate) {
+        mChannelTemplate = channelTemplate;
     }
 
     //public void setmExpectedTypes(List<String> expectedTypes) {
@@ -459,6 +456,6 @@ public class DtsMessageConverter extends SimpleMessageConverter {
     }
 
     public void setJobFactory(final DtsJobFactory jobFactory) {
-        this.mJobFactory = jobFactory;
+        mJobFactory = jobFactory;
     }
 }
