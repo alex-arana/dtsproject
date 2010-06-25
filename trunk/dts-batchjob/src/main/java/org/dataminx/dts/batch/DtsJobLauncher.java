@@ -27,9 +27,12 @@
  */
 package org.dataminx.dts.batch;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
@@ -60,16 +63,13 @@ public class DtsJobLauncher extends SimpleJobLauncher {
 
     /** The logger. */
     private static final Log LOGGER = LogFactory.getLog(DtsJobLauncher.class);
-
     /** A reference to the DtsJobFactory. */
     private DtsJobFactory mJobFactory;
-
     /**
      * The validator to be used in checking for the validity of the submitted
      * DTS job.
      */
     private DtsJobDefinitionValidator mDtsJobDefinitionValidator;
-
     /**
      * The reference to the message resolver so that validation error messages
      * are taken from a ResourceBundle.
@@ -80,7 +80,90 @@ public class DtsJobLauncher extends SimpleJobLauncher {
      * Constructs a new instance of {@link DtsJobLauncher}.
      */
     public DtsJobLauncher() {
+    }
 
+    /**
+     * Overloaded version 
+     * 
+     * @param jobId
+     * @param job
+     * @return
+     * @throws JobExecutionAlreadyRunningException
+     * @throws JobRestartException
+     * @throws JobInstanceAlreadyCompleteException
+     * @throws InvalidJobDefinitionException
+     * @throws IllegalArgumentException if the given headersToAddToBatchParams contains objects other than String, Date, Double or Long 
+     */
+    public JobExecution run(final String jobId, final JobDefinitionDocument job, final Map<String, Object> headersToAddToBatchParams)
+            throws JobExecutionAlreadyRunningException, JobRestartException,
+            JobInstanceAlreadyCompleteException, InvalidJobDefinitionException {
+        final MapBindingResult errors = new MapBindingResult(new HashMap(),
+                "jobDefinitionErrors");
+
+        mDtsJobDefinitionValidator.validate(job.getJobDefinition(), errors);
+        if (errors.hasErrors()) {
+            //FieldError error = errors.getFieldError("jobIdentification.jobName");
+            final List<FieldError> fieldErrors = errors.getFieldErrors();
+            final StringBuffer validationErrors = new StringBuffer();
+            String validationErrorMessage = "";
+            for (final FieldError fieldError : fieldErrors) {
+                validationErrorMessage = mMessageSource.getMessage(fieldError,
+                        Locale.getDefault());
+                validationErrors.append(validationErrorMessage).append("\n");
+            }
+            throw new InvalidJobDefinitionException("Invalid job request\n"
+                    + validationErrors);
+        }
+
+        final SubmitJobRequestDocument dtsJobRequest = SubmitJobRequestDocument.Factory.newInstance();
+        //SubmitJobRequest submitJobRequest =
+        dtsJobRequest.addNewSubmitJobRequest();
+
+        // replace JobDefinition with the one read from the input file
+        dtsJobRequest.getSubmitJobRequest().setJobDefinition(
+                job.getJobDefinition());
+
+        // TODO: filter out the credential info from the logs using the one that WN uses
+        final String auditableRequest = SchemaUtils.getAuditableString(dtsJobRequest);
+        LOGGER.debug("request payload:\n" + auditableRequest);
+
+        final long maxAttempts = SchemaUtils.getMaxAttempts(dtsJobRequest.getSubmitJobRequest());
+
+        final String tag = UUID.randomUUID().toString();
+        // invoke the job factory to create a new job instance
+        final DtsFileTransferJob dtsJob = mJobFactory.createJob(jobId, tag,
+                dtsJobRequest);
+
+        //final JobParameters paras = new JobParametersBuilder().addLong(
+        //    "maxAttempts", maxAttempts).toJobParameters();
+        // also add the maxAttempts.
+
+        // create a builder and add the given props to the parameters.
+        final JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong("maxAttempts", maxAttempts);
+
+        if (headersToAddToBatchParams != null) {
+            // iterate and add props here.
+            Set<String> keys = headersToAddToBatchParams.keySet();
+            for (String key : keys) {
+                Object addObject = headersToAddToBatchParams.get(key);
+                if (addObject instanceof String) {
+                    builder.addString(key, (String) addObject);
+                } else if (addObject instanceof Long) {
+                    builder.addLong(key, (Long) addObject);
+                } else if (addObject instanceof Date) {
+                    builder.addDate(key, (Date) addObject);
+                } else if (addObject instanceof Double) {
+                    builder.addDouble(key, (Double) addObject);
+                } else {
+                    throw new IllegalArgumentException("headersToAddToBatchParams type is not String, Date, Double or Long.");
+                }
+            }
+        }
+
+        // finally convert the builder to params
+        final JobParameters paras = builder.toJobParameters();
+        return run(dtsJob, paras);
     }
 
     /**
@@ -96,52 +179,10 @@ public class DtsJobLauncher extends SimpleJobLauncher {
      * @throws JobInstanceAlreadyCompleteException if the job has already completed
      */
     public JobExecution run(final String jobId, final JobDefinitionDocument job)
-        throws JobExecutionAlreadyRunningException, JobRestartException,
-        JobInstanceAlreadyCompleteException, InvalidJobDefinitionException {
-
-        final MapBindingResult errors = new MapBindingResult(new HashMap(),
-            "jobDefinitionErrors");
-
-        mDtsJobDefinitionValidator.validate(job.getJobDefinition(), errors);
-
-        if (errors.hasErrors()) {
-            //FieldError error = errors.getFieldError("jobIdentification.jobName");
-            final List<FieldError> fieldErrors = errors.getFieldErrors();
-            final StringBuffer validationErrors = new StringBuffer();
-            String validationErrorMessage = "";
-            for (final FieldError fieldError : fieldErrors) {
-                validationErrorMessage = mMessageSource.getMessage(fieldError,
-                    Locale.getDefault());
-                validationErrors.append(validationErrorMessage).append("\n");
-            }
-            throw new InvalidJobDefinitionException("Invalid job request\n"
-                + validationErrors);
-        }
-
-        final SubmitJobRequestDocument dtsJobRequest = SubmitJobRequestDocument.Factory
-            .newInstance();
-        //SubmitJobRequest submitJobRequest =
-        dtsJobRequest.addNewSubmitJobRequest();
-
-        // replace JobDefinition with the one read from the input file
-        dtsJobRequest.getSubmitJobRequest().setJobDefinition(
-            job.getJobDefinition());
-
-        // TODO: filter out the credential info from the logs using the one that WN uses
-        final String auditableRequest = SchemaUtils
-            .getAuditableString(dtsJobRequest);
-        LOGGER.debug("request payload:\n" + auditableRequest);
-
-        final long maxAttempts = SchemaUtils.getMaxAttempts(dtsJobRequest
-            .getSubmitJobRequest());
-
-        final String tag = UUID.randomUUID().toString();
-        // invoke the job factory to create a new job instance
-        final DtsFileTransferJob dtsJob = mJobFactory.createJob(jobId, tag,
-            dtsJobRequest);
-        final JobParameters paras = new JobParametersBuilder().addLong(
-            "maxAttempts", maxAttempts).toJobParameters();
-        return run(dtsJob, paras);
+            throws JobExecutionAlreadyRunningException, JobRestartException,
+            JobInstanceAlreadyCompleteException, InvalidJobDefinitionException {
+        // call overloaded method and null for the header collection
+        return this.run(jobId, job, null);
     }
 
     public void setDtsJobFactory(final DtsJobFactory jobFactory) {
@@ -155,7 +196,7 @@ public class DtsJobLauncher extends SimpleJobLauncher {
      *        use
      */
     public void setDtsJobDefinitionValidator(
-        final DtsJobDefinitionValidator dtsJobDefinitionValidator) {
+            final DtsJobDefinitionValidator dtsJobDefinitionValidator) {
         mDtsJobDefinitionValidator = dtsJobDefinitionValidator;
     }
 
