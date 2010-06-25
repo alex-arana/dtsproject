@@ -1,6 +1,12 @@
 package org.dataminx.dts.wn;
 
+import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_DATA_TRANSFER_STEP_KEY;
+import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_DETAILS;
+import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_SUBMIT_JOB_REQUEST_KEY;
+
 import java.util.List;
+
+import org.dataminx.dts.batch.common.util.ExecutionContextCleaner;
 import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +21,8 @@ import org.springframework.integration.core.Message;
 public class BatchJobUpdateHandler {
 
     /** Internal application logger. */
-    private static final Logger LOG = LoggerFactory.getLogger(BatchJobUpdateHandler.class);
+    private static final Logger LOG = LoggerFactory
+        .getLogger(BatchJobUpdateHandler.class);
 
     /** to access job instance and executions from job id */
     private JobExplorer mJobExplorer;
@@ -26,6 +33,8 @@ public class BatchJobUpdateHandler {
     /** manage how to restart a job if needed */
     private JobRestartStrategy mRestartStrategy;
 
+    private ExecutionContextCleaner mExecutionContextCleaner;
+
     /**
      * Depends on type of update of batchjob execution, original update can be forwarded
      * back to client or it will be handled here. Typical action is for restarting a failed
@@ -34,19 +43,24 @@ public class BatchJobUpdateHandler {
      * @return message back to client
      */
     @ServiceActivator
-    public Message<?> handleBatchJobUpdate(Message<?> message) {
-        Object payload  = message.getPayload();
+    public Message<?> handleBatchJobUpdate(final Message<?> message) {
+        final Object payload = message.getPayload();
         if (payload instanceof FireUpJobErrorEventDocument) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Received a FireUpJobErrorEventDocument, checking if retry is needed");
+                LOG
+                    .debug("Received a FireUpJobErrorEventDocument, checking if retry is needed");
             }
-            FireUpJobErrorEventDocument jobErrorDoc = (FireUpJobErrorEventDocument)payload;
-            final String jobErrorKey = jobErrorDoc.getFireUpJobErrorEvent().getJobResourceKey();
-            JobInstance instance = mJobExplorer.getJobInstances(jobErrorKey, 0, 1).get(0);
-            long maxAttempts = instance.getJobParameters().getLong("maxAttempts");
-            List<JobExecution> executions = mJobExplorer.getJobExecutions(instance);
+            final FireUpJobErrorEventDocument jobErrorDoc = (FireUpJobErrorEventDocument) payload;
+            final String jobErrorKey = jobErrorDoc.getFireUpJobErrorEvent()
+                .getJobResourceKey();
+            final JobInstance instance = mJobExplorer.getJobInstances(
+                jobErrorKey, 0, 1).get(0);
+            final long maxAttempts = instance.getJobParameters().getLong(
+                "maxAttempts");
+            final List<JobExecution> executions = mJobExplorer
+                .getJobExecutions(instance);
             long retries = 0;
-            for (JobExecution exec:executions) {
+            for (final JobExecution exec : executions) {
                 if (exec.getExitStatus().equals(ExitStatus.FAILED)) {
                     retries++;
                 }
@@ -54,21 +68,34 @@ public class BatchJobUpdateHandler {
             if (retries < maxAttempts) {
                 mRestartStrategy.restartJob(instance.getJobName());
             }
+            else {
+                // let's try and clean up the execution context when we know
+                // that the job won't be retried anymore
+                final List<JobExecution> jobExecutions = mJobExplorer
+                    .getJobExecutions(instance);
+                mExecutionContextCleaner.forceRemoveExecutionContextEntries(
+                    jobExecutions, new String[] {DTS_JOB_DETAILS,
+                        DTS_SUBMIT_JOB_REQUEST_KEY},
+                    new String[] {DTS_DATA_TRANSFER_STEP_KEY});
+                // TODO: we'll need to delete the job step files for this failed job as well
+            }
 
             return null;
         }
         return message;
     }
 
-
-    public void setJobExplorer(JobExplorer mJobExplorer) {
+    public void setJobExplorer(final JobExplorer mJobExplorer) {
         this.mJobExplorer = mJobExplorer;
     }
 
-
-    public void setJobRepository(JobRepository mJobRepository) {
+    public void setJobRepository(final JobRepository mJobRepository) {
         this.mJobRepository = mJobRepository;
     }
 
+    public void setExecutionContextCleaner(
+        final ExecutionContextCleaner executionContextCleaner) {
+        mExecutionContextCleaner = executionContextCleaner;
+    }
 
 }
