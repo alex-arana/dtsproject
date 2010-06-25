@@ -99,12 +99,27 @@ si.jms.jobSubmitQueueName = dts.job.submit.queue
 si.jms.jobEventQueueName = dts.job.event.queue
 si.jms.jobControlTopicName = dts.job.control.topic
 
-
 #
 # Additional configuration
 
-# lifetime of MyProxy credentials (in seconds, 0 for maximum)
+# lifetime of MyProxy credentials (in hours, 0 for maximum)
 default.myproxy.lifetime = 43200
+
+# The number of parallel connections the job will try to use.
+# Note that the value provided below might not be achieved if
+# the server has connection restriction to the service that the
+# job is trying to use
+default.max.parallel.connections = 4
+
+# Maximum size of all the files that will be transferred by the step
+max.total.bytes.perstep = 10485760
+
+# Maximum number of files a step will transfer
+max.total.num.files.perstep = 3
+
+
+# Anything equal to or higher than this value is considered a big file
+min.bigfiles.bytes.size = 1024
 
 }}}
 
