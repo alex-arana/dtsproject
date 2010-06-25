@@ -466,6 +466,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
             "Unable to find data transfer input data in step context.");
         LOGGER.debug(mJobStep.toString());
 
+        // TODO: DTUs should be read from the step property files !
         final List<DtsDataTransferUnit> dataTransferUnits = mJobStep
             .getDataTransferUnits();
 

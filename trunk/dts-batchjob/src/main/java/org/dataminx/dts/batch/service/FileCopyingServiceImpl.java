@@ -134,6 +134,8 @@ public class FileCopyingServiceImpl implements FileCopyingService,
             //sourceFO = sourceFileSystemManager.resolveFile(sourceURI);
             //targetFO = targetFileSystemManager.resolveFile(targetURI);
 
+            // we invoke the resolveFile(uri, fileSystemOptions) method
+
             sourceFO = sourceFileSystemManager.resolveFile(sourceURI,
                 mDtsVfsUtil.getFileSystemOptions(source, mEncrypter));
             targetFO = targetFileSystemManager.resolveFile(targetURI,

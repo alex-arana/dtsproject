@@ -36,10 +36,11 @@ import java.util.List;
  * @author Gerson Galang
  */
 public class MixedFilesJobStepAllocator implements DtsJobStepAllocator {
-    /** The list of DtsJobSteps where DtsTransferUnits will be allocated. */
+    /** The list of DtsJobSteps where DtsTransferUnits will be allocated.
+     TODO: remove this list and write the steps to file rather than hold an in-mem collection */
     private final List<DtsJobStep> mSteps;
 
-    /** A reference to the DtsJobStep. */
+    /** A reference to the current DtsJobStep that is being constructed. */
     private DtsJobStep mTmpDtsJobStep;
 
     /** The Source Root FileObject URI string. */
@@ -75,7 +76,10 @@ public class MixedFilesJobStepAllocator implements DtsJobStepAllocator {
             && (mTmpDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit || mTmpDtsJobStep
                 .getCurrentTotalByteSize()
                 + dataTransferUnit.getSize() >= maxTotalByteSizePerStepLimit)) {
+
+            // TODO: here write a new step properties file rather than add it to the list (and remove the list)
             mSteps.add(mTmpDtsJobStep);
+
             mTmpDtsJobStep = new DtsJobStep(mSourceRootFileObject,
                 mTargetRootFileObject, mSteps.size() + 1,
                 maxTotalFileNumPerStepLimit, maxTotalByteSizePerStepLimit,
@@ -87,6 +91,35 @@ public class MixedFilesJobStepAllocator implements DtsJobStepAllocator {
             mTmpDtsJobStep.addDataTransferUnit(dataTransferUnit);
         }
     }
+
+
+
+    /**
+     * TODO Writes the DtsJobStep to file.
+     *
+     * @param filename the name of the file to write the DtsJobStep to
+     * @param jobStep the DtsJobStep to be serialized
+     */
+    /*private void writeJobStepToFile(final String filename,
+        final DtsJobStep jobStep) {
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(filename);
+        }
+        catch (final FileNotFoundException e) {
+            LOGGER.debug("FileNotFoundException was thrown while creating a "
+                + "step file to store the DataTransferUnits.");
+        }
+        for (final DtsDataTransferUnit dataTransferUnit : jobStep
+            .getDataTransferUnits()) {
+            writer.print(dataTransferUnit.getSourceFileUri() + ";");
+            writer.print(dataTransferUnit.getDestinationFileUri() + ";");
+            writer.print(dataTransferUnit.getDataTransferIndex() + ";");
+            writer.println(dataTransferUnit.getSize() + ";");
+        }
+        writer.close();
+    }*/
+
 
     /**
      * {@inheritDoc}
@@ -104,6 +137,7 @@ public class MixedFilesJobStepAllocator implements DtsJobStepAllocator {
         final String targetRootFileObject,
         final long maxTotalByteSizePerStepLimit,
         final int maxTotalFileNumPerStepLimit) {
+        // init member vars
         mTmpDtsJobStep = new DtsJobStep(sourceRootFileObject,
             targetRootFileObject, mSteps.size() + 1,
             maxTotalFileNumPerStepLimit, maxTotalByteSizePerStepLimit,
