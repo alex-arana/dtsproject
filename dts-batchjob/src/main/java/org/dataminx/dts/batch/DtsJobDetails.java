@@ -55,7 +55,8 @@ public class DtsJobDetails implements Serializable {
     /** The serial version UID needed to serialize this class. */
     private static final long serialVersionUID = 1L;
 
-    /** The list of DtsJobSteps to be processed by the job. */
+    /** The list of DtsJobSteps to be processed by the job.
+     TODO: remove this list and use the steps written to file rather than rely on an in-mem collection */
     private List<DtsJobStep> mJobSteps;
 
     /** The current size of files in bytes that have been transferred at a given time. */

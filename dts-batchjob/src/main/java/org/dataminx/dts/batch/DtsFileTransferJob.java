@@ -92,7 +92,8 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
     /** The time in milliseconds when the job completed executing. */
     private long mCompletedTime;
 
-    /** A reference to the application's job notification service. */
+    /** A reference to the application's job notification service.  */
+    // should this be wired in config rather than autowired. 
     @Autowired
     private JobNotificationService mJobNotificationService;
 
@@ -139,6 +140,8 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
         mJobRequest = jobRequest.getSubmitJobRequest();
         setJobRepository(jobRepository);
 
+        // replace the credentials in the mJobRequest with pointers. The credentials
+        // are then stored within the given credentialStore
         applyCredentialFiltering(credentialStore);
     }
 
@@ -341,7 +344,7 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
         StepExecution stepExecution = handleStep(mCheckRequirementsStep,
             execution);
 
-        // we'll skip the other steps if the job scoping task step fails
+        // we'll skip the other steps if the check requirements task step fails
         if (!stepExecution.getStatus().equals(BatchStatus.COMPLETED)) {
             checkRequirementsFailed = true;
         }
@@ -365,6 +368,8 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
             // let's check if there's anything to transfer
             final DtsJobDetails dtsJobDetails = (DtsJobDetails) context
                 .get(DTS_JOB_DETAILS);
+            // TODO: check the jobDetails step count rather than its job-step list
+            // as this list is to be removed. 
             if (!dtsJobDetails.getJobSteps().isEmpty()) {
 
                 LOGGER.info("Started the MaxStreamCounting step at "

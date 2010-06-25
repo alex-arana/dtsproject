@@ -68,16 +68,26 @@ public class DtsJobPartitioner implements Partitioner, InitializingBean {
      * {@inheritDoc}
      */
     public Map<String, ExecutionContext> partition(final int gridSize) {
-        final List<DtsJobStep> jobSteps = mDtsJobDetails.getJobSteps();
-        int i = 0;
+        // TODO: need to remove the getJobSteps reference here as this collection
+        // is due to be removed. Rather, would need to iterate the job's step files.
 
-        final Map<String, ExecutionContext> map = new HashMap<String, ExecutionContext>(
-            gridSize);
+        // partioner's role is to generate execution contexts as input params for new step exeuctions.
+        // The return value associates a unique name for each step exeuction (the string)
+        // with input parameters in the form of an ExecutionContext. The
+        // ExecutionContext is just a bag of name-value pairs, typically containing
+        // a range of primary keys, or the location of an input file.
+        final List<DtsJobStep> jobSteps = mDtsJobDetails.getJobSteps();
+        LOGGER.debug("partion with gridSize: "+gridSize);
+        int i = 0;
+        final Map<String, ExecutionContext> map = new HashMap<String, ExecutionContext>(gridSize);
         for (final DtsJobStep jobStep : jobSteps) {
             final ExecutionContext context = new ExecutionContext();
+            // put the dtsJobStep into the Step ExecutionContext so that it can
+            // be retrieved by the step (via late binding to the context using
+            // value="#{stepExecutionContext[DATA_TRANSFER_STEP]}" in the config)
             context.put(DTS_DATA_TRANSFER_STEP_KEY, jobStep);
-            map.put(String.format("%s:%03d", DTS_DATA_TRANSFER_STEP_KEY, i),
-                context);
+            // put the context into the map under a unique step key.
+            map.put(String.format("%s:%03d", DTS_DATA_TRANSFER_STEP_KEY, i), context);
             i++;
         }
 

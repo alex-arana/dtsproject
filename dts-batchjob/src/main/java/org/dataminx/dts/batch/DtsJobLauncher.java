@@ -42,6 +42,7 @@ import org.dataminx.dts.common.validator.DtsJobDefinitionValidator;
 import org.dataminx.dts.common.ws.InvalidJobDefinitionException;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;

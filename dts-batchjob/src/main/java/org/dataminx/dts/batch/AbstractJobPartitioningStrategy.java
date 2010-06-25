@@ -186,17 +186,6 @@ public abstract class AbstractJobPartitioningStrategy implements
             jobDetails.setJobId(jobResourceKey);
             jobDetails.setJobTag(jobTag);
 
-            // Get a ref to the JobDetails Map that holds the maximum number of files to be transferred
-            // from each Source Map<Source URI (String), number of files (Integer)>.
-            // We need this max number of files to be transferred for each source
-            // so we can intelligently decide how many parallel threads we need to use
-            // whenever we deal with the given source. knowing the number of parallel
-            // threads to use means knowing the number of FileSystemManager connections
-            // to cache. there's no point caching 4 FileSystemManagers for a given source
-            // if the number of files to be transferred from that source is only 1.
-            final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = jobDetails
-                .getSourceTargetMaxTotalFilesToTransfer();
-
             mDtsJobStepAllocator = createDtsJobStepAllocator();
             mExcluded = new ArrayList<String>();
             mTotalSize = 0;
@@ -293,11 +282,11 @@ public abstract class AbstractJobPartitioningStrategy implements
                     //
                     // Thus the allocator Lists many steps, and each step Lists many DTUs !
                     // and this can (potentially) require lots of memory to hold these collections.
-                    // Would it be better to save the Steps in the files WHILE recursivley
-                    // allocating/creating Steps rather than saving them all AFTER completing the
+                    // Would it be better to write the Step to file as soon as the step has reached its constraints
+                    // and do this WHILE recursivley allocating/creating Steps, rather than saving them all AFTER completing the
                     // scoping as is done below with jobDetails.saveJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps();
                     // It could really reduce mem footprint of the batch job if all the
-                    // collections did not need to be held in-memory at once.
+                    // collections did not need to be held in-memory at once (also consider running many jobs concurrently).
 
                     final CreationFlagEnumeration.Enum creationFlag = ((MinxJobDescriptionType) jobDescription)
                         .getTransferRequirements().getCreationFlag();
@@ -316,52 +305,20 @@ public abstract class AbstractJobPartitioningStrategy implements
                     final String targetParentRootStr = targetParent
                         .getFileSystem().getRoot().getURL().toString();
 
-                    // Could we replace the if/else block with the following two modified
-                    // method invocations? (need to check with Gerson):
-                    //this.updateOrPutSourceTargetMaxTotalFilesToTransfer(jobDetails.getSourceTargetMaxTotalFilesToTransfer(), sourceParentRootStr, mPerDataTransferTotalFiles);
-                    //this.updateOrPutSourceTargetMaxTotalFilesToTransfer(jobDetails.getSourceTargetMaxTotalFilesToTransfer(), targetParentRootStr, mPerDataTransferTotalFiles);
-
-                    if (sourceTargetMaxTotalFilesToTransfer
-                        .containsKey(sourceParentRootStr)
-                        && sourceTargetMaxTotalFilesToTransfer
-                            .containsKey(targetParentRootStr)) {
-                        // update source, update target
-                        this.updateSourceTargetMaxTotalFilesToTransfer(
-                            sourceTargetMaxTotalFilesToTransfer,
+                    // Update the JobDetails Map that holds the maximum number of files to be transferred
+                    // from each Source Map<Source URI (String), number of files (Integer)>.
+                    // We need this max number of files to be transferred for each source
+                    // so we can intelligently decide how many parallel threads we need to use
+                    // whenever we deal with the given source. knowing the number of parallel
+                    // threads to use means knowing the number of FileSystemManager connections
+                    // to cache. there's no point caching 4 FileSystemManagers for a given source
+                    // if the number of files to be transferred from that source is only 1.
+                    this.updateOrPutSourceTargetMaxTotalFilesToTransfer(
+                            jobDetails.getSourceTargetMaxTotalFilesToTransfer(),
                             sourceParentRootStr, mPerDataTransferTotalFiles);
-                        this.updateSourceTargetMaxTotalFilesToTransfer(
-                            sourceTargetMaxTotalFilesToTransfer,
+                    this.updateOrPutSourceTargetMaxTotalFilesToTransfer(
+                            jobDetails.getSourceTargetMaxTotalFilesToTransfer(),
                             targetParentRootStr, mPerDataTransferTotalFiles);
-                    }
-                    else if (sourceTargetMaxTotalFilesToTransfer
-                        .containsKey(sourceParentRootStr)
-                        && !sourceTargetMaxTotalFilesToTransfer
-                            .containsKey(targetParentRootStr)) {
-                        // update source, put target
-                        this.updateSourceTargetMaxTotalFilesToTransfer(
-                            sourceTargetMaxTotalFilesToTransfer,
-                            sourceParentRootStr, mPerDataTransferTotalFiles);
-                        sourceTargetMaxTotalFilesToTransfer.put(
-                            targetParentRootStr, mPerDataTransferTotalFiles);
-                    }
-                    else if (!sourceTargetMaxTotalFilesToTransfer
-                        .containsKey(sourceParentRootStr)
-                        && sourceTargetMaxTotalFilesToTransfer
-                            .containsKey(targetParentRootStr)) {
-                        // put source, update target
-                        sourceTargetMaxTotalFilesToTransfer.put(
-                            sourceParentRootStr, mPerDataTransferTotalFiles);
-                        this.updateSourceTargetMaxTotalFilesToTransfer(
-                            sourceTargetMaxTotalFilesToTransfer,
-                            targetParentRootStr, mPerDataTransferTotalFiles);
-                    }
-                    else {
-                        // put source, put target
-                        sourceTargetMaxTotalFilesToTransfer.put(
-                            sourceParentRootStr, mPerDataTransferTotalFiles);
-                        sourceTargetMaxTotalFilesToTransfer.put(
-                            targetParentRootStr, mPerDataTransferTotalFiles);
-                    }
 
                     dataTransferIndex++;
                 }
@@ -400,19 +357,21 @@ public abstract class AbstractJobPartitioningStrategy implements
             jobDetails.setTotalBytes(mTotalSize);
             jobDetails.setTotalFiles(mTotalFiles);
 
+            // TODO: remove this so that the JobSteps are saved in property
+            // files during the allocation process rather than storing and iterating all
+            // jobSteps after allocation (mem-hog)
+            //
             // saveJobSteps() also sets the JobSteps in jobDetails thus maintaining 
             // an in-mem collection of job steps (potentially requies lots of mem) 
             // Would it be better to save each job step as they are
             // created rather than having to hold all the info within mem as
             // collections. 
-            jobDetails
-                .saveJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps());
+            jobDetails.saveJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps());
 
             for (final DtsJobStep jobStep : mDtsJobStepAllocator
                 .getAllocatedJobSteps()) {
                 LOGGER.debug(jobStep);
             }
-            // let's try to put the steps in the step execution context
 
         }
         finally {
@@ -611,6 +570,8 @@ public abstract class AbstractJobPartitioningStrategy implements
         mMaxTotalFileNumPerStepLimit = maxTotalFileNumPerStepLimit;
     }
 
+
+
     /**
      * This method is used to get the optimum number of connections that should be cached by the MaxStreamCounterTask
      * step on the FileSystemManagerCache. There's no point caching 5 connections so we could do 5 concurrent
@@ -620,22 +581,6 @@ public abstract class AbstractJobPartitioningStrategy implements
      *        for the given source/target Root FileObject URI string
      * @param parentRootStr the source or target Root FileObject URI string
      * @param perDataTransferTotalFiles the total number of files to be transferred for the given DataTransferElement
-     */
-    private void updateSourceTargetMaxTotalFilesToTransfer(
-        final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer,
-        final String parentRootStr, 
-        final int perDataTransferTotalFiles) {
-        //
-        if (sourceTargetMaxTotalFilesToTransfer.get(parentRootStr) < perDataTransferTotalFiles) {
-            sourceTargetMaxTotalFilesToTransfer.put(parentRootStr, perDataTransferTotalFiles);
-        }
-    }
-
-
-    /**
-     * Maybe replace above updateSourceTargetMaxTotalFilesToTransfer for easier
-     * invocation from within partitionTheJob
-     *
      * @param sourceTargetMaxTotalFilesToTransfer
      * @param parentRootStr
      * @param perDataTransferTotalFiles

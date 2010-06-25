@@ -137,7 +137,7 @@
       </list>
     </property>
     <property name="stopwatchTimer" ref="stopwatchTimer"/>
-    <property name="jobPartitioningStrategy" ref="jobPartitioningStrategy"/>    
+    <property name="jobPartitioningStrategy" ref="jobPartitioningStrategy"/>
   </bean>
   
   <bean id="dtsJobDefinitionValidator" class="org.dataminx.dts.common.validator.DefaultDtsJobDefinitionValidator">
@@ -205,11 +205,11 @@
         <!-- 
         We are going to partition the fileCopyStep,
         i.e. run it many times as a parallel grid (with gridSize set to one,
-        we simply run fileCopyStep sequentially).
+        we simply run fileCopyStep partitions sequentially).
         -->
         <property name="step" ref="fileCopyStep"/>
         <!-- Rely on the default gridSize of one 
-        (determines number of separate step executions to create/run in parallel
+        (Used to specify the number of separate step executions to create/run in parallel
         (i.e. a parallel partition) so it can be matched to the size of the
         thread pool in the TaskExecutor)-->
         <!--<property name="gridSize" value="1" />-->
