@@ -109,6 +109,7 @@
 
   <bean id="fileCopyTask" class="org.dataminx.dts.batch.FileCopyTask" scope="step">
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
+    <!-- the DtsJobStep value will be set from the stepExeCtxt -->
     <property name="jobStep" value="#{stepExecutionContext[DATA_TRANSFER_STEP]}"/>
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
     <property name="jobNotificationService" ref="jobNotificationService"/>
@@ -126,10 +127,10 @@
   </bean>
   
   <bean id="dtsFileTransferJob" scope="prototype" class="org.dataminx.dts.batch.DtsFileTransferJob">
+    <property name="checkRequirementsStep" ref="checkRequirementsStep"/>
     <property name="jobScopingStep" ref="jobScopingStep"/>
     <property name="maxStreamCountingStep" ref="maxStreamCountingStep"/>
     <property name="partitioningStep" ref="partitioningStep"/>
-    <property name="checkRequirementsStep" ref="checkRequirementsStep"/>
     <property name="jobExecutionListeners">
       <list>
         <ref bean="dtsFileTransferJobListener"/>
@@ -181,16 +182,39 @@
     </batch:tasklet>
   </batch:step>
 
+
+  <!--
+  We are going to partition our fileCopyStep, i.e. execute our step
+  multiple times using a synchronous task-execution grid (gridSize=1).
+  The number of stepExecutions 
+  -->
   <bean id="partitioningStep"
         class="org.springframework.batch.core.partition.support.PartitionStep">
+    <!--
+    PartitionHandler sends StepExecution requests to the remote steps
+    Spring Batch provides a useful implementation of PartitionHandler that executes Steps locally in
+    separate threads of execution using Spring's TaskExecutor strategy
+    -->
     <property name="partitionHandler">
       <bean class="org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler">
         <property name="taskExecutor">
           <bean class="org.springframework.core.task.SyncTaskExecutor"/>
         </property>
+        <!-- 
+        We are going to partition the fileCopyStep,
+        i.e. run it many times as a parallel grid (with gridSize set to one,
+        we simply run fileCopyStep sequentially).
+        -->
         <property name="step" ref="fileCopyStep"/>
+        <!-- Rely on the default gridSize of one (determines number of separate step executions to create
+        so it can be matched to the size of the thread pool in the TaskExecutor)-->
+        <!--<property name="gridSize" value="1" />-->
       </bean>
     </property>
+
+    <!--
+    Use a generic implementation of StepExecutionSplitter that delegates to a
+    Partitioner to generate ExecutionContext instances.-->
     <property name="stepExecutionSplitter">
       <bean class="org.springframework.batch.core.partition.support.SimpleStepExecutionSplitter">
         <constructor-arg ref="jobRepository"/>
@@ -212,7 +236,8 @@
   
   
   <bean id="jobPartitioningStrategy" class="org.dataminx.dts.batch.AbstractJobPartitioningStrategy">
-    <!-- replace the jobStepAllocator implementation here if you want to use a 
+    <!-- lookup-method injection of createDtsJobStepAllocator method.
+         replace the jobStepAllocator implementation here if you want to use a
          new strategy for partitioning files -->
     <lookup-method  name="createDtsJobStepAllocator" bean="mixedFilesJobStepAllocator"/>
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
