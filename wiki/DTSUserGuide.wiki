@@ -17,6 +17,8 @@ Following is a list of software components required to get the Data Transfer Ser
    * [http://www.mysql.com/ MySQL Database]
    * The database of your choice. We're using [http://www.mysql.com MySQL].
 
+Create a user called "dts-user" on your machine.
+
 ==== Getting The Code ====
 The DTS codebase is currently hosted in the DTS Google Code SVN repository. You can check out the code by running:
 {{{
@@ -101,7 +103,7 @@ Start ActiveMQ
 Configure the dts-workernode
 {{{
  > cd dts-workernode
- > cp src/main/resources/dts-workernode.properties.default ~/.dataminx/dts-workernode.properties
+ > cp src/main/resources/dts-workernode.properties.template ~/.dataminx/dts-workernode.properties
  > # edit ~/.dataminx/dts-workernode.properties if you need to. by default the values in the properties file should just work
  > # set value of wn.id to the name of the host running the dts-workernode module. This should be unique.
  > mvn -Ddataminx.dir=/home/dts-user/.dataminx exec:java
