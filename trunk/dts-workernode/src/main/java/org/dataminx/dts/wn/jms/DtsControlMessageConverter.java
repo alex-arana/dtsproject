@@ -302,7 +302,7 @@ public class DtsControlMessageConverter extends SimpleMessageConverter {
         this.mChannelTemplate = mChannelTemplate;
     }
 
-    public void setmExpectedTypes(final List<String> expectedTypes) {
+    public void setExpectedTypes(final List<String> expectedTypes) {
         this.mExpectedTypes = expectedTypes;
     }
 
