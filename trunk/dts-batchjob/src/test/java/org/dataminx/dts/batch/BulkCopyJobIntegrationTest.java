@@ -129,6 +129,9 @@ public class BulkCopyJobIntegrationTest extends
         assertEquals(doesJobStepExists(jobId), false);
     }
 
+    // TODO: need to enable this test later on and think of a way to make it
+    // access a file on the deployment machien that's about 80MB in size which
+    // this test will use for the suspend resume capability
     @Test(enabled = false)
     public void testSuspendResume() throws Exception {
         final File f = new ClassPathResource(
@@ -175,7 +178,7 @@ public class BulkCopyJobIntegrationTest extends
         // let's stop (suspend) its execution
         for (final String jobName : mJobOperator.getJobNames()) {
             if (jobName.equals(jobId)) {
-                LOGGER.debug("Found the running job to be cancelled");
+                LOGGER.debug("Found the running job to be suspended");
 
                 for (final Long execId : mJobOperator
                     .getRunningExecutions(jobName)) {
@@ -249,7 +252,7 @@ public class BulkCopyJobIntegrationTest extends
         // let's stop (suspend) its execution
         for (final String jobName : mJobOperator.getJobNames()) {
             if (jobName.equals(jobId)) {
-                LOGGER.debug("Found the running job to be cancelled");
+                LOGGER.debug("Found the running job to be suspended");
 
                 for (final Long execId : mJobOperator
                     .getRunningExecutions(jobName)) {
@@ -308,7 +311,7 @@ public class BulkCopyJobIntegrationTest extends
         // let's stop (suspend) its execution
         for (final String jobName : mJobOperator.getJobNames()) {
             if (jobName.equals(jobId)) {
-                LOGGER.debug("Found the running job to be cancelled");
+                LOGGER.debug("Found the running job to be suspended again");
 
                 for (final Long execId : mJobOperator
                     .getRunningExecutions(jobName)) {
