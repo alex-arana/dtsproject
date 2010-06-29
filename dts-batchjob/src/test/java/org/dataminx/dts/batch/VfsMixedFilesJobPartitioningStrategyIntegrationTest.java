@@ -69,7 +69,6 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
             mDtsJob.getJobDefinition(), jobId, jobTag);
 
         assertNotNull(jobDetails);
-        assertEquals(jobDetails.getJobSteps().size(), 11);
         assertEquals(jobDetails.getTotalBytes(), 30408704);
         assertEquals(jobDetails.getTotalFiles(), 20);
         assertEquals(jobDetails.getSourceTargetMaxTotalFilesToTransfer().get(
