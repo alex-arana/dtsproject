@@ -10,7 +10,7 @@
   <jsdl:JobDescription xsi:type="mjsdl:MinxJobDescriptionType" xmlns:mjsdl="http://schemas.dataminx.org/dts/2009/07/jsdl"
     xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl">
     <jsdl:JobIdentification>
-      <jsdl:JobName>testjob</jsdl:JobName>
+      <jsdl:JobName>test-job</jsdl:JobName>
       <jsdl:Description>Gerson's Job</jsdl:Description>
       <jsdl:JobAnnotation>Gerson's Job Annotation</jsdl:JobAnnotation>
       <jsdl:JobProject>apollo33</jsdl:JobProject>
@@ -75,6 +75,10 @@
         <jsdl:URI>file://etc/cron.daily</jsdl:URI>
       </mjsdl:Source>
       <mjsdl:Target>
+        <jsdl:URI>tmp://</jsdl:URI>
+      </mjsdl:Target>
+      <!--
+      <mjsdl:Target>
         <jsdl:URI>gsiftp://ngdata.sapac.edu.au/data/grid/grid-test/StartUp/</jsdl:URI>
         <mjsdl:Credential>
           <mjsdl:MyProxyToken>
@@ -84,11 +88,12 @@
             <mjsdl:MyProxyPort>7512</mjsdl:MyProxyPort>
           </mjsdl:MyProxyToken>
         </mjsdl:Credential>
-      </mjsdl:Target>   
+      </mjsdl:Target>
+      -->   
     </mjsdl:DataTransfer>    
     
     <mjsdl:TransferRequirements>
-      <dmi:MaxAttempts>0</dmi:MaxAttempts>
+      <dmi:MaxAttempts>3</dmi:MaxAttempts>
       <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
     </mjsdl:TransferRequirements>
   </jsdl:JobDescription>
