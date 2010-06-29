@@ -90,7 +90,7 @@
   </bean>
   
   <bean id="checkRequirementsTask" class="org.dataminx.dts.batch.CheckRequirementsTask" scope="step">
-    <property name="jobStepDirectory" value="file:///${dataminx.dir}/jobsteps" />
+    <property name="jobStepDirectory" value="file://${user.home}/.dataminx/jobsteps" />
   </bean>
 
   <!--
