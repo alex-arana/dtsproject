@@ -27,6 +27,8 @@
  */
 package org.dataminx.dts.security.auth.callback;
 
+import java.io.IOException;
+
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
@@ -69,7 +71,7 @@ public class PassiveCallbackHandler implements CallbackHandler {
     /**
      * {@inheritDoc}
      */
-    public void handle(final Callback[] callbacks) throws java.io.IOException,
+    public void handle(final Callback[] callbacks) throws IOException,
         UnsupportedCallbackException {
         for (int i = 0; i < callbacks.length; i++) {
             if (callbacks[i] instanceof NameCallback) {

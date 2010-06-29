@@ -54,8 +54,6 @@ import org.dataminx.dts.security.auth.callback.PassiveCallbackHandler;
  */
 public abstract class AbstractBasicLoginModule implements LoginModule {
 
-    // TODO: javadoc
-
     /** The logger. */
     private static final Log LOGGER = LogFactory
         .getLog(AbstractBasicLoginModule.class);
@@ -181,8 +179,8 @@ public abstract class AbstractBasicLoginModule implements LoginModule {
             mCallbackHandler.handle(callbacks);
 
             final String username = ((NameCallback) callbacks[0]).getName();
-            final String password = ((PasswordCallback) callbacks[1])
-                .getPassword().toString();
+            final String password = new String(
+                ((PasswordCallback) callbacks[1]).getPassword());
 
             ((PasswordCallback) callbacks[1]).clearPassword();
 
