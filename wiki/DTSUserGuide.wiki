@@ -88,9 +88,9 @@ There might be times when you would only deploy the DTS Batch Job module and not
 {{{
  > cd dts-batchjobclient
  > mvn clean
- > mvn assembly:assembly –Pdeploy-assembly1 –DskipTests=true
+ > mvn assembly:assembly -Pdeploy-assembly1 -DskipTests=true
  > cd target/dts-batchjobclient-0.0.1-SNAPSHOT-dts-agent/lib
- > java –jar dts-batchjobclient-0.0.1-SNAPSHOT.jar <path-to-dts-job-def-doc>
+ > java -jar dts-batchjobclient-0.0.1-SNAPSHOT.jar <path-to-dts-job-def-doc>
 }}}
 
 ==== DTS Workernode ====
