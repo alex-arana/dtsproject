@@ -96,23 +96,7 @@
         <beans:property name="maxBatchJobNumer" value="${wn.manager.maxBatchJobNumber}"/>
     </beans:bean>
 
-    <beans:bean id="jobOperator" class="org.springframework.batch.core.launch.support.SimpleJobOperator">
-        <beans:property name="jobExplorer">
-            <beans:bean class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">
-                <beans:property name="dataSource" ref="dataSource" />
-            </beans:bean>
-        </beans:property>
-        <beans:property name="jobRegistry" ref="jobRegistry"/>
-        <beans:property name="jobRepository" ref="jobRepository" />
-        <beans:property name="jobLauncher" ref="dtsJobLauncher" />
-    </beans:bean>
-
-    <beans:bean id="jobRegistry" class="org.springframework.batch.core.configuration.support.MapJobRegistry"/>
-    <beans:bean id="jobRegistryBeanPostProcessor" class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">
-        <beans:property name="jobRegistry" ref="jobRegistry"/>
-    </beans:bean>
-
-    <beans:bean id="dtsWorkerNodeInformationServiceImpl" class="org.dataminx.dts.wn.DtsWorkerNodeInformationServiceImpl">
+    <beans:bean id="dtsWorkerNodeInformationService" class="org.dataminx.dts.wn.DtsWorkerNodeInformationServiceImpl">
         <beans:property name="workerNodeID" value="${wn.id}"/>
         <beans:property name="workerNodeIDMessageHeaderName" value="${wn.id.message.header.name}"/>
     </beans:bean>
@@ -185,7 +169,7 @@
     <beans:bean id="jobNotificationService"
                 class="org.dataminx.dts.wn.service.WorkerNodeJobNotificationService">
         <beans:property name="channelTemplate" ref="dtsEventsChannelTemplate"/>
-        <beans:property name="dtsWorkerNodeInformationService" ref="dtsWorkerNodeInformationServiceImpl"/>
+        <beans:property name="dtsWorkerNodeInformationService" ref="dtsWorkerNodeInformationService"/>
     </beans:bean>
     <!--
     <beans:bean id="dtsJobRequestHandler"
@@ -256,14 +240,6 @@
         <beans:property name="transformer" ref="dtsMessagePayloadTransformer"/>
         <beans:property name="channelTemplate" ref="dtsEventsChannelTemplate"/>
         <beans:property name="dtsJobLauncher" ref="dtsJobLauncher"/>
-
-        <!--
-   <beans:property name="mExpectedTypes">
-            <beans:list>
-                <beans:value>org.dataminx.schemas.dts.x2009.x07.messages.impl.SubmitJobRequestDocumentImpl</beans:value>
-            </beans:list>
-   </beans:property>
-   -->
     </beans:bean>
 
     <beans:bean id="dtsControlMessageConverter" class="org.dataminx.dts.wn.jms.DtsControlMessageConverter">
