@@ -27,9 +27,12 @@
  */
 package org.dataminx.dts.batch;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
@@ -41,6 +44,7 @@ import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 import org.dataminx.dts.DtsException;
+import org.dataminx.dts.batch.common.DtsBatchJobConstants;
 import org.dataminx.dts.common.vfs.DtsVfsUtil;
 import org.dataminx.dts.security.crypto.DummyEncrypter;
 import org.dataminx.dts.security.crypto.Encrypter;
@@ -98,6 +102,10 @@ public abstract class AbstractJobPartitioningStrategy implements
     /** A reference to the DtsJobStepAllocator. */
     private DtsJobStepAllocator mDtsJobStepAllocator;
 
+    /** TODO: Define a new unique directory as a sub dir of the DTS_JOB_STEP_DIRECTORY_KEY
+    for writing step files for this particular job */
+    // private File mJobStepDir;
+
     /**
      * Add the given source to the list of files to transfer.
      *
@@ -109,13 +117,13 @@ public abstract class AbstractJobPartitioningStrategy implements
      */
     private void addFilesToTransfer(final FileObject source,
         final FileObject destination, final int dataTransferIndex)
-        throws FileSystemException {
+        throws FileSystemException, FileNotFoundException {
         LOGGER.debug("addFilesToTransfer(\"" + source.getURL() + "\", \""
             + destination.getURL() + "\", " + dataTransferIndex + ")");
         // update member vars
         mTotalSize += source.getContent().getSize();
-        mTotalFiles++;
-        mPerDataTransferTotalFiles++;
+        ++mTotalFiles;
+        ++mPerDataTransferTotalFiles;
         // adds the new DtsDataTransferUnit to the current DtsJobStep (in jobStepAllocator)
         // the dataTransferUnit represents a single file only transfer
         mDtsJobStepAllocator.addDataTransferUnit(
@@ -172,6 +180,12 @@ public abstract class AbstractJobPartitioningStrategy implements
         FileSystemManager fileSystemManager = null;
         final DtsJobDetails jobDetails = new DtsJobDetails();
 
+        // TODO: lets create a new dir in the for this particular job
+        // as a sub-directory of the DTS_JOB_STEP_DIRECTORY_KEY.
+        // This method throws IllegalStateExceptions if the job dir cannot
+        // be created. 
+        //this.createJobStepDir();
+        
         try {
             try {
                 fileSystemManager = mDtsVfsUtil.createNewFsManager();
@@ -187,6 +201,7 @@ public abstract class AbstractJobPartitioningStrategy implements
             jobDetails.setJobTag(jobTag);
 
             mDtsJobStepAllocator = createDtsJobStepAllocator();
+            // TODO: implement mDtsJobStepAllocator.setJobStepDir(mJobStepDir);
             mExcluded = new ArrayList<String>();
             mTotalSize = 0;
             mTotalFiles = 0;
@@ -256,6 +271,7 @@ public abstract class AbstractJobPartitioningStrategy implements
                     // allocator's step with the given byte-size and file-num
                     // constraints (i.e. mDtsJobStepAllocator.mTmpDtsJobStep).
                     // Thus, there is always at least ONE (often more) steps per dataTransfer element.
+                    LOGGER.debug("Creating new dataTransfer: "+sourceParent.getFileSystem().getRoot().getURL().toString() + "  "+targetParent.getFileSystem().getRoot().getURL().toString());
                     mDtsJobStepAllocator.createNewDataTransfer(
                         sourceParent.getFileSystem().getRoot().getURL().toString(),
                         targetParent.getFileSystem().getRoot().getURL().toString(),
@@ -290,8 +306,7 @@ public abstract class AbstractJobPartitioningStrategy implements
 
                     final CreationFlagEnumeration.Enum creationFlag = ((MinxJobDescriptionType) jobDescription)
                         .getTransferRequirements().getCreationFlag();
-                    prepare(sourceParent, targetParent, dataTransferIndex,
-                        creationFlag);
+                    prepare(sourceParent, targetParent, dataTransferIndex, creationFlag);
 
                     // Update the max number of total files to be transferred for the
                     // given source and/or target based on the number of files to be
@@ -306,7 +321,7 @@ public abstract class AbstractJobPartitioningStrategy implements
                         .getFileSystem().getRoot().getURL().toString();
 
                     // Update the JobDetails Map that holds the maximum number of files to be transferred
-                    // from each Source Map<Source URI (String), number of files (Integer)>.
+                    // from each Source using: Map<Source URI (String), number of files (Integer)>.
                     // We need this max number of files to be transferred for each source
                     // so we can intelligently decide how many parallel threads we need to use
                     // whenever we deal with the given source. knowing the number of parallel
@@ -336,10 +351,14 @@ public abstract class AbstractJobPartitioningStrategy implements
                     throw e;
                 }
 
-                // If the allocator's current step contains DTUs, then ensure
-                // that this is also added to the allocator's list of steps and
-                // close the allocation.
-                mDtsJobStepAllocator.closeNewDataTransfer();
+                try {
+                    // If the allocator's current step contains DTUs, then ensure
+                    // that this is also added to the allocator's list of steps and
+                    // close the allocation.
+                    mDtsJobStepAllocator.closeNewDataTransfer();
+                } catch (final FileNotFoundException e) {
+                    throw new DtsException(e);
+                }
 
             }
             LOGGER.info("Total number of files to be transferred: "
@@ -385,6 +404,32 @@ public abstract class AbstractJobPartitioningStrategy implements
 
         return jobDetails;
     }
+
+
+    /**
+     * TODO: implement 
+     * Create a new unique directory as a sub dir of the DTS_JOB_STEP_DIRECTORY_KEY
+     * for this particular job for writing step files.
+     */
+    /*private void createJobStepDir() {
+        // lets create a new unique job directory to store all the job
+        // step files
+        final File jobStepRootDir = new File(System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY));
+        if (!jobStepRootDir.exists() && !jobStepRootDir.isDirectory()) {
+            throw new IllegalStateException("Job step root directory does not exist: "
+                    + System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY));
+        }
+        final File jobDir = new File(jobStepRootDir, UUID.randomUUID().toString());
+        if (!jobDir.mkdir()) {
+            throw new IllegalStateException("Could not create unique job step directory");
+        }
+        mJobStepDir = new File(jobDir, "dtsJobSteps");
+        if (!mJobStepDir.mkdir()) {
+            throw new IllegalStateException("Could not create job step sub directory");
+        }
+    }*/
+
+
 
     /**
      * Prepares the remote destination for the files that will be transferred to it by pre-generating the folders where
@@ -465,18 +510,20 @@ public abstract class AbstractJobPartitioningStrategy implements
                     // ... File to Dir
 
                     // create the new object
-                    final String newFilePath = destinationParent.getURL()
+                    /*final String newFilePath = destinationParent.getURL()
                         + FileName.SEPARATOR
-                        + sourceParent.getName().getBaseName();
+                        + sourceParent.getName().getBaseName();*/
 
                     // would be easier to resolve using existing FileObject and 
                     // specifying a relative path, e.g:
-                    //final FileObject destinationChild = destinationParent.resolveFile(sourceParent.getName().getBaseName());
-                    final FileObject destinationChild = destinationParent
+                    final FileObject destinationChild = destinationParent.resolveFile(sourceParent.getName().getBaseName());
+                    /*final FileObject destinationChild = destinationParent
                         .getFileSystem().getFileSystemManager().resolveFile(
                             newFilePath,
                             destinationParent.getFileSystem()
-                                .getFileSystemOptions());
+                                .getFileSystemOptions());*/
+
+
                     // destinationChild.createFile();
 
                     if (destinationChild.exists()) {
@@ -500,26 +547,23 @@ public abstract class AbstractJobPartitioningStrategy implements
             else if (sourceParent.getType().equals(FileType.FOLDER)
                 && !mCancelled) {
 
-                // .. Dir to Dir 
-                // May not be Dir to Dir, what about Dir to (existing) File ?
-                // in which case we should prob throw excetion (or exclude?)
-                //if(destinationParent.exists() && destinationParent.getType().equals(FileType.FILE)){
-                    // throw new JobScopingException("mkdir: destination exists but is not a directory");
-                    // or
-                    // mExcluded.add(sourceParent.getName().getFriendlyURI());
-                //} else {
+                // .. Dir to File
+                if(destinationParent.exists() && destinationParent.getType().equals(FileType.FILE))
+                     throw new JobScopingException("mkdir: destination exists but is not a directory");
+                    // or mExcluded.add(sourceParent.getName().getFriendlyURI());
 
+                // .. Dir to Dir/IMAGINARY
                 // create the new object
                 // again may be easier to resolve using existing FileObject and 
                 // specifying a relative path, e.g:
-                //final FileObject destinationChild = destinationParent.resolveFile(sourceParent.getName().getBaseName());
-                final String newFolderPath = destinationParent.getURL()
+                final FileObject destinationChild = destinationParent.resolveFile(sourceParent.getName().getBaseName());
+                /*final String newFolderPath = destinationParent.getURL()
                     + FileName.SEPARATOR + sourceParent.getName().getBaseName();
                 final FileObject destinationChild = destinationParent
                     .getFileSystem().getFileSystemManager().resolveFile(
                         newFolderPath,
                         destinationParent.getFileSystem()
-                            .getFileSystemOptions());
+                            .getFileSystemOptions());*/
 
                 if (!destinationChild.exists()) {
                     destinationChild.createFolder();
@@ -544,6 +588,9 @@ public abstract class AbstractJobPartitioningStrategy implements
         }
         catch (final FileSystemException e) {
             throw new DtsException(e);
+        }
+        catch(final FileNotFoundException e){
+            throw new DtsException(e); 
         }
     }
 

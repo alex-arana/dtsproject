@@ -27,6 +27,7 @@
  */
 package org.dataminx.dts.batch;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 /**
@@ -57,15 +58,25 @@ interface DtsJobStepAllocator {
      * @param dataTransferUnit the DtsDataTransferUnit to be added to the DtsJobStep
      * @param maxTotalByteSizePerStepLimit the total number in bytes per step limit
      * @param maxTotalFileNumPerStepLimit the total number of files per step limit
+     * @throws FileNotFoundException if the given dataTransferUnit could not be persisted
      */
     void addDataTransferUnit(final DtsDataTransferUnit dataTransferUnit,
         final long maxTotalByteSizePerStepLimit,
-        final int maxTotalFileNumPerStepLimit);
+        final int maxTotalFileNumPerStepLimit) throws FileNotFoundException;
 
     /**
      * This method had to be called before a new DataTransfer element is processed.
+     * @throws FileNotFoundException if the given dataTransferUnit could not be persisted when
+     * closing the data transfer. 
      */
-    void closeNewDataTransfer();
+    void closeNewDataTransfer() throws FileNotFoundException;
+
+    /**
+     * TODO Directory to where job step files will be written.
+     *
+     * @param jobStepDir the directory where job steps file are persited. 
+     */
+    //void setJobStepDir(final java.io.File jobStepDir);
 
     /**
      * Returns the list of DtsJobSteps that has been allocated by the DtsJobStepAllocator.

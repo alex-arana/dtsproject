@@ -32,8 +32,8 @@ import org.testng.annotations.Test;
 public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
     AbstractTestNGSpringContextTests {
 
-    private static final long FILE_SIZE_10MB = 10485760;
-    private static final long FILE_SIZE_1MB = 1048576;
+    private static final long FILE_SIZE_10MB = 10485760; //bytes
+    private static final long FILE_SIZE_1MB = 1048576;   // bytes
 
     @Autowired
     private AbstractJobPartitioningStrategy mPartitioningStrategy;
@@ -51,6 +51,7 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
         return new Object[][] { {2, 5}, {3, 3}};
     }
 
+    
     @Test(groups = {"local-file-transfer-test"})
     public void testPartitionJobWith20MixedFilesBasedOnMaxNumOfFiles()
         throws IOException, XmlException, JobScopingException {
@@ -119,6 +120,8 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
             jobId, jobTag);
     }
 
+     
+     
     @Test(groups = {"local-file-transfer-test"})
     public void testPartitionJobWithMixedFilesBasedOnMaxByteSize()
         throws IOException, XmlException, JobScopingException {
