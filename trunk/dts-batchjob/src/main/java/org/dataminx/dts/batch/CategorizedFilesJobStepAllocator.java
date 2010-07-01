@@ -27,6 +27,7 @@
  */
 package org.dataminx.dts.batch;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +59,9 @@ public class CategorizedFilesJobStepAllocator implements DtsJobStepAllocator,
 
     /** The cut off size for a file to be considered big. */
     private long mBigFileSize;
+
+    /** TODO the directory where jobSteps will be persited */
+    //private File mJobStepDir = new File(System.getProperty("java.io.tmpdir"));
 
     /**
      * MixedFilesJobStepAllocator's constructor.
@@ -172,4 +176,14 @@ public class CategorizedFilesJobStepAllocator implements DtsJobStepAllocator,
             "Big file size should have a positive value");
 
     }
+
+
+
+    /**
+     * TODO implement
+     * {@inheritDoc}
+     */
+    //public void setJobStepDir(File jobStepDir){
+    //    this.mJobStepDir = jobStepDir;
+    //}
 }
