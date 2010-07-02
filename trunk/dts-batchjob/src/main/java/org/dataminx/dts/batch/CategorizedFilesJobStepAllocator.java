@@ -35,6 +35,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
+ * TODO - Currently broken - needs work.
  * A JobStepAllocator that groups files based on their sizes.
  *
  * @author Gerson Galang
@@ -60,8 +61,11 @@ public class CategorizedFilesJobStepAllocator implements DtsJobStepAllocator,
     /** The cut off size for a file to be considered big. */
     private long mBigFileSize;
 
-    /** TODO the directory where jobSteps will be persited */
-    //private File mJobStepDir = new File(System.getProperty("java.io.tmpdir"));
+     /** Counts the number of steps generated */
+    //private int mStepCount = 0;
+
+    /** The directory path jobStep files will be persisted */
+    private String mJobStepDir = (new File(System.getProperty("java.io.tmpdir"))).getAbsolutePath();
 
     /**
      * MixedFilesJobStepAllocator's constructor.
@@ -78,42 +82,54 @@ public class CategorizedFilesJobStepAllocator implements DtsJobStepAllocator,
         final int maxTotalFileNumPerStepLimit) {
 
         if (dataTransferUnit.getSize() >= mBigFileSize) {
-            // if mTmpDtsJobStep has already been initialised and (number of DataTransferUnits in the step
-            // has reached the max total number of files per step limit OR the size of the file we are going
-            // to add will exceed the max size in bytes of all the files per step limit)
             if (mTmpBigFilesDtsJobStep != null
-                && (mTmpBigFilesDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit || mTmpBigFilesDtsJobStep
-                    .getCurrentTotalByteSize()
-                    + dataTransferUnit.getSize() >= maxTotalByteSizePerStepLimit)) {
+                    && (mTmpBigFilesDtsJobStep.getCurrentTotalFileNum() < maxTotalFileNumPerStepLimit
+                    && mTmpBigFilesDtsJobStep.getCurrentTotalByteSize() + dataTransferUnit.getSize() <= maxTotalByteSizePerStepLimit)) {
+
+                // with the addition of this dtu, we are less than the current
+                // step file count limit and will be less than or equal to the step
+                // byte limit so we can add the dtu to the current step.
+                mTmpBigFilesDtsJobStep.addDataTransferUnit(dataTransferUnit);
+
+            } else {
+                // otherwise, with the addition of this dtu, either the file count
+                // limit or the byte limit for the current step will be exceeded.
+                // Therefore, persist the current job step without adding the dtu
+                // and create a new jobStep and add the dtu to the new step.
                 mSteps.add(mTmpBigFilesDtsJobStep);
+                String jobStepFilePath = (new File(this.mJobStepDir,  mSteps.size() + 1/*this.mStepCount*/ + "_jobStep.dts")).getAbsolutePath();
+
                 mTmpBigFilesDtsJobStep = new DtsJobStep(mSourceRootFileObject,
-                    mTargetRootFileObject, mSteps.size() + 1,
-                    maxTotalFileNumPerStepLimit, maxTotalByteSizePerStepLimit,
-                    DtsJobStep.Type.BIG_FILES);
+                        mTargetRootFileObject, mSteps.size() + 1,
+                        maxTotalFileNumPerStepLimit, maxTotalByteSizePerStepLimit,
+                        DtsJobStep.Type.BIG_FILES, jobStepFilePath);
                 mTmpBigFilesDtsJobStep.addDataTransferUnit(dataTransferUnit);
+
             }
-            else {
-                // if (!mTmpBigFilesDtsJobStep.isFull())
-                mTmpBigFilesDtsJobStep.addDataTransferUnit(dataTransferUnit);
-            }
-        }
-        else { // it is a small file
-            // if mTmpDtsJobStep has already been initialised and (number of DataTransferUnits in the step
-            // has reached the max total number of files per step limit OR the size of the file we are going
-            // to add will exceed the max size in bytes of all the files per step limit)
+
+
+        } else { // it is a small file
             if (mTmpSmallFilesDtsJobStep != null
-                && (mTmpSmallFilesDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit || mTmpSmallFilesDtsJobStep
-                    .getCurrentTotalByteSize()
-                    + dataTransferUnit.getSize() >= maxTotalByteSizePerStepLimit)) {
-                mSteps.add(mTmpSmallFilesDtsJobStep);
-                mTmpSmallFilesDtsJobStep = new DtsJobStep(
-                    mSourceRootFileObject, mTargetRootFileObject,
-                    mSteps.size() + 1, maxTotalFileNumPerStepLimit,
-                    maxTotalByteSizePerStepLimit, DtsJobStep.Type.SMALL_FILES);
+                    && (mTmpSmallFilesDtsJobStep.getCurrentTotalFileNum() < maxTotalFileNumPerStepLimit
+                    && mTmpSmallFilesDtsJobStep.getCurrentTotalByteSize() + dataTransferUnit.getSize() <= maxTotalByteSizePerStepLimit)) {
+
+                // with the addition of this dtu, we are less than the current
+                // step file count limit and will be less than or equal to the step
+                // byte limit so we can add the dtu to the current step.
                 mTmpSmallFilesDtsJobStep.addDataTransferUnit(dataTransferUnit);
-            }
-            else {
-                // if (!mTmpSmallFilesDtsJobStep.isFull())
+
+            } else {
+                // otherwise, with the addition of this dtu, either the file count
+                // limit or the byte limit for the current step will be exceeded.
+                // Therefore, persist the current job step without adding the dtu
+                // and create a new jobStep and add the dtu to the new step.
+                String jobStepFilePath = (new File(this.mJobStepDir,  mSteps.size() + 1/*this.mStepCount*/ + "_jobStep.dts")).getAbsolutePath();
+                mSteps.add(mTmpSmallFilesDtsJobStep);
+
+                mTmpSmallFilesDtsJobStep = new DtsJobStep(
+                        mSourceRootFileObject, mTargetRootFileObject,
+                        mSteps.size() + 1, maxTotalFileNumPerStepLimit,
+                        maxTotalByteSizePerStepLimit, DtsJobStep.Type.SMALL_FILES, jobStepFilePath);
                 mTmpSmallFilesDtsJobStep.addDataTransferUnit(dataTransferUnit);
             }
         }
@@ -145,15 +161,18 @@ public class CategorizedFilesJobStepAllocator implements DtsJobStepAllocator,
                     + "or more than the big files size");
         }
 
+        //++this.mStepCount;
+        String jobStepFilePath = (new File(this.mJobStepDir,  mSteps.size() + 1/*this.mStepCount*/ + "_jobStep.dts")).getAbsolutePath();
+
         mTmpBigFilesDtsJobStep = new DtsJobStep(sourceRootFileObject,
             targetRootFileObject, mSteps.size() + 1,
             maxTotalFileNumPerStepLimit, maxTotalByteSizePerStepLimit,
-            DtsJobStep.Type.BIG_FILES);
+            DtsJobStep.Type.BIG_FILES, jobStepFilePath);
 
         mTmpSmallFilesDtsJobStep = new DtsJobStep(sourceRootFileObject,
             targetRootFileObject, mSteps.size() + 1,
             maxTotalFileNumPerStepLimit, maxTotalByteSizePerStepLimit,
-            DtsJobStep.Type.SMALL_FILES);
+            DtsJobStep.Type.SMALL_FILES, jobStepFilePath);
 
         mSourceRootFileObject = sourceRootFileObject;
         mTargetRootFileObject = targetRootFileObject;
@@ -180,10 +199,63 @@ public class CategorizedFilesJobStepAllocator implements DtsJobStepAllocator,
 
 
     /**
-     * TODO implement
      * {@inheritDoc}
      */
-    //public void setJobStepDir(File jobStepDir){
-    //    this.mJobStepDir = jobStepDir;
+    public void setJobStepSaveDir(String jobStepDirPath) {
+        this.mJobStepDir = jobStepDirPath;
+    }
+
+
+    //public int getStepCount(){
+    //    return this.mStepCount;
     //}
 }
+
+
+/*
+ * public void addDataTransferUnit(final DtsDataTransferUnit dataTransferUnit,
+        final long maxTotalByteSizePerStepLimit,
+        final int maxTotalFileNumPerStepLimit) {
+
+        if (dataTransferUnit.getSize() >= mBigFileSize) {
+            // if mTmpDtsJobStep has already been initialised and (number of DataTransferUnits in the step
+            // has reached the max total number of files per step limit OR the size of the file we are going
+            // to add will exceed the max size in bytes of all the files per step limit)
+            if (mTmpBigFilesDtsJobStep != null
+                    && (mTmpBigFilesDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit
+                    || mTmpBigFilesDtsJobStep.getCurrentTotalByteSize() + dataTransferUnit.getSize() >= maxTotalByteSizePerStepLimit)) {
+
+                mSteps.add(mTmpBigFilesDtsJobStep);
+                mTmpBigFilesDtsJobStep = new DtsJobStep(mSourceRootFileObject,
+                        mTargetRootFileObject, mSteps.size() + 1,
+                        maxTotalFileNumPerStepLimit, maxTotalByteSizePerStepLimit,
+                        DtsJobStep.Type.BIG_FILES);
+                mTmpBigFilesDtsJobStep.addDataTransferUnit(dataTransferUnit);
+
+
+            } else {
+                // if (!mTmpBigFilesDtsJobStep.isFull())
+                mTmpBigFilesDtsJobStep.addDataTransferUnit(dataTransferUnit);
+            }
+
+
+        } else { // it is a small file
+            // if mTmpDtsJobStep has already been initialised and (number of DataTransferUnits in the step
+            // has reached the max total number of files per step limit OR the size of the file we are going
+            // to add will exceed the max size in bytes of all the files per step limit)
+            if (mTmpSmallFilesDtsJobStep != null
+                    && (mTmpSmallFilesDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit || mTmpSmallFilesDtsJobStep.getCurrentTotalByteSize()
+                    + dataTransferUnit.getSize() >= maxTotalByteSizePerStepLimit)) {
+                mSteps.add(mTmpSmallFilesDtsJobStep);
+                mTmpSmallFilesDtsJobStep = new DtsJobStep(
+                        mSourceRootFileObject, mTargetRootFileObject,
+                        mSteps.size() + 1, maxTotalFileNumPerStepLimit,
+                        maxTotalByteSizePerStepLimit, DtsJobStep.Type.SMALL_FILES);
+                mTmpSmallFilesDtsJobStep.addDataTransferUnit(dataTransferUnit);
+            } else {
+                // if (!mTmpSmallFilesDtsJobStep.isFull())
+                mTmpSmallFilesDtsJobStep.addDataTransferUnit(dataTransferUnit);
+            }
+        }
+    }
+ */

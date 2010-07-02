@@ -72,11 +72,11 @@ interface DtsJobStepAllocator {
     void closeNewDataTransfer() throws FileNotFoundException;
 
     /**
-     * TODO Directory to where job step files will be written.
+     * Path to a directory where the allocator will write all the job step files .
      *
-     * @param jobStepDir the directory where job steps file are persited. 
+     * @param jobStepDir the directory path where job steps files are persited.
      */
-    //void setJobStepDir(final java.io.File jobStepDir);
+    void setJobStepSaveDir(final String jobStepDir);
 
     /**
      * Returns the list of DtsJobSteps that has been allocated by the DtsJobStepAllocator.

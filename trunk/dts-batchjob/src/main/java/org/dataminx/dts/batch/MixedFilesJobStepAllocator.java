@@ -29,7 +29,6 @@ package org.dataminx.dts.batch;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,10 +53,10 @@ public class MixedFilesJobStepAllocator implements DtsJobStepAllocator {
     private String mTargetRootFileObject;
 
     /** Counts the number of steps generated */
-    private int stepCounter = 0;
+    private int mStepCount = 0;
 
-    /** TODO The directory where jobStep files will be persisted */
-    //private File mJobStepDir = new File(System.getProperty("java.io.tmpdir"));
+    /** TODO The directory path jobStep files will be persisted */
+    private String mJobStepDir = (new File(System.getProperty("java.io.tmpdir"))).getAbsolutePath();
 
     /**
      * MixedFilesJobStepAllocator's constructor.
@@ -98,66 +97,17 @@ public class MixedFilesJobStepAllocator implements DtsJobStepAllocator {
     }
 
     /**
-     * Persist the current job step (currently adds this to the mSteps, but
-     * TODO write the jobStepToFile and not save step in collection).
+     * Persist the current job step 
      * @throws FileNotFoundException
      */
     private void persistCurrentJobStep() throws FileNotFoundException{
-         // TODO uncomment this.writeJobStepToFile();
-         // remove mSteps.add(mTmpDtsJobStep)
+        mTmpDtsJobStep.writeToFile();
+        // TODO: do not save the step in this.mSteps as this collection
+        // will no longer be needed when all of the jobStep state is written
+        // to file.
+        mTmpDtsJobStep.clearDataTransferUnits();
         mSteps.add(mTmpDtsJobStep);
     }
-
-
-    /**
-     * Method is replaced as above because it contains a bug in the 'if' logic.
-     * For example: if, with the addition of the given DTU, the total step bytes
-     * is raised to equal the byte limit
-     * (i.e. mTmpDtsJobStep.getCurrentTotalByteSize() + dtu.getSize() == the maxTotalByteSizePerStepLimit)
-     * then the dtu is not added to the current step even though it should be ! 
-     */
-    /*public void addDataTransferUnit(final DtsDataTransferUnit dataTransferUnit,
-        final long maxTotalByteSizePerStepLimit,
-        final int maxTotalFileNumPerStepLimit,
-        final File jobStepDir) throws FileNotFoundException{
-        if (mTmpDtsJobStep != null
-                && (mTmpDtsJobStep.getCurrentTotalFileNum() >= maxTotalFileNumPerStepLimit
-                || (mTmpDtsJobStep.getCurrentTotalByteSize() + dataTransferUnit.getSize()) >= maxTotalByteSizePerStepLimit)) {
-
-            // TODO: here write a new step properties file rather than add it to the list (and remove the list)
-            //this.writeJobStepToFile(jobStepDir);
-            mSteps.add(mTmpDtsJobStep);
-
-            this.createNewDataTransfer(
-                    mSourceRootFileObject,
-                    mTargetRootFileObject,
-                    maxTotalByteSizePerStepLimit,
-                    maxTotalFileNumPerStepLimit);
-        }
-        mTmpDtsJobStep.addDataTransferUnit(dataTransferUnit);
-    }*/
-
-
-    /**
-     * TODO implement 
-     * @throws FileNotFoundException
-     */
-    /*private void writeJobStepToFile() throws FileNotFoundException {
-        PrintWriter writer = null;
-        try {
-            File newStepFile = new File(this.mJobStepDir, this.stepCounter + "_jobStep.dts");
-            writer = new PrintWriter(newStepFile);
-            for (final DtsDataTransferUnit dataTransferUnit : this.mTmpDtsJobStep.getDataTransferUnits()) {
-                writer.print(dataTransferUnit.getSourceFileUri() + ";");
-                writer.print(dataTransferUnit.getDestinationFileUri() + ";");
-                writer.print(dataTransferUnit.getDataTransferIndex() + ";");
-                writer.println(dataTransferUnit.getSize() + ";");
-            }
-        } finally {
-            writer.close();
-        }
-    }*/
-
 
     /**
      * {@inheritDoc}
@@ -176,13 +126,15 @@ public class MixedFilesJobStepAllocator implements DtsJobStepAllocator {
         final long maxTotalByteSizePerStepLimit,
         final int maxTotalFileNumPerStepLimit) {
         // init member vars
+        ++this.mStepCount;
+        String jobStepFilePath = (new File(this.mJobStepDir, this.mStepCount + "_jobStep.dts")).getAbsolutePath();
         this.mTmpDtsJobStep = new DtsJobStep(sourceRootFileObject,
-            targetRootFileObject, mSteps.size() + 1,
+            targetRootFileObject, mStepCount, //mSteps.size() + 1,
             maxTotalFileNumPerStepLimit, maxTotalByteSizePerStepLimit,
-            DtsJobStep.Type.MIXED_FILES);
+            DtsJobStep.Type.MIXED_FILES, jobStepFilePath);
         this.mSourceRootFileObject = sourceRootFileObject;
         this.mTargetRootFileObject = targetRootFileObject;
-        ++this.stepCounter;
+        
     }
 
     /**
@@ -192,10 +144,15 @@ public class MixedFilesJobStepAllocator implements DtsJobStepAllocator {
         return mSteps;
     }
 
+    //public int getStepCount(){
+    //    return this.mStepCount;
+    //}
+
+
     /**
      * {@inheritDoc}
      */
-    //public void setJobStepDir(File jobStepDir) {
-    //    this.mJobStepDir = jobStepDir;
-    //}
+    public void setJobStepSaveDir(String jobStepDirPath) {
+        this.mJobStepDir = jobStepDirPath;
+    }
 }

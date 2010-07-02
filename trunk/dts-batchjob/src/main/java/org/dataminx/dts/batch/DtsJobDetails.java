@@ -77,6 +77,9 @@ public class DtsJobDetails implements Serializable {
     /** The job tag. */
     private String mJobTag;
 
+    /** The directory where all this job's job steps are written */
+    private String mRootJobDir;
+
     /** The list of files that have been excluded from the job and won't be transferred. */
     private List<String> mExcludedFiles = new ArrayList<String>();
 
@@ -148,7 +151,7 @@ public class DtsJobDetails implements Serializable {
      *
      * @param jobSteps the list of DtsJobSteps to save
      */
-    public void saveJobSteps(final List<DtsJobStep> jobSteps) {
+    /*public void saveJobSteps(final List<DtsJobStep> jobSteps) {
         LOGGER.debug("DtsJobDetails saveJobSteps()");
 
         // write the DataTransferUnits held by each of the steps and also add the filename where the DataTransferUnits
@@ -161,6 +164,12 @@ public class DtsJobDetails implements Serializable {
             jobStep.setJobStepFilename(filename);
         }
 
+        // set this classes list of DtsJobSteps (should we do this because
+        // each step holds a List referencing many DTUs ! and this can (potentially) require lots of memory to hold these collections)
+        mJobSteps = jobSteps;
+    }*/
+
+    public void setJobSteps(final List<DtsJobStep> jobSteps){
         // set this classes list of DtsJobSteps (should we do this because
         // each step holds a List referencing many DTUs ! and this can (potentially) require lots of memory to hold these collections)
         mJobSteps = jobSteps;
@@ -196,7 +205,7 @@ public class DtsJobDetails implements Serializable {
      * @param filename the name of the file to write the DtsJobStep to
      * @param jobStep the DtsJobStep to be serialized
      */
-    private void writeJobStepToFile(final String filename,
+    /*private void writeJobStepToFile(final String filename,
         final DtsJobStep jobStep) {
         PrintWriter writer = null;
         try {
@@ -214,6 +223,16 @@ public class DtsJobDetails implements Serializable {
             writer.println(dataTransferUnit.getSize() + ";");
         }
         writer.close();
+    }*/
+
+
+
+    public void setRootJobDir(String rootJobDir){
+        this.mRootJobDir = rootJobDir; 
+    }
+
+    public String getRootJobDir(){
+        return this.mRootJobDir;
     }
 
 }

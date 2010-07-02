@@ -43,7 +43,7 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
         final DtsVfsUtil dtsVfsUtil = new DtsVfsUtil();
         mPartitioningStrategy.setDtsVfsUtil(dtsVfsUtil);
         System.setProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY,
-            "/tmp");
+            System.getProperty("java.io.tmpdir"));
     }
 
     @DataProvider(name = "jobwith9files-provider")
@@ -51,7 +51,7 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
         return new Object[][] { {2, 5}, {3, 3}};
     }
 
-    
+ 
     @Test(groups = {"local-file-transfer-test"})
     public void testPartitionJobWith20MixedFilesBasedOnMaxNumOfFiles()
         throws IOException, XmlException, JobScopingException {

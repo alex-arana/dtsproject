@@ -48,7 +48,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
     public void init() {
         mDtsVfsUtil = mock(DtsVfsUtil.class);
         System.setProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY,
-            "/tmp");
+            System.getProperty("java.io.tmpdir"));
     }
 
     @Test(groups = {"local-file-transfer-test"})
@@ -65,7 +65,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(3);
 
         final FileSystemManager fileSystemManager = VFSUtil.createNewFsManager(
-            false, false, false, false, true, true, false, "/tmp");
+            false, false, false, false, true, true, false, System.getProperty("java.io.tmpdir"));
 
         when(mDtsVfsUtil.createNewFsManager()).thenReturn(
             (DefaultFileSystemManager) fileSystemManager);
