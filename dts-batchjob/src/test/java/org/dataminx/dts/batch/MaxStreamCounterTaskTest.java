@@ -72,7 +72,7 @@ public class MaxStreamCounterTaskTest {
             .thenReturn(sourceTargetMaxTotalFilesToTransfer);
 
         final FileSystemManager fileSystemManager = VFSUtil.createNewFsManager(
-            false, false, false, false, true, true, false, "/tmp");
+            false, false, false, false, true, true, false, System.getProperty("java.io.tmpdir"));
         when(mDtsVfsUtil.createNewFsManager()).thenReturn(
             (DefaultFileSystemManager) fileSystemManager);
 

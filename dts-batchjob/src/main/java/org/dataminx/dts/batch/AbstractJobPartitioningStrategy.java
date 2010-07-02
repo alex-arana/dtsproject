@@ -64,6 +64,7 @@ import org.springframework.util.Assert;
  * will to use.
  *
  * @author Gerson Galang
+ * @author David Meredith (modifications) 
  */
 public abstract class AbstractJobPartitioningStrategy implements
     JobPartitioningStrategy, InitializingBean {
@@ -180,11 +181,11 @@ public abstract class AbstractJobPartitioningStrategy implements
         FileSystemManager fileSystemManager = null;
         final DtsJobDetails jobDetails = new DtsJobDetails();
 
-        // TODO: lets create a new dir in the for this particular job
+        // Create a new unique dir for this particular job
         // as a sub-directory of the DTS_JOB_STEP_DIRECTORY_KEY.
         // This method throws IllegalStateExceptions if the job dir cannot
         // be created. 
-        //this.createJobStepDir();
+        jobDetails.setRootJobDir( this.createRootJobDir() );
         
         try {
             try {
@@ -201,7 +202,7 @@ public abstract class AbstractJobPartitioningStrategy implements
             jobDetails.setJobTag(jobTag);
 
             mDtsJobStepAllocator = createDtsJobStepAllocator();
-            // TODO: implement mDtsJobStepAllocator.setJobStepDir(mJobStepDir);
+            mDtsJobStepAllocator.setJobStepSaveDir( jobDetails.getRootJobDir() );
             mExcluded = new ArrayList<String>();
             mTotalSize = 0;
             mTotalFiles = 0;
@@ -295,14 +296,6 @@ public abstract class AbstractJobPartitioningStrategy implements
                     //      with the addition of the DTU to its list, then add the existing step
                     //      to the allocator's step list and re-create the current step, then:
                     //    - add the DTU to the allocator's current step 
-                    //
-                    // Thus the allocator Lists many steps, and each step Lists many DTUs !
-                    // and this can (potentially) require lots of memory to hold these collections.
-                    // Would it be better to write the Step to file as soon as the step has reached its constraints
-                    // and do this WHILE recursivley allocating/creating Steps, rather than saving them all AFTER completing the
-                    // scoping as is done below with jobDetails.saveJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps();
-                    // It could really reduce mem footprint of the batch job if all the
-                    // collections did not need to be held in-memory at once (also consider running many jobs concurrently).
 
                     final CreationFlagEnumeration.Enum creationFlag = ((MinxJobDescriptionType) jobDescription)
                         .getTransferRequirements().getCreationFlag();
@@ -376,20 +369,15 @@ public abstract class AbstractJobPartitioningStrategy implements
             jobDetails.setTotalBytes(mTotalSize);
             jobDetails.setTotalFiles(mTotalFiles);
 
-            // TODO: remove this so that the JobSteps are saved in property
-            // files during the allocation process rather than storing and iterating all
-            // jobSteps after allocation (mem-hog)
-            //
-            // saveJobSteps() also sets the JobSteps in jobDetails thus maintaining 
-            // an in-mem collection of job steps (potentially requies lots of mem) 
-            // Would it be better to save each job step as they are
-            // created rather than having to hold all the info within mem as
-            // collections. 
-            jobDetails.saveJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps());
+            // TODO: There will be no need to save all the jobSteps in the jobDetails
+            // as these can now be read from disk when required, e.g. in the
+            // FileCopyTask (since the jobDetails now saves the path to the 
+            // job's unique directory where all the jobSteps are persisted )
+            jobDetails.setJobSteps(mDtsJobStepAllocator.getAllocatedJobSteps());
 
-            for (final DtsJobStep jobStep : mDtsJobStepAllocator
-                .getAllocatedJobSteps()) {
+            for (final DtsJobStep jobStep : mDtsJobStepAllocator.getAllocatedJobSteps()) {
                 LOGGER.debug(jobStep);
+                //jobStep.clearDataTransferUnits();
             }
 
         }
@@ -407,11 +395,10 @@ public abstract class AbstractJobPartitioningStrategy implements
 
 
     /**
-     * TODO: implement 
      * Create a new unique directory as a sub dir of the DTS_JOB_STEP_DIRECTORY_KEY
      * for this particular job for writing step files.
      */
-    /*private void createJobStepDir() {
+    private String createRootJobDir() {
         // lets create a new unique job directory to store all the job
         // step files
         final File jobStepRootDir = new File(System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY));
@@ -419,15 +406,16 @@ public abstract class AbstractJobPartitioningStrategy implements
             throw new IllegalStateException("Job step root directory does not exist: "
                     + System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY));
         }
-        final File jobDir = new File(jobStepRootDir, UUID.randomUUID().toString());
-        if (!jobDir.mkdir()) {
+        final File rootJobDir = new File(jobStepRootDir, UUID.randomUUID().toString());
+        if (!rootJobDir.mkdir()) {
             throw new IllegalStateException("Could not create unique job step directory");
         }
-        mJobStepDir = new File(jobDir, "dtsJobSteps");
-        if (!mJobStepDir.mkdir()) {
-            throw new IllegalStateException("Could not create job step sub directory");
-        }
-    }*/
+        //final File jobStepDir = new File(rootJobDir, "dtsJobSteps");
+        //if (!jobStepDir.mkdir()) {
+        //    throw new IllegalStateException("Could not create job step sub directory");
+        //}
+        return rootJobDir.getAbsolutePath();
+    }
 
 
 
