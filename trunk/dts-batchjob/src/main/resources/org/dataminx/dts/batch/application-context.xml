@@ -37,11 +37,7 @@
   -->
   
   <bean id="jobNotificationService" class="org.dataminx.dts.batch.service.LoggingJobNotificationService" />
-  
-  <bean id="dtsBulkCopyJobCliRunner" class="org.dataminx.dts.batch.client.DtsBulkCopyJobCliRunner">
-    <property name="dtsJobLauncher" ref="dtsJobLauncher"/>
-  </bean>
-  
+
   <!--
      This bean has to be declared outside of the batch-context.xml so that the calling module
      (which most of the time will be dts-workernode) will declare this on its own spring config
