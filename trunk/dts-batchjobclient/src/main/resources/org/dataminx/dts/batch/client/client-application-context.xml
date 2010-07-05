@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+  <!--
+  the DtsBulkCopyJobCliRunner.java class builds the spring context from 
+  the following classpath resources (the first two are from the
+  'dts-batch job' dependent module):
+  
+  /org/dataminx/dts/batch/application-context.xml
+  /org/dataminx/dts/batch/batch-context.xml
+  /org/dataminx/dts/batch/client/client-application-context.xml
+  -->
+
+  <bean id="dtsBulkCopyJobCliRunner" class="org.dataminx.dts.batch.client.DtsBulkCopyJobCliRunner">
+    <property name="dtsJobLauncher" ref="dtsJobLauncher"/>
+  </bean>
+  
+
+</beans>

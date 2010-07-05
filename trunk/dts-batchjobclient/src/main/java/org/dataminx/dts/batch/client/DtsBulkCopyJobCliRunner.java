@@ -59,7 +59,8 @@ public class DtsBulkCopyJobCliRunner {
     /** Default Spring classpath definition. */
     public static final String[] DEFAULT_SPRING_CLASSPATH = {
         "/org/dataminx/dts/batch/application-context.xml",
-        "/org/dataminx/dts/batch/batch-context.xml"};
+        "/org/dataminx/dts/batch/batch-context.xml",
+        "/org/dataminx/dts/batch/client/client-application-context.xml"};
 
     /** The logger. */
     private static final Log LOGGER = LogFactory
