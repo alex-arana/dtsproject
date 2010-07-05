@@ -153,21 +153,30 @@ public class DtsFileTransferJobListener implements JobExecutionListener,
      */
     private void removeJobStepFiles(final String jobTag) {
         LOGGER.debug("Deleting job step files.");
-        final File jobStepDirectory = new File(System
-            .getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY));
-        final File[] jobStepFiles = jobStepDirectory
-            .listFiles(new FilenameFilter() {
-                public boolean accept(final File dir, final String name) {
-                    if (name.startsWith(jobTag) && name.endsWith("dts")) {
-                        return true;
-                    }
-                    return false;
-                }
-            });
+        final File jobStepDirectory = new File(
+                System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY),
+                jobTag);
+        final File[] jobStepFiles = jobStepDirectory.listFiles(dtsStepFilesFilter);
         for (final File jobStepFile : jobStepFiles) {
             jobStepFile.delete();
         }
+        boolean deletedOk = jobStepDirectory.delete();
+        LOGGER.debug("Deleting job's unique directory: "+deletedOk);
     }
+
+    /**
+     * Filter used to delete .dts step files.
+     */
+    private FilenameFilter dtsStepFilesFilter = new FilenameFilter() {
+
+        public boolean accept(final File dir, final String name) {
+            //if (name.startsWith(jobTag) && name.endsWith("dts")) {
+            if (name.endsWith("dts")) {
+                return true;
+            }
+            return false;
+        }
+    };
 
     public void setExecutionContextCleaner(
         final ExecutionContextCleaner executionContextCleaner) {
