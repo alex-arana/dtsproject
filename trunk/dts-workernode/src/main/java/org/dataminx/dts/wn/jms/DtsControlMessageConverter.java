@@ -33,7 +33,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.jms.BytesMessage;
@@ -45,11 +44,16 @@ import javax.jms.TextMessage;
 import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
+import org.apache.xmlbeans.XmlObject;
 
 import org.dataminx.dts.common.jms.DtsMessagePayloadTransformer;
 import org.dataminx.dts.common.xml.ByteArrayResult;
 import org.dataminx.schemas.dts.x2009.x07.messages.CustomFaultDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.CustomFaultType;
+import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.GetJobDetailsRequestDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.channel.MessageChannelTemplate;
@@ -72,24 +76,20 @@ import org.springframework.xml.transform.StringResult;
  * @author hnguyen
  */
 public class DtsControlMessageConverter extends SimpleMessageConverter {
-    /** Internal logger object. */
-    private static final Logger LOG = LoggerFactory
-        .getLogger(DtsControlMessageConverter.class);
 
+    /** Internal logger object. */
+    private static final Logger LOG = LoggerFactory.getLogger(DtsControlMessageConverter.class);
     /**
      * Default format of outgoing messages.
      */
     private OutputFormat mOutputFormat = OutputFormat.XML_TEXT;
-
     /** Component used to marshall Java object graphs into XML. */
     private Marshaller mMarshaller;
-
     /**
      * Component used to transform input DTS Documents into Java objects
      * (unmarshaller = XML -to-> java content objects).
      */
     private DtsMessagePayloadTransformer mTransformer;
-
     /** A reference to the ChannelTemplate object. */
     private MessageChannelTemplate mChannelTemplate;
 
@@ -97,61 +97,66 @@ public class DtsControlMessageConverter extends SimpleMessageConverter {
      * Injected list of expected class names that will be transformed according
      * to our xml marshalling, e.g. "org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument"
      */
-    private List<String> mExpectedTypes;
-
+    //private List<String> mExpectedTypes;
     /**
      * {@inheritDoc}
      */
     @Override
     public Object fromMessage(final Message message) throws JMSException,
-        MessageConversionException {
-        final String jobId = message.getJMSCorrelationID();
-        LOG.info("A new JMS message has been received: " + jobId);
+            MessageConversionException {
+        String correlationID = null;
+        // Try to get the job id from the correlation id or JMSMessageID first. If they are
+        // not available, to create it with UUID.randomUUID().toString().
+        if (message.getJMSCorrelationID() != null
+                && !message.getJMSCorrelationID().equals("")) {
+            correlationID = message.getJMSCorrelationID();
+        } else if (message.getJMSMessageID() != null
+                && !message.getJMSMessageID().equals("")) {
+            correlationID = message.getJMSMessageID();
+        }
+
+        LOG.info("A new JMS message has been received: " + correlationID);
         final Object payload = extractMessagePayload(message);
         LOG.debug(String.format(
-            "Finished reading message payload of type: '%s'", payload
-                .getClass().getName()));
+                "Finished reading message payload of type: '%s'", payload.getClass().getName()));
 
         // Check DTS Control Request message xml doc
-        try {
-            final Object dtsControlRequest = mTransformer
-                .transformPayload(payload);
 
-            final String incomeRequestTypeName = dtsControlRequest.getClass()
-                .getName();
+        try {
+            final Object dtsControlRequest = mTransformer.transformPayload(payload);
+            /*
+            final String incomeRequestTypeName = dtsControlRequest.getClass().getName();
             if (!mExpectedTypes.contains(incomeRequestTypeName)) {
-                throw new Exception(incomeRequestTypeName
-                    + " is not a DTSControlRequest Message");
+            throw new Exception(incomeRequestTypeName
+            + " is not a DTSControlRequest Message");
+             */
+            XmlObject expectedXML = (XmlObject) dtsControlRequest;
+            if ((expectedXML instanceof CancelJobRequestDocument) || (expectedXML instanceof ResumeJobRequestDocument) || (expectedXML instanceof GetJobStatusRequestDocument) || (expectedXML instanceof GetJobDetailsRequestDocument)) {
+
+                // TODO: Note, we also need to copy all the other jms headers into the SI message!!
+                // consider the given ClientID property that the client uses to filter
+                // messages intended only for them. Here we need to 'turn-around' the message headers even
+                // if we dont understand them, e.g. consider the JMS.REPLY_TO header).
+                final Map<String, Object> jmsMsgHeaders = buildjJMSHeadersforSIMessage(message, correlationID);
+                final MessageBuilder<Object> msgbuilder = MessageBuilder.withPayload(dtsControlRequest).copyHeaders(jmsMsgHeaders);
+                final org.springframework.integration.core.Message<Object> msg = msgbuilder.build();
+                return msg;
+            } else {
+                throw new Exception("Invaild XML Payload here");
             }
-            else {
-                return dtsControlRequest;
-            }
-        }
-        catch (final Exception e) {
+        } catch (final Exception e) {
             LOG.debug("Invalid XML payload: " + e.getMessage());
-            final CustomFaultDocument document = CustomFaultDocument.Factory
-                .newInstance();
-            final CustomFaultType InvalidJobControlFaultDetail = document
-                .addNewCustomFault();
+            final CustomFaultDocument document = CustomFaultDocument.Factory.newInstance();
+            final CustomFaultType InvalidJobControlFaultDetail = document.addNewCustomFault();
             InvalidJobControlFaultDetail.setMessage(e.getMessage());
 
             // TODO: Note, we also need to copy all the other jms headers into the SI message!!
             // consider the given ClientID property that the client uses to filter
             // messages intended only for them. Here we need to 'turn-around' the message headers even
             // if we dont understand them, e.g. consider the JMS.REPLY_TO header).
-            final Map<String, Object> jmsMsgHeaders = new LinkedHashMap<String, Object>();
-            final Enumeration jmsMsgProperyNames = message.getPropertyNames();
-            if (jmsMsgProperyNames != null) {
-                while (jmsMsgProperyNames.hasMoreElements()) {
-                    final String pName = (String) jmsMsgProperyNames
-                        .nextElement();
-                    jmsMsgHeaders.put(pName, message.getStringProperty(pName));
-                }
-            }
-            final MessageBuilder<CustomFaultDocument> msgbuilder = MessageBuilder
-                .withPayload(document).copyHeaders(jmsMsgHeaders);
-            final org.springframework.integration.core.Message<CustomFaultDocument> msg = msgbuilder
-                .setCorrelationId(jobId).build();
+            final Map<String, Object> jmsMsgHeaders = buildjJMSHeadersforSIMessage(message, correlationID);
+            final MessageBuilder<CustomFaultDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(jmsMsgHeaders);
+            final org.springframework.integration.core.Message<CustomFaultDocument> msg = msgbuilder.build();
             mChannelTemplate.send(msg);
         }
         // Here we need to return null rather than throw a new MessageConversionException
@@ -166,32 +171,29 @@ public class DtsControlMessageConverter extends SimpleMessageConverter {
      */
     @Override
     public Message toMessage(final Object object, final Session session)
-        throws JMSException, MessageConversionException {
+            throws JMSException, MessageConversionException {
 
         Assert.notNull(object);
         final Class<? extends Object> objectClass = object.getClass();
         if (!mMarshaller.supports(objectClass)) {
             throw new MessageConversionException(
-                String
-                    .format(
-                        "Unable to convert object of type '%s' to a valid DTS Job update JMS message.",
-                        objectClass.getName()));
+                    String.format(
+                    "Unable to convert object of type '%s' to a valid DTS Job update JMS message.",
+                    objectClass.getName()));
         }
 
         // convert the input schema entity to an object we can send back as the payload of a JMS message
         final Result result = createOutputResult();
         try {
             mMarshaller.marshal(object, result);
-        }
-        catch (final XmlMappingException ex) {
+        } catch (final XmlMappingException ex) {
             final String message = "An error has occurred marshalling the input object graph to an XML document: "
-                + object;
+                    + object;
             LOG.error(message, ex);
             throw new MessageConversionException(message, ex);
-        }
-        catch (final IOException ex) {
+        } catch (final IOException ex) {
             final String message = "An I/O error has occurred marshalling the input object graph to an XML document: "
-                + object;
+                    + object;
             LOG.error(message, ex);
             throw new MessageConversionException(message, ex);
         }
@@ -241,24 +243,21 @@ public class DtsControlMessageConverter extends SimpleMessageConverter {
      * @throws JMSException if the incoming message is not of a supported message type
      */
     private Object extractMessagePayload(final Message message)
-        throws JMSException {
+            throws JMSException {
         final Object payload;
         if (message instanceof TextMessage) {
             final TextMessage textMessage = (TextMessage) message;
             payload = textMessage.getText();
-        }
-        else if (message instanceof ObjectMessage) {
+        } else if (message instanceof ObjectMessage) {
             final ObjectMessage objectMessage = (ObjectMessage) message;
             payload = objectMessage.getObject();
-        }
-        else if (message instanceof BytesMessage) {
+        } else if (message instanceof BytesMessage) {
             final BytesMessage bytesMessage = (BytesMessage) message;
             final byte[] bytes = new byte[(int) bytesMessage.getBodyLength()];
             bytesMessage.readBytes(bytes);
             final ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
             payload = new StreamSource(bis);
-        }
-        else {
+        } else {
             throw new MessageConversionException("Invalid message type...");
         }
         return payload;
@@ -277,16 +276,15 @@ public class DtsControlMessageConverter extends SimpleMessageConverter {
      * outgoing messages.
      */
     public enum OutputFormat {
+
         /**
          * Send outgoing messages as an array of bytes containing an XML document.
          */
         BYTE_ARRAY,
-
         /**
          * Send outgoing messages as Object messages containing a DOM document.
          */
         DOM_OBJECT,
-
         /**
          * Send outgoing messages as Text messages containing an XML document.
          */
@@ -302,12 +300,26 @@ public class DtsControlMessageConverter extends SimpleMessageConverter {
         this.mChannelTemplate = mChannelTemplate;
     }
 
-    public void setExpectedTypes(final List<String> expectedTypes) {
-        this.mExpectedTypes = expectedTypes;
-    }
-
+    //public void setExpectedTypes(final List<String> expectedTypes) {
+    //    this.mExpectedTypes = expectedTypes;
+    //}
     public void setMarshaller(final Marshaller marshaller) {
         this.mMarshaller = marshaller;
 
+    }
+
+    private Map<String, Object> buildjJMSHeadersforSIMessage(Message message, String correlationID) throws JMSException {
+        final Map<String, Object> jmsMsgHeaders = new LinkedHashMap<String, Object>();
+        final Enumeration jmsMsgProperyNames = message.getPropertyNames();
+        if (jmsMsgProperyNames != null) {
+            while (jmsMsgProperyNames.hasMoreElements()) {
+                final String pName = (String) jmsMsgProperyNames.nextElement();
+                jmsMsgHeaders.put(pName, message.getStringProperty(pName));
+            }
+        }
+        jmsMsgHeaders.put(
+                org.springframework.integration.jms.JmsHeaders.CORRELATION_ID,
+                correlationID);
+        return jmsMsgHeaders;
     }
 }

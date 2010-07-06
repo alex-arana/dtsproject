@@ -120,7 +120,7 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
             final JobParameters jobParameters = jobExecution.getJobInstance().getJobParameters();
             final Map<String, Object> springIntegrationMsgHeaders = this.getHeaders(jobParameters);
             final MessageBuilder<FireUpJobErrorEventDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(springIntegrationMsgHeaders);
-            final Message<FireUpJobErrorEventDocument> msg = msgbuilder.setCorrelationId(jobId).build();
+            final Message<FireUpJobErrorEventDocument> msg = msgbuilder.build();
             mChannelTemplate.send(msg);
         }
     }
@@ -154,7 +154,7 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
             final JobParameters jobParameters = stepExecution.getJobParameters();
             final Map<String, Object> springIntegrationMsgHeaders = this.getHeaders(jobParameters);
             final MessageBuilder<FireUpStepFailureEventDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(springIntegrationMsgHeaders);
-            final Message<FireUpStepFailureEventDocument> msg = msgbuilder.setCorrelationId(jobId).build();
+            final Message<FireUpStepFailureEventDocument> msg = msgbuilder.build();
             mChannelTemplate.send(msg);
         }
     }
@@ -208,7 +208,7 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
         final Map<String, Object> springIntegrationMsgHeaders = this.getHeaders(jobParameters);
 
         final MessageBuilder<JobEventUpdateRequestDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(springIntegrationMsgHeaders);
-        final Message<JobEventUpdateRequestDocument> msg = msgbuilder.setCorrelationId(jobId).build();
+        final Message<JobEventUpdateRequestDocument> msg = msgbuilder.build();
         mChannelTemplate.send(msg);
     }
 
@@ -234,7 +234,7 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
         final JobParameters jobParameters = stepExecution.getJobParameters();
         final Map<String, Object> springIntegrationMsgHeaders = this.getHeaders(jobParameters);
         final MessageBuilder<JobEventUpdateRequestDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(springIntegrationMsgHeaders);
-        final Message<JobEventUpdateRequestDocument> msg = msgbuilder.setCorrelationId(jobId).build();
+        final Message<JobEventUpdateRequestDocument> msg = msgbuilder.build();
         mChannelTemplate.send(msg);
     }
 
@@ -259,7 +259,7 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
         final JobParameters jobParameters = stepExecution.getJobParameters();
         final Map<String, Object> springIntegrationMsgHeaders = this.getHeaders(jobParameters);
         final MessageBuilder<JobEventUpdateRequestDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(springIntegrationMsgHeaders);
-        final Message<JobEventUpdateRequestDocument> msg = msgbuilder.setCorrelationId(jobId).build();
+        final Message<JobEventUpdateRequestDocument> msg = msgbuilder.build();
         mChannelTemplate.send(msg);
     }
 

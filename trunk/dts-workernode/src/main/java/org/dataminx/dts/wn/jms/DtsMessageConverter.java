@@ -169,7 +169,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
                     org.springframework.integration.jms.JmsHeaders.CORRELATION_ID,
                     jobId);
             final MessageBuilder<InvalidJobDefinitionFaultDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(jmsMsgHeaders);
-            final org.springframework.integration.core.Message<InvalidJobDefinitionFaultDocument> msg = msgbuilder.setCorrelationId(jobId).build();
+            final org.springframework.integration.core.Message<InvalidJobDefinitionFaultDocument> msg = msgbuilder.build();
             mChannelTemplate.send(msg);
 
             // Here we need to return null rather than throw a new MessageConversionException
