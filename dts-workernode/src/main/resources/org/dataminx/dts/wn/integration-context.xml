@@ -180,6 +180,7 @@
                 class="org.dataminx.dts.wn.ControlRequestHandler">
         <beans:property name="workerNodeManager" ref="workerNodeManager"/>
         <beans:property name="jobRestartStrategy" ref="immediateJobRestartStrategy"/>
+        <beans:property name="dtsWorkerNodeInformationService" ref="dtsWorkerNodeInformationService"/>
     </beans:bean>
 
 
@@ -246,7 +247,7 @@
         <beans:property name="marshaller" ref="dtsMarshaller"/>
         <beans:property name="channelTemplate" ref="dtsEventsChannelTemplate"/>
         <beans:property name="transformer" ref="dtsMessagePayloadTransformer"/>
-        <beans:property name="expectedTypes">
+        <!--<beans:property name="expectedTypes">
             <beans:list>
                 <beans:value>org.dataminx.schemas.dts.x2009.x07.messages.impl.CancelJobRequestDocumentImpl</beans:value>
                 <beans:value>org.dataminx.schemas.dts.x2009.x07.messages.impl.ResumeJobRequestDocumentImpl</beans:value>
@@ -254,7 +255,7 @@
                 <beans:value>org.dataminx.schemas.dts.x2009.x07.messages.impl.GetJobDetailsRequestDocumentImpl</beans:value>
                 <beans:value>org.dataminx.schemas.dts.x2009.x07.messages.impl.GetJobStatusRequestDocumentImpl</beans:value>
             </beans:list>
-        </beans:property>
+        </beans:property>-->
     </beans:bean>
 
 </beans:beans>
