@@ -14,8 +14,8 @@
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
-
-  <import resource="file:${user.home}/.dataminx/*-context.xml"/>
+ 
+  <import resource="file:${dataminx.dir}/*-context.xml"/>  
 <!-- 
   <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource">
     <property name="driverClassName" value="${batch.jdbc.driver}" />
@@ -88,9 +88,12 @@
     <property name="jobNotificationService" ref="jobNotificationService"/>
     <property name="executionContextCleaner" ref="executionContextCleaner"/>
   </bean>
-  
+
+
   <bean id="checkRequirementsTask" class="org.dataminx.dts.batch.CheckRequirementsTask" scope="step">
-    <property name="jobStepDirectory" value="file://${user.home}/.dataminx/jobsteps" />
+    <!--<property name="jobStepDirectory" value="file://${user.home}/.dataminx/jobsteps" />-->
+    <property name="jobStepDirectory" value="file:${dataminx.dir}/jobsteps" />
+    <!--<property name="jobStepDirectory" value="file:/home/djm76/.dataminx/jobsteps"/>-->
   </bean>
 
   <!--
