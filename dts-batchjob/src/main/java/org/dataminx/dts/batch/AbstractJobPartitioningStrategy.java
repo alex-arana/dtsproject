@@ -32,12 +32,10 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.vfs.FileName;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemManager;
@@ -168,6 +166,8 @@ public abstract class AbstractJobPartitioningStrategy implements
         throws JobScopingException {
         Assert.hasText(jobResourceKey,
             "JobResourceKey should not be null or empty.");
+        Assert.hasText(jobTag,
+            "JobTag should not be null or empty.");
         Assert.notNull(jobDefinition, "JobDefinitionType should not be null.");
         if (mMaxTotalByteSizePerStepLimit < 0) {
             throw new DtsException(
@@ -185,7 +185,7 @@ public abstract class AbstractJobPartitioningStrategy implements
         // as a sub-directory of the DTS_JOB_STEP_DIRECTORY_KEY.
         // This method throws IllegalStateExceptions if the job dir cannot
         // be created. 
-        jobDetails.setRootJobDir( this.createRootJobDir() );
+        jobDetails.setRootJobDir( this.createRootJobDir(jobTag) );
         
         try {
             try {
@@ -398,15 +398,23 @@ public abstract class AbstractJobPartitioningStrategy implements
      * Create a new unique directory as a sub dir of the DTS_JOB_STEP_DIRECTORY_KEY
      * for this particular job for writing step files.
      */
-    private String createRootJobDir() {
+    private String createRootJobDir(String jobTag) {
         // lets create a new unique job directory to store all the job
         // step files
-        final File jobStepRootDir = new File(System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY));
-        if (!jobStepRootDir.exists() && !jobStepRootDir.isDirectory()) {
+        String jobStepDir = System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY);
+        if(jobStepDir == null){
             throw new IllegalStateException("Job step root directory does not exist: "
-                    + System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY));
+                    + jobStepDir);
         }
-        final File rootJobDir = new File(jobStepRootDir, UUID.randomUUID().toString());
+        final File jobStepRootDir = new File(jobStepDir );
+        if (jobStepRootDir == null || !jobStepRootDir.exists() && !jobStepRootDir.isDirectory()) {
+            throw new IllegalStateException("Job step root directory does not exist: " + jobStepDir);
+        }
+        // TODO: maybe we should create the directory after the jobTag !
+        //String jobTab = jobExecution.getExecutionContext().getString(DtsBatchJobConstants.DTS_JOB_TAG);
+        //final File rootJobDir = new File(jobStepRootDir, UUID.randomUUID().toString());
+        final File rootJobDir = new File(jobStepRootDir, jobTag);
+
         if (!rootJobDir.mkdir()) {
             throw new IllegalStateException("Could not create unique job step directory");
         }

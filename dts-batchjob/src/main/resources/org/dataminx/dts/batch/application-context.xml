@@ -6,20 +6,20 @@
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
-        
+       
   <!-- Enable Spring beans annotation support -->
   <context:annotation-config />
 
   <!-- Enable automatic classpath scanning -->
   <context:component-scan base-package="org.dataminx.dts" />
   
-  <context:property-placeholder location="file:///${dataminx.dir}/dts-bulkcopyjob.properties"/>
+  <context:property-placeholder location="file:${dataminx.dir}/dts-bulkcopyjob.properties"/> 
   
   <bean id="jobLauncherTaskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
 
   <!-- Initialise the logging subsystem -->
   <bean id="log4jConfigurator" class="org.dataminx.dts.common.Log4jConfiguratorBean">
-    <property name="configuration" value="file:///${dataminx.dir}/log4j.xml" />
+    <property name="configuration" value="file:${dataminx.dir}/log4j.xml" />  <!--file:///${dataminx.dir} -->
     <property name="refreshInterval" value="5000" />
   </bean>
   

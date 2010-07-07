@@ -84,18 +84,21 @@ public class DtsJobLauncher extends SimpleJobLauncher {
     }
 
     /**
-     * Overloaded version 
+     * An overloaded version of the {@link SimpleJobLauncher#run(org.springframework.batch.core.Job,
+     * org.springframework.batch.core.JobParameters) run} method which launches
+     * a DTS Job.
      * 
-     * @param jobId
-     * @param job
-     * @return
-     * @throws JobExecutionAlreadyRunningException
-     * @throws JobRestartException
-     * @throws JobInstanceAlreadyCompleteException
-     * @throws InvalidJobDefinitionException
-     * @throws IllegalArgumentException if the given headersToAddToBatchParams contains objects other than String, Date, Double or Long 
+     * @param jobId the jobResourceKey
+     * @param job the JobDefinitionDocument
+     * @param valuesToAddToBatchParams String, Date, Double or Long objects that
+     * will be added to the jobs {@link JobParameters} under the corresponding map keys.
+     * @return the JobExecution if job launch is successful
+     * @throws JobExecutionAlreadyRunningException if the job is already running
+     * @throws JobRestartException if the job is not allowed to be restarted
+     * @throws JobInstanceAlreadyCompleteException if the job has already completed
+     * @throws IllegalArgumentException if the given valuesToAddToBatchParams contains objects other than String, Date, Double or Long
      */
-    public JobExecution run(final String jobId, final JobDefinitionDocument job, final Map<String, Object> headersToAddToBatchParams)
+    public JobExecution run(final String jobId, final JobDefinitionDocument job, final Map<String, Object> valuesToAddToBatchParams)
             throws JobExecutionAlreadyRunningException, JobRestartException,
             JobInstanceAlreadyCompleteException, InvalidJobDefinitionException {
         final MapBindingResult errors = new MapBindingResult(new HashMap(),
@@ -143,11 +146,11 @@ public class DtsJobLauncher extends SimpleJobLauncher {
         final JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong("maxAttempts", maxAttempts);
 
-        if (headersToAddToBatchParams != null) {
+        if (valuesToAddToBatchParams != null) {
             // iterate and add props here.
-            Set<String> keys = headersToAddToBatchParams.keySet();
+            Set<String> keys = valuesToAddToBatchParams.keySet();
             for (String key : keys) {
-                Object addObject = headersToAddToBatchParams.get(key);
+                Object addObject = valuesToAddToBatchParams.get(key);
                 if (addObject instanceof String) {
                     builder.addString(key, (String) addObject);
                 } else if (addObject instanceof Long) {

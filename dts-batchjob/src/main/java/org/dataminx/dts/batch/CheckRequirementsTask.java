@@ -63,6 +63,15 @@ public class CheckRequirementsTask implements Tasklet {
     public RepeatStatus execute(final StepContribution stepContribution,
         final ChunkContext chunkContext) throws Exception {
 
+        //if(true)return RepeatStatus.FINISHED;
+        LOGGER
+                .debug("Required Properties: "
+                    +DtsConstants.DATAMINX_CONFIGURATION_KEY + " ["+System.getProperty(DtsConstants.DATAMINX_CONFIGURATION_KEY)+"]"
+                    + "\n"
+                    +DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY + " ["+ System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY)+"]"
+                    );
+
+        
         if (System.getProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY) != null) {
             LOGGER
                 .debug("Using the user provided "
@@ -74,17 +83,17 @@ public class CheckRequirementsTask implements Tasklet {
         else {
             // TODO: should we really have this step implemented as a real Spring Batch step?
             // see if we can get the workernode or broker CLI runner be the one doing this bit.
-
             if ((mJobStepDirectory == null) || !mJobStepDirectory.exists()) {
                 final File jobStepDirectoryFile = new File(System
                     .getProperty("user.home")
-                    + "/"
+                    + File.separator
                     + DtsConstants.DEFAULT_DATAMINX_CONFIGURATION_DIR
-                    + "/jobsteps/");
-                if (jobStepDirectoryFile.mkdir()) {
+                    + File.separator
+                    + "jobsteps");
+                //if (jobStepDirectoryFile.mkdir()) {
                     mJobStepDirectory = new FileSystemResource(
                         jobStepDirectoryFile);
-                }
+                //}
             }
         }
         if (!isJobStepDirectoryFolder(mJobStepDirectory)) {

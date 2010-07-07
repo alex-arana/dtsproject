@@ -67,7 +67,7 @@ public class BulkCopyJobIntegrationTest extends
         final File[] jobStepFiles = jobStepDirectory
             .listFiles(new FilenameFilter() {
                 public boolean accept(final File dir, final String name) {
-                    if (name.startsWith(jobResourceKey) && name.endsWith("dts")) {
+                    if (/*name.startsWith(jobResourceKey) &&*/ name.endsWith("dts")) {
                         return true;
                     }
                     return false;
@@ -96,8 +96,7 @@ public class BulkCopyJobIntegrationTest extends
         // assume that the DTS_JOB_DETAILS hasn't been saved to the DB.
         assertNull(jobExecution.getExecutionContext().get(DTS_JOB_DETAILS));
 
-        assertNotNull(jobExecution.getExecutionContext().get(
-            DTS_SUBMIT_JOB_REQUEST_KEY));
+        assertNotNull(jobExecution.getExecutionContext().get(DTS_SUBMIT_JOB_REQUEST_KEY));
     }
 
     @Test
@@ -113,19 +112,25 @@ public class BulkCopyJobIntegrationTest extends
         final JobExecution jobExecution = mJobLauncher.run(jobId, mDtsJob);
         assertTrue(jobExecution.getStatus() == BatchStatus.COMPLETED);
 
+
+        assertNull(jobExecution.getExecutionContext().get(DTS_JOB_DETAILS));
+
         final List<JobExecution> jobExecutions = mJobExplorer
             .getJobExecutions(jobExecution.getJobInstance());
 
         for (final JobExecution jobEx : jobExecutions) {
             assertNull(jobEx.getExecutionContext().get(DTS_JOB_DETAILS));
-            assertNull(jobEx.getExecutionContext().get(
-                DTS_SUBMIT_JOB_REQUEST_KEY));
+            assertNull(jobEx.getExecutionContext().get(DTS_SUBMIT_JOB_REQUEST_KEY));
 
             for (final StepExecution stepExecution : jobEx.getStepExecutions()) {
                 assertNull(stepExecution.getExecutionContext().get(
                     DTS_DATA_TRANSFER_STEP_KEY));
             }
         }
+
+        // assert that the jobSteps have been deleted ok after job finished.
+        // TODO: need to get a handle on the job tag rather than jobId and so
+        // may have to overload a new launch method in order to pass the tag
         assertEquals(doesJobStepExists(jobId), false);
     }
 
