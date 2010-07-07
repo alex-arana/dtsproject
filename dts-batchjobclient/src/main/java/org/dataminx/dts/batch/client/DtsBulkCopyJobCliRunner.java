@@ -76,7 +76,7 @@ public class DtsBulkCopyJobCliRunner {
      * Constructs a new instance of the DtsBulkCopyJobCliRunner using the default configuration folder.
      */
     public DtsBulkCopyJobCliRunner() {
-        this("");
+        this(System.getProperty(DATAMINX_CONFIGURATION_KEY));
     }
 
     /**
@@ -139,6 +139,7 @@ public class DtsBulkCopyJobCliRunner {
 
         // lets setup the dataminx config.
         final String configDir = System.getProperty(DATAMINX_CONFIGURATION_KEY);
+        LOGGER.debug("DATAMINX_CONFIGURATION_KEY = "+configDir);
         final DtsBulkCopyJobCliRunner jobRunner = new DtsBulkCopyJobCliRunner(
             configDir);
         jobRunner.initAppContext();
