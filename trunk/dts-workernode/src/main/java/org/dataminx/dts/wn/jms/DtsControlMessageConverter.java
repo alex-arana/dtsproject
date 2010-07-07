@@ -48,12 +48,12 @@ import org.apache.xmlbeans.XmlObject;
 
 import org.dataminx.dts.common.jms.DtsMessagePayloadTransformer;
 import org.dataminx.dts.common.xml.ByteArrayResult;
+import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.CustomFaultDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.CustomFaultType;
-import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
-import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobDetailsRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.channel.MessageChannelTemplate;
@@ -137,7 +137,7 @@ public class DtsControlMessageConverter extends SimpleMessageConverter {
                 // consider the given ClientID property that the client uses to filter
                 // messages intended only for them. Here we need to 'turn-around' the message headers even
                 // if we dont understand them, e.g. consider the JMS.REPLY_TO header).
-                final Map<String, Object> jmsMsgHeaders = buildjJMSHeadersforSIMessage(message, correlationID);
+                final Map<String, Object> jmsMsgHeaders = buildJMSHeadersforSIMessage(message, correlationID);
                 final MessageBuilder<Object> msgbuilder = MessageBuilder.withPayload(dtsControlRequest).copyHeaders(jmsMsgHeaders);
                 final org.springframework.integration.core.Message<Object> msg = msgbuilder.build();
                 return msg;
@@ -154,7 +154,7 @@ public class DtsControlMessageConverter extends SimpleMessageConverter {
             // consider the given ClientID property that the client uses to filter
             // messages intended only for them. Here we need to 'turn-around' the message headers even
             // if we dont understand them, e.g. consider the JMS.REPLY_TO header).
-            final Map<String, Object> jmsMsgHeaders = buildjJMSHeadersforSIMessage(message, correlationID);
+            final Map<String, Object> jmsMsgHeaders = buildJMSHeadersforSIMessage(message, correlationID);
             final MessageBuilder<CustomFaultDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(jmsMsgHeaders);
             final org.springframework.integration.core.Message<CustomFaultDocument> msg = msgbuilder.build();
             mChannelTemplate.send(msg);
@@ -308,7 +308,7 @@ public class DtsControlMessageConverter extends SimpleMessageConverter {
 
     }
 
-    private Map<String, Object> buildjJMSHeadersforSIMessage(Message message, String correlationID) throws JMSException {
+    private Map<String, Object> buildJMSHeadersforSIMessage(Message message, String correlationID) throws JMSException {
         final Map<String, Object> jmsMsgHeaders = new LinkedHashMap<String, Object>();
         final Enumeration jmsMsgProperyNames = message.getPropertyNames();
         if (jmsMsgProperyNames != null) {
