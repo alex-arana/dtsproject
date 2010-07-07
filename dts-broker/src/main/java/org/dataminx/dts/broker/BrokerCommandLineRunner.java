@@ -31,6 +31,12 @@ public class BrokerCommandLineRunner {
     /** config directory */
     private final File mConfigDir;
 
+
+    public BrokerCommandLineRunner() {
+      this( System.getProperty(DATAMINX_CONFIGURATION_KEY)); 
+    }
+
+
     /**
      * Constructor that accepts an absolute path to config directory.
      * @param configDir
