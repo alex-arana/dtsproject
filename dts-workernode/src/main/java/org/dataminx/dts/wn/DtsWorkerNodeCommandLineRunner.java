@@ -59,6 +59,13 @@ public class DtsWorkerNodeCommandLineRunner {
      */
     private final File mConfigDir;
 
+    
+    
+    public DtsWorkerNodeCommandLineRunner() throws DtsException {
+        this(System.getProperty(DATAMINX_CONFIGURATION_KEY));
+    }
+
+
     /**
      * Constructs a new instance of <code>DtsWorkerNodeCommandLineRunner</code>
      * using the specified DataMINX configuration folder.
