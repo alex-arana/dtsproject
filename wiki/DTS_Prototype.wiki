@@ -121,6 +121,16 @@ max.total.num.files.perstep = 3
 # Anything equal to or higher than this value is considered a big file
 min.bigfiles.bytes.size = 1024
 
+# control logic for workernode manager
+wn.manager.maxBatchJobNumber = 1
+
+#default worker node ID in format: DtsWorkerNode + hostname + UUID
+wn.id=DtsWorkerNodemyhostname001
+
+#default message header name of worker node ID
+wn.id.message.header.name=DTSWorkerNodeID
+
+
 }}}
 
    * *`log4j.xml`* This file is optional and can be used to customise the amount and type of logging output by the application. Here's the example log4j.xml file included with the dts-common module:
