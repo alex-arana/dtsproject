@@ -67,11 +67,13 @@ Create the Spring Batch tables by running the db script provided in dts-batchjob
  > mysql -u dts -h localhost -D dts -p < dts-batchjob/src/main/resources/db/schema-mysql.sql
 }}}
 
-Run dts-batchjob/src/test/resources/create-testfiles.sh to create the test files the unit tests would use. Remember to change the file to executable.
+Run dts-batchjob/src/test/resources/create-testfiles.sh to create the test files the unit tests would use. Remember to change the file to executable. The database you configured previously should also be running. 
 
 Run the test
 {{{
  > cd dts-batchjob
+ > chmod +x src/test/resources/create-testfiles.sh
+ > ./src/test/resources/create-testfiles.sh
  > mvn -e -Ddataminx.dir=/home/dts-user/.dataminx test
  > mvn -e -Ddataminx.dir=/home/dts-user/.dataminx integration-test
 }}}
