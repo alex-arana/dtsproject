@@ -79,18 +79,28 @@ public class DtsWorkerNodeInformationServiceImpl implements
 
         return mInstanceId;
     }
-
+    
+    /**
+     * Returns the the name of the workernodeID message header.
+     * @return The workernodeID message header name as a <code>String</code>
+     */
     public String getWorkerNodeIDMessageHeaderName(){
 
         return mWorkerNodeIDMessageHeaderName;
     }
 
-    public void setworkerNodeID(String workerNodeID){
+    /**
+     * Set the WorkNodeID that is specified in the workernode properties configuration file
+     */
+    public void setWorkerNodeID(String workerNodeID){
 
         mInstanceId=workerNodeID;
     }
 
-    public void setworkerNodeIDMessageHeaderName(String workerNodeIDMessageHeaderName){
+    /**
+     * Set the name of the workernodeID message header this is specified in the workernode properties configuration file.
+     */
+    public void setWorkerNodeIDMessageHeaderName(String workerNodeIDMessageHeaderName){
 
         mWorkerNodeIDMessageHeaderName= workerNodeIDMessageHeaderName;
     }
