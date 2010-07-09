@@ -47,11 +47,11 @@ public class ControlRequestHandler {
     private DtsWorkerNodeInformationService mDtsWorkerNodeInformationService;
 
     /**
-     * Handles all different control message types sent from the broker or job submit queue. Depending on
+     * Handles all different control message types sent from the broker or control queue. Depending on
      * which control messages, the handler will call cancel, or restart functionality of {@link WorkerNodeManager}
-     * class. It is worth noting that this handler doesn't handle errors that this stage because normal errors
+     * class. It is worth noting that this handler doesn't handle errors at this stage because normal errors
      * will be dealt with via the JobNotificationService route. However, there are error cases that need
-     * handling here such as dealiing with jobid that is not existed (implementation needed here)
+     * handling here such as dealing with unknown jobid (implementation needed here)
      * @param message
      */
     @ServiceActivator
@@ -60,42 +60,56 @@ public class ControlRequestHandler {
         // can be sent to the dtsJobEvents !
 
         final Object controlRequest = message.getPayload();
+        final MessageHeaders msgHeaders = message.getHeaders();
         if (controlRequest instanceof CancelJobRequestDocument) {
             final CancelJobRequest cancelRequest = ((CancelJobRequestDocument) controlRequest).getCancelJobRequest();
-            final String jobCancelled = cancelRequest.getJobResourceKey();
-            LOG.debug("received cancel job request for " + jobCancelled);
+            final String jobId = cancelRequest.getJobResourceKey();
+            LOG.debug("received cancel job request for " + jobId);
+
+            boolean found = false;
             for (String jobName : mWorkerNodeManager.getJobNames()) {
-                if (jobName.equals(jobCancelled)) {
+                if (jobName.equals(jobId)) {
+                    found = true;
                     LOG.debug("Found running job requested cancelled");
                     try {
+                        // if the job is stopped ok, we are assuming that the
+                        // workernodeJobNotificationService will respond with a
+                        // confirmation message ! (ASSUMING)
+                        boolean stopped = false;
                         for (Long execId : mWorkerNodeManager.getRunningExecutions(jobName)) {
                             mWorkerNodeManager.stop(execId);
+                            stopped = true;
                         }
-                        // do we need to return some confirmation that the job
-                        // was stopped ok here ?
-                        // Also, do we need to resond if any of the exceptions
-                        // are caught below.
-
+                        if (!stopped) {
+                            String errorMsg = "Could not stop job: " + jobId;
+                            return buildAnErrorMessage(msgHeaders, errorMsg);
+                        }
                     } catch (NoSuchJobException e) {
                         LOG.debug(e.getMessage());
+                        return buildAnErrorMessage(msgHeaders, e.getMessage());
                     } catch (JobExecutionNotRunningException e) {
                         LOG.debug(e.getMessage());
+                        return buildAnErrorMessage(msgHeaders, e.getMessage());
                     } catch (NoSuchJobExecutionException e) {
                         LOG.debug(e.getMessage());
+                        return buildAnErrorMessage(msgHeaders, e.getMessage());
                     }
                 }
             }
-            MessageHeaders msgHeaders = message.getHeaders();
-            String errorMsg = "The CancelJob request is not processed due to a wrong JobResourceKey: " + jobCancelled;
-            return buildAnErrorMessage(msgHeaders, errorMsg);
+            if (!found) {
+                String errorMsg = "Could not find job: " + jobId;
+                return buildAnErrorMessage(msgHeaders, errorMsg);
+            }
+
+
         } else if (controlRequest instanceof ResumeJobRequestDocument) {
             final ResumeJobRequest resumeRequest = ((ResumeJobRequestDocument) controlRequest).getResumeJobRequest();
-            final String jobResumed = resumeRequest.getJobResourceKey();
-            LOG.debug("Received a resume job request for " + jobResumed);
+            final String jobId = resumeRequest.getJobResourceKey();
+            LOG.debug("Received a resume job request for " + jobId);
             for (String jobName : mWorkerNodeManager.getJobNames()) {
-                if (jobName.equals(jobResumed)) {
+                if (jobName.equals(jobId)) {
                     LOG.debug("Found running job requested resumsed");
-                    mWorkerNodeManager.restartJob(jobResumed);
+                    mWorkerNodeManager.restartJob(jobId);
                     // do we need to return some confirmation that the job
                     // was stopped ok here ?
                     // Also, do we need to resond if any of the exceptions
@@ -104,9 +118,10 @@ public class ControlRequestHandler {
 
                 }
             }
-            MessageHeaders msgHeaders = message.getHeaders();
-            String errorMsg = "The ResumeJob request is not processed due to a wrong JobResourceKey: " + jobResumed;
+            String errorMsg = "The ResumeJob request is not processed due to a wrong JobResourceKey: " + jobId;
             return buildAnErrorMessage(msgHeaders, errorMsg);
+
+            
         } else if (controlRequest instanceof GetJobStatusRequestDocument) {
             final GetJobStatusRequest getJobStatusRequest = ((GetJobStatusRequestDocument) controlRequest).getGetJobStatusRequest();
             final String jobGotStatus = getJobStatusRequest.getJobResourceKey();
@@ -124,7 +139,6 @@ public class ControlRequestHandler {
                             stateType.setValue(null);
                             response.setState(stateType);
                             Map<String, Object> SIMsgHeaders = new LinkedHashMap<String, Object>();
-                            MessageHeaders msgHeaders = message.getHeaders();
                             Iterator<String> iterator = msgHeaders.keySet().iterator();
                             while (iterator.hasNext()) {
                                 String key = iterator.next();
@@ -147,7 +161,6 @@ public class ControlRequestHandler {
                     }
                 }
             }
-            MessageHeaders msgHeaders = message.getHeaders();
             String errorMsg = "The GetJobStatus request is not processed due to a wrong JobResourceKey: " + jobGotStatus;
             return buildAnErrorMessage(msgHeaders, errorMsg);
 
@@ -161,7 +174,6 @@ public class ControlRequestHandler {
                     //todo
                 }
             }
-            MessageHeaders msgHeaders = message.getHeaders();
             String errorMsg = "The GetJobDetails request is not processed due to a wrong JobResourceKey: " + jobGotDetails;
             return buildAnErrorMessage(msgHeaders, errorMsg);
         }
