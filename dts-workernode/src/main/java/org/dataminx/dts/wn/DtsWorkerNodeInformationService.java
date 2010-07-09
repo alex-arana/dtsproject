@@ -42,6 +42,10 @@ public interface DtsWorkerNodeInformationService {
     String getInstanceId();
 
 
+    /**
+     * Returns the the name of the workernodeID message header.
+     * @return The workernodeID message header name as a <code>String</code>
+     */
     String getWorkerNodeIDMessageHeaderName();
 
     /**
