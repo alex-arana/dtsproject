@@ -53,6 +53,7 @@ public class ControlRequestHandler {
      * will be dealt with via the JobNotificationService route. However, there are error cases that need
      * handling here such as dealing with unknown jobid (implementation needed here)
      * @param message
+     * @return
      */
     @ServiceActivator
     public Object handleControlRequest(Message<?> message) {
@@ -72,15 +73,16 @@ public class ControlRequestHandler {
                     found = true;
                     LOG.debug("Found running job requested cancelled");
                     try {
-                        // if the job is stopped ok, we are assuming that the
-                        // workernodeJobNotificationService will respond with a
-                        // confirmation message ! (ASSUMING)
                         boolean stopped = false;
                         for (Long execId : mWorkerNodeManager.getRunningExecutions(jobName)) {
                             mWorkerNodeManager.stop(execId);
                             stopped = true;
                         }
-                        if (!stopped) {
+                        if(stopped){
+                            // here do we need to send a confirmation message that
+                            // the job stopped ok.
+                        }
+                        else {
                             String errorMsg = "Could not stop job: " + jobId;
                             return buildAnErrorMessage(msgHeaders, errorMsg);
                         }
