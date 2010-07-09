@@ -131,9 +131,12 @@ public class DtsControlMessageConverter extends SimpleMessageConverter {
             + " is not a DTSControlRequest Message");
              */
             XmlObject expectedXML = (XmlObject) dtsControlRequest;
-            if ((expectedXML instanceof CancelJobRequestDocument) || (expectedXML instanceof ResumeJobRequestDocument) || (expectedXML instanceof GetJobStatusRequestDocument) || (expectedXML instanceof GetJobDetailsRequestDocument)) {
+            if ((expectedXML instanceof CancelJobRequestDocument)
+                    || (expectedXML instanceof ResumeJobRequestDocument)
+                    || (expectedXML instanceof GetJobStatusRequestDocument)
+                    || (expectedXML instanceof GetJobDetailsRequestDocument)) {
 
-                // TODO: Note, we also need to copy all the other jms headers into the SI message!!
+                // Note, we also need to copy all the other jms headers into the SI message!!
                 // consider the given ClientID property that the client uses to filter
                 // messages intended only for them. Here we need to 'turn-around' the message headers even
                 // if we dont understand them, e.g. consider the JMS.REPLY_TO header).
@@ -159,10 +162,9 @@ public class DtsControlMessageConverter extends SimpleMessageConverter {
             final org.springframework.integration.core.Message<CustomFaultDocument> msg = msgbuilder.build();
             mChannelTemplate.send(msg);
         }
-        // Here we need to return null rather than throw a new MessageConversionException
+        // Here we need to return a value rather than throw a new MessageConversionException
         // this is related to the jms transaction we think.
         //throw new MessageConversionException("Invalid XML Payload "+e.getMessage());
-        //return null;
         return "looks like we recieved a junk control message.";
     }
 
