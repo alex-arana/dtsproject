@@ -123,7 +123,7 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         final Object payload = extractMessagePayload(message);
         LOG.debug(String.format(
                 "Finished reading message payload of type: '%s'", payload.getClass().getName()));
-        LOG.debug(payload.toString());
+        //LOG.debug(payload.toString());
 
         try {
 
