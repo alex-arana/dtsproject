@@ -101,6 +101,7 @@
     <mockito.version>1.8.2</mockito.version>
     <maven-assembly-plugin.version>2.2-beta-5</maven-assembly-plugin.version>
     <dts-crypto-plugin.version>0.0.1-SNAPSHOT</dts-crypto-plugin.version>
+    <maven-surefire-plugin.version>2.5</maven-surefire-plugin.version>
   </properties>
 
   <repositories>
@@ -221,6 +222,11 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>${maven-assembly-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
