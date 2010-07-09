@@ -33,7 +33,11 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 
 /**
- * Notification service used by DTS Worker Node jobs to:
+ * Notification service that can implemented by clients of the Dts Batch Job so 
+ * that the client can be notified of various events occuring during the execution 
+ * of the running batch job. Example clients include the DTS Worker Node which
+ * sends notification messages to the messaging infrastructure and the
+ * default Dts Batch LoggingJobNotificationService. 
  * <ol>
  * <li>Inform other parts of the system of job progress
  * <li>Notify job lifecycle events (JOB_STARTED, JOB_COMPLETED etc)
@@ -56,17 +60,10 @@ public interface JobNotificationService {
     /**
      * Posts a message on the Job Event queue informing of the progress in a currently active DTS operation.
      *
-     * @param dtsJob An active DTS Job instance
-     * @param message A progress message to send
-     */
-    void notifyJobProgress(DtsFileTransferJob dtsJob, String message);
-
-    /**
-     * Posts a message on the Job Event queue informing of the progress in a currently active DTS operation.
-     *
      * @param jobId Unique identifier of the DTS Job
      * @param filesTransferred number of files that has already been transferred
      * @param volumeTransferred amount of data in bytes that has already been transferred
+     * @param stepExecution the execution context of the DTS Job step
      */
     void notifyJobProgress(String jobId, int filesTransferred,
         long volumeTransferred, final StepExecution stepExecution);
@@ -78,6 +75,7 @@ public interface JobNotificationService {
      * @param jobId Unique identifier of the DTS Job
      * @param filesTotal total number of files that will be transferred
      * @param volumeTotal total size in bytes of all the files that will be transferred
+     * @param stepExecution the execution context of the DTS Job step
      */
     void notifyJobScope(String jobId, int filesTotal, long volumeTotal, final StepExecution stepExecution);
 
@@ -88,14 +86,26 @@ public interface JobNotificationService {
      *
      * @param dtsJob An active DTS Job instance
      * @param jobStatus DTS Job Status
+     * @param jobExecution the execution context of the DTS Job
      */
     void notifyJobStatus(DtsFileTransferJob dtsJob, JobStatus jobStatus, JobExecution jobExecution);
 
     /**
      * Posts an error message event on the JMS Job Event queue concerning a DTS Job step.
      *
-     * @param dtsJobId Unique identifier of the step's parent DTS Job
+     * @param jobId Unique identifier of the step's parent DTS Job
      * @param stepExecution the execution context of the DTS Job step in error
      */
-    void notifyStepFailures(String dtsJobId, StepExecution stepExecution);
+    void notifyStepFailures(String jobId, StepExecution stepExecution);
+
+
+
+     /**
+     * Posts a message on the Job Event queue informing of the progress in a currently active DTS operation.
+     *
+     * @param dtsJob An active DTS Job instance
+     * @param message A progress message to send
+     */
+    //void notifyJobProgress(DtsFileTransferJob dtsJob, String message);
+
 }

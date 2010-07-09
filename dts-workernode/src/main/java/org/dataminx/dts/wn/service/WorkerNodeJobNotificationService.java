@@ -61,8 +61,9 @@ import org.springframework.integration.message.MessageBuilder;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the DTS Worker Node's
- * {@link JobNotificationService}.
+ * Default implementation of the DTS Batch Job's
+ * {@link JobNotificationService}. This implementation constructs messages and
+ * sends messages to the injected {@link MessageChannelTemplate}. 
  * 
  * @author Alex Arana
  * @author Gerson Galang
@@ -103,20 +104,14 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
                 errorDetails.addFailureTrace(ExceptionUtils.getFullStackTrace(failure));
             }
 
-            // Previously, we sent directly to the JMS queue rather than to 
-            // a spring integration channel.
-            //mJobEventQueueSender.doSend(jobId, document);
-
             // Rather than invoke the JMS job event queue sender directly,
             // we send the XML entity document to the 'dtsJobEvents' channel
             // using the injected channel template.
             // The 'dtsJobEvents' channel is bound to an out-bound channel adapter which
             // facilitates different message targets/sources (jms, dir, rmi ws etc);
-            // TODO: we need to set additional message headers (e.g. consider the 
+            // We also need to set additional message headers (e.g. consider the
             // ClientID given by the client that the client uses to filter their own 
-            // messages.
-            //String clientid = jobExecution.getExecutionContext().getString("ClientID");
-
+            // messages).
             final JobParameters jobParameters = jobExecution.getJobInstance().getJobParameters();
             final Map<String, Object> springIntegrationMsgHeaders = this.getHeaders(jobParameters);
             final MessageBuilder<FireUpJobErrorEventDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(springIntegrationMsgHeaders);
@@ -162,16 +157,6 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
     /**
      * {@inheritDoc}
      */
-    public void notifyJobProgress(final DtsFileTransferJob dtsJob,
-            final String message) {
-        // TODO Implement this method or get rid of it
-        throw new UnsupportedOperationException(
-                "Method notifyJobProgress() not yet implemented");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public void notifyJobStatus(final DtsFileTransferJob dtsJob,
             final JobStatus jobStatus, final JobExecution jobExecution) {
         Assert.notNull(dtsJob);
@@ -187,6 +172,9 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
         jobEventDetail.setWorkerNodeHost(mDtsWorkerNodeInformationService.getInstanceId());
         jobEventDetail.setActiveTime(toCalendar(dtsJob.getStartTime()));
         switch (jobStatus) {
+            case CREATED:
+                jobEventDetail.setStatus(StatusValueType.CREATED);
+                break;
             case TRANSFERRING:
                 jobEventDetail.setStatus(StatusValueType.TRANSFERRING);
                 break;
@@ -263,10 +251,26 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
         mChannelTemplate.send(msg);
     }
 
+
+
+    
+
+    /**
+     * {@inheritDoc}
+     */
+    /*public void notifyJobProgress(final DtsFileTransferJob dtsJob,
+            final String message) {
+        // TODO Implement this method or get rid of it
+        throw new UnsupportedOperationException(
+                "Method notifyJobProgress() not yet implemented");
+    }*/
+
+
+
     /**
      * Inject a message channel template for the Job Event queue.
      * 
-     * @param mChannelTemplate
+     * @param channelTemplate
      */
     public void setChannelTemplate(final MessageChannelTemplate channelTemplate) {
         mChannelTemplate = channelTemplate;
@@ -282,10 +286,10 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
         mDtsWorkerNodeInformationService = dtsWorkerNodeInformationService;
     }
 
-    // Build SI msg headers which include a JMS CORRELATION_ID entry.
-    // The JMS CORRELATION_ID entry may be set in another location so that the WorkerNodeJobNotificationService
-    // class can completely disconnect from JMS.
+    // Build SI msg headers
     private Map<String, Object> getHeaders(final JobParameters jobParameters) {
+        // The JMS CORRELATION_ID entry may be set in another location so that the WorkerNodeJobNotificationService
+        // class can completely disconnect from JMS.
         final Map<String, Object> springIntegMsgHeaders = new LinkedHashMap<String, Object>();
         if (jobParameters != null) {
             final Map<String, JobParameter> allParameters = jobParameters.getParameters();
