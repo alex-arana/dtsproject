@@ -37,7 +37,7 @@ import org.springframework.batch.core.StepExecution;
 /**
  * The LoggingJobNotificationService is an implementation of the JobNotificationService interface which only
  * logs the method that was called. This implementation is used when the a DTS job is launched from the
- * DtsBuilkCopyJobCliRunner and not the DTS workernode.
+ * DtsBulkCopyJobCliRunner and not the DTS workernode.
  *
  * @author Gerson Galang
  */
@@ -58,10 +58,10 @@ public class LoggingJobNotificationService implements JobNotificationService {
     /**
      * {@inheritDoc}
      */
-    public void notifyJobProgress(final DtsFileTransferJob dtsJob,
+    /*public void notifyJobProgress(final DtsFileTransferJob dtsJob,
         final String message) {
         LOGGER.debug("DtsBulkCopyJobCliRunner notifyJobProgress()");
-    }
+    }*/
 
     /**
      * {@inheritDoc}
@@ -90,7 +90,7 @@ public class LoggingJobNotificationService implements JobNotificationService {
     /**
      * {@inheritDoc}
      */
-    public void notifyStepFailures(final String dtsJobId,
+    public void notifyStepFailures(final String jobId,
         final StepExecution stepExecution) {
         LOGGER.debug("DtsBulkCopyJobCliRunner notifyStepFailures()");
     }
