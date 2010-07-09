@@ -70,7 +70,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.5</version>
         <configuration>
             <!-- systemPropertyVariables is the replacement of the deprecated
             systemProperties. Important: It can accept any value from
@@ -78,29 +77,38 @@
           <systemPropertyVariables>
             <dataminx.dir>${dataminx.dir}</dataminx.dir>
           </systemPropertyVariables>
+          <excludes>
+<!--
+To separate tests from integration tests:
+  mvn test
+  mvn integration-test
+To run a specified test or integration test:
+  mvn -Ddataminx.dir=/home/djm76/.dataminxes -Dtest=ProcessDtsJobMessageIntegrationTest test
+
+Could also use system property and the following exclude pattern
+"<exclude>${surefireExclude}</exclude>" to separate integration tests from unit tests.
+For goals that do not want to run integration tests (e.g. install or test)
+the system property "surefireExclude" should be set to "**/*IntegrationTest.java".
+For goal that should run integration tests (e.g. site:site or integration-test)
+the system property "surefireExclude" should be not set (could also set to "none").
+Examples:
+To exclude integeration tests:    mvn -DsurefireExclude=**/*IntegrationTest.java test
+To integration test:              mvn integration-test
+-->
+              <exclude>**/*IntegrationTest.java</exclude>
+          </excludes>
         </configuration>
         <executions>
           <execution>
-            <id>unit-tests</id>
-            <phase>test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <skip>false</skip>
-              <excludes>
-                <exclude>**/*IntegrationTest.java</exclude>
-              </excludes>
-            </configuration>
-          </execution>
-          <execution>
-            <id>integration-tests</id>
+            <id>surefire-itest</id>
             <phase>integration-test</phase>
             <goals>
               <goal>test</goal>
             </goals>
             <configuration>
-              <skip>false</skip>
+              <excludes>
+                <exclude>none</exclude>
+              </excludes>
               <includes>
                 <include>**/*IntegrationTest.java</include>
               </includes>
@@ -136,7 +144,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.5.5</version>
+      <!--<version>1.5.5</version>-->
     </dependency>
 
     <!-- Log4J -->
