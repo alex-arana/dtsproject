@@ -39,7 +39,7 @@
     <property name="queue" ref="jmsJobSubmitQueue"/>
     <property name="jmsTemplate" ref="convertableJmsTemplate"/>
   </bean>
-  <bean id="controlQueueSender" class="org.dataminx.dts.common.jms.JobQueueSender">
+  <bean id="controlQueueSender" class="org.dataminx.dts.common.jms.ControlQueueSender">
     <property name="queue" ref="jmsJobControlQueue"/>
     <property name="jmsTemplate" ref="controlQueueConvertableJmsTemplate"/>
   </bean>

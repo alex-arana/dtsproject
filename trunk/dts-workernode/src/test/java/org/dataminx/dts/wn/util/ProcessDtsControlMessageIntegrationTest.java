@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.dataminx.dts.common.jms.JobQueueSender;
+import org.dataminx.dts.common.jms.ControlQueueSender;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@ public class ProcessDtsControlMessageIntegrationTest extends
     AbstractTestNGSpringContextTests {
     @Autowired
     @Qualifier("controlQueueSender")
-    private JobQueueSender mJmsQueueSender;
+    private ControlQueueSender mJmsQueueSender;
 
     @Test
     public void cancelDtsJobAsDocument() throws Exception {
