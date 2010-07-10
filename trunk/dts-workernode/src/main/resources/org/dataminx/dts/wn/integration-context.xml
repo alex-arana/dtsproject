@@ -139,7 +139,7 @@
         channel="dtsJobEvents"
         jms-template="jmsJobEventQueueConvertableJmsTemplate"
         />
-
+    <!--
     <jms:message-driven-channel-adapter
         channel="dtsControlRequests"
         connection-factory="jmsConnectionFactory"
@@ -147,6 +147,19 @@
         message-converter="dtsControlMessageConverter"
         transaction-manager="jmsTransactionManager"
         />
+       -->
+    <jms:message-driven-channel-adapter
+        container="controlRequestsMessageContainer"
+        message-converter="dtsControlMessageConverter"
+        channel="dtsControlRequests"
+        />
+<beans:bean id="controlRequestsMessageContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <beans:property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <beans:property name="destinationName" value="${si.jms.jobControlQueueName}"/>
+    <beans:property name="messageSelector" value="${wn.id.message.header.name} = '${wn.id}'"/>
+    <beans:property name="transactionManager" ref="jmsTransactionManager"/>
+</beans:bean>
+    
     <!--
 
         <jms:message-driven-channel-adapter

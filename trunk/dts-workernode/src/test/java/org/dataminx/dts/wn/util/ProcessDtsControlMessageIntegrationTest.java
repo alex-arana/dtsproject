@@ -53,7 +53,7 @@ import org.testng.annotations.Test;
 public class ProcessDtsControlMessageIntegrationTest extends
     AbstractTestNGSpringContextTests {
     @Autowired
-    @Qualifier("jobQueueSender")
+    @Qualifier("controlQueueSender")
     private JobQueueSender mJmsQueueSender;
 
     @Test
@@ -63,6 +63,7 @@ public class ProcessDtsControlMessageIntegrationTest extends
             .parse(f);
         Map<String, Object> jmsproperties = new HashMap<String, Object>();
         jmsproperties.put("ClientID","DtsClient001");
+        jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodehostname001");
         mJmsQueueSender.doSend(generateNewJobId(), jmsproperties, jobRequest);
         // TODO: add a few lines of assert in here to make sure that the job really is running
         // or has completed
@@ -74,6 +75,7 @@ public class ProcessDtsControlMessageIntegrationTest extends
             .parse(f);
         Map<String, Object> jmsproperties = new HashMap<String, Object>();
         jmsproperties.put("ClientID","DtsClient001");
+        jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodehostname001");
         mJmsQueueSender.doSend(generateNewJobId(), jmsproperties, jobRequest);
         // TODO: add a few lines of assert in here to make sure that the job really is running
         // or has completed
