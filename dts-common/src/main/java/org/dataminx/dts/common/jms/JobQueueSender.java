@@ -76,6 +76,11 @@ public class JobQueueSender {
                         jmsMessage.setStringProperty("ClientID",
                                 (String) jmsParameterMap.get("ClientID"));
                     }
+                    if (jmsParameterMap.get("DTSWorkerNodeID") != null
+                            && !jmsParameterMap.get("DTSWorkerNodeID").toString().trim().equals("")) {
+                        jmsMessage.setStringProperty("DTSWorkerNodeID",
+                                (String) jmsParameterMap.get("DTSWorkerNodeID"));
+                    }
                     // check for the other jms properties/parameters here...
                 }
                 return jmsMessage;
