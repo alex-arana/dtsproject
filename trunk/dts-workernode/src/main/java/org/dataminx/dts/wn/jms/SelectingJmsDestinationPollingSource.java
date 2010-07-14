@@ -23,7 +23,7 @@ import org.springframework.jms.core.JmsTemplate;
  */
 public class SelectingJmsDestinationPollingSource extends JmsDestinationPollingSource {
 
-    private String mSelector;
+    private String mMessageSelector;
 
     public SelectingJmsDestinationPollingSource(JmsTemplate jmsTemplate) {
         super(jmsTemplate);
@@ -41,10 +41,10 @@ public class SelectingJmsDestinationPollingSource extends JmsDestinationPollingS
     @Override
     public Message<Object> receive() {
         Object receivedObject = null;
-        if (this.getSelector() == null) {
+        if (this.getMessageSelector() == null) {
             receivedObject = this.getJmsTemplate().receiveAndConvert();
         } else {
-            receivedObject = this.getJmsTemplate().receiveSelectedAndConvert(mSelector);
+            receivedObject = this.getJmsTemplate().receiveSelectedAndConvert(this.mMessageSelector);
         }
         if (receivedObject == null) {
             return null;
@@ -57,17 +57,17 @@ public class SelectingJmsDestinationPollingSource extends JmsDestinationPollingS
 
     /**
      * Set the JMS message selector value
-     * @param selector
+     * @param messageSelector
      */
-    public void setSelector(String selector) {
-        this.mSelector = selector;
+    public void setMessageSelector(String messageSelector) {
+        this.mMessageSelector = messageSelector;
     }
 
     /**
      * Get the JMS message selector value 
      * @return
      */
-    public String getSelector() {
-        return this.mSelector;
+    public String getMessageSelector() {
+        return this.mMessageSelector;
     }
 }
