@@ -3,9 +3,11 @@
  */
 package org.dataminx.dts.common.jms;
 
+import java.util.Iterator;
 import static org.dataminx.dts.common.broker.DtsBrokerConstants.ROUTING_HEADER_KEY;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -66,7 +68,15 @@ public class JobQueueSender {
                         session);
                 jmsMessage.setJMSCorrelationID(jobId);
                 if (jmsParameterMap != null) {
-                    if (jmsParameterMap.get(ROUTING_HEADER_KEY) != null
+                    Set<String> keys = jmsParameterMap.keySet();
+                    Iterator<String> iterator = keys.iterator();
+                    while (iterator.hasNext()) {
+                        String key = iterator.next();
+                        jmsMessage.setStringProperty(key, (String) jmsParameterMap.get(key));
+                    }
+
+
+                    /*if (jmsParameterMap.get(ROUTING_HEADER_KEY) != null
                             && !jmsParameterMap.get(ROUTING_HEADER_KEY).toString().trim().equals("")) {
                         jmsMessage.setStringProperty(ROUTING_HEADER_KEY,
                                 (String) jmsParameterMap.get(ROUTING_HEADER_KEY));
@@ -80,7 +90,7 @@ public class JobQueueSender {
                             && !jmsParameterMap.get("DTSWorkerNodeID").toString().trim().equals("")) {
                         jmsMessage.setStringProperty("DTSWorkerNodeID",
                                 (String) jmsParameterMap.get("DTSWorkerNodeID"));
-                    }
+                    }*/
                     // check for the other jms properties/parameters here...
                 }
                 return jmsMessage;
