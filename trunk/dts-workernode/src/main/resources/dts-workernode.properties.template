@@ -21,6 +21,15 @@ si.jms.jobSubmitQueueName = broker.default.output.queue
 si.jms.jobEventQueueName = dts.job.event.queue
 si.jms.jobControlQueueName = dts.job.control.queue
 
+# message selector value for the si.jms.jobSubmitQueueName (can leave blank
+# if want to receive all messages)
+si.jms.jobSubmitQueue.selector=
+
+# message selector value for the si.jms.jobControlQueueName (highly
+# recommended to leave as is) 
+si.jms.jobControlQueue.selector=${wn.id.message.header.name} = '${wn.id}'
+
+
 # control logic for workernode manager
 wn.manager.maxBatchJobNumber = 1
 
@@ -29,3 +38,5 @@ wn.id=DtsWorkerNodemyhostname001
 
 #default message header name of worker node ID
 wn.id.message.header.name=DTSWorkerNodeID
+
+

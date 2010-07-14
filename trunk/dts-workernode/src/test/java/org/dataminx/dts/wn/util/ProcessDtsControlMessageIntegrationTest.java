@@ -49,6 +49,8 @@ import org.testng.annotations.Test;
  * @author Alex Arana
  * @author Gerson Galang
  */
+//@ContextConfiguration(locations = {
+//    "/org/dataminx/dts/wn/util/ProcessDtsControlMessageIntegrationTest-context.xml"})
 @ContextConfiguration
 public class ProcessDtsControlMessageIntegrationTest extends
     AbstractTestNGSpringContextTests {
@@ -63,11 +65,12 @@ public class ProcessDtsControlMessageIntegrationTest extends
             .parse(f);
         Map<String, Object> jmsproperties = new HashMap<String, Object>();
         jmsproperties.put("ClientID","DtsClient001");
-        jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodehostname001");
-        mJmsQueueSender.doSend(generateNewJobId(), jmsproperties, jobRequest);
+        jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodemyhostname001");
+        mJmsQueueSender.doSend("cancel"+generateNewJobId(), jmsproperties, jobRequest);
         // TODO: add a few lines of assert in here to make sure that the job really is running
         // or has completed
-    }
+        Thread.sleep(3000);
+     }
     @Test
     public void resumeDtsJobAsDocument() throws Exception {
         final File f = new ClassPathResource("/org/dataminx/dts/wn/util/resume-request.xml").getFile();
@@ -75,10 +78,12 @@ public class ProcessDtsControlMessageIntegrationTest extends
             .parse(f);
         Map<String, Object> jmsproperties = new HashMap<String, Object>();
         jmsproperties.put("ClientID","DtsClient001");
-        jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodehostname001");
-        mJmsQueueSender.doSend(generateNewJobId(), jmsproperties, jobRequest);
+        jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodemyhostname001");
+        mJmsQueueSender.doSend("resume"+generateNewJobId(), jmsproperties, jobRequest);
         // TODO: add a few lines of assert in here to make sure that the job really is running
         // or has completed
+        Thread.sleep(3000);
+
     }
 
     private String generateNewJobId() {
