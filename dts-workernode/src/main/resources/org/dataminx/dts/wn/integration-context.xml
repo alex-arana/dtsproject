@@ -83,9 +83,16 @@
         <beans:property name="workerNodeManager" ref="workerNodeManager"/>
     </beans:bean>
 
+    <!--
     <beans:bean id="jmsMessageSource" class="org.springframework.integration.jms.JmsDestinationPollingSource">
         <beans:constructor-arg index="0" ref="convertableJmsTemplate"/>
     </beans:bean>
+    -->
+    <beans:bean id="jmsMessageSource" class="org.dataminx.dts.wn.jms.SelectingJmsDestinationPollingSource">
+         <beans:constructor-arg index="0" ref="convertableJmsTemplate"/>
+         <beans:property name="messageSelector" value="${si.jms.jobSubmitQueue.selector}"/>
+    </beans:bean>
+
 
     <beans:bean id="trigger" class="org.springframework.integration.scheduling.IntervalTrigger">
         <beans:constructor-arg value="10000"/>
@@ -156,7 +163,8 @@
 <beans:bean id="controlRequestsMessageContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
     <beans:property name="connectionFactory" ref="jmsConnectionFactory"/>
     <beans:property name="destinationName" value="${si.jms.jobControlQueueName}"/>
-    <beans:property name="messageSelector" value="${wn.id.message.header.name} = '${wn.id}'"/>
+    <!--<beans:property name="messageSelector" value="${wn.id.message.header.name} = '${wn.id}'"/>-->
+    <beans:property name="messageSelector" value="${si.jms.jobControlQueue.selector}"/>
     <beans:property name="transactionManager" ref="jmsTransactionManager"/>
 </beans:bean>
     

@@ -30,11 +30,7 @@
   <bean id="jmsJobControlQueue" class="org.apache.activemq.command.ActiveMQQueue">
     <constructor-arg index="0" value="${si.jms.jobControlQueueName}"/>
   </bean>
-  
-  <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-    <property name="connectionFactory" ref="jmsConnectionFactory"/>
-    <property name="defaultDestination" ref="jmsJobEventQueue"/>
-  </bean>
+
 
   <!--
   A JMSTemplate for the 'jmsJobEventQueue' that performs message conversion
@@ -53,6 +49,10 @@
     <property name="defaultDestination" ref="jmsJobSubmitQueue"/>
     <property name="messageConverter" ref="dtsMessageConverter"/>
   </bean>
+
+  <!--
+  A JMSTemplate for the 'jmsControlQueue' that performs message converstion
+  -->
   <bean id="controlQueueConvertableJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
     <property name="connectionFactory" ref="jmsConnectionFactory"/>
     <property name="defaultDestination" ref="jmsJobControlQueue"/>
