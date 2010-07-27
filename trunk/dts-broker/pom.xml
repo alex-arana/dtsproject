@@ -267,10 +267,12 @@
       <groupId>bouncycastle</groupId>
       <artifactId>bcprov-jdk16</artifactId>
     </dependency>
+    <!--
     <dependency>
         <groupId>au.org.arcs.auth</groupId>
         <artifactId>simpleProxyLib</artifactId>
     </dependency>
+    -->
     <dependency>
       <groupId>org.unitils</groupId>
       <artifactId>unitils</artifactId>

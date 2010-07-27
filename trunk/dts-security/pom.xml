@@ -51,11 +51,18 @@
       <groupId>bouncycastle</groupId>
       <artifactId>bcprov-jdk16</artifactId>
     </dependency>
+    <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+    </dependency>
+    
 
     <!-- Proxy Light -->
-    <dependency>
+    <!--<dependency>
         <groupId>au.org.arcs.auth</groupId>
         <artifactId>simpleProxyLib</artifactId>
     </dependency>
+    -->
+
   </dependencies>
 </project>
