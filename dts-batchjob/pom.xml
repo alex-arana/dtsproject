@@ -413,10 +413,10 @@ To integration test:              mvn integration-test
     </dependency>
 
     <!-- Proxy Light -->
-    <dependency>
+    <!--<dependency>
         <groupId>au.org.arcs.auth</groupId>
         <artifactId>simpleProxyLib</artifactId>
-    </dependency>
+    </dependency>-->
 
     <!-- Unitils -->
     <dependency>
