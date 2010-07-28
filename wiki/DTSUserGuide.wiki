@@ -1,6 +1,8 @@
 #labels Phase-Implementation,Install-Guide,User-Guide
 <wiki:toc max_depth="3" />
 
+This version of user guide is for Linux OS. In Windows, some changes are needed. For example, the user home directory is in C:\Documents and Settings\userxyz, the file path is "\" rather than "/" , and file copy command is "copy" rather than "cp". Use -Ddataminx.dir="C:/Documents and Settings/userxyz/.dataminx" foramt for your the command line input.
+
 == Data Transfer Service ==
 
 The Data Transfer Service is composed of a number of components and the sections below will show you how each of the DTS modules can be installed and used. 
