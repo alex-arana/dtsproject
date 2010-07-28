@@ -67,9 +67,11 @@ Create the Spring Batch tables by running the db script provided in dts-batchjob
  > mysql -u dts -h localhost -D dts -p < dts-batchjob/src/main/resources/db/schema-mysql.sql
 }}}
 
-Run dts-batchjob/src/test/resources/create-testfiles.sh to create the test files the unit tests would use. Remember to change the file to executable. The database you configured previously should also be running. 
+Before running the test, the database you configured previously should also be running.
 
-Run the test
+Unzip the testfiles and run the test: 
+
+Run the test in Linux:
 {{{
  > cd dts-batchjob
  > cp ./src/test/resources/testfiles.zip ~
@@ -79,8 +81,6 @@ Run the test
  > mvn -e -Ddataminx.dir=/home/dts-user/.dataminx test
  > mvn -e -Ddataminx.dir=/home/dts-user/.dataminx integration-test
 }}}
-
-*TODO: Write up the fix we've done to get around the problem with dataminx.dir not being picked up from the context xml files. dataminx.dir is needed so plugin-context.xml can be imported. Same issue with checkRequirementsTask not finding dataminx.dir if it's not specified in the dts-bulkcopyjob.properties*
 
 Edit testjob.xml in src/test/resources/org/dataminx/dts/batch and add the source/destination you want to access then run the command below. Remember to add your credential details to filter.properties in src/test/filters if you don't want to put your credentials in the actual job document.
 {{{
