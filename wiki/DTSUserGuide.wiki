@@ -72,8 +72,10 @@ Run dts-batchjob/src/test/resources/create-testfiles.sh to create the test files
 Run the test
 {{{
  > cd dts-batchjob
- > chmod +x src/test/resources/create-testfiles.sh
- > ./src/test/resources/create-testfiles.sh
+ > cp ./src/test/resources/testfiles.zip ~
+ > cd ~
+ > unzip testfiles.zip
+ > cd /usr/local/minx-dts/dts-batchjob	
  > mvn -e -Ddataminx.dir=/home/dts-user/.dataminx test
  > mvn -e -Ddataminx.dir=/home/dts-user/.dataminx integration-test
 }}}
