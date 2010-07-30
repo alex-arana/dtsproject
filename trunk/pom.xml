@@ -812,7 +812,12 @@
         <version>${postgresql.version}</version>
       </dependency>
 
-
+      <!-- Derby JDBC Driver -->
+      <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derby</artifactId>
+        <version>10.6.1.0</version>
+      </dependency>
 
 
       <!-- C3P0 -->
