@@ -21,7 +21,7 @@ public class ImmediateJobRestartStrategy implements JobRestartStrategy {
     }
 
     @Override
-    public void restartJob(final String jobName) {
+    public void restartJob(final String jobName) throws Exception {
         Long instanceId;
         try {
             instanceId = mWorkerNodeManager.getJobInstances(jobName, 0, 1).get(0);
@@ -30,8 +30,8 @@ public class ImmediateJobRestartStrategy implements JobRestartStrategy {
         }
         catch (JobExecutionException ex) {
             LOG.debug("Error restarting job " + jobName + " immediately",ex);
+            throw ex;
         }
-
     }
 
 }

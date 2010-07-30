@@ -66,9 +66,14 @@ public class BatchJobUpdateHandler {
                 }
             }
             if (retries < maxAttempts) {
-                mRestartStrategy.restartJob(instance.getJobName());
-            }
-            else {
+                String jName = instance.getJobName();
+                try {
+                    mRestartStrategy.restartJob(jName);
+                } catch (Exception ex) {
+                    LOG.debug("Unknown error during restarting job execution" + jName, ex);
+
+                }
+            } else {
                 // let's try and clean up the execution context when we know
                 // that the job won't be retried anymore
                 final List<JobExecution> jobExecutions = mJobExplorer

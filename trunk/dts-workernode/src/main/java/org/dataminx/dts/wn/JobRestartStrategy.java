@@ -11,6 +11,6 @@ package org.dataminx.dts.wn;
  */
 public interface JobRestartStrategy {
 
-    public void restartJob(String jobName);
+    public void restartJob(String jobName) throws Exception;
 
 }

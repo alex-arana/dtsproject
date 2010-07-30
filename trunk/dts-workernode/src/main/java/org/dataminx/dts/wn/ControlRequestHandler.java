@@ -1,14 +1,17 @@
 package org.dataminx.dts.wn;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Handler;
-import org.ogf.schemas.dmi.x2008.x05.dmi.StateDocument;
 import org.ogf.schemas.dmi.x2008.x05.dmi.StateType;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobResponseDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobResponseDocument.CancelJobResponse;
 import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobResponseDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobResponseDocument.ResumeJobResponse;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobDetailsRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusResponseDocument;
@@ -19,6 +22,8 @@ import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument.Resu
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobDetailsRequestDocument.GetJobDetailsRequest;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument.GetJobStatusRequest;
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusResponseDocument.GetJobStatusResponse;
+import org.ogf.schemas.dmi.x2008.x05.dmi.DetailType;
+import org.ogf.schemas.dmi.x2008.x05.dmi.StatusValueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
@@ -81,6 +86,19 @@ public class ControlRequestHandler {
                         if(stopped){
                             // here do we need to send a confirmation message that
                             // the job stopped ok.
+                            final CancelJobResponseDocument document = CancelJobResponseDocument.Factory.newInstance();
+                            final CancelJobResponse cancelJobResponse = document.addNewCancelJobResponse();
+                            Map<String, Object> SIMsgHeaders = new LinkedHashMap<String, Object>();
+                            Iterator<String> iterator = msgHeaders.keySet().iterator();
+                            while (iterator.hasNext()) {
+                                String key = iterator.next();
+                                SIMsgHeaders.put(key, msgHeaders.get(key).toString());
+                            }
+                            SIMsgHeaders.put(mDtsWorkerNodeInformationService.getWorkerNodeIDMessageHeaderName(), mDtsWorkerNodeInformationService.getInstanceId());
+                            cancelJobResponse.setSuccessFlag(stopped);
+                            MessageBuilder<CancelJobResponseDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(SIMsgHeaders);
+                            Message<CancelJobResponseDocument> msg = msgbuilder.build();
+                            return msg;
                         }
                         else {
                             String errorMsg = "Could not stop job: " + jobId;
@@ -108,76 +126,117 @@ public class ControlRequestHandler {
             final ResumeJobRequest resumeRequest = ((ResumeJobRequestDocument) controlRequest).getResumeJobRequest();
             final String jobId = resumeRequest.getJobResourceKey();
             LOG.debug("Received a resume job request for " + jobId);
+            boolean found = false;
             for (String jobName : mWorkerNodeManager.getJobNames()) {
                 if (jobName.equals(jobId)) {
+                    found = true;
                     LOG.debug("Found running job requested resumsed");
-                    mWorkerNodeManager.restartJob(jobId);
-                    // do we need to return some confirmation that the job
-                    // was stopped ok here ?
-                    // Also, do we need to resond if any of the exceptions
-                    // are caught below.
-
-
+                    try {
+                        mJobRestartStrategy.restartJob(jobId);
+                        final ResumeJobResponseDocument document = ResumeJobResponseDocument.Factory.newInstance();
+                        final ResumeJobResponse resumeJobResponse = document.addNewResumeJobResponse();
+                        Map<String, Object> SIMsgHeaders = new LinkedHashMap<String, Object>();
+                        Iterator<String> iterator = msgHeaders.keySet().iterator();
+                        while (iterator.hasNext()) {
+                            String key = iterator.next();
+                            SIMsgHeaders.put(key, msgHeaders.get(key).toString());
+                        }
+                        SIMsgHeaders.put(mDtsWorkerNodeInformationService.getWorkerNodeIDMessageHeaderName(), mDtsWorkerNodeInformationService.getInstanceId());
+                        resumeJobResponse.setSuccessFlag(true);
+                        MessageBuilder<ResumeJobResponseDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(SIMsgHeaders);
+                        Message<ResumeJobResponseDocument> msg = msgbuilder.build();
+                        return msg;
+                    } catch (Exception ex) {
+                        return buildAnErrorMessage(msgHeaders, ex.getMessage());
+                    }
                 }
             }
+            if (!found) {
             String errorMsg = "The ResumeJob request is not processed due to a wrong JobResourceKey: " + jobId;
             return buildAnErrorMessage(msgHeaders, errorMsg);
-
+            }
             
         } else if (controlRequest instanceof GetJobStatusRequestDocument) {
             final GetJobStatusRequest getJobStatusRequest = ((GetJobStatusRequestDocument) controlRequest).getGetJobStatusRequest();
             final String jobGotStatus = getJobStatusRequest.getJobResourceKey();
             LOG.debug("Received a GetJobStatus request for " + jobGotStatus);
+            boolean found = false;
             for (String jobName : mWorkerNodeManager.getJobNames()) {
                 if (jobName.equals(jobGotStatus)) {
-                    LOG.debug("Found running job whose status can be accessed.");
+                    found = true;
                     try {
-                        for (Long execId : mWorkerNodeManager.getRunningExecutions(jobName)) {
-                            mWorkerNodeManager.getSummary(execId);
-                            final GetJobStatusResponseDocument document = GetJobStatusResponseDocument.Factory.newInstance();
-                            final GetJobStatusResponse response = document.addNewGetJobStatusResponse();
-                            final StateDocument doc = StateDocument.Factory.newInstance();
-                            final StateType stateType = doc.addNewState();
-                            stateType.setValue(null);
-                            response.setState(stateType);
-                            Map<String, Object> SIMsgHeaders = new LinkedHashMap<String, Object>();
-                            Iterator<String> iterator = msgHeaders.keySet().iterator();
-                            while (iterator.hasNext()) {
-                                String key = iterator.next();
-                                SIMsgHeaders.put(key, msgHeaders.get(key).toString());
+                        if (mWorkerNodeManager.getRunningExecutions(jobName).size()==0) {
+                            for (Long execId : mWorkerNodeManager.getRunningExecutions(jobName)) {
+                                String dtsJobSummary = mWorkerNodeManager.getSummary(execId);
+                                LOG.debug(jobGotStatus + "'s dtsJobSummary: " + dtsJobSummary);
+                                final GetJobStatusResponseDocument document = GetJobStatusResponseDocument.Factory.newInstance();
+                                final GetJobStatusResponse response = document.addNewGetJobStatusResponse();
+                                final StateType stateType = response.addNewState();
+                                //COMPLETED, STARTING, STARTED, STOPPING, STOPPED, FAILED, ABANDONED, UNKNOWN;
+                                // decide the status from the summary
+                                String jobState = parseJobSummary(dtsJobSummary);
+                                LOG.debug("parseJobSummary(dtsJobSummary): " + jobState);
+                                if (jobState.equals("STARTING")) {
+                                    stateType.setValue(StatusValueType.CREATED);
+                                } else if (jobState.equals("COMPLETED")) {
+                                    stateType.setValue(StatusValueType.DONE);
+                                } else if (jobState.equals("FAILED")) {
+                                    stateType.setValue(StatusValueType.FAILED_UNCLEAN);
+                                } else if (jobState.equals("UNKNOWN")) {
+                                    stateType.setValue(StatusValueType.SCHEDULED);
+                                } else if (jobState.equals("STOPPED")) {
+                                    stateType.setValue(StatusValueType.SUSPENDED);
+                                } else if (jobState.equals("STARTED")) {
+                                    stateType.setValue(StatusValueType.TRANSFERRING);
+                                } else {
+                                    stateType.setValue(StatusValueType.FAILED_UNKNOWN);
+                                }
+                                final DetailType detail = stateType.addNewDetail();
+                                stateType.setDetail(detail);
+                                response.setState(stateType);
+                                Map<String, Object> SIMsgHeaders = new LinkedHashMap<String, Object>();
+                                Iterator<String> iterator = msgHeaders.keySet().iterator();
+                                while (iterator.hasNext()) {
+                                    String key = iterator.next();
+                                    SIMsgHeaders.put(key, msgHeaders.get(key).toString());
+                                }
+                                SIMsgHeaders.put(mDtsWorkerNodeInformationService.getWorkerNodeIDMessageHeaderName(), mDtsWorkerNodeInformationService.getInstanceId());
+                                final MessageBuilder<GetJobStatusResponseDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(SIMsgHeaders);
+                                final Message<GetJobStatusResponseDocument> msg = msgbuilder.build();
+                                return msg;
                             }
-                            SIMsgHeaders.put(mDtsWorkerNodeInformationService.getWorkerNodeIDMessageHeaderName(), mDtsWorkerNodeInformationService.getInstanceId());
-                            final MessageBuilder<GetJobStatusResponseDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(SIMsgHeaders);
-                            final Message<GetJobStatusResponseDocument> msg = msgbuilder.setCorrelationId(msgHeaders.get(org.springframework.integration.jms.JmsHeaders.CORRELATION_ID)).build();
-                            return msg;
+                        } else {
+                            return buildAnErrorMessage(msgHeaders, "There are no running executions to give a job status. The job may be stopped or completed.");
                         }
-                        // do we need to return some confirmation that the job
-                        // was stopped ok here ?
-                        // Also, do we need to resond if any of the exceptions
-                        // are caught below.
-
                     } catch (NoSuchJobException e) {
                         LOG.debug(e.getMessage());
+                        return buildAnErrorMessage(msgHeaders, e.getMessage());
                     } catch (NoSuchJobExecutionException e) {
                         LOG.debug(e.getMessage());
+                        return buildAnErrorMessage(msgHeaders, e.getMessage());
                     }
                 }
             }
-            String errorMsg = "The GetJobStatus request is not processed due to a wrong JobResourceKey: " + jobGotStatus;
-            return buildAnErrorMessage(msgHeaders, errorMsg);
-
+            if (!found) {
+                String errorMsg = "The GetJobStatus request is not processed due to a wrong JobResourceKey: " + jobGotStatus;
+                return buildAnErrorMessage(msgHeaders, errorMsg);
+            }
         } else if (controlRequest instanceof GetJobDetailsRequestDocument) {
             final GetJobDetailsRequest getJobDetailsRequest = ((GetJobDetailsRequestDocument) controlRequest).getGetJobDetailsRequest();
             final String jobGotDetails = getJobDetailsRequest.getJobResourceKey();
             LOG.debug("Received a GetJobDetails request for " + jobGotDetails);
+            boolean found = false;
             for (String jobName : mWorkerNodeManager.getJobNames()) {
                 if (jobName.equals(jobGotDetails)) {
+                    found = true;
                     LOG.debug("Found running job whose details can be accessed.");
                     //todo
                 }
             }
+            if (!found) {
             String errorMsg = "The GetJobDetails request is not processed due to a wrong JobResourceKey: " + jobGotDetails;
             return buildAnErrorMessage(msgHeaders, errorMsg);
+           }
         }
         return null;
     }
@@ -213,5 +272,14 @@ public class ControlRequestHandler {
         MessageBuilder<CustomFaultDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(SIMsgHeaders);
         Message<CustomFaultDocument> msg = msgbuilder.build();
         return msg;
+    }
+
+    private String parseJobSummary(String jobSummary){
+      // jobSummary's format  (", startTime=%s, endTime=%s, lastUpdated=%s, status=%s, exitStatus=%s, job=[%s]", startTime, endTime, lastUpdated, status, exitStatus, jobInstance)
+        String s = "status";
+        String e = "exitStatus";
+        int sstart = jobSummary.indexOf(s);
+        int estart = jobSummary.indexOf(e);
+        return jobSummary.substring(sstart+7, estart-2);
     }
 }
