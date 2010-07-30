@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<minx:getJobStatusRequest xmlns:minx="http://schemas.dataminx.org/dts/2009/07/messages">
+    <jsdl:JobResourceKey xmlns:jsdl="http://schemas.dataminx.org/dts/2009/07/jsdl">ANSTO_007</jsdl:JobResourceKey>
+</minx:getJobStatusRequest>
