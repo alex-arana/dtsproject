@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
  * requests.
  *
  * @author Gerson Galang
+ * @author David Meredith (modifications)
  */
 public class DtsJobDetails implements Serializable {
 
@@ -84,7 +85,41 @@ public class DtsJobDetails implements Serializable {
     private List<String> mExcludedFiles = new ArrayList<String>();
 
     /**
-     * Holds the maximum number of files to be transferred from each Source or Target element.
+     * For every distinct ROOT URI that appears in all the DataTransfer elements
+     * in a document (both sources and sinks), the element that defines the MAX
+     * number of files to copy is stored against the ROOT URI (the key). 
+     *
+     * <br/>
+     * For example, if 2 source elements are defined which
+     * have a common ROOT URI (gridftp://host1.dl.ac.uk), then the element
+     * that has the highest file count value will have its
+     * file count stored in the map against the common ROOT URI. The common sink
+     * ROOT URI (gridftp://host2.dl.ac.uk) will also have this maximum value
+     * (illustrated below):
+     *
+     * <pre>
+     * Given the following job document:
+     *
+     *   <DataTransfer>
+     *    <sourceURI> gridftp://host1.dl.ac.uk/some/dir/200files </sourceURI>
+     *    <targetURI> gridftp://host2.dl.ac.uk/sink/dir </targetURI>
+     *   </DataTransfer>
+     *   <DataTransfer>
+     *     <sourceURI> gridftp://host1.dl.ac.uk/some/other/dir/400files </sourceURI>
+     *     <targetURI> gridftp://host2.dl.ac.uk/sink/dir </targetURI>
+     *   </DataTransfer>
+     *
+     * Results in two map entries:
+     * Map entry 1 (<gridftp://host1.dl.ac.uk> , <400>)   [400 files max from DataTransfer element 2]
+     * Map entry 2 (<gridftp://host2.dl.ac.uk> , <400>)   [400 files max to sink]
+     *
+     * Important: The map DOES NOT hold the TOTAL number of files to copied
+     * from each source/sink ROOT URI (this is very different - which would result in
+     * the following map entires):
+     * Erronous Map entry 1 (<gridftp://host1.dl.ac.uk> , <600>)   [200+400 = 600 files max from DataTransfer element 1 + 2]
+     * Erronous Map entry 2 (<gridftp://host2.dl.ac.uk> , <600>)   [600 files max to sink]
+     *
+     * </pre>
      */
     private final Map<String, Integer> mSourceTargetMaxTotalFilesToTransfer = new HashMap<String, Integer>();
 

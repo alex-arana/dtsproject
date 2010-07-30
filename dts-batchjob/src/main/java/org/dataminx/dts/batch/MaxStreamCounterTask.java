@@ -284,36 +284,34 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
 
         FileSystemManager fileSystemManager = null;
         try {
-            fileSystemManager = mDtsVfsUtil.createNewFsManager();
-        }
-        catch (final FileSystemException e) {
-            throw new DtsJobExecutionException(
-                "FileSystemException was thrown while creating new FileSystemManager in the max stream counter task.",
-                e);
-        }
+            try {
+                fileSystemManager = mDtsVfsUtil.createNewFsManager();
+            } catch (final FileSystemException e) {
+                throw new DtsJobExecutionException(
+                        "FileSystemException was thrown while creating new FileSystemManager in the max stream counter task.",
+                        e);
+            }
 
-        // TODO: have this step rerun if it fails... use the user's provided
-        // info
+            // TODO: have this step rerun if it fails... use the user's provided
+            // info
 
-        final List<DataTransferType> dataTransfers = new ArrayList<DataTransferType>();
+            final List<DataTransferType> dataTransfers = new ArrayList<DataTransferType>();
 
-        final JobDescriptionType jobDescription = mSubmitJobRequest
-            .getJobDefinition().getJobDescription();
-        if (jobDescription instanceof MinxJobDescriptionType) {
-            final MinxJobDescriptionType minxJobDescription = (MinxJobDescriptionType) jobDescription;
-            CollectionUtils.addAll(dataTransfers, minxJobDescription
-                .getDataTransferArray());
-        }
-        if (CollectionUtils.isEmpty(dataTransfers)) {
-            LOGGER
-                .warn("DTS job request is incomplete as it does not contain any data transfer elements.");
-            throw new DtsJobExecutionException(
-                "DTS job request contains no data transfer elements.");
-        }
+            final JobDescriptionType jobDescription = mSubmitJobRequest.getJobDefinition().getJobDescription();
+            if (jobDescription instanceof MinxJobDescriptionType) {
+                final MinxJobDescriptionType minxJobDescription = (MinxJobDescriptionType) jobDescription;
+                CollectionUtils.addAll(dataTransfers, minxJobDescription.getDataTransferArray());
+            }
+            if (CollectionUtils.isEmpty(dataTransfers)) {
+                LOGGER.warn("DTS job request is incomplete as it does not contain any data transfer elements.");
+                throw new DtsJobExecutionException(
+                        "DTS job request contains no data transfer elements.");
+            }
 
-        // for each DataTransferType, get the corresponding root FileObject from source
-        // and target URIs and put unique root FO in a map<URI in String, FileObject>
-        for (final DataTransferType dataTransfer : dataTransfers) {
+            // for each DataTransferType, get the corresponding root FileObject from source
+            // and target URIs and put each source and target unique ROOT FO in a map:
+            // mFileObjectMap<ROOT URI String, ROOT FileObject>
+            for (final DataTransferType dataTransfer : dataTransfers) {
 
             final FileObject sourceFO = fileSystemManager
                 .resolveFile(dataTransfer.getSource().getURI(), mDtsVfsUtil
@@ -322,50 +320,62 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
                 .resolveFile(dataTransfer.getTarget().getURI(), mDtsVfsUtil
                     .getFileSystemOptions(dataTransfer.getTarget(), mEncrypter));
 
-            // TODO: handle cases where in source and destination root File
-            // Object of File System are the same but the credentials to
-            // access them are different. So just means that those are still
-            // two different scenarios.
+                // TODO: handle cases where in source and destination root File
+                // Object of File System are the same but the credentials to
+                // access them are different. So just means that those are still
+                // two different scenarios.
 
-            // TODO: what do we do then if the restriction on access/connection
-            // is on a per-host rather than a per-user access
+                // TODO: what do we do then if the restriction on access/connection
+                // is on a per-host rather than a per-user access
 
-            if (!mFileObjectMap.containsKey(sourceFO.getFileSystem().getRoot()
-                .getURL().toString())) {
-                mFileObjectMap.put(sourceFO.getFileSystem().getRoot().getURL()
-                    .toString(), sourceFO.getFileSystem().getRoot());
+                final FileObject sourceRoot = sourceFO.getFileSystem().getRoot();
+                final FileObject targetRoot = targetFO.getFileSystem().getRoot();
+
+                if (!mFileObjectMap.containsKey(sourceRoot.getURL().toString())) {
+                    LOGGER.debug("put source in FileObject map: "+sourceRoot.getURL().toString());
+                    mFileObjectMap.put(sourceRoot.getURL().toString(), sourceRoot);
+                }
+                if (!mFileObjectMap.containsKey(targetRoot.getURL().toString())) {
+                    LOGGER.debug("put target in File Object map: "+targetRoot.getURL().toString());
+                    mFileObjectMap.put(targetRoot.getURL().toString(), targetRoot);
+                }
             }
-            if (!mFileObjectMap.containsKey(targetFO.getFileSystem().getRoot()
-                .getURL().toString())) {
-                mFileObjectMap.put(targetFO.getFileSystem().getRoot().getURL()
-                    .toString(), targetFO.getFileSystem().getRoot());
-            }
+
+        } finally {
+            // let's close the connection here..
+            ((DefaultFileSystemManager) fileSystemManager).close();
         }
 
-        // let's close the connection here..
-        ((DefaultFileSystemManager) fileSystemManager).close();
-
         final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = new FileObjectMap<String, Integer>();
-        sourceTargetMaxTotalFilesToTransfer.putAll(mDtsJobDetails
-            .getSourceTargetMaxTotalFilesToTransfer());
+        sourceTargetMaxTotalFilesToTransfer.putAll(mDtsJobDetails.getSourceTargetMaxTotalFilesToTransfer());
 
-        // go through each FO in the map and check for max connections we can
+        if(LOGGER.isDebugEnabled()){
+          for (final String foRootKey : mFileObjectMap.keySet()) {
+            LOGGER.debug("iterate FileObject map, key : "+foRootKey);
+          }
+        }
+        
+        // go through each ROOT URI FO in the map and check for max connections we can
         // make on each one and put in map<URI in String, Integer of max connections>
         for (final String foRootKey : mFileObjectMap.keySet()) {
-
+            LOGGER.debug("process - get FileObject value with key : "+foRootKey);
             final FileObject foRoot = mFileObjectMap.get(foRootKey);
 
-            // if there are more files to transfer for this source/target, we'll use
-            // our own preset max parallel connections to try.
+            // If there are more files to transfer than the mMaxConnectionsToTry
+            // for this source or target (most probably true), we'll try to use UP to our
+            // own preset max parallel connections to try.
+            // TODO: must find out why we need the if != null !!!!! 
+            if(sourceTargetMaxTotalFilesToTransfer.get(foRootKey) != null){
             if (sourceTargetMaxTotalFilesToTransfer.get(foRootKey) > mMaxConnectionsToTry) {
                 gatherMaxConnections(foRoot, mMaxConnectionsToTry);
             }
             else {
-                // since there's not that many files to transfer for this source/target
-                // we'll try and open up connections to the same number of files that will
-                // be transferred from this source/target
-                gatherMaxConnections(foRoot,
-                    sourceTargetMaxTotalFilesToTransfer.get(foRootKey));
+                // (sourceTargetMaxTotalFilesToTransfer.get(foRootKey) < mMaxConnectionsToTry)
+                // Since there's not that many files to transfer for this source or target
+                // we'll try and open up connections UP to the same number of files that will
+                // be transferred to/from this source or target
+                gatherMaxConnections(foRoot, sourceTargetMaxTotalFilesToTransfer.get(foRootKey));
+            }
             }
         }
 

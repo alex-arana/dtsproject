@@ -1,6 +1,5 @@
 package org.dataminx.dts.batch;
 
-import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -27,7 +26,7 @@ import org.testng.annotations.Test;
  * it.
  * 
  * @author Gerson Galang
- * @author David Meredith 
+ * @author David Meredith (modifications)
  */
 @ContextConfiguration(locations = {
     "/org/dataminx/dts/batch/client-context.xml",
@@ -65,20 +64,28 @@ public class QuickBulkCopyJobIntegrationTest extends
     @BeforeClass
     public void init() throws Exception {
         //System.setProperty("dataminx.dir", "/home/djm76/.dataminx");
-        final File f = new ClassPathResource("/org/dataminx/dts/batch/testjob"
-            + getTestFilePostfix() + ".xml").getFile();
-        mDtsJob = JobDefinitionDocument.Factory.parse(f);
+        //final File f = new ClassPathResource("/org/dataminx/dts/batch/testjob"+ getTestFilePostfix() + ".xml").getFile();
+        //mDtsJob = JobDefinitionDocument.Factory.parse(f);
+
+        final File f = new ClassPathResource("/org/dataminx/dts/batch/testjob.xml").getFile();
+        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
+        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
+        //System.out.println(homeDir);
+        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
+        //System.out.println(docString);
+        mDtsJob = JobDefinitionDocument.Factory.parse(docString);
+        
         assertNotNull(mDtsJob);
     }
 
     @Test
     public void testRunJob() throws Exception {
-        if(true) return;
         final String jobId = UUID.randomUUID().toString();
         final JobExecution jobExecution = mJobLauncher.run(jobId, mDtsJob);
         assertTrue(jobExecution.getStatus() == BatchStatus.COMPLETED);
             //|| jobExecution.getStatus() == BatchStatus.FAILED);
         assertEquals(jobId, jobExecution.getJobInstance().getJobName());
     }
+
 
 }

@@ -11,21 +11,14 @@
     xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl">
     <jsdl:JobIdentification>
       <jsdl:JobName>testjob</jsdl:JobName>
-      <jsdl:Description>Gerson's Job</jsdl:Description>
-      <jsdl:JobAnnotation>Gerson's Job Annotation</jsdl:JobAnnotation>
+      <jsdl:Description>Gerson's and Dave's Job</jsdl:Description>
+      <jsdl:JobAnnotation>Gerson's and Dave's Job Annotation</jsdl:JobAnnotation>
       <jsdl:JobProject>apollo33</jsdl:JobProject>
     </jsdl:JobIdentification>
     <mjsdl:DataTransfer>
-      <mjsdl:Source>        
-        <jsdl:URI>file://${user.home}/testfiles/dir-with-mixedfiles</jsdl:URI>
-      </mjsdl:Source>
-      <mjsdl:Target>
-        <jsdl:URI>tmp://</jsdl:URI>
-      </mjsdl:Target>
-    </mjsdl:DataTransfer>
-    <mjsdl:DataTransfer>
-      <mjsdl:Source>        
-        <jsdl:URI>file://${user.home}/testfiles/dir-with-9files</jsdl:URI>
+      <mjsdl:Source>
+        <jsdl:URI>file://@home.dir.replacement@/testfiles/dir-with-9files</jsdl:URI>
+        <!--<jsdl:URI>file://${user.home}/testfiles/dir-with-9files</jsdl:URI>-->
       </mjsdl:Source>
       <mjsdl:Target>
         <jsdl:URI>tmp://</jsdl:URI>

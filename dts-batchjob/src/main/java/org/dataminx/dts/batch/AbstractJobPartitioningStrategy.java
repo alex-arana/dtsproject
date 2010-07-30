@@ -164,18 +164,14 @@ public abstract class AbstractJobPartitioningStrategy implements
     public DtsJobDetails partitionTheJob(final JobDefinitionType jobDefinition,
         final String jobResourceKey, final String jobTag)
         throws JobScopingException {
-        Assert.hasText(jobResourceKey,
-            "JobResourceKey should not be null or empty.");
-        Assert.hasText(jobTag,
-            "JobTag should not be null or empty.");
+        Assert.hasText(jobResourceKey, "JobResourceKey should not be null or empty.");
+        Assert.hasText(jobTag, "JobTag should not be null or empty.");
         Assert.notNull(jobDefinition, "JobDefinitionType should not be null.");
         if (mMaxTotalByteSizePerStepLimit < 0) {
-            throw new DtsException(
-                "MaxTotalByteSizePerLimit should be a positive number.");
+            throw new DtsException("MaxTotalByteSizePerLimit should be a positive number.");
         }
         if (mMaxTotalFileNumPerStepLimit < 0) {
-            throw new DtsException(
-                "MaxTotalFileNumPerStepLimit should be a positive number.");
+            throw new DtsException("MaxTotalFileNumPerStepLimit should be a positive number.");
         }
 
         FileSystemManager fileSystemManager = null;
@@ -215,23 +211,19 @@ public abstract class AbstractJobPartitioningStrategy implements
                 .getJobDescription();
             if (jobDescription instanceof MinxJobDescriptionType) {
                 final MinxJobDescriptionType minxJobDescription = (MinxJobDescriptionType) jobDescription;
-                CollectionUtils.addAll(dataTransfers, minxJobDescription
-                    .getDataTransferArray());
+                CollectionUtils.addAll(dataTransfers, minxJobDescription.getDataTransferArray());
             }
             if (CollectionUtils.isEmpty(dataTransfers)) {
-                LOGGER
-                    .warn("DTS job request is incomplete as it does not contain any data transfer elements.");
-                throw new DtsJobExecutionException(
-                    "DTS job request contains no data transfer elements.");
+                LOGGER.warn("DTS job request is incomplete as it does not contain any data transfer elements.");
+                throw new DtsJobExecutionException("DTS job request contains no data transfer elements.");
             }
+
             int dataTransferIndex = 0;
             for (final DataTransferType dataTransfer : dataTransfers) {
-
                 // reset the total number of files to be transferred within this DataTransfer element
                 mPerDataTransferTotalFiles = 0;
 
-                // the sourceParent can be a directory or a file that needs to be
-                // transferred to the target destination
+                // Resolve sourceParent - dir or file to be copied to targetParent
                 FileObject sourceParent = null;
                 try {
                     sourceParent = fileSystemManager.resolveFile(
@@ -251,6 +243,7 @@ public abstract class AbstractJobPartitioningStrategy implements
                             + dataTransfer.getSource().getURI() + ".", e);
                 }
 
+                // Resolve targetParent - destincation for copy
                 FileObject targetParent = null;
                 try {
                     targetParent = fileSystemManager.resolveFile(
@@ -264,23 +257,70 @@ public abstract class AbstractJobPartitioningStrategy implements
                 }
 
                 try {
-
                     // 1 JobStepAllocator  -has->  *DtsJobSteps
                     // 1 DtsJobStep        -has->  *DtsDataTransferUnits
+
+                    // The sourceParentRootStr and targetParentRootStr
+                    // are the keys in the JobDetails.sourceTargetMaxTotalFilesToTransfer
+                    // Map that holds the maximum number of files to be transferred
+                    // from each SourceRoot (URI) and to each SinkRoot (URI) per source/sink element. 
+                    // i.e. Map<ROOT URI (String), number of files (Integer)>.
                     //
-                    // Call createNewDataTransfer to initialise the current
-                    // allocator's step with the given byte-size and file-num
-                    // constraints (i.e. mDtsJobStepAllocator.mTmpDtsJobStep).
-                    // Thus, there is always at least ONE (often more) steps per dataTransfer element.
-                    LOGGER.debug("Creating new dataTransfer: "+sourceParent.getFileSystem().getRoot().getURL().toString() + "  "+targetParent.getFileSystem().getRoot().getURL().toString());
+                    // i.e. For every distinct ROOT URI that appears in all the DataTransfer elements
+                    // in a document (both sources and sinks), the element that defines the MAX
+                    // number of files to copy is stored against the ROOT URI (the key).
+                    //
+                    // For example, if 2 source elements are defined which
+                    // have a common ROOT URI (gridftp://host1.dl.ac.uk), then the element
+                    // that has the highest file count value will have its
+                    // file count stored in the map against the common ROOT URI. The common sink
+                    // ROOT URI (gridftp://host2.dl.ac.uk) will also have this maximum value
+                    // (illustrated below):
+                    //
+                    // Given the following job document:
+                    //
+                    //    <DataTransfer>
+                    //     <sourceURI> gridftp://host1.dl.ac.uk/some/dir/200files </sourceURI>
+                    //     <targetURI> gridftp://host2.dl.ac.uk/sink/dir </targetURI>
+                    //    </DataTransfer>
+                    //    <DataTransfer>
+                    //      <sourceURI> gridftp://host1.dl.ac.uk/some/other/dir/400files </sourceURI>
+                    //      <targetURI> gridftp://host2.dl.ac.uk/sink/dir </targetURI>
+                    //    </DataTransfer>
+                    //
+                    // Results in two map entries:
+                    //  Map entry 1 (<gridftp://host1.dl.ac.uk> , <400>)   [400 files max from DataTransfer element 2]
+                    //  Map entry 2 (<gridftp://host2.dl.ac.uk> , <400>)   [400 files max to sink]
+                    //
+                    // Important: The map DOES NOT hold the TOTAL number of files to copied
+                    // from each source/sink ROOT URI (this is very different - which would result in
+                    // the following map entires):
+                    //  Erronous Map entry 1 (<gridftp://host1.dl.ac.uk> , <600>)   [200+400 = 600 files max from DataTransfer element 1 + 2]
+                    //  Erronous Map entry 2 (<gridftp://host2.dl.ac.uk> , <600>)   [600 files max to sink]
+                    //
+                    // Important: Note that each SINK entry in the map
+                    // will have the same number of files specified as the
+                    // corresponding source.
+                    final String sourceParentRootStr =
+                            sourceParent.getFileSystem().getRoot().getURL().toString();
+                    final String targetParentRootStr =
+                            targetParent.getFileSystem().getRoot().getURL().toString();
+
+                    // Initialise a new step in the allocator with the given
+                    // byte-size and file-num thresholds (mDtsJobStepAllocator.mTmpDtsJobStep)
+                    // (this step becomes the allocator's current step to which
+                    // new DTUs are subsequently added in the prepare() call below).
+                    // Thus, there is always at least ONE (often more) steps
+                    // per dataTransfer element which is what we want !
+                    LOGGER.debug("Creating new dataTransfer: "+sourceParentRootStr + "  "+targetParentRootStr);
                     mDtsJobStepAllocator.createNewDataTransfer(
-                        sourceParent.getFileSystem().getRoot().getURL().toString(),
-                        targetParent.getFileSystem().getRoot().getURL().toString(),
+                        sourceParentRootStr,
+                        targetParentRootStr,
                         mMaxTotalByteSizePerStepLimit,
                         mMaxTotalFileNumPerStepLimit);
 
                     // Find out the number of files to be transferred for the given
-                    // source and target pair. also create the directory structure
+                    // source and target pair. Also create the directory structure
                     // on the target destination. Do this by:
                     //
                     // - Recurse/drill-down into each source to generate file-only transfers (DTUs)
@@ -306,21 +346,18 @@ public abstract class AbstractJobPartitioningStrategy implements
                     // transferred between the source and target so we can use the
                     // values for finding out the number of FileSystemManagers we can cache.
 
-                    // get the sourceParentRootStr and targetParentRootStr which
-                    // represent the keys
-                    final String sourceParentRootStr = sourceParent
-                        .getFileSystem().getRoot().getURL().toString();
-                    final String targetParentRootStr = targetParent
-                        .getFileSystem().getRoot().getURL().toString();
-
                     // Update the JobDetails Map that holds the maximum number of files to be transferred
-                    // from each Source using: Map<Source URI (String), number of files (Integer)>.
-                    // We need this max number of files to be transferred for each source
+                    // from each Source and to each Sink using:
+                    // Map<Source URI (String), number of files (Integer)>.
+                    // We need this max number of files to be transferred from each source and to each sink
                     // so we can intelligently decide how many parallel threads we need to use
-                    // whenever we deal with the given source. knowing the number of parallel
+                    // whenever we deal with the given source/sink combination. knowing the number of parallel
                     // threads to use means knowing the number of FileSystemManager connections
                     // to cache. there's no point caching 4 FileSystemManagers for a given source
                     // if the number of files to be transferred from that source is only 1.
+                    // Also, there's no point in caching 4 FileSystemManager connections
+                    // to a particular sink if there is only one FileSysMan connection
+                    // to the source.
                     this.updateOrPutSourceTargetMaxTotalFilesToTransfer(
                             jobDetails.getSourceTargetMaxTotalFilesToTransfer(),
                             sourceParentRootStr, mPerDataTransferTotalFiles);
@@ -632,14 +669,25 @@ public abstract class AbstractJobPartitioningStrategy implements
         final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer,
         final String parentRootStr,
         final int perDataTransferTotalFiles) {
-        // if map does not contain key
-        //   or
-        // if map.get(key) < perDataTransferTotalFiles
-        //   then
-        // put/update key (initial-put or overwrite)
+
+        // Logic for calculating the MAX number of files to be copied to/from
+        // each Source or Target element for each ROOT URI
         if( !sourceTargetMaxTotalFilesToTransfer.containsKey(parentRootStr) ||
                 sourceTargetMaxTotalFilesToTransfer.get(parentRootStr) < perDataTransferTotalFiles) {
             sourceTargetMaxTotalFilesToTransfer.put(parentRootStr, perDataTransferTotalFiles);
         }
+
+        // Logic for calculating the TOTAL number of files to be copied to/from
+        // each ROOT URI across all DataTransfes (very different).
+        /*if( !sourceTargetMaxTotalFilesToTransfer.containsKey(parentRootStr) ) {
+            // does not contain key, so initial put
+            sourceTargetMaxTotalFilesToTransfer.put(parentRootStr, perDataTransferTotalFiles);
+        }        
+        else if(sourceTargetMaxTotalFilesToTransfer.containsKey(parentRootStr)) {
+            // else if does contain key, so increment the total
+            // get the previous number of files for this source or sink
+            int fileCount = sourceTargetMaxTotalFilesToTransfer.get(parentRootStr).intValue();
+            sourceTargetMaxTotalFilesToTransfer.put(parentRootStr, perDataTransferTotalFiles + fileCount);
+        }*/
     }
 }
