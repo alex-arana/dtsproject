@@ -75,6 +75,14 @@
       </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="resumeJobResponse">
+        <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element name="SuccessFlag" type="xsd:boolean" minOccurs="0" />
+        </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
     <!--
       Operation "cancelJobDocument"
       Input:  <mjsdl:JobResourceKey />
@@ -91,6 +99,14 @@
         </xsd:sequence>
       </xsd:complexType>
     </xsd:element>
+
+    <xsd:element name="cancelJobResponse">
+        <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element name="SuccessFlag" type="xsd:boolean" minOccurs="0" />
+        </xsd:sequence>
+        </xsd:complexType>
+   </xsd:element>
 
     <!--
       Operation "getJobStatusDocument"
