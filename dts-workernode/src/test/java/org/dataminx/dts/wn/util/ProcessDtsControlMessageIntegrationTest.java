@@ -34,6 +34,7 @@ import java.util.UUID;
 
 import org.dataminx.dts.common.jms.ControlQueueSender;
 import org.dataminx.schemas.dts.x2009.x07.messages.CancelJobRequestDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -69,7 +70,6 @@ public class ProcessDtsControlMessageIntegrationTest extends
         mJmsQueueSender.doSend("cancel"+generateNewJobId(), jmsproperties, jobRequest);
         // TODO: add a few lines of assert in here to make sure that the job really is running
         // or has completed
-        Thread.sleep(3000);
      }
     @Test
     public void resumeDtsJobAsDocument() throws Exception {
@@ -82,8 +82,19 @@ public class ProcessDtsControlMessageIntegrationTest extends
         mJmsQueueSender.doSend("resume"+generateNewJobId(), jmsproperties, jobRequest);
         // TODO: add a few lines of assert in here to make sure that the job really is running
         // or has completed
-        Thread.sleep(3000);
+    }
 
+    @Test
+    public void getJobStatusRequestDocument() throws Exception {
+        final File f = new ClassPathResource("/org/dataminx/dts/wn/util/getJobStatus-request.xml").getFile();
+        final GetJobStatusRequestDocument jobRequest = GetJobStatusRequestDocument.Factory
+            .parse(f);
+        Map<String, Object> jmsproperties = new HashMap<String, Object>();
+        jmsproperties.put("ClientID","DtsClient001");
+        jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodemyhostname001");
+        mJmsQueueSender.doSend("getJobStatus"+generateNewJobId(), jmsproperties, jobRequest);
+        // TODO: add a few lines of assert in here to make sure that the job really is running
+        // or has completed
     }
 
     private String generateNewJobId() {
