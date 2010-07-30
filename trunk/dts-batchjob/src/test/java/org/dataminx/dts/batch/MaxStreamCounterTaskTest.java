@@ -1,6 +1,6 @@
 package org.dataminx.dts.batch;
 
-import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
+
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -29,57 +29,65 @@ import uk.ac.dl.escience.vfs.util.VFSUtil;
  * A unit test for the MaxStreamCounterTask class.
  * 
  * @author Gerson Galang
+ * @author David Meredith (modifications)
  */
 @Test(groups = {"unit-test"})
 public class MaxStreamCounterTaskTest {
 
-    private DtsVfsUtil mDtsVfsUtil;
-    private SubmitJobRequest mSubmitJobRequest;
-    private FileSystemManagerCache mFileSystemManagerCache;
-    private DtsJobDetails mDtsJobDetails;
+    private DtsVfsUtil mockDtsVfsUtil;
+    private SubmitJobRequest mockSubmitJobRequest;
+    private FileSystemManagerCache mockFileSystemManagerCache;
+    private DtsJobDetails mockDtsJobDetails;
 
     @BeforeClass
     public void init() {
-        mDtsVfsUtil = mock(DtsVfsUtil.class);
-        mSubmitJobRequest = mock(SubmitJobRequest.class);
-        mFileSystemManagerCache = mock(FileSystemManagerCache.class);
-        mDtsJobDetails = mock(DtsJobDetails.class);
+        mockDtsVfsUtil = mock(DtsVfsUtil.class);
+        mockSubmitJobRequest = mock(SubmitJobRequest.class);
+        mockFileSystemManagerCache = mock(FileSystemManagerCache.class);
+        mockDtsJobDetails = mock(DtsJobDetails.class);
     }
 
     @SuppressWarnings("unchecked")
     @Test(groups = {"local-file-transfer-test"})
     public void testExecuteThatReturns10ParallelConnections() throws Exception {
-        final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()
-                + ".xml").getFile();
-        final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory
-            .parse(f);
+        //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()+ ".xml").getFile();
+        //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
+
+        final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
+        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
+        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
+        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
+        System.out.println(docString);
+        final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(docString);
+        
+
+        // map Holds the maximum number of files to be transferred from each Source or Target element.
         final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = new FileObjectMap<String, Integer>();
-        sourceTargetMaxTotalFilesToTransfer.put(
-            DtsConstants.FILE_ROOT_PROTOCOL, 2);
+        sourceTargetMaxTotalFilesToTransfer.put(DtsConstants.FILE_ROOT_PROTOCOL, 1);
 
         final MaxStreamCounterTask maxStreamCounterTask = new MaxStreamCounterTask();
-        maxStreamCounterTask.setSubmitJobRequest(mSubmitJobRequest);
-        maxStreamCounterTask.setDtsVfsUtil(mDtsVfsUtil);
-        maxStreamCounterTask.setFileSystemManagerCache(mFileSystemManagerCache);
+        maxStreamCounterTask.setSubmitJobRequest(mockSubmitJobRequest);
+        maxStreamCounterTask.setDtsVfsUtil(mockDtsVfsUtil);
+        maxStreamCounterTask.setFileSystemManagerCache(mockFileSystemManagerCache);
         maxStreamCounterTask.setMaxConnectionsToTry(10);
-        maxStreamCounterTask.setDtsJobDetails(mDtsJobDetails);
+        maxStreamCounterTask.setDtsJobDetails(mockDtsJobDetails);
 
-        when(mSubmitJobRequest.getJobDefinition()).thenReturn(
+        // mokito objects here 
+        when(mockSubmitJobRequest.getJobDefinition()).thenReturn(
             dtsJob.getJobDefinition());
 
-        when(mDtsJobDetails.getSourceTargetMaxTotalFilesToTransfer())
+        when(mockDtsJobDetails.getSourceTargetMaxTotalFilesToTransfer())
             .thenReturn(sourceTargetMaxTotalFilesToTransfer);
 
         final FileSystemManager fileSystemManager = VFSUtil.createNewFsManager(
             false, false, false, false, true, true, false, System.getProperty("java.io.tmpdir"));
-        when(mDtsVfsUtil.createNewFsManager()).thenReturn(
+        when(mockDtsVfsUtil.createNewFsManager()).thenReturn(
             (DefaultFileSystemManager) fileSystemManager);
 
         final RepeatStatus taskStatus = maxStreamCounterTask
             .execute(null, null);
 
-        verify(mFileSystemManagerCache).initFileSystemManagerCache(anyMap());
+        verify(mockFileSystemManagerCache).initFileSystemManagerCache(anyMap());
 
         assertEquals(taskStatus, RepeatStatus.FINISHED);
 
@@ -88,13 +96,15 @@ public class MaxStreamCounterTaskTest {
 
     }
 
-    @Test
+
+
+    /*@Test
     public void testContentsOfTheFileSystemManagerCache() {
         // TODO: check and see if max connections really is provided by a file transfer
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void testNonExistenceOfPropertiesFromExecutionContextAfterJobFinishedSuccessfully() {
         // TODO:
-    }
+    }*/
 }

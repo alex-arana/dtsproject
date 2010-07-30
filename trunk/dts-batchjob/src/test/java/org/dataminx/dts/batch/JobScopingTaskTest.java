@@ -1,7 +1,6 @@
 package org.dataminx.dts.batch;
 
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_DETAILS;
-import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
@@ -32,6 +31,7 @@ import org.testng.annotations.Test;
  * A unit test for the JobScopingTask class.
  * 
  * @author Gerson Galang
+ * @author David Meredith (modifications)
  */
 @Test(groups = {"unit-test"})
 public class JobScopingTaskTest {
@@ -51,11 +51,15 @@ public class JobScopingTaskTest {
 
     @Test(groups = {"local-file-transfer-test"})
     public void testExecute() throws Exception {
-        final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()
-                + ".xml").getFile();
-        final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory
-            .parse(f);
+        //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()+ ".xml").getFile();
+        final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
+
+        //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
+
+        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
+        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
+        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
+        final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(docString);
 
         final JobScopingTask jobScopingTask = new JobScopingTask();
         jobScopingTask.setJobNotificationService(mJobNotificationService);
