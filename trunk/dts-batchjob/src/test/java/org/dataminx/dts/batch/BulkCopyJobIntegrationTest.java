@@ -82,13 +82,8 @@ public class BulkCopyJobIntegrationTest extends
     @Test
     public void testExistenceOfPropertiesFromExecutionContextAfterJobFailed()
         throws Exception {
-        final File f = new ClassPathResource(
-            "/org/dataminx/dts/batch/failedjob.xml").getFile();
-        //mDtsJob = JobDefinitionDocument.Factory.parse(f);
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        mDtsJob = JobDefinitionDocument.Factory.parse(docString);
+        final File f = new ClassPathResource("/org/dataminx/dts/batch/failedjob.xml").getFile();
+        mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
         assertNotNull(mDtsJob);
 
         final String jobId = UUID.randomUUID().toString();
@@ -108,13 +103,7 @@ public class BulkCopyJobIntegrationTest extends
         throws Exception {
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()+ ".xml").getFile();
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
-
-        //mDtsJob = JobDefinitionDocument.Factory.parse(f);
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        mDtsJob = JobDefinitionDocument.Factory.parse(docString);
-
+        mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
         assertNotNull(mDtsJob);
 
         final String jobId = UUID.randomUUID().toString();
@@ -150,12 +139,7 @@ public class BulkCopyJobIntegrationTest extends
     public void testSuspendResume() throws Exception {
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-suspend" + getTestFilePostfix()+ ".xml").getFile();
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-suspend.xml").getFile();
-
-        //mDtsJob = JobDefinitionDocument.Factory.parse(f);
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        mDtsJob = JobDefinitionDocument.Factory.parse(docString);
+        mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
 
         assertNotNull(mDtsJob);
 
@@ -229,12 +213,7 @@ public class BulkCopyJobIntegrationTest extends
     @Test(enabled = false)
     public void testSuspendResumeSuspendResume() throws Exception {
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-suspend.xml").getFile();
-        //mDtsJob = JobDefinitionDocument.Factory.parse(f);
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        mDtsJob = JobDefinitionDocument.Factory.parse(docString);
-
+        mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
         assertNotNull(mDtsJob);
 
         final String jobId = UUID.randomUUID().toString();

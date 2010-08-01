@@ -54,16 +54,10 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
 
     @Test(groups = {"local-file-transfer-test"})
     public void testPartitionWith1File() throws IOException, XmlException,
-        JobScopingException {
-        //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()+ ".xml").getFile();
-        //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
-
+        JobScopingException, Exception {
+       
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(docString);
-
+        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
 
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
@@ -100,16 +94,12 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
 
     @Test(groups = {"local-file-transfer-test"}, expectedExceptions = DtsException.class)
     public void testNegativeMaxTotalFileNumPerStepLimit() throws IOException,
-        XmlException, JobScopingException {
+        XmlException, JobScopingException, Exception {
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix() + ".xml").getFile();
         //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
-
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(docString);
+        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
 
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
@@ -122,15 +112,12 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
 
     @Test(groups = {"local-file-transfer-test"}, expectedExceptions = DtsException.class)
     public void testNegativeMaxTotalByteSizePerStepLimit() throws IOException,
-        XmlException, JobScopingException {
+        XmlException, JobScopingException, Exception {
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()+ ".xml").getFile();
         //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(docString);
+        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
 
 
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
@@ -152,15 +139,12 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
 
     @Test(groups = {"local-file-transfer-test"}, expectedExceptions = IllegalArgumentException.class)
     public void testNullJobResourceKeyParameter() throws IOException,
-        XmlException, JobScopingException {
+        XmlException, JobScopingException, Exception {
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()+ ".xml").getFile();
         //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(docString);
+        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
 
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
         mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), null,
