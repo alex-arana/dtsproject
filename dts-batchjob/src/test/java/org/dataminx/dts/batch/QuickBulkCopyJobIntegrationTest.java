@@ -68,12 +68,7 @@ public class QuickBulkCopyJobIntegrationTest extends
         //mDtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/testjob.xml").getFile();
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        //System.out.println(homeDir);
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        //System.out.println(docString);
-        mDtsJob = JobDefinitionDocument.Factory.parse(docString);
+        mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
         
         assertNotNull(mDtsJob);
     }

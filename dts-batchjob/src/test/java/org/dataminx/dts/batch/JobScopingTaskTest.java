@@ -55,11 +55,7 @@ public class JobScopingTaskTest {
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
 
         //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
-
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(docString);
+        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
 
         final JobScopingTask jobScopingTask = new JobScopingTask();
         jobScopingTask.setJobNotificationService(mJobNotificationService);

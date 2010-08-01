@@ -54,16 +54,13 @@ public class MaxStreamCounterTaskTest {
         //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        System.out.println(docString);
-        final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(docString);
+        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
         
 
         // map Holds the maximum number of files to be transferred from each Source or Target element.
         final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = new FileObjectMap<String, Integer>();
         sourceTargetMaxTotalFilesToTransfer.put(DtsConstants.FILE_ROOT_PROTOCOL, 1);
+        sourceTargetMaxTotalFilesToTransfer.put(DtsConstants.TMP_ROOT_PROTOCOL, 1);
 
         final MaxStreamCounterTask maxStreamCounterTask = new MaxStreamCounterTask();
         maxStreamCounterTask.setSubmitJobRequest(mockSubmitJobRequest);

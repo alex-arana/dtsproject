@@ -57,17 +57,14 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
 
     @Test(groups = {"local-file-transfer-test"})
     public void testPartitionJobWith20MixedFilesBasedOnMaxNumOfFiles()
-        throws IOException, XmlException, JobScopingException {
+        throws IOException, XmlException, JobScopingException, Exception {
 
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-20files" + getTestFilePostfix()+ ".xml").getFile();
         //final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-20files.xml").getFile();
 
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory.parse(docString);
+        final JobDefinitionDocument mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
 
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(2);
@@ -88,17 +85,13 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
     @Test(groups = {"local-file-transfer-test"}, dataProvider = "jobwith9files-provider")
     public void testPartitionJobWith9FilesBasedOnMaxNumOfFiles(
         final int maxTotalFileNumPerStepLimit, final int expectedNumOfSteps)
-        throws IOException, XmlException, JobScopingException {
+        throws IOException, XmlException, JobScopingException, Exception {
 
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-9files" + getTestFilePostfix()+ ".xml").getFile();
         //final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-9files.xml").getFile();
-
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory.parse(docString);
+        final JobDefinitionDocument mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
 
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
         mPartitioningStrategy
@@ -118,16 +111,12 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
 
     @Test(groups = {"local-file-transfer-test"}, expectedExceptions = JobScopingException.class)
     public void testPartitionJobWithFileExceedingMaxByteSizeLimit()
-        throws IOException, XmlException, JobScopingException {
+        throws IOException, XmlException, JobScopingException, Exception {
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-mixedfiles"+ getTestFilePostfix() + ".xml").getFile();
         //final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-mixedfiles.xml").getFile();
-
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory.parse(docString);
+        final JobDefinitionDocument mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
 
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_1MB);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(3);
@@ -143,16 +132,12 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
     
     @Test(groups = {"local-file-transfer-test"})
     public void testPartitionJobWithMixedFilesBasedOnMaxByteSize()
-        throws IOException, XmlException, JobScopingException {
+        throws IOException, XmlException, JobScopingException, Exception {
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-mixedfiles"+ getTestFilePostfix() + ".xml").getFile();
         //final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-mixedfiles.xml").getFile();
-
-        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
-        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
-        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
-        final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory.parse(docString);
+        final JobDefinitionDocument mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
  
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(3);
