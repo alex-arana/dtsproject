@@ -43,6 +43,7 @@ public class JobScopingTaskTest {
 
     @BeforeClass
     public void init() {
+        TestUtils.assertTestEnvironmentOk();
         mJobNotificationService = mock(JobNotificationService.class);
         mJobPartitioningStrategy = mock(JobPartitioningStrategy.class);
         mSubmitJobRequest = mock(SubmitJobRequest.class);

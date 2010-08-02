@@ -21,6 +21,8 @@ import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.core.io.ClassPathResource;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import uk.ac.dl.escience.vfs.util.VFSUtil;
@@ -41,11 +43,12 @@ public class MaxStreamCounterTaskTest {
 
     @BeforeClass
     public void init() {
+        TestUtils.assertTestEnvironmentOk();
         mockDtsVfsUtil = mock(DtsVfsUtil.class);
         mockSubmitJobRequest = mock(SubmitJobRequest.class);
         mockFileSystemManagerCache = mock(FileSystemManagerCache.class);
         mockDtsJobDetails = mock(DtsJobDetails.class);
-    }
+    }    
 
     @SuppressWarnings("unchecked")
     @Test(groups = {"local-file-transfer-test"})

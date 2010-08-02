@@ -47,6 +47,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
 
     @BeforeClass
     public void init() {
+        TestUtils.assertTestEnvironmentOk();
         mDtsVfsUtil = mock(DtsVfsUtil.class);
         System.setProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY,
             System.getProperty("java.io.tmpdir"));

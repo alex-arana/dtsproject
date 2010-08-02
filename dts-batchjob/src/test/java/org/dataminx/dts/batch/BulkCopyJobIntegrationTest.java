@@ -31,6 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 /**
@@ -60,6 +62,11 @@ public class BulkCopyJobIntegrationTest extends
 
     @Autowired
     private JobOperator mJobOperator;
+
+    @BeforeClass
+    public void init() throws Exception {
+        TestUtils.assertTestEnvironmentOk();
+    }
 
     private boolean doesJobStepExists(final String jobResourceKey) {
         final File jobStepDirectory = new File(System
