@@ -43,6 +43,7 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
 
     @BeforeClass
     public void init() {
+        TestUtils.assertTestEnvironmentOk();
         final DtsVfsUtil dtsVfsUtil = new DtsVfsUtil();
         mPartitioningStrategy.setDtsVfsUtil(dtsVfsUtil);
         System.setProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY,
