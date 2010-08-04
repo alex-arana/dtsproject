@@ -75,6 +75,7 @@
         <jsdl:URI>file://@home.dir.replacement@/testfiles/dir-with-9files</jsdl:URI>
       </mjsdl:Source>
       <mjsdl:Target>
+        <!--<jsdl:URI>file://@home.dir.replacement@/testfilesCopiedDave</jsdl:URI>-->
         <jsdl:URI>tmp://</jsdl:URI>
       </mjsdl:Target>
       <!--
