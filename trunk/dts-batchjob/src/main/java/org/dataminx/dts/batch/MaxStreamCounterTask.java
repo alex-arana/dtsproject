@@ -28,6 +28,7 @@
 package org.dataminx.dts.batch;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -137,68 +138,47 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
             FileSystemManager fileSystemManager = null;
             try {
                 fileSystemManager = mDtsVfsUtil.createNewFsManager();
-                final FileObject fileObject = fileSystemManager.resolveFile(
-                    mFoRootURI, mOptions);
+                final FileObject fileObject = fileSystemManager.resolveFile(mFoRootURI, mOptions);
                 LOGGER_RC.debug(mConnectionName + " successfully connected.");
 
                 try {
                     // just hang in here for a while just in case there's a
                     // delay in connection with the other threads...
                     Thread.sleep(REMOTE_CONNECTION_THREADS_WAIT_TIME);
-                }
-                catch (final InterruptedException e) {
+                } catch (final InterruptedException e) {
                     LOGGER_RC.error("InterruptedException during sleep", e);
                 }
 
                 try {
                     LOGGER_RC.debug(mConnectionName + " disconnecting.");
                     fileObject.close();
+                } catch (final FileSystemException e) {
+                    LOGGER_RC.warn("FileSystemException thrown during the logout process of the max parallel connection test task.");
                 }
-                catch (final FileSystemException e) {
-                    LOGGER_RC
-                        .warn("FileSystemException thrown during the logout process of the max "
-                            + "parallel connection test task.");
-
-                }
-            }
-            catch (final FileSystemException e) {
-                LOGGER_RC
-                    .error("FileSystemException thrown during the login process of the max"
-                        + "parallel connection test task.");
-
+            } catch (final FileSystemException e) {
+                LOGGER_RC.error("FileSystemException thrown during the login process of the max parallel connection test task.");
                 mParent.setHasConnectionErrorArised(true);
                 mSuccessfulConnection = false;
             }
 
+            // barrier await();
             try {
                 mBarrier.await();
-            }
-            catch (final BrokenBarrierException e) {
-                LOGGER_RC
-                    .warn(
-                        "BrokenBarrierException thrown while the barrier is waiting for the other tasks to finish.",
-                        e);
+            } catch (final BrokenBarrierException e) {
+                LOGGER_RC.warn("BrokenBarrierException thrown while the barrier is waiting for the other tasks to finish.",e);
                 return;
-            }
-            catch (final InterruptedException e) {
-                LOGGER_RC
-                    .warn(
-                        "InterruptedException thrown the barrier is waiting for the other tasks to finish.",
-                        e);
+            } catch (final InterruptedException e) {
+                LOGGER_RC.warn("InterruptedException thrown the barrier is waiting for the other tasks to finish.",e);
                 return;
-            }
-            finally {
-                // having this here will help us avoid old connections not being
-                // let go
-                if (!mSuccessfulConnection
-                    || !mParent.getHasConnectionErrorArised()
+            } finally {
+                // having this here will help us avoid old connections not being let go
+                if (!mSuccessfulConnection || !mParent.getHasConnectionErrorArised()
                     && !mParent.isLastTry() && fileSystemManager != null) {
                     ((DefaultFileSystemManager) fileSystemManager).close();
                 }
                 else {
                     // we'll add the working connections in a list that the steps can share later on
-                    LOGGER_RC
-                        .debug("Adding a new fileSystemManager to the cache.");
+                    LOGGER_RC.debug("Adding a new fileSystemManager to the cache.");
                     mWorkingConnectionsList.add(fileSystemManager);
                 }
             }
@@ -244,13 +224,17 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
     private Encrypter mEncrypter;
 
     /** A container for unique FileObjects specified as source/targets in the job. */
-    private final Map<String, FileObject> mFileObjectMap = new FileObjectMap<String, FileObject>();
+    //private final Map<String, FileObject> mFileObjectMap = new FileObjectMap<String, FileObject>();
+    private final Map<String, FileObject> mFileObjectMap = new java.util.HashMap<String, FileObject>();
 
     /**
      * The cache to hold the FileSystemManagers available for each source/target to use during the file copy process.
      */
+    //private final Map<String, List<FileSystemManager>> mWorkingConnectionsListPerRootFileObject =
+    //    new FileObjectMap<String, List<FileSystemManager>>();
     private final Map<String, List<FileSystemManager>> mWorkingConnectionsListPerRootFileObject =
-        new FileObjectMap<String, List<FileSystemManager>>();
+        new java.util.HashMap<String, List<FileSystemManager>>();
+
 
     /** An attribute that will say if maximum number of retries is reached. */
     private volatile boolean mIsLastTry;
@@ -313,12 +297,8 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
             // mFileObjectMap<ROOT URI String, ROOT FileObject>
             for (final DataTransferType dataTransfer : dataTransfers) {
 
-            final FileObject sourceFO = fileSystemManager
-                .resolveFile(dataTransfer.getSource().getURI(), mDtsVfsUtil
-                    .getFileSystemOptions(dataTransfer.getSource(), mEncrypter));
-            final FileObject targetFO = fileSystemManager
-                .resolveFile(dataTransfer.getTarget().getURI(), mDtsVfsUtil
-                    .getFileSystemOptions(dataTransfer.getTarget(), mEncrypter));
+                final FileObject sourceFO = fileSystemManager.resolveFile(dataTransfer.getSource().getURI(), mDtsVfsUtil.getFileSystemOptions(dataTransfer.getSource(), mEncrypter));
+                final FileObject targetFO = fileSystemManager.resolveFile(dataTransfer.getTarget().getURI(), mDtsVfsUtil.getFileSystemOptions(dataTransfer.getTarget(), mEncrypter));
 
                 // TODO: handle cases where in source and destination root File
                 // Object of File System are the same but the credentials to
@@ -346,8 +326,11 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
             ((DefaultFileSystemManager) fileSystemManager).close();
         }
 
-        final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = new FileObjectMap<String, Integer>();
-        sourceTargetMaxTotalFilesToTransfer.putAll(mDtsJobDetails.getSourceTargetMaxTotalFilesToTransfer());
+        // why use a put all and not ref the mDtsJobDetails.map direclty ?
+        //final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = new FileObjectMap<String, Integer>();
+        //final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = new java.util.HashMap<String, Integer>();
+        //sourceTargetMaxTotalFilesToTransfer.putAll(mDtsJobDetails.getSourceTargetMaxTotalFilesToTransfer());
+        final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = mDtsJobDetails.getSourceTargetMaxTotalFilesToTransfer();
 
         if(LOGGER.isDebugEnabled()){
           for (final String foRootKey : mFileObjectMap.keySet()) {
@@ -365,30 +348,25 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
             // for this source or target (most probably true), we'll try to use UP to our
             // own preset max parallel connections to try.
             // TODO: must find out why we need the if != null !!!!! 
-            if(sourceTargetMaxTotalFilesToTransfer.get(foRootKey) != null){
+            //if(sourceTargetMaxTotalFilesToTransfer.get(foRootKey) != null){
             if (sourceTargetMaxTotalFilesToTransfer.get(foRootKey) > mMaxConnectionsToTry) {
                 gatherMaxConnections(foRoot, mMaxConnectionsToTry);
             }
             else {
-                // (sourceTargetMaxTotalFilesToTransfer.get(foRootKey) < mMaxConnectionsToTry)
                 // Since there's not that many files to transfer for this source or target
                 // we'll try and open up connections UP to the same number of files that will
                 // be transferred to/from this source or target
                 gatherMaxConnections(foRoot, sourceTargetMaxTotalFilesToTransfer.get(foRootKey));
             }
-            }
+            //}
         }
 
         try {
             // TODO: remove this later on... or change FileSystemManagerCache implementation
-            mFileSystemManagerCache
-                .initFileSystemManagerCache(mWorkingConnectionsListPerRootFileObject);
+            mFileSystemManagerCache.initFileSystemManagerCache(mWorkingConnectionsListPerRootFileObject);
         }
         catch (final FileSystemManagerCacheAlreadyInitializedException e) {
-            LOGGER
-                .error(
-                    "Initialisation of FileSystemManagerCache failed because it has not been cleared yet.",
-                    e);
+            LOGGER.error("Initialisation of FileSystemManagerCache failed because it has not been cleared yet.",e);
             throw e;
         }
         return RepeatStatus.FINISHED;
@@ -404,8 +382,9 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
      */
     private void gatherMaxConnections(final FileObject fileObjectRoot,
         final int maxTry) throws FileSystemException {
-        mIsLastTry = false;
 
+        LOGGER.debug("root url: "+fileObjectRoot.getURL().toString()+" maxTry: "+maxTry);
+        mIsLastTry = false;
         int threadCounter = 1;
 
         try {
@@ -414,26 +393,26 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
                 || fileObjectRoot.getURL().toString().startsWith("tmp://")) {
                 threadCounter = maxTry;
             }
+        } catch (final FileSystemException e1) {
+            throw new DtsException("Error occurred while getting the file object root's URL");
         }
-        catch (final FileSystemException e1) {
-            throw new DtsException(
-                "Error occurred while getting the file object root's URL");
-        }
+
         List<FileSystemManager> workingConnections = null;
         while (threadCounter <= maxTry) {
             if (threadCounter == maxTry) {
                 mIsLastTry = true;
             }
             LOGGER.debug("==========================");
-            LOGGER.debug("Trying with " + threadCounter + " threads on "
-                + fileObjectRoot.getURL().toString() + ".");
-            workingConnections = startRemoteConnections(fileObjectRoot,
-                threadCounter);
+            LOGGER.debug("Trying with " + threadCounter + " threads on ["+ fileObjectRoot.getURL().toString() + "]");
+            workingConnections = startRemoteConnections(fileObjectRoot, threadCounter);
 
             if (mHasConnectionErrorArised) {
                 break;
             }
 
+            // if we are currently ramping up the connections/threads
+            // (threadCounter !yet= maxTry), then workingConnections should
+            // be empty - why/dont understand ?????
             if (LOGGER.isDebugEnabled() && threadCounter != maxTry) {
                 Assert.isTrue(workingConnections.isEmpty(),
                     "WorkingConnections list should be empty.");
@@ -444,17 +423,16 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
             threadCounter++;
         }
 
+        // if threadCounter == maxTry, then should'nt the assertion be
+        // maxTry == workingConnections.size()  ???????
         if (LOGGER.isDebugEnabled() && threadCounter == maxTry) {
-            Assert
-                .isTrue(
-                    maxTry != workingConnections.size(),
+            Assert.isTrue(maxTry != workingConnections.size(),
                     "MaxAllowedConnections should have the same number of connections in the workingConnections list.");
         }
+
         try {
-            mWorkingConnectionsListPerRootFileObject.put(fileObjectRoot
-                .getURL().toString(), workingConnections);
-        }
-        catch (final FileSystemException e) {
+            mWorkingConnectionsListPerRootFileObject.put(fileObjectRoot.getURL().toString(), workingConnections);
+        } catch (final FileSystemException e) {
             throw e;
         }
 
@@ -540,9 +518,12 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
         }
         for (int i = 0; i < numConnections; i++) {
             final RemoteConnection remoteConnection = new RemoteConnection(
-                fileObjectRootString, fileObjectRoot.getFileSystem()
-                    .getFileSystemOptions(), this,
-                "ConnectionThread" + (i + 1), barrier, workingConnectionsList);
+                fileObjectRootString, 
+                fileObjectRoot.getFileSystem().getFileSystemOptions(),
+                this,
+                "ConnectionThread" + (i + 1), 
+                barrier,
+                workingConnectionsList);
             executor.execute(remoteConnection);
         }
 
@@ -555,6 +536,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
             }
         }
 
+        // this should prob be in a finally block !
         executor.shutdown();
 
         // TODO: probably need to remove mMaxAllowedConnections if workignConnectionsList can provide the same info
