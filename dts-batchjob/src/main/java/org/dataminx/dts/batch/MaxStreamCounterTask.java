@@ -30,8 +30,6 @@ package org.dataminx.dts.batch;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
@@ -72,7 +70,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
 
     /**
      * A Thread that establishes new {@link FileSystemManager} connections to the
-     * given rootURI.
+     * given rootURL up to a given limit. 
      */
     private class GatherAndCacheConnectionsToRootUrl extends Thread {
 
@@ -80,17 +78,22 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
         final int mConnectionLimit;
 
         /** The FileObject to connect to. */
-        private final String mRootURI;
+        private final String mRootURL;
 
         /** The FileSystemOptions to use for the given FileObject, mFoRootURI. */
         private final FileSystemOptions mOptions;
 
         /** A reference to the list where a successful FileSystemManager connections are stored  */
-        private final List<FileSystemManager> mWorkingConnectionsList = new ArrayList<FileSystemManager>();
+        private final List<FileSystemManager> mWorkingConnectionsList = new ArrayList<FileSystemManager>(0);
 
-
-        private GatherAndCacheConnectionsToRootUrl(final String rootURI, final FileSystemOptions options, final int connectionLimit) {
-            mRootURI = rootURI;
+        /**
+         * Construct a new GatherAndCacheConnectionsToRootUrl
+         * @param rootURL the root URL to connect to
+         * @param options used to make the connections
+         * @param connectionLimit make no more connections than this limit
+         */
+        private GatherAndCacheConnectionsToRootUrl(final String rootURL, final FileSystemOptions options, final int connectionLimit) {
+            mRootURL = rootURL;
             mOptions = options;
             this.mConnectionLimit = connectionLimit;
         }
@@ -99,21 +102,24 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
         public void run() {
             try {
                 for(int i=0; i<this.mConnectionLimit; i++){
-                  //System.out.println("RESOLVE: "+mRootURI);
                   FileSystemManager  fileSystemManager = mDtsVfsUtil.createNewFsManager();
                   //FileSystemManager fileSystemManager = VFSUtil.createNewFsManager(false, false, false, false, false, true, false, System.getProperty("java.io.tmpdir"));
-                  fileSystemManager.resolveFile(mRootURI, mOptions);
-                  //successfully resolved/connected so lets add to the fileSystemManager.
+                  fileSystemManager.resolveFile(mRootURL, mOptions);
+                  //successfully resolved/connected so lets add the active fileSystemManager.
                   this.mWorkingConnectionsList.add(fileSystemManager);
                 }
 
             } catch (FileSystemException ex) {
-                //Logger.getLogger(MaxStreamCounterTask.class.getName()).log(Level.SEVERE, null, ex);
-                LOGGER.warn("Max number of connections reached");
                 // OK, looks like thats our lot - no more connections allowed.
+                //Logger.getLogger(MaxStreamCounterTask.class.getName()).log(Level.SEVERE, null, ex);
+                LOGGER.warn("Max number of connections reached: "+ex.getMessage());
             } finally {
-                // lets put the working connections into the parent map
-                mWorkingConnectionsListPerRootFileObject.put(mRootURI, mWorkingConnectionsList);
+                // if not a single connection could be made, throw early.
+                if(mWorkingConnectionsList.size() == 0){
+                    throw new DtsJobExecutionException("Unable to establish a single connection in MaxStreamCounterTask to: "+mRootURL);
+                }
+                // cache the working connections into the parent map
+                mWorkingConnectionsListPerRootFileObject.put(mRootURL, mWorkingConnectionsList);
             }
         }
 
@@ -121,7 +127,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
          * @return the rootURL used to initialize this class 
          */
         private String getRootURL(){
-           return this.mRootURI;
+           return this.mRootURL;
         }
 
         /**
@@ -232,7 +238,6 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
                 // Object of File System are the same but the credentials to
                 // access them are different. So just means that those are still
                 // two different scenarios.
-
                 // TODO: what do we do then if the restriction on access/connection
                 // is on a per-host rather than a per-user access
 
