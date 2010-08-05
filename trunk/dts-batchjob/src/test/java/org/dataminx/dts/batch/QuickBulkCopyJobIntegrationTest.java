@@ -42,9 +42,12 @@ public class QuickBulkCopyJobIntegrationTest extends
     @Autowired
     private DtsJobLauncher mJobLauncher;
 
+    public QuickBulkCopyJobIntegrationTest(){
+        TestUtils.assertTestEnvironmentOk();
+    }
+
     @BeforeClass
     public void init() throws Exception {
-        TestUtils.assertTestEnvironmentOk();
         //System.setProperty("dataminx.dir", "/home/djm76/.dataminx");
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/testjob"+ getTestFilePostfix() + ".xml").getFile();
         //mDtsJob = JobDefinitionDocument.Factory.parse(f);
