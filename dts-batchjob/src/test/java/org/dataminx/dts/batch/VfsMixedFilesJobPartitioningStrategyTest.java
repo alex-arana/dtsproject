@@ -42,12 +42,15 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
     @Autowired
     private AbstractJobPartitioningStrategy mPartitioningStrategy;
     private DtsVfsUtil mDtsVfsUtil;
-
     private static final long FILE_SIZE_10MB = 10485760;
+
+    public VfsMixedFilesJobPartitioningStrategyTest(){
+         TestUtils.assertTestEnvironmentOk();
+    }
 
     @BeforeClass
     public void init() {
-        TestUtils.assertTestEnvironmentOk();
+        //TestUtils.assertTestEnvironmentOk();
         mDtsVfsUtil = mock(DtsVfsUtil.class);
         System.setProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY,
             System.getProperty("java.io.tmpdir"));

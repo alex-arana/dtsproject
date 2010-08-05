@@ -41,9 +41,12 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
     @Autowired
     private AbstractJobPartitioningStrategy mPartitioningStrategy;
 
-    @BeforeClass
-    public void init() {
+    public VfsMixedFilesJobPartitioningStrategyIntegrationTest(){
         TestUtils.assertTestEnvironmentOk();
+    }
+
+    @BeforeClass
+    public void init() {        
         final DtsVfsUtil dtsVfsUtil = new DtsVfsUtil();
         mPartitioningStrategy.setDtsVfsUtil(dtsVfsUtil);
         System.setProperty(DtsBatchJobConstants.DTS_JOB_STEP_DIRECTORY_KEY,

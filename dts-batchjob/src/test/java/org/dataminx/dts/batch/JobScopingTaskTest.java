@@ -41,9 +41,13 @@ public class JobScopingTaskTest {
     private SubmitJobRequest mSubmitJobRequest;
     private ChunkContext mChunkContext;
 
+    public JobScopingTaskTest(){
+          TestUtils.assertTestEnvironmentOk();
+    }
+
+
     @BeforeClass
     public void init() {
-        TestUtils.assertTestEnvironmentOk();
         mJobNotificationService = mock(JobNotificationService.class);
         mJobPartitioningStrategy = mock(JobPartitioningStrategy.class);
         mSubmitJobRequest = mock(SubmitJobRequest.class);

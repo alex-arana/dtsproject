@@ -46,9 +46,12 @@ public class MaxStreamCounterTaskTest {
     private FileSystemManagerCache mockFileSystemManagerCache;
     private DtsJobDetails mockDtsJobDetails;
 
+    public MaxStreamCounterTaskTest(){
+           TestUtils.assertTestEnvironmentOk();
+    }
+
     @BeforeClass
     public void init() {
-        TestUtils.assertTestEnvironmentOk();
         //mockDtsVfsUtil = mock(DtsVfsUtil.class);
         mockSubmitJobRequest = mock(SubmitJobRequest.class);
         mockFileSystemManagerCache = mock(FileSystemManagerCache.class);

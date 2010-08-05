@@ -63,9 +63,12 @@ public class BulkCopyJobIntegrationTest extends
     @Autowired
     private JobOperator mJobOperator;
 
+    public BulkCopyJobIntegrationTest(){
+       TestUtils.assertTestEnvironmentOk();
+    }
+
     @BeforeClass
     public void init() throws Exception {
-        TestUtils.assertTestEnvironmentOk();
     }
 
     private boolean doesJobStepExists(final String jobResourceKey) {
