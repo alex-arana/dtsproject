@@ -30,8 +30,7 @@ public class FileSystemManagerCacheTest {
         final Map<String, List<FileSystemManager>> fileSystemManagersPerRootFileObject =
             new HashMap<String, List<FileSystemManager>>();
         fileSystemManagersPerRootFileObject.put(anyString(), anyList());
-        mFileSystemManagerCache
-            .initFileSystemManagerCache(fileSystemManagersPerRootFileObject);
+        mFileSystemManagerCache.initFileSystemManagerCache(fileSystemManagersPerRootFileObject);
         mFileSystemManagerCache.initFileSystemManagerCache(anyMap());
     }
 
@@ -43,7 +42,7 @@ public class FileSystemManagerCacheTest {
             new HashMap<String, List<FileSystemManager>>();
         final List<FileSystemManager> fsmList = new ArrayList<FileSystemManager>();
         final FileSystemManager fsm = VFSUtil.createNewFsManager(true, true,
-            true, true, true, true, true, "/tmp");
+            true, true, true, true, true, System.getProperty("java.io.tmpdir"));
         fsmList.add(fsm);
         fileSystemManagersPerRootFileObject.put(ROOT_FILE_OBJECT, fsmList);
         mFileSystemManagerCache
@@ -62,7 +61,7 @@ public class FileSystemManagerCacheTest {
             new HashMap<String, List<FileSystemManager>>();
         final List<FileSystemManager> fsmList = new ArrayList<FileSystemManager>();
         final FileSystemManager fsm = VFSUtil.createNewFsManager(true, true,
-            true, true, true, true, true, "/tmp");
+            true, true, true, true, true, System.getProperty("java.io.tmpdir"));
         fsmList.add(fsm);
         fileSystemManagersPerRootFileObject.put(ROOT_FILE_OBJECT, fsmList);
         mFileSystemManagerCache
@@ -79,7 +78,7 @@ public class FileSystemManagerCacheTest {
         final List<FileSystemManager> fsmList = new ArrayList<FileSystemManager>();
         for (int i = 0; i < 5; i++) {
             fsmList.add(VFSUtil.createNewFsManager(true, true, true, true,
-                true, true, true, "/tmp"));
+                true, true, true, System.getProperty("java.io.tmpdir")));
         }
         fileSystemManagersPerRootFileObject.put(ROOT_FILE_OBJECT, fsmList);
         mFileSystemManagerCache
@@ -105,7 +104,7 @@ public class FileSystemManagerCacheTest {
         final List<FileSystemManager> fsmList = new ArrayList<FileSystemManager>();
         for (int i = 0; i < 2; i++) {
             fsmList.add(VFSUtil.createNewFsManager(true, true, true, true,
-                true, true, true, "/tmp"));
+                true, true, true, System.getProperty("java.io.tmpdir")));
         }
 
         fileSystemManagersPerRootFileObject.put(ROOT_FILE_OBJECT, fsmList);
@@ -134,7 +133,7 @@ public class FileSystemManagerCacheTest {
             new HashMap<String, List<FileSystemManager>>();
         final List<FileSystemManager> fsmList = new ArrayList<FileSystemManager>();
         fsmList.add(VFSUtil.createNewFsManager(true, true, true, true, true,
-            true, true, "/tmp"));
+            true, true, System.getProperty("java.io.tmpdir")));
 
         fileSystemManagersPerRootFileObject.put(ROOT_FILE_OBJECT, fsmList);
         mFileSystemManagerCache
@@ -156,7 +155,7 @@ public class FileSystemManagerCacheTest {
             new HashMap<String, List<FileSystemManager>>();
         final List<FileSystemManager> fsmList = new ArrayList<FileSystemManager>();
         fsmList.add(VFSUtil.createNewFsManager(true, true, true, true, true,
-            true, true, "/tmp"));
+            true, true, System.getProperty("java.io.tmpdir")));
 
         fileSystemManagersPerRootFileObject.put(ROOT_FILE_OBJECT, fsmList);
         mFileSystemManagerCache
@@ -166,7 +165,7 @@ public class FileSystemManagerCacheTest {
 
         mFileSystemManagerCache.returnOne(ROOT_FILE_OBJECT, VFSUtil
             .createNewFsManager(true, true, true, true, true, true, true,
-                "/tmp"));
+                System.getProperty("java.io.tmpdir")));
     }
 
     @Test(expectedExceptions = UnknownRootFileObjectException.class)
@@ -179,7 +178,7 @@ public class FileSystemManagerCacheTest {
         final List<FileSystemManager> fsmList = new ArrayList<FileSystemManager>();
         for (int i = 0; i < 5; i++) {
             fsmList.add(VFSUtil.createNewFsManager(true, true, true, true,
-                true, true, true, "/tmp"));
+                true, true, true, System.getProperty("java.io.tmpdir")));
         }
         fileSystemManagersPerRootFileObject.put(ROOT_FILE_OBJECT, fsmList);
         mFileSystemManagerCache
