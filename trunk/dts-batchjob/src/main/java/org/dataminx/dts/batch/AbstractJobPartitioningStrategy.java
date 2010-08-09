@@ -62,7 +62,7 @@ import org.springframework.util.Assert;
  * will to use.
  *
  * @author Gerson Galang
- * @author David Meredith (modifications) 
+ * @author David Meredith
  */
 public abstract class AbstractJobPartitioningStrategy implements
     JobPartitioningStrategy, InitializingBean {
@@ -73,6 +73,12 @@ public abstract class AbstractJobPartitioningStrategy implements
 
     /** A flag if the user has requested the processing of the job to be stopped or cancelled. */
     private final boolean mCancelled = false;
+
+    /** The limit on the total size of all the files that will be transferred by this job. */
+    private long mTotalSizeLimit = Long.MAX_VALUE;
+
+    /** The limit on the total number of files to be transferred by this job. */
+    private long mTotalFilesLimit = Long.MAX_VALUE;
 
     /** The total size of all the files that will be transferred by this job. */
     private long mTotalSize;
@@ -116,12 +122,22 @@ public abstract class AbstractJobPartitioningStrategy implements
      */
     private void addFilesToTransfer(final FileObject source,
         final FileObject destination, final int dataTransferIndex)
-        throws FileSystemException, FileNotFoundException {
+        throws FileSystemException, FileNotFoundException, JobScopingException {
         LOGGER.debug("addFilesToTransfer(\"" + source.getURL() + "\", \""
             + destination.getURL() + "\", " + dataTransferIndex + ")");
         // update member vars
         mTotalSize += source.getContent().getSize();
         ++mTotalFiles;
+        // here we need to test that the mTotalSize and mTotalFiles does not
+        // exceed the limits configured for this batch job and throw
+        // JobScopingException if either are exceeded !
+        if(mTotalSize > this.mTotalSizeLimit){
+            throw new JobScopingException("Total file transfer size limited exceeded. Byte limit set to: "+this.mTotalSizeLimit);
+        }
+        if(mTotalFiles > this.mTotalFilesLimit){
+             throw new JobScopingException("Total file transfer count limit exceeded. File lmit set to: "+this.mTotalFilesLimit);
+        }
+
         ++mPerDataTransferTotalFiles;
         // adds the new DtsDataTransferUnit to the current DtsJobStep (in jobStepAllocator)
         // the dataTransferUnit represents a single file only transfer
@@ -155,6 +171,12 @@ public abstract class AbstractJobPartitioningStrategy implements
         else if (mMaxTotalFileNumPerStepLimit < 0) {
             throw new JobScopingException(
                 "MaxTotalFileNumPerStepLimit should be a positive number.");
+        }
+        if(this.mTotalFilesLimit < 0){
+             throw new JobScopingException("TotalFilesLimit should be a positive number.");
+        }
+        if(this.mTotalSizeLimit < 0){
+            throw new JobScopingException("TotalSizeLimit should be a positive number.");
         }
     }
 
@@ -391,10 +413,8 @@ public abstract class AbstractJobPartitioningStrategy implements
                 }
 
             }
-            LOGGER.info("Total number of files to be transferred: "
-                + mTotalFiles);
-            LOGGER.info("Total size of files to be transferred: " + mTotalSize
-                + " bytes");
+            LOGGER.info("Total number of files to be transferred: "+ mTotalFiles);
+            LOGGER.info("Total size of files to be transferred: " + mTotalSize+ " bytes");
             LOGGER.debug("list of excluded files: ");
             for (final String excluded : mExcluded) {
                 LOGGER.debug(" - " + excluded);
@@ -648,6 +668,25 @@ public abstract class AbstractJobPartitioningStrategy implements
     public void setMaxTotalFileNumPerStepLimit(
         final int maxTotalFileNumPerStepLimit) {
         mMaxTotalFileNumPerStepLimit = maxTotalFileNumPerStepLimit;
+    }
+
+    /**
+     * The limit on the total number of all the files that can be transferred by this job.
+     * Default is <code>Long.MAX_VALUE</code>
+     * @param totalFilesLimit
+     */
+    public void setTotalFilesLimit(final long totalFilesLimit){
+        this.mTotalFilesLimit = totalFilesLimit; 
+
+    }
+
+    /**
+     * The limit on the total size of all the files that can be transferred by this job.
+     * Default is <code>Long.MAX_VALUE</code>
+     * @param totalSizeLimit
+     */
+    public void setTotalSizeLimit(final long totalSizeLimit){
+        this.mTotalSizeLimit = totalSizeLimit;
     }
 
 

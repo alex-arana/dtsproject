@@ -72,7 +72,8 @@
     
     <mjsdl:DataTransfer>
       <mjsdl:Source>
-        <jsdl:URI>file://@home.dir.replacement@/testfiles/dir-with-9files</jsdl:URI>
+        <jsdl:URI>file://@home.dir.replacement@/testfiles/dir-with-9files/test01MB-0.bin</jsdl:URI>
+        <!--<jsdl:URI>file://@home.dir.replacement@/testfiles/dir-with-9files</jsdl:URI>-->
       </mjsdl:Source>
       <mjsdl:Target>
         <!--<jsdl:URI>file://@home.dir.replacement@/testfilesCopiedDave</jsdl:URI>-->

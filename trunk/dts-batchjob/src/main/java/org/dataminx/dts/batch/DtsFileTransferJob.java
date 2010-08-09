@@ -73,6 +73,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Alex Arana
  * @author Gerson Galang
+ * @author David Meredith
  */
 public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
 
@@ -354,7 +355,9 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
                 + mStopwatchTimer.getFormattedElapsedTime());
 
             // TODO convert to application exceptions.
-            // jobScoping will store the jobDetails in the Job execution context.
+            // jobScoping will store the jobDetails in the Job execution context,
+            // it generates list of DTUs and creates dir structure on remote
+            // sinks.
             stepExecution = handleStep(mJobScopingStep, execution);
 
             LOGGER.info("Finished the JobScopingTask step at "
