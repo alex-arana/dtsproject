@@ -17,7 +17,6 @@ Following is a list of software components required to get the Data Transfer Ser
    * [http://subversion.tigris.org/getting.html Subversion]
    * [http://maven.apache.org/ Maven]
    * [http://activemq.apache.org/ ActiveMQ]
-   * The database of your choice. We're using an embedded/pre-configured Hypersonic DB [http://hsqldb.org HSQLDB].
 
 
 ==== Getting The Code ====
@@ -37,7 +36,7 @@ The DTS codebase is currently hosted in the DTS Google Code SVN repository. You 
  > cp dts-workernode/src/test/filters/filter.properties.template dts-workernode/src/test/filters/filter.properties
  > cp dts-broker/src/test/filters/filter.properties.template dts-broker/src/test/filters/filter.properties
  > cp dts-ws/src/main/resources/dts-ws.properties.template ~/.dataminx/dts-ws.properties
- > mvn -Ddataminx.dir=~/.dataminx -DskipTests=true install
+ > mvn -DskipTests=true -DproxyHost=optionalHostName -DproxyPort=8080 install
 }}}
 
 === Postinstall ===
