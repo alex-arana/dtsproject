@@ -1,6 +1,8 @@
 #labels Phase-Implementation,Install-Guide,User-Guide
 <wiki:toc max_depth="3" />
 
+=DTS Developer Guide=
+
 This version of user guide is for Linux OS. In Windows, some changes are needed. For example, the user home directory is in C:\Documents and Settings\userxyz, the file path is "\" rather than "/" , and file copy command is "copy" rather than "cp". Use -Ddataminx.dir="C:/Documents and Settings/userxyz/.dataminx" format for command line input.
 
 == Data Transfer Service ==
@@ -16,10 +18,8 @@ Following is a list of software components required to get the Data Transfer Ser
    * [http://subversion.tigris.org/getting.html Subversion]
    * [http://maven.apache.org/ Maven]
    * [http://activemq.apache.org/ ActiveMQ]
-   * [http://www.mysql.com/ MySQL Database]
-   * The database of your choice. We're using [http://www.mysql.com MySQL].
+   * The database of your choice. We're using an embedded/pre-configured Hypersonic DB [http://hsqldb.org HSQLDB].
 
-Create a user called "dts-user" on your machine.
 
 ==== Getting The Code ====
 The DTS codebase is currently hosted in the DTS Google Code SVN repository. You can check out the code by running:
@@ -33,7 +33,6 @@ The DTS codebase is currently hosted in the DTS Google Code SVN repository. You 
 ==== Build the project ====
 {{{
  > cd minx-dts
- > mkdir ~/.dataminx
  > cp dts-batchjob/src/test/filters/filter.properties.template dts-batchjob/src/test/filters/filter.properties
  > cp dts-ws/src/test/filters/filter.properties.template dts-ws/src/test/filters/filter.properties
  > cp dts-workernode/src/test/filters/filter.properties.template dts-workernode/src/test/filters/filter.properties
@@ -47,46 +46,25 @@ The DTS codebase is currently hosted in the DTS Google Code SVN repository. You 
 
 Run the following commands...
 {{{
- > cd minx-dts
- > cp dts-batchjob/src/main/resources/dts-bulkcopyjob.properties.template ~/.dataminx/dts-bulkcopyjob.properties
- > cp dts-broker/src/main/resources/plugin-context.xml ~/.dataminx
-}}}
-
-Assuming you decided to use MySQL as well for your DB. Create the dts database
-{{{
- > mysql -u root
- mysql> CREATE DATABASE dts;
- mysql> CREATE USER 'dts'@'localhost' IDENTIFIED BY '<change-me-to-your-chosen-password>';
- mysql> GRANT ALL PRIVILEGES ON dts.* to 'dts'@'localhost';
-}}}
-
-Edit the values of the following fields in dts-bulkcopyjob.properties to the 'dts' if you named the user to the dts database as 'dts' and the password you used above.
-   * batch.jdbc.user
-   * batch.jdbc.password
-
-Create the Spring Batch tables by running the db script provided in dts-batchjob/src/main/resources/db for the DB you are using. Provide the user who will run the DTS access to it. Remember to use a password for root@localhost or dts@localhost if you've decided to use MySQL.
-{{{
- > mysql -u dts -h localhost -D dts -p < dts-batchjob/src/main/resources/db/schema-mysql.sql
-}}}
-
-Before running the test, the database you configured previously should also be running.
-
-Unzip the testfiles and run the test: 
-
-Run the test in Linux:
-{{{
  > cd dts-batchjob
- > cp ./src/test/resources/testfiles.zip ~
- > cd ~
- > unzip testfiles.zip
- > cd /usr/local/minx-dts/dts-batchjob	
- > mvn -e -Ddataminx.dir=/home/dts-user/.dataminx test
- > mvn -e -Ddataminx.dir=/home/dts-user/.dataminx integration-test
+ > cp -r src/main/resources/sample-dot-dataminx-dir ~/.dataminx
 }}}
 
-Edit testjob.xml in src/test/resources/org/dataminx/dts/batch and add the source/destination you want to access then run the command below. Remember to add your credential details to filter.properties in src/test/filters if you don't want to put your credentials in the actual job document.
+Edit the values of the following fields in ~/.dataminx/dts-bulkcopyjob.properties
+  * batch.jdbc.url (specify full path to your '~/.dataminx/hsqlDB/dtsdb' directory)
+
+Copy the testfiles.zip file to your {{{$HOME}}} directory, unzip and run tests: 
+
 {{{
- > mvn -Ddataminx.dir=/home/dts-user/.dataminx -Dtest=QuickBulkCopyJobIntegrationTest test
+ > cp ./src/test/resources/testfiles.zip ~
+ > unzip ~/testfiles.zip
+ > mvn -e -Ddataminx.dir=/<path-to-your-dot-dataminx-dir>/.dataminx test
+ > mvn -e -Ddataminx.dir=/<path-to-your-dot-dataminx-dir>/.dataminx integration-test
+}}}
+
+You can edit 'testjob.xml' in src/test/resources/org/dataminx/dts/batch and add the source/destination you want to access then run the command below. Remember to add your credential details to filter.properties in src/test/filters if you don't want to put your credentials in the actual job document.
+{{{
+ > mvn -Ddataminx.dir=/<path-to-your-dot-dataminx-dir>/.dataminx -Dtest=QuickBulkCopyJobIntegrationTest test
 }}}
 
 ==== DTS Batch Job Client ====
