@@ -37,6 +37,9 @@ import java.util.HashMap;
  * into a single key.
  *
  * @author Gerson Galang
+ * @author David Meredith (modifications)
+ * @deprecated use a direct HashMap instead because we cannot assume that file://
+ * is the root url for local files, e.g. it is file:///C:/ for Win. 
  */
 public class FileObjectMap<K, V> extends HashMap<K, V> {
 
@@ -60,7 +63,10 @@ public class FileObjectMap<K, V> extends HashMap<K, V> {
     @SuppressWarnings("unchecked")
     @Override
     public V put(final K key, final V value) {
-        if (key.toString().startsWith(TMP_ROOT_PROTOCOL)) {
+        //
+        // Simulate dropping of any string after the third "/" in either a "file:///" OR "tmp:///" string.
+        // previously was: if (key.toString().startsWith(TMP_ROOT_PROTOCOL)) {
+        if (key.toString().startsWith(TMP_ROOT_PROTOCOL) /*|| key.toString().startsWith(FILE_ROOT_PROTOCOL)*/) {
             return super.put((K) FILE_ROOT_PROTOCOL, value);
         }
         return super.put(key, value);

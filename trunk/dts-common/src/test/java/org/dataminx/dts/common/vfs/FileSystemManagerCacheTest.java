@@ -26,17 +26,21 @@ public class FileSystemManagerCacheTest {
     @Test(expectedExceptions = FileSystemManagerCacheAlreadyInitializedException.class)
     public void testInitFileSystemManagerCacheWithError()
         throws FileSystemManagerCacheAlreadyInitializedException {
+
         mFileSystemManagerCache = new FileSystemManagerCache();
         final Map<String, List<FileSystemManager>> fileSystemManagersPerRootFileObject =
             new HashMap<String, List<FileSystemManager>>();
         fileSystemManagersPerRootFileObject.put(anyString(), anyList());
         mFileSystemManagerCache.initFileSystemManagerCache(fileSystemManagersPerRootFileObject);
+        // next line will force the expected exception
         mFileSystemManagerCache.initFileSystemManagerCache(anyMap());
     }
-
+    
+    @Test
     public void testBorrowOne()
         throws FileSystemManagerCacheAlreadyInitializedException,
         UnknownRootFileObjectException, FileSystemException {
+
         mFileSystemManagerCache = new FileSystemManagerCache();
         final Map<String, List<FileSystemManager>> fileSystemManagersPerRootFileObject =
             new HashMap<String, List<FileSystemManager>>();
@@ -45,10 +49,13 @@ public class FileSystemManagerCacheTest {
             true, true, true, true, true, System.getProperty("java.io.tmpdir"));
         fsmList.add(fsm);
         fileSystemManagersPerRootFileObject.put(ROOT_FILE_OBJECT, fsmList);
-        mFileSystemManagerCache
-            .initFileSystemManagerCache(fileSystemManagersPerRootFileObject);
+
+        // init the cache
+        mFileSystemManagerCache.initFileSystemManagerCache(fileSystemManagersPerRootFileObject);
+
         final FileSystemManager returnedFSM = mFileSystemManagerCache
             .borrowOne(ROOT_FILE_OBJECT);
+        // assert that the cached fsm is the returnedFSM
         Assert.assertEquals(returnedFSM, fsm);
     }
 
@@ -56,6 +63,7 @@ public class FileSystemManagerCacheTest {
     public void testBorrowOneWithUnknownRootFileObjectException()
         throws FileSystemManagerCacheAlreadyInitializedException,
         UnknownRootFileObjectException, FileSystemException {
+
         mFileSystemManagerCache = new FileSystemManagerCache();
         final Map<String, List<FileSystemManager>> fileSystemManagersPerRootFileObject =
             new HashMap<String, List<FileSystemManager>>();
@@ -66,12 +74,15 @@ public class FileSystemManagerCacheTest {
         fileSystemManagersPerRootFileObject.put(ROOT_FILE_OBJECT, fsmList);
         mFileSystemManagerCache
             .initFileSystemManagerCache(fileSystemManagersPerRootFileObject);
+        // this line forces the expected exception because its an unknown key
         mFileSystemManagerCache.borrowOne(anyString());
     }
 
+    @Test
     public void testBorrowOneFromList()
         throws FileSystemManagerCacheAlreadyInitializedException,
         UnknownRootFileObjectException, FileSystemException {
+
         mFileSystemManagerCache = new FileSystemManagerCache();
         final Map<String, List<FileSystemManager>> fileSystemManagersPerRootFileObject =
             new HashMap<String, List<FileSystemManager>>();
@@ -81,10 +92,13 @@ public class FileSystemManagerCacheTest {
                 true, true, true, System.getProperty("java.io.tmpdir")));
         }
         fileSystemManagersPerRootFileObject.put(ROOT_FILE_OBJECT, fsmList);
-        mFileSystemManagerCache
-            .initFileSystemManagerCache(fileSystemManagersPerRootFileObject);
-        Assert.assertEquals(mFileSystemManagerCache
-            .getSizeOfAvailableFileSystemManagers(ROOT_FILE_OBJECT), 5);
+        // init the cache
+        mFileSystemManagerCache.initFileSystemManagerCache(fileSystemManagersPerRootFileObject);
+        // assert that the cache contains expected 5 FSMs
+        Assert.assertEquals(mFileSystemManagerCache.getSizeOfAvailableFileSystemManagers(ROOT_FILE_OBJECT), 5);
+
+        // borrow 5 FSMs and assert that the size of the available FSMs in the
+        // cache is decremented after each loan.
         for (int i = 5; i > 0; i--) {
             final FileSystemManager returnedFSM = mFileSystemManagerCache
                 .borrowOne(ROOT_FILE_OBJECT);
@@ -93,11 +107,13 @@ public class FileSystemManagerCacheTest {
                 .getSizeOfAvailableFileSystemManagers(ROOT_FILE_OBJECT), i - 1);
         }
     }
-
+    
+    @Test
     public void testReturnOneFromList()
         throws FileSystemManagerCacheAlreadyInitializedException,
         UnknownRootFileObjectException, FileSystemException,
         UnknownFileSystemManagerException {
+
         mFileSystemManagerCache = new FileSystemManagerCache();
         final Map<String, List<FileSystemManager>> fileSystemManagersPerRootFileObject =
             new HashMap<String, List<FileSystemManager>>();
@@ -111,14 +127,18 @@ public class FileSystemManagerCacheTest {
         mFileSystemManagerCache
             .initFileSystemManagerCache(fileSystemManagersPerRootFileObject);
 
+        // borrow one
         final FileSystemManager returnedFSM = mFileSystemManagerCache
             .borrowOne(ROOT_FILE_OBJECT);
 
+        // so there should be only one left that is available
         Assert.assertEquals(mFileSystemManagerCache
             .getSizeOfAvailableFileSystemManagers(ROOT_FILE_OBJECT), 1);
 
+        // return the fsm
         mFileSystemManagerCache.returnOne(ROOT_FILE_OBJECT, returnedFSM);
 
+        // so there should be two available after the return.
         Assert.assertEquals(mFileSystemManagerCache
             .getSizeOfAvailableFileSystemManagers(ROOT_FILE_OBJECT), 2);
     }
@@ -128,6 +148,7 @@ public class FileSystemManagerCacheTest {
         throws FileSystemManagerCacheAlreadyInitializedException,
         UnknownRootFileObjectException, FileSystemException,
         UnknownFileSystemManagerException {
+
         mFileSystemManagerCache = new FileSystemManagerCache();
         final Map<String, List<FileSystemManager>> fileSystemManagersPerRootFileObject =
             new HashMap<String, List<FileSystemManager>>();
@@ -142,6 +163,7 @@ public class FileSystemManagerCacheTest {
         final FileSystemManager returnedFSM = mFileSystemManagerCache
             .borrowOne(ROOT_FILE_OBJECT);
 
+        // throw expected exception when trying to return an FSM with an unknown key
         mFileSystemManagerCache.returnOne(anyString(), returnedFSM);
     }
 
@@ -150,6 +172,7 @@ public class FileSystemManagerCacheTest {
         throws FileSystemManagerCacheAlreadyInitializedException,
         UnknownRootFileObjectException, FileSystemException,
         UnknownFileSystemManagerException {
+
         mFileSystemManagerCache = new FileSystemManagerCache();
         final Map<String, List<FileSystemManager>> fileSystemManagersPerRootFileObject =
             new HashMap<String, List<FileSystemManager>>();
@@ -163,6 +186,7 @@ public class FileSystemManagerCacheTest {
 
         mFileSystemManagerCache.borrowOne(ROOT_FILE_OBJECT);
 
+        // assert that returning a new FSM (not the borrowed one) throws an expected exception
         mFileSystemManagerCache.returnOne(ROOT_FILE_OBJECT, VFSUtil
             .createNewFsManager(true, true, true, true, true, true, true,
                 System.getProperty("java.io.tmpdir")));
@@ -172,6 +196,7 @@ public class FileSystemManagerCacheTest {
     public void testClear()
         throws FileSystemManagerCacheAlreadyInitializedException,
         UnknownRootFileObjectException, FileSystemException {
+
         mFileSystemManagerCache = new FileSystemManagerCache();
         final Map<String, List<FileSystemManager>> fileSystemManagersPerRootFileObject =
             new HashMap<String, List<FileSystemManager>>();
@@ -184,8 +209,11 @@ public class FileSystemManagerCacheTest {
         mFileSystemManagerCache
             .initFileSystemManagerCache(fileSystemManagersPerRootFileObject);
 
+        // clear the cache so it does not contain any cahced FSMs
         mFileSystemManagerCache.clear();
-        Assert.assertEquals(mFileSystemManagerCache
-            .getSizeOfAvailableFileSystemManagers(ROOT_FILE_OBJECT), 0);
+        // this line throws the expected exception because the cache is cleared
+        // and so the ROOT_FILE_OBJECT key is unknown. 
+        Assert.assertEquals(
+                mFileSystemManagerCache.getSizeOfAvailableFileSystemManagers(ROOT_FILE_OBJECT), 0);
     }
 }
