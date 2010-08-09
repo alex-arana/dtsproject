@@ -40,7 +40,7 @@ import org.testng.annotations.Test;
  * store the job's details onto it.
  * 
  * @author Gerson Galang
- * @author David Meredith (modifications)
+ * @author David Meredith
  */
 @ContextConfiguration(locations = {
     "/org/dataminx/dts/batch/client-context.xml",
@@ -107,7 +107,7 @@ public class BulkCopyJobIntegrationTest extends
 
         assertNotNull(jobExecution.getExecutionContext().get(DTS_SUBMIT_JOB_REQUEST_KEY));
     }
-
+    
     @Test
     public void testNonExistenceOfPropertiesFromExecutionContextAfterJobFinishedSuccessfully()
         throws Exception {

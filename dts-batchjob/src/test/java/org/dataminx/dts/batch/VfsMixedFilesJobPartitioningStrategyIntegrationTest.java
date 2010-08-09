@@ -82,7 +82,7 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
         // (two DataTransfer elements defined, first has 11 files, second has 9) 11 + 9 = 20
         assertEquals(jobDetails.getTotalFiles(), 20);
 
-        // expected value here was 11 ! (should this be 20 ?).
+        // 
         this.checkSourceFileCountEqualsSinkFileCount(11, jobDetails.getSourceTargetMaxTotalFilesToTransfer());
     }
 

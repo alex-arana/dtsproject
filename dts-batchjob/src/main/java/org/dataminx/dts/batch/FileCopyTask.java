@@ -82,6 +82,21 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
     InitializingBean {
 
     /**
+     * Gets the next DtsDataTransferUnit to process.
+     *
+     * @return the next DtsDataTransferUnit
+     */
+    public static synchronized DtsDataTransferUnit getNextDataTransferUnit(
+            Iterator<DtsDataTransferUnit> dataTransferUnitIterator, String copierName) {
+        if (dataTransferUnitIterator.hasNext()) {
+            return dataTransferUnitIterator.next();
+        } else {
+            LOGGER.debug(copierName + " has nothing left to process.");
+            return null;
+        }
+    }
+
+    /**
      * The FileCopier is the actual class that does the file-to-file transfer and is run as a thread.
      */
     private class FileCopier implements Runnable {
@@ -137,7 +152,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
          *
          * @return the next DtsDataTransferUnit
          */
-        public synchronized DtsDataTransferUnit getNextDataTransferUnit() {
+        /*public synchronized DtsDataTransferUnit getNextDataTransferUnit() {
             if (mDataTransferUnitIterator.hasNext()) {
                 return mDataTransferUnitIterator.next();
             }
@@ -145,7 +160,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
                 LOGGER_FC.debug(mCopierName + " has nothing left to process.");
                 return null;
             }
-        }
+        }*/
 
         /** Performs the actual data transfer. */
         public void run() {
@@ -153,7 +168,8 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
             // we won't use hasNext() in testing for the contents of the mDataTransferUnitIterator
             // as there might be issues with race conditions.
 
-            DtsDataTransferUnit dataTransferUnit = getNextDataTransferUnit();
+            //DtsDataTransferUnit dataTransferUnit = getNextDataTransferUnit();
+            DtsDataTransferUnit dataTransferUnit = getNextDataTransferUnit(mDataTransferUnitIterator, mCopierName);
             while (dataTransferUnit != null) { // TODO: && !stopped) {
 
                 if (mHasTransferErrorArised) {
@@ -204,7 +220,8 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
                             + "file that was recently copied.", e);
                 }
 
-                dataTransferUnit = getNextDataTransferUnit();
+                //dataTransferUnit = getNextDataTransferUnit();
+                dataTransferUnit = getNextDataTransferUnit(mDataTransferUnitIterator, mCopierName);
             }
 
             // let's try and return the borrowed FileSystemManager connections...
@@ -472,10 +489,11 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
 
         // shortcut! as we don't really need to send updates everytime a new dataTransferUnit is processed
         mBatchTotalFiles = dataTransferUnits.size();
+        LOGGER.debug("Step's DTU count: "+mBatchTotalFiles);
 
+        // number of concurrent connections to the source - what about the target?
         int numConcurrentConnections = mFileSystemManagerCache
-            .getSizeOfAvailableFileSystemManagers(mJobStep
-                .getSourceRootFileObjectString());
+            .getSizeOfAvailableFileSystemManagers(mJobStep.getSourceRootFileObjectString());
 
         if (numConcurrentConnections == 0) {
             throw new NoAvailableConnectionException(
@@ -483,16 +501,16 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
                     + mJobStep.getSourceRootFileObjectString());
         }
 
-        if (mRootFileObjectComparator.compare(mJobStep
-            .getSourceRootFileObjectString(), mJobStep
-            .getTargetRootFileObjectString()) != 0) {
-            final int tmpNumConcurrentConnections = mFileSystemManagerCache
-                .getSizeOfAvailableFileSystemManagers(mJobStep
-                    .getTargetRootFileObjectString());
+        // not sure we need this if now...?
+        if (mRootFileObjectComparator.compare(
+                mJobStep.getSourceRootFileObjectString(),
+                mJobStep.getTargetRootFileObjectString()) != 0) {
 
-            // get the minimum between the two
-            if (tmpNumConcurrentConnections < numConcurrentConnections) {
-                numConcurrentConnections = tmpNumConcurrentConnections;
+            final int tmpNumConcurrentConnectionsToTarget = mFileSystemManagerCache
+                    .getSizeOfAvailableFileSystemManagers(mJobStep.getTargetRootFileObjectString());
+            // get the minimum between the source and target
+            if (tmpNumConcurrentConnectionsToTarget < numConcurrentConnections) {
+                numConcurrentConnections = tmpNumConcurrentConnectionsToTarget;
             }
         }
 

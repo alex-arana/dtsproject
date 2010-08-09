@@ -57,10 +57,10 @@ public class JobScopingTaskTest {
     @Test(groups = {"local-file-transfer-test"})
     public void testExecute() throws Exception {
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()+ ".xml").getFile();
-        final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
+        //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
 
         //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
-        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        //final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
 
         final JobScopingTask jobScopingTask = new JobScopingTask();
         jobScopingTask.setJobNotificationService(mJobNotificationService);

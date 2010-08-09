@@ -1,6 +1,6 @@
 package org.dataminx.dts.batch;
 
-import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
+//import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -82,8 +82,6 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         assertEquals(jobDetails.getJobSteps().size(), 1);
         assertEquals(jobDetails.getTotalFiles(), 1);
 
-
-        //System.out.println("hello all");
         //System.out.println("keyset: "+jobDetails.getSourceTargetMaxTotalFilesToTransfer().keySet());
         assertEquals(jobDetails.getSourceTargetMaxTotalFilesToTransfer().size(), 2);
         assertEquals(jobDetails.getSourceTargetMaxTotalFilesToTransfer().get(DtsConstants.TMP_ROOT_PROTOCOL).intValue(), 1);
@@ -114,6 +112,52 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
             jobTag);
     }
 
+
+
+
+    @Test(groups = {"local-file-transfer-test"}, expectedExceptions = JobScopingException.class)
+    public void testMaxTotalFilesLimit() throws IOException,
+        XmlException, JobScopingException, Exception {
+        //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix() + ".xml").getFile();
+        //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
+
+        final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-20files.xml").getFile();
+        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
+        mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
+        mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(3);
+        // this is the tested var - it will cause the expected job scoping exception.
+        mPartitioningStrategy.setTotalFilesLimit(10);
+        //mPartitioningStrategy.setTotalSizeLimit(1);
+        final String jobId = UUID.randomUUID().toString();
+        final String jobTag = jobId;
+        mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), jobId,
+            jobTag);
+    }
+
+
+    @Test(groups = {"local-file-transfer-test"}, expectedExceptions = JobScopingException.class)
+    public void testMaxTotalSizeLimit() throws IOException,
+        XmlException, JobScopingException, Exception {
+        //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix() + ".xml").getFile();
+        //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
+
+        final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
+        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
+        mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
+        mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(3);
+        // this is the tested var - it will cause the expected job scoping exception
+        mPartitioningStrategy.setTotalSizeLimit(100); // 100 byte < 1MB test file 
+
+        final String jobId = UUID.randomUUID().toString();
+        final String jobTag = jobId;
+        mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), jobId,
+            jobTag);
+    }
+
+
+
     @Test(groups = {"local-file-transfer-test"}, expectedExceptions = DtsException.class)
     public void testNegativeMaxTotalByteSizePerStepLimit() throws IOException,
         XmlException, JobScopingException, Exception {
@@ -122,7 +166,6 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
         final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
-
 
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
