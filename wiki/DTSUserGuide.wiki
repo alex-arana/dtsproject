@@ -1,4 +1,4 @@
-#labels Phase-Implementation,Install-Guide,User-Guide
+#labels Phase-Implementation,Install-Guide,Developer-Guide
 <wiki:toc max_depth="3" />
 
 =DTS Developer Guide=
