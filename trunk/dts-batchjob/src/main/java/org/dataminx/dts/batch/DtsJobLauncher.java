@@ -59,6 +59,7 @@ import org.springframework.validation.MapBindingResult;
  *
  * @author Alex Arana
  * @author Gerson Galang
+ * @author David Meredith 
  */
 public class DtsJobLauncher extends SimpleJobLauncher {
 
