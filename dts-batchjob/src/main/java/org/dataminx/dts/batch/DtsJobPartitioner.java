@@ -69,7 +69,8 @@ public class DtsJobPartitioner implements Partitioner, InitializingBean {
      */
     public Map<String, ExecutionContext> partition(final int gridSize) {
         // TODO: need to remove the getJobSteps reference here as this collection
-        // is due to be removed. Rather, would need to iterate the job's step files.
+        // is due to be removed. Rather, would need to iterate all the step files
+        // and put the jobStep file path into the stepExecutionContext.
 
         // partioner's role is to generate execution contexts as input params for new step exeuctions.
         // The return value associates a unique name for each step exeuction (the string)

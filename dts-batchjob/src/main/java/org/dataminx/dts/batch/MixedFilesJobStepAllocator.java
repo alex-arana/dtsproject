@@ -103,8 +103,7 @@ public class MixedFilesJobStepAllocator implements DtsJobStepAllocator {
     private void persistCurrentJobStep() throws FileNotFoundException{
         mTmpDtsJobStep.writeToFile();
         // TODO: do not save the step in this.mSteps as this collection
-        // will no longer be needed when all of the jobStep state is written
-        // to file.
+        // will no longer be needed when all of the jobStep state is written to file. In this case, we will also not need to call clearDataTransferUnits()
         mTmpDtsJobStep.clearDataTransferUnits();
         mSteps.add(mTmpDtsJobStep);
     }

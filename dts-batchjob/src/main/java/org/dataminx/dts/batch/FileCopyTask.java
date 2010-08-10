@@ -77,16 +77,27 @@ import org.springframework.util.Assert;
  *
  * @author Alex Arana
  * @author Gerson Galang
+ * @author David Meredith
  */
 public class FileCopyTask implements Tasklet, StepExecutionListener,
     InitializingBean {
 
     /**
-     * Gets the next DtsDataTransferUnit to process.
+     * Gets the next DtsDataTransferUnit to process. This method is invoked by
+     * multiple instances of the FileCopier Thread. Importantly, the given DTU
+     * iterator (dataTransferUnitIterator) is shared across multiple FileCopier threads.
+     * Therefore, this method has to be thread safe since this iterator represents
+     * shared mutable state. We declare this method here (rather than inside
+     * the FileCopier class) in order to apply a common lock on the method
+     * (i.e. the intrinsic lock of the FileCopyTask class). If we were defining
+     * this method within each FileCopier, the lock used to synchronize the method
+     * would be different for each FileCopier Thread (i.e. it would be the intrinsic
+     * lock of each FileCopier instance). This would not be thread safe: you need
+     * to use the same lock on shared mutable state when synchronizing across threads. 
      *
      * @return the next DtsDataTransferUnit
      */
-    public static synchronized DtsDataTransferUnit getNextDataTransferUnit(
+    private static synchronized DtsDataTransferUnit getNextDataTransferUnit(
             Iterator<DtsDataTransferUnit> dataTransferUnitIterator, String copierName) {
         if (dataTransferUnitIterator.hasNext()) {
             return dataTransferUnitIterator.next();

@@ -230,6 +230,7 @@ To integration test:              mvn integration-test
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <!-- Spring OXM -->
@@ -303,6 +304,7 @@ To integration test:              mvn integration-test
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <!-- TestNG -->

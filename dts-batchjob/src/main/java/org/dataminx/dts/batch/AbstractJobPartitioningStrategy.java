@@ -74,11 +74,11 @@ public abstract class AbstractJobPartitioningStrategy implements
     /** A flag if the user has requested the processing of the job to be stopped or cancelled. */
     private final boolean mCancelled = false;
 
-    /** The limit on the total size of all the files that will be transferred by this job. */
-    private long mTotalSizeLimit = Long.MAX_VALUE;
+    /** The limit on the total size of all the files that will be transferred by this job. -1 means unlimited */
+    private long mTotalSizeLimit = -1l;
 
-    /** The limit on the total number of files to be transferred by this job. */
-    private long mTotalFilesLimit = Long.MAX_VALUE;
+    /** The limit on the total number of files to be transferred by this job. -1 means unlimited */
+    private long mTotalFilesLimit = -1l;
 
     /** The total size of all the files that will be transferred by this job. */
     private long mTotalSize;
@@ -130,12 +130,13 @@ public abstract class AbstractJobPartitioningStrategy implements
         ++mTotalFiles;
         // here we need to test that the mTotalSize and mTotalFiles does not
         // exceed the limits configured for this batch job and throw
-        // JobScopingException if either are exceeded !
-        if(mTotalSize > this.mTotalSizeLimit){
-            throw new JobScopingException("Total file transfer size limited exceeded. Byte limit set to: "+this.mTotalSizeLimit);
+        // JobScopingException if either are exceeded ! Only do this test if
+        // thresholds are not -1 (which means unlimited).
+        if (this.mTotalSizeLimit > 0 && mTotalSize > this.mTotalSizeLimit) {
+            throw new JobScopingException("Total file transfer size limited exceeded. Byte limit set to: " + this.mTotalSizeLimit);
         }
-        if(mTotalFiles > this.mTotalFilesLimit){
-             throw new JobScopingException("Total file transfer count limit exceeded. File lmit set to: "+this.mTotalFilesLimit);
+        if (this.mTotalFilesLimit > 0 && mTotalFiles > this.mTotalFilesLimit) {
+            throw new JobScopingException("Total file transfer count limit exceeded. File lmit set to: " + this.mTotalFilesLimit);
         }
 
         ++mPerDataTransferTotalFiles;
@@ -172,11 +173,16 @@ public abstract class AbstractJobPartitioningStrategy implements
             throw new JobScopingException(
                 "MaxTotalFileNumPerStepLimit should be a positive number.");
         }
-        if(this.mTotalFilesLimit < 0){
-             throw new JobScopingException("TotalFilesLimit should be a positive number.");
+
+        if (this.mTotalFilesLimit != -1) {
+            if (this.mTotalFilesLimit <= 0) {
+                throw new JobScopingException("TotalFilesLimit should be a positive number or -1 to indicate unlimited.");
+            }
         }
-        if(this.mTotalSizeLimit < 0){
-            throw new JobScopingException("TotalSizeLimit should be a positive number.");
+        if (this.mTotalSizeLimit != -1) {
+            if (this.mTotalSizeLimit <= 0) {
+                throw new JobScopingException("TotalSizeLimit should be a positive number or -1 to indicate unlimited.");
+            }
         }
     }
 
@@ -672,7 +678,7 @@ public abstract class AbstractJobPartitioningStrategy implements
 
     /**
      * The limit on the total number of all the files that can be transferred by this job.
-     * Default is <code>Long.MAX_VALUE</code>
+     * Default is <code>-1</code> which means unlimted.
      * @param totalFilesLimit
      */
     public void setTotalFilesLimit(final long totalFilesLimit){
@@ -682,7 +688,7 @@ public abstract class AbstractJobPartitioningStrategy implements
 
     /**
      * The limit on the total size of all the files that can be transferred by this job.
-     * Default is <code>Long.MAX_VALUE</code>
+     * Default is <code>-1</code> which means unlimted.
      * @param totalSizeLimit
      */
     public void setTotalSizeLimit(final long totalSizeLimit){

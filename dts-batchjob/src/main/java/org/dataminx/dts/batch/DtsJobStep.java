@@ -254,9 +254,13 @@ public class DtsJobStep implements Serializable {
         PrintWriter writer = null;
         try {
             File newStepFile = new File(this.mFilePath);
+            // newStepFile - The file to use as the destination of this writer.
+            // If the file exists then it will be truncated to zero size (overwritten);
+            // otherwise, a new file will be created.
+            // The output will be written to the file and is buffered.
             writer = new PrintWriter(newStepFile);
             /*
-            writer.println("DtsJobStep");
+            writer.println("#DtsJobStep Properties");
             writer.println(this.mStepId);
             writer.println(this.mStepType);
             writer.println(this.mCurrentTotalByteSize);
