@@ -13,10 +13,10 @@
       </jsdl:JobIdentification>
       <mjsdl:DataTransfer>
         <mjsdl:Source>
-          <jsdl1:URI xmlns:jsdl1="http://schemas.ggf.org/jsdl/2005/11/jsdl">file://etc/passwd</jsdl1:URI>
+          <jsdl1:URI xmlns:jsdl1="http://schemas.ggf.org/jsdl/2005/11/jsdl">file://C:/WINDOWS/notepad.exe</jsdl1:URI>
         </mjsdl:Source>
         <mjsdl:Target>
-          <jsdl1:URI xmlns:jsdl1="http://schemas.ggf.org/jsdl/2005/11/jsdl">file://tmp/hello.pass
+          <jsdl1:URI xmlns:jsdl1="http://schemas.ggf.org/jsdl/2005/11/jsdl">tmp://
           </jsdl1:URI>
         </mjsdl:Target>
       </mjsdl:DataTransfer>

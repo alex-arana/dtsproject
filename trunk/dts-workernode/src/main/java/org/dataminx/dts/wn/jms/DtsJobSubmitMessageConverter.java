@@ -33,7 +33,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -48,7 +47,6 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.xmlbeans.XmlObject;
-import org.dataminx.dts.batch.DtsJobLauncher;
 import org.dataminx.dts.common.jms.DtsMessagePayloadTransformer;
 import org.dataminx.dts.common.xml.ByteArrayResult;
 import org.dataminx.schemas.dts.x2009.x07.messages.InvalidJobDefinitionFaultDocument;
@@ -58,7 +56,6 @@ import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.integration.channel.MessageChannelTemplate;
 import org.springframework.integration.message.MessageBuilder;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
@@ -71,49 +68,63 @@ import org.springframework.xml.transform.StringResult;
 /**
  * This class is a dual-purpose messaging converter:
  * <ul>
- *   <li>Converts an incoming JMS message into a DTS Job definition.
+ *   <li>Converts an incoming JMS message into a DTS Job definition wrapped as a
+ *       Spring Integration message.
  *   <li>Converts a supported schema entity into an outgoing JMS message.
  * </ul>
  *
  * @author Alex Arana
  * @author hnguyen
+ * @author David Meredith
+ * @author Ming Jiang
  */
 @Component("dtsMessageConverter")
-public class DtsMessageConverter extends SimpleMessageConverter {
+public class DtsJobSubmitMessageConverter extends SimpleMessageConverter {
 
     /** Internal logger object. */
-    private static final Logger LOG = LoggerFactory.getLogger(DtsMessageConverter.class);
-    /**
-     * Default format of outgoing messages.
-     */
+    private static final Logger LOG = LoggerFactory.getLogger(DtsJobSubmitMessageConverter.class);
+
+    /** Default format of outgoing messages. */
     private OutputFormat mOutputFormat = OutputFormat.XML_TEXT;
+
     /** Component used to marshall Java object graphs into XML. */
     private Marshaller mMarshaller;
+
     /**
      * Component used to transform input DTS Documents into Java objects
      * (unmarshaller = XML -to-> java content objects).
      */
     private DtsMessagePayloadTransformer mTransformer;
-    /** A reference to the ChannelTemplate object. */
-    private MessageChannelTemplate mChannelTemplate;
-    private DtsJobLauncher mDtsJobLauncher;
 
-    /*
-     * A lightweight method to cover xml payload validation and passing down jms meesage headers or turning around these headers in
-     * message of exception of invalid xml doc. The method creates a DtsJobLauncher object and call its run method diretly rather than
-     * passing down a DtsJobRequest object in a SI messaage to the dtsJobRequestHandler activator.
+
+
+    /**
+     * Converts a jms message into a Spring Integration message.
+     *
+     * @param message the input jms message
+     * @return a {@link org.springframework.integration.core.Message}. The message body
+     *  contains either a {@link JobDefinitionDocument} or a @{link InvalidJobDefinitionFaultDocument}
+     *  depending on whether the given jms message wraps a vaild {@link JobDefinitionDocument}.
+     *  All the jms headers are copied into the returned Message headers.
+     *  Since this converter is jms specific, both the {@link org.springframework.integration.jms.JmsHeaders.CORRELATION_ID}
+     *  and {@link org.springframework.integration.core.MessageHeaders.CORRELATION_ID} headers
+     *  are also added and hold the unique job identifier extracted from the
+     *  jms correlation id (priority) or jms message id (second). If neither the jms correlation id or
+     *  the message id exist, a new UUID is created and is stored.
+     * @throws JMSException
+     * @throws MessageConversionException
      */
     @Override
     public Object fromMessage(final Message message) throws JMSException,
             MessageConversionException {
         String jobId = null;
         // Try to get the job id from the correlation id or JMSMessageID first. If they are
-        // not available, to create it with UUID.randomUUID().toString().
+        // not available, create it with UUID.randomUUID().toString().
         if (message.getJMSCorrelationID() != null
-                && !message.getJMSCorrelationID().equals("")) {
+                && !message.getJMSCorrelationID().trim().equals("")) {
             jobId = message.getJMSCorrelationID();
         } else if (message.getJMSMessageID() != null
-                && !message.getJMSMessageID().equals("")) {
+                && !message.getJMSMessageID().trim().equals("")) {
             jobId = message.getJMSMessageID();
         } else {
             jobId = UUID.randomUUID().toString();
@@ -125,63 +136,44 @@ public class DtsMessageConverter extends SimpleMessageConverter {
                 "Finished reading message payload of type: '%s'", payload.getClass().getName()));
         //LOG.debug(payload.toString());
 
-        try {
+        // Copy all the jms headers into the SI message map
+        // e.g. consider the given ClientID property that the client uses to filter
+        // messages intended only for them. Here we need to 'turn-around' the message headers even
+        // if we dont understand them, e.g. consider the JMS.REPLY_TO header).
+        Map jmsMsgHeaders = this.getJmsHeadersAsStringMap(message);
+        // Add the integration.jms.CORRELATION_ID so that this header is
+        // automatically mapped on any return message.
+        jmsMsgHeaders.put(org.springframework.integration.jms.JmsHeaders.CORRELATION_ID, jobId);
+        // Store the jobID under the generic integration.CORRELATION_ID (this header
+        // is intended for internal spring integration usage and is agonostic of
+        // any particular transport or messaging protocol.
+        jmsMsgHeaders.put(org.springframework.integration.core.MessageHeaders.CORRELATION_ID, jobId); 
 
+        try {
             final XmlObject expectedXML = (XmlObject) mTransformer.transformPayload(payload);
             if (!(expectedXML instanceof SubmitJobRequestDocument)) {
-                throw new Exception("Invaild XML Payload here");
+                throw new Exception("Invaild XML Payload: SubmitJobRequestDocument expected");
             }
             SubmitJobRequestDocument doc = (SubmitJobRequestDocument) expectedXML;
             JobDefinitionType jobdeftype = doc.getSubmitJobRequest().getJobDefinition();
             JobDefinitionDocument ourdoc = JobDefinitionDocument.Factory.newInstance();
             ourdoc.setJobDefinition(jobdeftype);
+            final MessageBuilder<JobDefinitionDocument> msgbuilder = MessageBuilder.withPayload(ourdoc).copyHeaders(jmsMsgHeaders);
+            return msgbuilder.build();
 
-            // Add any additional parameters and return the job request to the framework
-            // store the given JMS.ClientID header property
-            // in the jobProperties so that we can subsequenlty 'turn-around' (set)
-            // this property when sending event notifications back to the client.
-            // e.g. the client would use the ClientID property to filter their own
-            // messages from the dtsJobEvents queue.
-            Map headers = this.getJmsHeadersAsStringMap(message);
-            headers.put(org.springframework.integration.jms.JmsHeaders.CORRELATION_ID, jobId);
-            mDtsJobLauncher.run(jobId, ourdoc, headers);
-            return null;
         } catch (final Exception e) {
             LOG.debug("Invalid XML payload: " + e.getMessage());
-
             final InvalidJobDefinitionFaultDocument document = InvalidJobDefinitionFaultDocument.Factory.newInstance();
             final InvalidJobDefinitionFaultType InvalidJobDefinitionFaultDetail = document.addNewInvalidJobDefinitionFault();
             InvalidJobDefinitionFaultDetail.setMessage(e.getMessage());
-
-            // TODO: Note, we also need to copy all the other jms headers into the SI message!!
-            // consider the given ClientID property that the client uses to filter
-            // messages intended only for them. Here we need to 'turn-around' the message headers even
-            // if we dont understand them, e.g. consider the JMS.REPLY_TO header).
-            final Map<String, Object> jmsMsgHeaders = new LinkedHashMap<String, Object>();
-            final Enumeration jmsMsgProperyNames = message.getPropertyNames();
-            if (jmsMsgProperyNames != null) {
-                while (jmsMsgProperyNames.hasMoreElements()) {
-                    final String pName = (String) jmsMsgProperyNames.nextElement();
-                    jmsMsgHeaders.put(pName, message.getStringProperty(pName));
-                }
-            }
-            jmsMsgHeaders.put(
-                    org.springframework.integration.jms.JmsHeaders.CORRELATION_ID,
-                    jobId);
             final MessageBuilder<InvalidJobDefinitionFaultDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(jmsMsgHeaders);
-            final org.springframework.integration.core.Message<InvalidJobDefinitionFaultDocument> msg = msgbuilder.build();
-            mChannelTemplate.send(msg);
-
-            // Here we need to return null rather than throw a new MessageConversionException
-            // this is related to the jms transaction we think.
-            //throw new MessageConversionException("Invalid XML Payload "+e.getMessage());
-            return null;
+            return msgbuilder.build();
         }
     }
 
     private Map getJmsHeadersAsStringMap(final Message message)
             throws JMSException {
-        final Map headerProperties = new HashMap();
+        final Map<String, String> headerProperties = new HashMap<String, String>();
         final Enumeration jmsMsgProperyNames = message.getPropertyNames();
         if (jmsMsgProperyNames != null) {
             while (jmsMsgProperyNames.hasMoreElements()) {
@@ -322,16 +314,4 @@ public class DtsMessageConverter extends SimpleMessageConverter {
         this.mMarshaller = marshaller;
     }
 
-    /**
-     * Inject a message channel template for the Job Event queue
-     *
-     * @param mChannelTemplate
-     */
-    public void setChannelTemplate(final MessageChannelTemplate channelTemplate) {
-        this.mChannelTemplate = channelTemplate;
-    }
-
-    public void setDtsJobLauncher(final DtsJobLauncher jobLauncher) {
-        mDtsJobLauncher = jobLauncher;
-    }
 }

@@ -25,10 +25,12 @@ si.jms.jobControlQueueName = dts.job.control.queue
 # if want to receive all messages)
 si.jms.jobSubmitQueue.selector=
 
-# message selector value for the si.jms.jobControlQueueName (highly
-# recommended to leave as is) 
-si.jms.jobControlQueue.selector=${wn.id.message.header.name} = '${wn.id}'
-
+# message selector value for the si.jms.jobControlQueueName 
+# Use the following example commented out below to filter for messages that 
+# are intended only for this worker node instance. This would require the
+# message producer to add the corresponding wn.id.message.header. 
+#si.jms.jobControlQueue.selector=${wn.id.message.header.name} = '${wn.id}'
+si.jms.jobControlQueue.selector=
 
 # control logic for workernode manager
 wn.manager.maxBatchJobNumber = 1
@@ -39,4 +41,10 @@ wn.id=DtsWorkerNodemyhostname001
 #default message header name of worker node ID
 wn.id.message.header.name=DTSWorkerNodeID
 
+# the polling interval in milliseconds to poll the jobSubmitQueue.
+# 10000 = 10secs (default)
+wn.polling.interval.millisecs=10000
 
+
+wn.user.name=
+wn.user.password=
