@@ -58,7 +58,7 @@ public class ProcessDtsControlMessageIntegrationTest extends
     @Autowired
     @Qualifier("controlQueueSender")
     private ControlQueueSender mJmsQueueSender;
-
+    
     @Test
     public void cancelDtsJobAsDocument() throws Exception {
         final File f = new ClassPathResource("/org/dataminx/dts/wn/util/cancel-request.xml").getFile();

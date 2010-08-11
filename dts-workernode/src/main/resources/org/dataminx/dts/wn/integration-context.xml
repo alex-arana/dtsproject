@@ -79,7 +79,7 @@
         <beans:property name="trigger" ref="trigger"/>
         <beans:property name="source" ref="jmsMessageSource"/>
         <beans:property name="outputChannel" ref="dtsJobRequests"/>
-        <beans:property name="transactionManager" ref="jmsTransactionManager"/>
+        <beans:property name="transactionManager" ref="jmsTransactionManagerJobSubmitQueue"/>
         <beans:property name="workerNodeManager" ref="workerNodeManager"/>
     </beans:bean>
 
@@ -89,13 +89,13 @@
     </beans:bean>
     -->
     <beans:bean id="jmsMessageSource" class="org.dataminx.dts.wn.jms.SelectingJmsDestinationPollingSource">
-         <beans:constructor-arg index="0" ref="convertableJmsTemplate"/>
+         <beans:constructor-arg index="0" ref="jmsJobSubmitQueueConvertableJmsTemplate"/>
          <beans:property name="messageSelector" value="${si.jms.jobSubmitQueue.selector}"/>
     </beans:bean>
 
 
     <beans:bean id="trigger" class="org.springframework.integration.scheduling.IntervalTrigger">
-        <beans:constructor-arg value="10000"/>
+        <beans:constructor-arg value="${wn.polling.interval.millisecs}"/>
     </beans:bean>
 
     <beans:bean id="workerNodeManager" class="org.dataminx.dts.wn.WorkerNodeManager">
@@ -107,6 +107,8 @@
         <beans:property name="workerNodeID" value="${wn.id}"/>
         <beans:property name="workerNodeIDMessageHeaderName" value="${wn.id.message.header.name}"/>
     </beans:bean>
+
+    
     <jms:outbound-channel-adapter
         channel="dtsClientEvents"
         jms-template="jmsJobEventQueueConvertableJmsTemplate"
@@ -158,15 +160,15 @@
     <jms:message-driven-channel-adapter
         container="controlRequestsMessageContainer"
         message-converter="dtsControlMessageConverter"
-        channel="dtsControlRequests"
-        />
-<beans:bean id="controlRequestsMessageContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
-    <beans:property name="connectionFactory" ref="jmsConnectionFactory"/>
-    <beans:property name="destinationName" value="${si.jms.jobControlQueueName}"/>
-    <!--<beans:property name="messageSelector" value="${wn.id.message.header.name} = '${wn.id}'"/>-->
-    <beans:property name="messageSelector" value="${si.jms.jobControlQueue.selector}"/>
-    <beans:property name="transactionManager" ref="jmsTransactionManager"/>
-</beans:bean>
+        channel="dtsControlRequests" />
+
+
+        <beans:bean id="controlRequestsMessageContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+            <beans:property name="connectionFactory" ref="jmsConnectionFactoryControlEventQueue"/>
+            <beans:property name="destinationName" value="${si.jms.jobControlQueueName}"/>
+            <beans:property name="messageSelector" value="${si.jms.jobControlQueue.selector}"/>
+            <beans:property name="transactionManager" ref="jmsTransactionManagerControlEventQueue"/>
+        </beans:bean>
     
     <!--
 
@@ -214,16 +216,28 @@
         <beans:constructor-arg index="0" ref="workerNodeManager"/>
         <beans:constructor-arg index="1" value="2000"/>
     </beans:bean>
+
+
+
     <!--
-  Service Activator - the service activator is the endpoint type for connecting
-  any Spring managed object so that it may play the role of a service.
-  -->
+    Service Activators
+    ==========================================================
+    Service activators are the endpoint type for connecting
+    any Spring managed object so that it may play the role of a service.
+    -->
+    <beans:bean id="dtsSubmitRequestHandler"
+                class="org.dataminx.dts.wn.SubmitRequestHandler">
+        <beans:property name="dtsJobLauncher" ref="dtsJobLauncher"/>
+    </beans:bean>
+    <service-activator input-channel="dtsJobRequests"
+                       output-channel="dtsJobEvents"
+                       ref="dtsSubmitRequestHandler"/>
+
 <!--
     <beans:bean id="dtsJobRequestHandler"
               class="org.springframework.batch.integration.launch.JobLaunchingMessageHandler">
     <beans:constructor-arg index="0" ref="dtsJobLauncher"/>
     </beans:bean>
-
     <service-activator input-channel="dtsJobRequests"
                      output-channel="dtsJobExecutions"
                      ref="dtsJobRequestHandler"/>
@@ -257,12 +271,18 @@
 
     <!-- <beans:bean id="headerMappingMessageConverter" class="org.springframework.integration.jms.HeaderMappingMessageConverter"></beans:bean>-->
 
-    <beans:bean id="dtsMessageConverter" class="org.dataminx.dts.wn.jms.DtsMessageConverter">
+    <!--<beans:bean id="dtsMessageConverter" class="org.dataminx.dts.wn.jms.DtsMessageConverter">
         <beans:property name="marshaller" ref="dtsMarshaller"/>
         <beans:property name="transformer" ref="dtsMessagePayloadTransformer"/>
         <beans:property name="channelTemplate" ref="dtsEventsChannelTemplate"/>
         <beans:property name="dtsJobLauncher" ref="dtsJobLauncher"/>
+    </beans:bean>-->
+    <beans:bean id="dtsMessageConverter" class="org.dataminx.dts.wn.jms.DtsJobSubmitMessageConverter">
+        <beans:property name="marshaller" ref="dtsMarshaller"/>
+        <beans:property name="transformer" ref="dtsMessagePayloadTransformer"/>
     </beans:bean>
+
+
 
     <beans:bean id="dtsControlMessageConverter" class="org.dataminx.dts.wn.jms.DtsControlMessageConverter">
         <beans:property name="marshaller" ref="dtsMarshaller"/>

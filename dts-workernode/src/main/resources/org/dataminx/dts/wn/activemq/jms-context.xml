@@ -4,19 +4,39 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-  <bean id="jmsConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+  <bean id="jmsConnectionFactoryControlEventQueue" class="org.springframework.jms.connection.CachingConnectionFactory">
     <property name="targetConnectionFactory">
       <bean class="org.apache.activemq.spring.ActiveMQConnectionFactory">
         <property name="brokerURL" value="${si.jms.brokerURL}"/>
+         <property name="userName" value="${wn.user.name}"/>
+         <property name="password" value="${wn.user.password}"/>
+      </bean>
+    </property>
+    <property name="sessionCacheSize" value="${si.jms.sessionCacheSize}"/>
+    <property name="cacheProducers" value="${si.jms.cacheProducers}"/>
+  </bean>
+
+
+  <bean id="jmsConnectionFactoryJobSubmitQueue" class="org.springframework.jms.connection.CachingConnectionFactory">
+    <property name="targetConnectionFactory">
+      <bean class="org.apache.activemq.spring.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${si.jms.brokerURL}"/>
+         <property name="userName" value="${wn.user.name}"/>
+         <property name="password" value="${wn.user.password}"/>
       </bean>
     </property>
     <property name="sessionCacheSize" value="${si.jms.sessionCacheSize}"/>
     <property name="cacheProducers" value="${si.jms.cacheProducers}"/>
   </bean>
   
-  <bean id="jmsTransactionManager"
+  <bean id="jmsTransactionManagerControlEventQueue"
         class="org.springframework.jms.connection.JmsTransactionManager">
-    <property name="connectionFactory" ref="jmsConnectionFactory" />
+    <property name="connectionFactory" ref="jmsConnectionFactoryControlEventQueue" />
+  </bean>
+
+  <bean id="jmsTransactionManagerJobSubmitQueue"
+        class="org.springframework.jms.connection.JmsTransactionManager">
+    <property name="connectionFactory" ref="jmsConnectionFactoryJobSubmitQueue" />
   </bean>
 
   <bean id="jmsJobSubmitQueue" class="org.apache.activemq.command.ActiveMQQueue">
@@ -33,19 +53,23 @@
 
 
   <!--
-  A JMSTemplate for the 'jmsJobEventQueue' that performs message conversion
+  A JMSTemplate for the 'jmsJobEventQueue' that performs message conversion.
+  For this template, we are sending to the jmsJobEventQueue and so use the
+  toMessage method of the message converter.
   -->
   <bean id="jmsJobEventQueueConvertableJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="connectionFactory" ref="jmsConnectionFactoryControlEventQueue"/>
     <property name="defaultDestination" ref="jmsJobEventQueue"/>
     <property name="messageConverter" ref="dtsMessageConverter"/>
   </bean>
 
   <!--
   A JMSTemplate for the 'jmsSubmitQueue' that performs message converstion
+  For this template, we are recieving from the jmsJobSubmitQueue and so use the
+  fromMessage method of the message converter.
   -->
-  <bean id="convertableJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+  <bean id="jmsJobSubmitQueueConvertableJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+    <property name="connectionFactory" ref="jmsConnectionFactoryJobSubmitQueue"/>
     <property name="defaultDestination" ref="jmsJobSubmitQueue"/>
     <property name="messageConverter" ref="dtsMessageConverter"/>
   </bean>
@@ -54,7 +78,7 @@
   A JMSTemplate for the 'jmsControlQueue' that performs message converstion
   -->
   <bean id="controlQueueConvertableJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="connectionFactory" ref="jmsConnectionFactoryControlEventQueue"/>
     <property name="defaultDestination" ref="jmsJobControlQueue"/>
     <property name="messageConverter" ref="dtsControlMessageConverter"/>
   </bean>

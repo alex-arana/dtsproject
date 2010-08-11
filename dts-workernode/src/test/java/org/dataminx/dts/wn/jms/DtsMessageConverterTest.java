@@ -42,6 +42,7 @@ import javax.jms.Message;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.batch.DtsFileTransferJob;
 import org.dataminx.dts.batch.DtsJobFactory;
@@ -49,6 +50,7 @@ import org.dataminx.dts.common.jms.DtsMessagePayloadTransformer;
 import org.dataminx.dts.common.util.CredentialStoreImpl;
 import org.dataminx.dts.common.validator.DtsJobDefinitionValidator;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.batch.integration.launch.JobLaunchRequest;
@@ -77,13 +79,13 @@ public class DtsMessageConverterTest {
 
     private Marshaller mockMarshaller;
 
-    private DtsMessageConverter mConverter;
+    private DtsJobSubmitMessageConverter mConverter;
 
     private TextMessage mockMessage;
 
-    private MessageChannelTemplate mockChannelTemplate;
+    //private MessageChannelTemplate mockChannelTemplate;
 
-    private DtsJobDefinitionValidator mockDtsJobDefinitionValidator;
+    //private DtsJobDefinitionValidator mockDtsJobDefinitionValidator;
 
     @BeforeClass
     public void init() {
@@ -91,23 +93,22 @@ public class DtsMessageConverterTest {
         mockPayloadTransformer = mock(DtsMessagePayloadTransformer.class);
         mockMarshaller = mock(Marshaller.class);
         mockMessage = mock(TextMessage.class);
-        mockChannelTemplate = mock(MessageChannelTemplate.class);
-        mockDtsJobDefinitionValidator = mock(DtsJobDefinitionValidator.class);
+        //mockChannelTemplate = mock(MessageChannelTemplate.class);
+        //mockDtsJobDefinitionValidator = mock(DtsJobDefinitionValidator.class);
 
     }
 
     /**
      * Test method for {@link org.dataminx.dts.wn.jms.DtsMessageConverter#fromMessage(javax.jms.Message)}.
      */
-    /*
     @Test
     public void testFromMessage() throws Exception {
-        mConverter = new DtsMessageConverter();
-        mConverter.setJobFactory(mockJobFactory);
+        mConverter = new DtsJobSubmitMessageConverter();
+        //mConverter.setJobFactory(mockJobFactory);
         mConverter.setMarshaller(mockMarshaller);
-        mConverter.setChannelTemplate(mockChannelTemplate);
+        //mConverter.setChannelTemplate(mockChannelTemplate);
         mConverter.setTransformer(mockPayloadTransformer);
-        mConverter.setDtsJobDefinitionValidator(mockDtsJobDefinitionValidator);
+        //mConverter.setDtsJobDefinitionValidator(mockDtsJobDefinitionValidator);
 
         final File f = new ClassPathResource(
             "/org/dataminx/dts/wn/util/minx-dts" + getTestFilePostfix()
@@ -128,10 +129,14 @@ public class DtsMessageConverterTest {
 
         final Object result = mConverter.fromMessage(mockMessage);
         Assert.assertNotNull(result);
-        Assert.assertTrue(result instanceof JobLaunchRequest);
-        Assert.assertSame(((JobLaunchRequest) result).getJob(), dtsJob);
+        Assert.assertTrue(result instanceof org.springframework.integration.core.Message);
+        Object payload = ((org.springframework.integration.core.Message)result).getPayload();
+        Assert.assertNotNull(payload);
+        //Assert.assertTrue(payload instanceof JobDefinitionDocument);
+        //Assert.assertTrue(result instanceof JobLaunchRequest);
+        //Assert.assertSame(((JobLaunchRequest) result).getJob(), dtsJob);
     }
-    */
+    
 
     /**
      * Test method for {@link org.dataminx.dts.wn.jms.DtsMessageConverter#fromMessage(javax.jms.Message)}.
@@ -142,9 +147,9 @@ public class DtsMessageConverterTest {
      * Test method for
      * {@link org.dataminx.dts.wn.jms.DtsMessageConverter#toMessage(java.lang.Object, javax.jms.Session)}.
      */
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void testToMessage() throws Exception {
-        mConverter = new DtsMessageConverter();
+        mConverter = new DtsJobSubmitMessageConverter();
         mConverter.setMarshaller(mockMarshaller);
         final Session mockSession = mock(Session.class);
 

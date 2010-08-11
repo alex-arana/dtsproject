@@ -3,46 +3,97 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-           http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
-  <!-- Enable Spring beans annotation support -->
-  <context:annotation-config/>
+    <!--
+    This config file is used in the worker node integration-tests to send messages
+    to the queues (send only). 
+    -->
 
-  <!--
+
+    <!-- Enable Spring beans annotation support -->
+    <context:annotation-config/>
+
+    <!--
     Enable automatic classpath scanning.
     NOTE: exclude from scanning any types causing auto-wiring errors and which we
     don't care to mock for the purposes of testing.
-  -->
-  <context:component-scan base-package="org.dataminx.dts">
-    <context:exclude-filter type="assignable" expression="org.dataminx.dts.batch.service.FileCopyingServiceImpl"/>
-  </context:component-scan>
+     -->
+    <context:component-scan base-package="org.dataminx.dts">
+        <context:exclude-filter type="assignable" expression="org.dataminx.dts.batch.service.FileCopyingServiceImpl"/>
+    </context:component-scan>
 
-  <bean id="applicationProperties"
-        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    <property name="locations">
-      <list>
-        <value>file:///${dataminx.dir}/dts-workernode.properties</value>
-        <value>file:///${dataminx.dir}/dts-bulkcopyjob.properties</value>
-      </list>
-    </property>
-    <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
-    <property name="ignoreUnresolvablePlaceholders" value="false"/>
-    <property name="order" value="1"/>
-  </bean>
-  
-  <!-- The task executor used by the Job Launcher specific to this module -->
-  <bean id="jobLauncherTaskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
- 
-  <bean id="jobQueueSender" class="org.dataminx.dts.common.jms.JobQueueSender">
-    <property name="queue" ref="jmsJobSubmitQueue"/>
-    <property name="jmsTemplate" ref="convertableJmsTemplate"/>
-  </bean>
-  <bean id="controlQueueSender" class="org.dataminx.dts.common.jms.ControlQueueSender">
-    <property name="queue" ref="jmsJobControlQueue"/>
-    <property name="jmsTemplate" ref="controlQueueConvertableJmsTemplate"/>
-  </bean>
-  <bean id="credentialStore" class="org.dataminx.dts.common.util.CredentialStoreImpl"/>
-  
+    <bean id="applicationProperties"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>file:///${dataminx.dir}/dts-workernode.properties</value>
+                <!--<value>file:///${dataminx.dir}/dts-bulkcopyjob.properties</value>-->
+            </list>
+        </property>
+        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+        <property name="ignoreUnresolvablePlaceholders" value="false"/>
+        <property name="order" value="1"/>
+    </bean>
+
+    <!-- The task executor used by the Job Launcher specific to this module -->
+    <bean id="jobLauncherTaskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
+
+    <bean id="jmsConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory">
+            <bean class="org.apache.activemq.spring.ActiveMQConnectionFactory">
+                <property name="brokerURL" value="${si.jms.brokerURL}"/>
+                <property name="userName" value="${wn.user.name}"/>
+                <property name="password" value="${wn.user.password}"/>
+            </bean>
+        </property>
+        <property name="sessionCacheSize" value="${si.jms.sessionCacheSize}"/>
+        <property name="cacheProducers" value="${si.jms.cacheProducers}"/>
+    </bean>
+
+    <bean id="jmsJobSubmitQueue" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg index="0" value="${si.jms.jobSubmitQueueName}"/>
+    </bean>
+
+    <bean id="jmsJobControlQueue" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg index="0" value="${si.jms.jobControlQueueName}"/>
+    </bean>
+
+    <!--
+    A JMSTemplate for the 'jmsSubmitQueue' that performs message converstion
+    -->
+    <bean id="jobSubmitQueueJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="jmsConnectionFactory"/>
+        <property name="defaultDestination" ref="jmsJobSubmitQueue"/>
+    </bean>
+
+    <!--
+    A JMSTemplate for the 'jmsControlQueue' that performs message converstion
+    -->
+
+    <bean id="controlQueueJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="jmsConnectionFactory"/>
+        <property name="defaultDestination" ref="jmsJobControlQueue"/>
+    </bean>
+
+    <!--
+    Used to submit to the job submit queue
+    -->
+    <bean id="jobQueueSender" class="org.dataminx.dts.common.jms.JobQueueSender">
+        <property name="queue" ref="jmsJobSubmitQueue"/>
+        <property name="jmsTemplate" ref="jobSubmitQueueJmsTemplate"/>
+    </bean>
+
+    <!--
+    Used to submit to the control queue.
+    -->
+    <bean id="controlQueueSender" class="org.dataminx.dts.common.jms.ControlQueueSender">
+        <property name="queue" ref="jmsJobControlQueue"/>
+        <property name="jmsTemplate" ref="controlQueueJmsTemplate"/>
+    </bean>
+
+    <bean id="credentialStore" class="org.dataminx.dts.common.util.CredentialStoreImpl"/>
+
 </beans>
