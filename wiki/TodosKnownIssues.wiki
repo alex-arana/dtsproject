@@ -19,7 +19,7 @@ This project is currently in Development - sorry no releases yet.
 
   * Fix the known commons-vfs-grid api bug associated with copying very large files with gridftp (this is not a bug with VFS or gridftp, rather its a bug with the commons-vfs-grid VFSUtil stuff - Dave knows about this). 
 
-  * Update the batch job to support chosen protocols. 
+  * Update the batch job so that different protocols can be selectively supported. 
 
   * Update the batch job to support gridftp put/get rather than streaming (which is default). 
 
