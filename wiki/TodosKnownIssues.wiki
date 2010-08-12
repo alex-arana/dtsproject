@@ -3,9 +3,9 @@ This project is currently in Development - sorry no releases yet.
 
 = Remaining Developer Todos =
 
-  * Change the format of the job request from the current xsd:red'd JSDL to the new DataCopy document (bulk data copy doc inspired by DMI). This will effect *all* the modules. 
+== Broker/message flow/worker node==
 
-  * Fix the known commons-vfs-grid api bug associated with copying very large files with gridftp (this is not a bug with VFS or gridftp, rather its a bug with the commons-vfs-grid VFSUtil stuff - Dave knows about this). 
+  * Change the format of the job request from the current xsd:red'd JSDL to the new DataCopy document (bulk data copy doc inspired by DMI). This will effect *all* the modules. 
 
   * Complete the message exchange between a worker node client and the worker node. No probs/issues to fix here, rather there are just remaining todos to complete the message flow. 
 
@@ -14,6 +14,10 @@ This project is currently in Development - sorry no releases yet.
   * Add an eventQueueListener (to the common module?) for worker node clients. 
 
   * We *really* need a workernode client (such as the WebService) that can submit jobs to the broker, and filter for events/status updates. Currently lacking developer effort to do this ! 
+
+== Batch Job ==
+
+  * Fix the known commons-vfs-grid api bug associated with copying very large files with gridftp (this is not a bug with VFS or gridftp, rather its a bug with the commons-vfs-grid VFSUtil stuff - Dave knows about this). 
 
   * Update the batch job to support chosen protocols. 
 
