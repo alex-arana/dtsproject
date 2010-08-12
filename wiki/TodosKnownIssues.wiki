@@ -5,7 +5,7 @@ This project is currently in Development - sorry no releases yet.
 
 == Broker/message flow/worker node==
 
-  * Change the format of the job request from the current xsd:red'd JSDL to the new DataCopy document (bulk data copy doc inspired by DMI). This will effect *all* the modules. 
+  * Change the format of the job request from the current xsd redef'd JSDL to the new DataCopy document (bulk data copy doc inspired by DMI). This will effect *all* the modules. 
 
   * Complete the message exchange between a worker node client and the worker node. No probs/issues to fix here, rather there are just remaining todos to complete the message flow. 
 
@@ -22,3 +22,5 @@ This project is currently in Development - sorry no releases yet.
   * Update the batch job to support chosen protocols. 
 
   * Update the batch job to support gridftp put/get rather than streaming (which is default). 
+
+  * Configure the batch job to persist credentials in the credentialStore (false by default). This is required in order to re-start jobs after hardware failure. 
