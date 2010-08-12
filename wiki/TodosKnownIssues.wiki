@@ -1,5 +1,4 @@
-Todos and Known Issues 
-We are currently in Development - sorry no releases yet. A number of known TODOS remain before we can provide pre-built binaries. 
+We are currently in Development - sorry no releases yet. A number of TODOS remain before we can provide pre-built binaries for more widespread deployment and testing. 
 
 = Remaining Developer Todos =
 
