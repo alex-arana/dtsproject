@@ -1,5 +1,5 @@
 Todos and Known Issues 
-This project is currently in Development - sorry no releases yet. 
+We are currently in Development - sorry no releases yet. A number of known TODOS remain before we can provide pre-built binaries. 
 
 = Remaining Developer Todos =
 
