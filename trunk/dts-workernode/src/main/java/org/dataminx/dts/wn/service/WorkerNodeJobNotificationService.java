@@ -252,21 +252,6 @@ public class WorkerNodeJobNotificationService implements JobNotificationService 
     }
 
 
-
-    
-
-    /**
-     * {@inheritDoc}
-     */
-    /*public void notifyJobProgress(final DtsFileTransferJob dtsJob,
-            final String message) {
-        // TODO Implement this method or get rid of it
-        throw new UnsupportedOperationException(
-                "Method notifyJobProgress() not yet implemented");
-    }*/
-
-
-
     /**
      * Inject a message channel template for the Job Event queue.
      * 
