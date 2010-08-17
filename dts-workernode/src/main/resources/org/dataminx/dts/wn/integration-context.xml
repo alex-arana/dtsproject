@@ -228,10 +228,11 @@
     <beans:bean id="dtsSubmitRequestHandler"
                 class="org.dataminx.dts.wn.SubmitRequestHandler">
         <beans:property name="dtsJobLauncher" ref="dtsJobLauncher"/>
+        <beans:property name="dtsWorkerNodeInformationService" ref="dtsWorkerNodeInformationService"/>
     </beans:bean>
     <service-activator input-channel="dtsJobRequests"
                        output-channel="dtsJobEvents"
-                       ref="dtsSubmitRequestHandler"/>
+                       ref="dtsSubmitRequestHandler"/> 
 
 <!--
     <beans:bean id="dtsJobRequestHandler"

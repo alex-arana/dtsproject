@@ -7,16 +7,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.dataminx.dts.batch.DtsJobLauncher;
-import org.dataminx.dts.common.ws.InvalidJobDefinitionException;
+
 import org.dataminx.schemas.dts.x2009.x07.messages.CustomFaultDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.CustomFaultType;
 import org.dataminx.schemas.dts.x2009.x07.messages.InvalidJobDefinitionFaultDocument;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
+//import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+//import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+//import org.springframework.batch.core.repository.JobRestartException;
+//import org.dataminx.dts.common.ws.InvalidJobDefinitionException;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.core.Message;
 import org.springframework.integration.core.MessageHeaders;
@@ -35,6 +36,9 @@ public class SubmitRequestHandler {
     /** A reference to the DTS specific job launcher */
     private DtsJobLauncher mDtsJobLauncher;
 
+    /** A reference to the DTS Worker Node information service. */
+    private DtsWorkerNodeInformationService mDtsWorkerNodeInformationService;
+
 
     /**
      * Handles Spring Integration messages that either wrap a valid {@link JobDefinitionDocument}
@@ -48,7 +52,7 @@ public class SubmitRequestHandler {
      * @return a Spring Integration Message used to wrap the returned document type. 
      */
     @ServiceActivator
-    public Message<?> handleControlRequest(Message<?> message) {
+    public Message<?> handleJobSubmitRequest(Message<?> message) {
         final Object submitRequest = message.getPayload();
         final MessageHeaders headers = message.getHeaders();
         // Use the spring integration correlation id as the jobID as this
@@ -72,13 +76,8 @@ public class SubmitRequestHandler {
                 while (it.hasNext()) {
                     String key = it.next();
                     Object h = headers.get(key);
-                    if (h instanceof String) {
-                        headersAsBatchJobParameters.put(key, h);
-                    } else if (h instanceof Date) {
-                        headersAsBatchJobParameters.put(key, h);
-                    } else if (h instanceof Double) {
-                        headersAsBatchJobParameters.put(key, h);
-                    } else if (h instanceof Long) {
+                    // Spring batch job parameters can only be of type String, Date, Double, Long.
+                    if (h instanceof String || h instanceof Date || h instanceof Double || h instanceof Long) {
                         headersAsBatchJobParameters.put(key, h);
                     } else {
                         if (h != null) {
@@ -91,24 +90,18 @@ public class SubmitRequestHandler {
                         }
                     }
                 }
+                // blocking / synchronous run method.
+                // TODO - update the batch job and the corresponding JobNotificationService
+                // in order to return a JobSubmitResponseDoc
                 mDtsJobLauncher.run(jobID, (JobDefinitionDocument) submitRequest, headersAsBatchJobParameters);
-                // return JobSubmitResponseDoc
-                return null; // lets return null for now until we can send a JobSubmitResponseDoc. 
+                return null; 
 
                 // TODO Will prob need to send back different error message types
-                // depending on the Exception. Currently, just send back a
-                // CustomFaultDocument
-            } catch (JobExecutionAlreadyRunningException ex) {
-                //java.util.logging.Logger.getLogger(SubmitRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
-                return this.buildAnErrorMessage(headers, ex.getMessage());
-            } catch (JobRestartException ex) {
-                //java.util.logging.Logger.getLogger(SubmitRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
-                return this.buildAnErrorMessage(headers, ex.getMessage());
-            } catch (JobInstanceAlreadyCompleteException ex) {
-                //java.util.logging.Logger.getLogger(SubmitRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
-                return this.buildAnErrorMessage(headers, ex.getMessage());
-            } catch (InvalidJobDefinitionException ex) {
-                //java.util.logging.Logger.getLogger(SubmitRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
+                // depending on the Exception. Currently, just send back CustomFaultDocument
+            } catch(Exception ex){
+                // catch all, e.g. job specific JobScopingException and Springs:
+                // JobExecutionAlreadyRunningException, JobRestartException,
+                //JobInstanceAlreadyCompleteException, InvalidJobDefinitionException
                 return this.buildAnErrorMessage(headers, ex.getMessage());
             }
 
@@ -141,8 +134,10 @@ public class SubmitRequestHandler {
             String key = iterator.next();
             SIMsgHeaders.put(key, messageHeaders.get(key).toString());
         }
-        // Not sure we need to add the worker id ? 
-        //SIMsgHeaders.put(mDtsWorkerNodeInformationService.getWorkerNodeIDMessageHeaderName(), mDtsWorkerNodeInformationService.getInstanceId());
+         // Add the worker id to the messge headers. If the job failed to submit,
+        // then this is not strictly required as no further control message would
+        // be sent for this job id, but add anyway to be consistent.
+        SIMsgHeaders.put(mDtsWorkerNodeInformationService.getWorkerNodeIDMessageHeaderName(), mDtsWorkerNodeInformationService.getInstanceId());
         GetJobStatusRequestReply.setMessage(error);
         MessageBuilder<CustomFaultDocument> msgbuilder = MessageBuilder.withPayload(document).copyHeaders(SIMsgHeaders);
         Message<CustomFaultDocument> msg = msgbuilder.build();
@@ -159,5 +154,15 @@ public class SubmitRequestHandler {
      */
     public void setDtsJobLauncher(final DtsJobLauncher jobLauncher) {
         this.mDtsJobLauncher = jobLauncher;
+    }
+
+
+    /**
+     * Set the DtsWorkerNodeInformationService.
+     *
+     * @param dtsWorkerNodeInformationService
+     */
+    public void setDtsWorkerNodeInformationService(final DtsWorkerNodeInformationService dtsWorkerNodeInformationService){
+        mDtsWorkerNodeInformationService = dtsWorkerNodeInformationService;
     }
 }
