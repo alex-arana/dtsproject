@@ -161,14 +161,14 @@ public class DtsJobLauncher extends SimpleJobLauncher {
                 } else if (addObject instanceof Double) {
                     builder.addDouble(key, (Double) addObject);
                 } else {
-                    throw new IllegalArgumentException("headersToAddToBatchParams type is not String, Date, Double or Long.");
+                    throw new IllegalArgumentException("headersToAddToBatchParams ["+key+"]: its type is not String, Date, Double or Long.");
                 }
             }
         }
 
         // finally convert the builder to params
-        final JobParameters paras = builder.toJobParameters();
-        return run(dtsJob, paras);
+        final JobParameters params = builder.toJobParameters();
+        return run(dtsJob, params);
     }
 
     /**

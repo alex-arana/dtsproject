@@ -30,6 +30,7 @@ public class TestUtils {
         // Maven's properties that can be converted to String value !!
         // can therefore specify the -Ddataminx.dir=/path/to/dataminx/dir on the
         // command line when running tests
+        try{
         if (!System.getProperties().containsKey(DtsConstants.DATAMINX_CONFIGURATION_KEY)) {
             throw new IllegalStateException("Please specify full path of your dataminx.dir using: " +
                     "'mvn -Ddataminx.dir=/full/path/to/.dataminx.dir test'");
@@ -54,6 +55,10 @@ public class TestUtils {
              throw new IllegalStateException(
             String.format(" Invalid testfiles folder: '%s'.  Please unpack the 'testfiles.zip' resource in your home directory to run tests",
                     testFilesDir.getAbsolutePath()));
+        }
+        }catch(IllegalStateException ex ){
+            throw new IllegalStateException("=================================================================\n"
+                    +ex.getMessage()+"\n=================================================================");
         }
 
     }

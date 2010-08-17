@@ -99,13 +99,4 @@ public interface JobNotificationService {
     void notifyStepFailures(String jobId, StepExecution stepExecution);
 
 
-
-     /**
-     * Posts a message on the Job Event queue informing of the progress in a currently active DTS operation.
-     *
-     * @param dtsJob An active DTS Job instance
-     * @param message A progress message to send
-     */
-    //void notifyJobProgress(DtsFileTransferJob dtsJob, String message);
-
 }
