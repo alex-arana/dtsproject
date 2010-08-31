@@ -50,7 +50,7 @@ import org.dataminx.dts.common.jms.DtsMessagePayloadTransformer;
 import org.dataminx.dts.common.util.CredentialStoreImpl;
 import org.dataminx.dts.common.validator.DtsJobDefinitionValidator;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.batch.integration.launch.JobLaunchRequest;

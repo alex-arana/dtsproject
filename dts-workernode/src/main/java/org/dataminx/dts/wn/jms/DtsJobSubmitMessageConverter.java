@@ -52,8 +52,10 @@ import org.dataminx.dts.common.xml.ByteArrayResult;
 import org.dataminx.schemas.dts.x2009.x07.messages.InvalidJobDefinitionFaultDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.InvalidJobDefinitionFaultType;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.message.MessageBuilder;
@@ -103,7 +105,7 @@ public class DtsJobSubmitMessageConverter extends SimpleMessageConverter {
      *
      * @param message the input jms message
      * @return a {@link org.springframework.integration.core.Message}. The message body
-     *  contains either a {@link JobDefinitionDocument} or a @{link InvalidJobDefinitionFaultDocument}
+     *  contains either a {@link DataCopyActivityDocument} or a @{link InvalidJobDefinitionFaultDocument}
      *  depending on whether the given jms message wraps a vaild {@link JobDefinitionDocument}.
      *  All the jms headers are copied into the returned Message headers.
      *  Since this converter is jms specific, both the {@link org.springframework.integration.jms.JmsHeaders.CORRELATION_ID}
@@ -155,10 +157,15 @@ public class DtsJobSubmitMessageConverter extends SimpleMessageConverter {
                 throw new Exception("Invaild XML Payload: SubmitJobRequestDocument expected");
             }
             SubmitJobRequestDocument doc = (SubmitJobRequestDocument) expectedXML;
-            JobDefinitionType jobdeftype = doc.getSubmitJobRequest().getJobDefinition();
-            JobDefinitionDocument ourdoc = JobDefinitionDocument.Factory.newInstance();
-            ourdoc.setJobDefinition(jobdeftype);
-            final MessageBuilder<JobDefinitionDocument> msgbuilder = MessageBuilder.withPayload(ourdoc).copyHeaders(jmsMsgHeaders);
+            DataCopyActivityType datacopytype = doc.getSubmitJobRequest().getDataCopyActivity();
+            DataCopyActivityDocument ourdoc = DataCopyActivityDocument.Factory.newInstance();
+            ourdoc.setDataCopyActivity(datacopytype);
+            final MessageBuilder<DataCopyActivityDocument> msgbuilder = MessageBuilder.withPayload(ourdoc).copyHeaders(jmsMsgHeaders);
+
+            //JobDefinitionType jobdeftype = doc.getSubmitJobRequest().getJobDefinition();
+            //JobDefinitionDocument ourdoc = JobDefinitionDocument.Factory.newInstance();
+            //ourdoc.setJobDefinition(jobdeftype);
+            //final MessageBuilder<JobDefinitionDocument> msgbuilder = MessageBuilder.withPayload(ourdoc).copyHeaders(jmsMsgHeaders);
             return msgbuilder.build();
 
         } catch (final Exception e) {

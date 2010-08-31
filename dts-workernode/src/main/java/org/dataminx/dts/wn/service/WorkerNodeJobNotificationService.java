@@ -39,7 +39,9 @@ import org.dataminx.dts.batch.DtsFileTransferJob;
 import org.dataminx.dts.batch.service.JobNotificationService;
 import org.dataminx.dts.common.model.JobStatus;
 import org.dataminx.dts.wn.DtsWorkerNodeInformationService;
-import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.StatusValueType;
+
+/*import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument;
 import org.dataminx.schemas.dts.x2009.x07.jms.FireUpStepFailureEventDocument;
 import org.dataminx.schemas.dts.x2009.x07.jms.JobErrorEventDetailType;
 import org.dataminx.schemas.dts.x2009.x07.jms.JobEventDetailType;
@@ -48,6 +50,16 @@ import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument.FireUp
 import org.dataminx.schemas.dts.x2009.x07.jms.FireUpStepFailureEventDocument.FireUpStepFailureEvent;
 import org.dataminx.schemas.dts.x2009.x07.jms.JobEventUpdateRequestDocument.JobEventUpdateRequest;
 import org.ogf.schemas.dmi.x2008.x05.dmi.StatusValueType;
+ *
+ */import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.FireUpJobErrorEventDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.FireUpJobErrorEventDocument.FireUpJobErrorEvent;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.FireUpStepFailureEventDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.FireUpStepFailureEventDocument.FireUpStepFailureEvent;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.JobErrorEventDetailType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.JobEventDetailType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.JobEventUpdateRequestDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.JobEventUpdateRequestDocument.JobEventUpdateRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
