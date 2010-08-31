@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DataCopyActivity xmlns="http://schemas.dmi.proposal.org/dts/2010/dmi-common"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://schemas.dmi.proposal.org/dts/2010/dmi-common dmi-common.xsd">
+    <DataCopyActivityRequirements>
+        <StartNotBefore>2006-05-04T18:13:51.0Z</StartNotBefore>
+        <EndNoLaterThan>2006-05-04T18:13:51.0Z</EndNoLaterThan>
+        <StayAliveTime>214748364</StayAliveTime>
+        <MaxAttempts>1</MaxAttempts>
+    </DataCopyActivityRequirements>
+    <Copy>
+        <Source>
+            <Data>
+                <DataUrl>file://@home.dir.replacement@/testfiles/dir-with-9files/test01MB-0.bin</DataUrl>
+                <Credentials>
+                   <MyProxyToken>
+                        <MyProxyUsername>dave</MyProxyUsername>
+                        <MyProxyPassword>password</MyProxyPassword>
+                        <MyProxyServer>myproxy.ngs.ac.uk</MyProxyServer>
+                        <MyProxyPort>443</MyProxyPort>
+                    </MyProxyToken>
+                </Credentials>
+            </Data>
+        </Source>
+        <Sink>
+            <Data>
+                <DataUrl>tmp://</DataUrl>
+            </Data>
+        </Sink>
+        <CopyRequirements>
+            <CreationFlag>overwrite</CreationFlag>
+        </CopyRequirements>
+    </Copy>
+    
+</DataCopyActivity>

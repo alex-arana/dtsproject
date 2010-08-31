@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://schemas.dmi.proposal.org/dts/2010/dmi-common"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:dmi2="http://schemas.dmi.proposal.org/dts/2010/dmi-common"
+    xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    elementFormDefault="qualified" version="1">
+
+<xsd:import namespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+            schemaLocation="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"/>
+
+
+<!--
+Need to add these back in when binding - netbeans xml stuff can't cope with
+the remote schema locations !
+
+xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+
+<xsd:import namespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+            schemaLocation="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"/>
+-->
+
+
+
+    <xsd:element name="DataCopyActivity" type="dmi2:DataCopyActivityType">
+        <xsd:annotation>
+            <xsd:documentation>This element is the root element for bulk data copy activites. It wraps one or more Copy elements.</xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="DataCopyActivityRequirements" type="dmi2:DataCopyActivityRequirementsType">
+        <xsd:annotation>
+            <xsd:documentation>This element is used to define the requirements for the whole data copy activty, not for each distinct (sub) DataCopy element. </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="Copy" type="dmi2:CopyType"/>
+    <xsd:element name="CopyRequirements" type="dmi2:CopyRequirementsType"/>
+    <xsd:element name="Source" type="dmi2:DataLocationsType"/>
+    <xsd:element name="Sink" type="dmi2:DataLocationsType"/>
+    <!--
+    <xsd:element name="idRef">
+        <xsd:annotation>
+            <xsd:documentation>This element is used as a placeholder in order to reference other (e.g. shared) elements. </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:attribute name="idref" type="xsd:IDREF" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+    -->
+    
+    <xsd:element name="JobResourceKey" type="xsd:anyURI"/>
+    <xsd:element name="URIProperties" abstract="true"/>
+    <xsd:element name="IrodsURIProperties" type="dmi2:IrodsURIPropertiesType"
+        substitutionGroup="dmi2:URIProperties"/>
+    <xsd:element name="GridFtpURIProperties" type="dmi2:GridFtpURIPropertiesType"
+        substitutionGroup="dmi2:URIProperties"/>
+    <xsd:element name="SrbURIProperties" type="dmi2:SrbURIPropertiesType"
+        substitutionGroup="dmi2:URIProperties"/>
+    <xsd:element name="PortRange" type="dmi2:PortRangeType"/>
+
+
+
+
+
+
+
+    <!--========================================================================-->
+    <xsd:element name="CreationFlag" type="dmi2:CreationFlagEnumeration"/>
+    <xsd:complexType name="DataCopyActivityType">
+        <xsd:sequence>
+            <!--<xsd:element name="SharedDefinitions" type="dmi2:SharedDefinitionsType" minOccurs="0"
+                maxOccurs="1"/>-->
+            <xsd:element ref="dmi2:DataCopyActivityRequirements" minOccurs="0" maxOccurs="1"/>
+            <xsd:element ref="dmi2:Copy" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="name"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+    <xsd:complexType name="DataCopyActivityRequirementsType">
+        <xsd:annotation>
+            <xsd:documentation>
+                A client may specify a number of constraints to the data
+                transfer such as start and end time (e.g. when resource
+                reservations have been made).
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="StartNotBefore" type="xsd:dateTime" minOccurs="0"/>
+            <xsd:element name="EndNoLaterThan" type="xsd:dateTime" minOccurs="0"/>
+            <xsd:element name="StayAliveTime" type="xsd:unsignedInt" minOccurs="0"/>
+            <xsd:element name="MaxAttempts" type="xsd:unsignedInt" minOccurs="0"/>
+            <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+    
+    
+    <!--
+    <xsd:complexType name="SharedDefinitionsType">
+        <xsd:annotation>
+            <xsd:documentation>This type is used to wrap shared element definitions that can be subsequently referenced in other places of the document. This reduces the amount of XML. </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element ref="dmi2:Copy" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element ref="dmi2:CopyRequirements" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element ref="dmi2:Source" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element ref="dmi2:Sink" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element ref="dmi2:URIProperties" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:any processContents="lax" minOccurs="0" maxOccurs="unbounded" namespace="##other"/>
+        </xsd:sequence>
+        <xsd:anyAttribute processContents="lax"/>
+    </xsd:complexType>
+    -->
+
+    <xsd:complexType name="CopyType">
+        <xsd:sequence>
+            <xsd:element name="Source" type="dmi2:DataLocationsType"/>
+            <xsd:element name="Sink" type="dmi2:DataLocationsType"/>
+            <xsd:element ref="dmi2:CopyRequirements" minOccurs="0" maxOccurs="1"/>
+            <!--
+            <xsd:choice>
+                <xsd:element name="Source" type="dmi2:DataLocationsType"/>
+                <xsd:element ref="dmi2:idRef"/>
+            </xsd:choice>
+            <xsd:choice>
+                <xsd:element name="Sink" type="dmi2:DataLocationsType"/>
+                <xsd:element ref="dmi2:idRef"/>
+            </xsd:choice>
+            <xsd:choice>
+                <xsd:element ref="dmi2:CopyRequirements" minOccurs="0" maxOccurs="1"/>
+                <xsd:element ref="dmi2:idRef"/>
+            </xsd:choice>
+            -->
+            <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:ID" use="optional"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+
+
+    <xsd:complexType name="CopyRequirementsType">
+        <xsd:sequence>
+            <xsd:element ref="dmi2:CreationFlag" minOccurs="0" maxOccurs="1"/>
+            <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:ID" use="optional"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+
+    <xsd:simpleType name="CreationFlagEnumeration">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="overwrite"/>
+            <xsd:enumeration value="append"/>
+            <xsd:enumeration value="dontOverwrite"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- 
+        dmi:DataLocations
+    -->
+    <xsd:complexType name="DataLocationsType">
+        <xsd:annotation>
+            <xsd:documentation>
+                This element serves as a container aggregating one or more
+                dmi:Data elements.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <!-- Important, TODO in future, Data should have maxOccurs="unbounded" in order to 
+            define alternative locations for the data -->
+            <xsd:element name="Data" type="dmi2:DataType" maxOccurs="1"/>
+            <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:ID" use="optional"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+    <!--<xsd:element name="DataLocations" type="dmi:DataLocationsType"/>-->
+
+    <!--
+        dmi:Data
+    -->
+    <xsd:complexType name="DataType">
+        <xsd:annotation>
+            <xsd:documentation>
+                The dmi:Data element describes for each data transfer protocol
+                (using the normalised values defined for dmi:SupportedProtocol)
+                the specific information that must be used to access the data.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="DataUrl" type="xsd:anyURI" minOccurs="0"/>
+            <xsd:element name="ProtocolUri" type="xsd:anyURI" minOccurs="0" maxOccurs="1"/>
+            <xsd:element ref="dmi2:URIProperties" minOccurs="0" maxOccurs="1"/>
+            <!-- TODO
+            <xsd:choice>
+                <xsd:element ref="dmi2:URIProperties" minOccurs="0" maxOccurs="1"/>
+                <xsd:element ref="dmi2:idRef" minOccurs="0" maxOccurs="1"/>
+            </xsd:choice>
+            -->
+            <xsd:element name="Credentials" type="dmi2:CredentialType" minOccurs="0" maxOccurs="1"/>
+            <!-- TODO use dmi2:Credentials rather than dmi2:CredentialsType-->
+            <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="name"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+
+
+    <xsd:complexType name="CredentialType">
+        <xsd:choice>
+            <xsd:element ref="wsse:UsernameToken"/>
+            <xsd:element ref="dmi2:MyProxyToken"/>
+            <xsd:element ref="dmi2:OtherCredentialToken"/>
+        </xsd:choice>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+    
+
+    <!--
+        dmi:Credentials
+    -->
+    <!--
+    <xsd:complexType name="CredentialsType">
+        <xsd:annotation>
+            <xsd:documentation>
+                Credentials in OGSA-DMI are used to describe the security
+                related information elements that are necessary to invoke a
+                data transfer using a specific transport protocol. This element 
+                does not define any normative structure so that OGSA-DMI can be
+                orthogonally composed with security infrastructures.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:any minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+    -->
+
+
+
+
+    <xsd:complexType name="MyProxyTokenType">
+        <xsd:annotation>
+            <xsd:documentation>
+                Information that needs to be provided to get a user's credential
+                from MyProxy
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="MyProxyUsername" type="xsd:string"/>
+            <xsd:element name="MyProxyPassword" type="xsd:string"/>
+            <xsd:element name="MyProxyServer" type="xsd:string"/>
+            <xsd:element name="MyProxyPort" type="xsd:int" default="7512"/>
+            <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:ID" use="optional"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+    <xsd:element name="MyProxyToken" type="dmi2:MyProxyTokenType"/>
+
+
+    
+    <xsd:complexType name="OtherCredentialTokenType">
+        <xsd:annotation>
+            <xsd:documentation>
+                A wrapper for credential tokens that are not specified in the
+                Credential element. This is also a workaround so we don't get this
+                error message
+
+                cos-nonambig: wsse:UsernameToken and WC During validation against this
+                schema, ambiguity would be created for those two particles.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+    <xsd:element name="OtherCredentialToken" type="dmi2:OtherCredentialTokenType" />
+
+
+
+    
+
+
+
+    <xsd:complexType name="GridFtpURIPropertiesType">
+        <xsd:sequence>
+            <xsd:element name="PortRange" type="dmi2:PortRangeType" minOccurs="0"/>
+            <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:ID" use="optional"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="PortRangeType">
+        <xsd:sequence>
+            <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:ID" use="optional"/>
+        <xsd:attribute name="RangeMin" type="xsd:int" use="required"/>
+        <xsd:attribute name="RangeMax" type="xsd:int" use="required"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+
+
+    <xsd:complexType name="SrbURIPropertiesType">
+        <xsd:sequence>
+            <xsd:element name="MdasDomainHome" type="xsd:string" minOccurs="1"/>
+            <xsd:element name="MdasCollectionHome" type="xsd:string" minOccurs="1"/>
+            <xsd:element name="ServerDN" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="DefaultResource" type="xsd:string" minOccurs="0"/>
+            <!-- <xsd:element name="PortRange" type="dmi2:PortRangeType" minOccurs="0" />-->
+            <xsd:element name="McatZone" type="xsd:string" minOccurs="0"/>
+            <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:ID" use="optional"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="IrodsURIPropertiesType">
+        <xsd:sequence>
+            <xsd:element name="IrodsHome" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="IrodsCwd" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="IrodsServerDN" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="IrodsDefaultResource" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="IrodsZone" type="xsd:string" minOccurs="1"/>
+            <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:ID" use="optional"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+
+
+
+
+    <!-- 
+        dmi:TransferRequirements
+    -->
+
+
+
+  <!--
+    dmi:Detail
+  -->
+  <xsd:complexType name="DetailType">
+    <xsd:annotation>
+      <xsd:documentation>
+        The StateDetail is an extension element that an implementation
+        may use to provide proprietary information.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:element name="Detail" type="dmi2:DetailType"/>
+
+  <!--
+    dmi:StatusValue
+  -->
+  <xsd:simpleType name="StatusValueType">
+    <xsd:annotation>
+      <xsd:documentation>
+        This enumeration lists all possible values for the
+        dmi:Status/@value attribute.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="Created"/>
+      <xsd:enumeration value="Scheduled"/>
+      <xsd:enumeration value="Transferring"/>
+      <xsd:enumeration value="Done"/>
+      <xsd:enumeration value="Suspended"/>
+      <xsd:enumeration value="Failed"/>
+      <xsd:enumeration value="Failed:Clean"/>
+      <xsd:enumeration value="Failed:Unclean"/>
+      <xsd:enumeration value="Failed:Unknown"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <!--
+    dmi:State
+  -->
+  <xsd:complexType name="StateType">
+    <xsd:annotation>
+      <xsd:documentation>
+        The status describes the current configuration of the Data
+        Transfer Instance within its lifetime.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="Detail" type="dmi2:DetailType" minOccurs="0"/>
+    </xsd:sequence>
+    <xsd:attribute name="value" type="dmi2:StatusValueType"/>
+  </xsd:complexType>
+  <xsd:element name="State" type="dmi2:StateType"/>
+
+
+
+</xsd:schema>
