@@ -11,7 +11,8 @@ import org.dataminx.dts.batch.DtsJobLauncher;
 import org.dataminx.schemas.dts.x2009.x07.messages.CustomFaultDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.CustomFaultType;
 import org.dataminx.schemas.dts.x2009.x07.messages.InvalidJobDefinitionFaultDocument;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -65,7 +66,7 @@ public class SubmitRequestHandler {
             jobID = (String) headers.getCorrelationId();
         }
 
-        if (submitRequest instanceof JobDefinitionDocument) {
+        if (submitRequest instanceof DataCopyActivityDocument) {
             LOG.debug("Submit job for: " + jobID);
             try {
                 // Spring batch job parameters can only be of type String, Date, Double, Long.
@@ -93,7 +94,7 @@ public class SubmitRequestHandler {
                 // blocking / synchronous run method.
                 // TODO - update the batch job and the corresponding JobNotificationService
                 // in order to return a JobSubmitResponseDoc
-                mDtsJobLauncher.run(jobID, (JobDefinitionDocument) submitRequest, headersAsBatchJobParameters);
+                mDtsJobLauncher.run(jobID, (DataCopyActivityDocument) submitRequest, headersAsBatchJobParameters);
                 return null; 
 
                 // TODO Will prob need to send back different error message types

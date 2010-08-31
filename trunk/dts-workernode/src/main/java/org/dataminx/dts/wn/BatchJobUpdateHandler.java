@@ -7,7 +7,8 @@ import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_SUBMIT_JOB_
 import java.util.List;
 
 import org.dataminx.dts.batch.common.util.ExecutionContextCleaner;
-import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument;
+//import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.FireUpJobErrorEventDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
