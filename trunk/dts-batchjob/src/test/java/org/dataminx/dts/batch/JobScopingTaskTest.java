@@ -16,8 +16,9 @@ import java.util.UUID;
 
 import org.dataminx.dts.batch.service.JobNotificationService;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityType;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -85,7 +86,7 @@ public class JobScopingTaskTest {
         when(mChunkContext.getStepContext()).thenReturn(stepContext);
         when(
             mJobPartitioningStrategy.partitionTheJob(
-                (JobDefinitionType) anyObject(), anyString(), anyString()))
+                (DataCopyActivityType) anyObject(), anyString(), anyString()))
             .thenReturn(dtsJobDetails);
 
         final RepeatStatus taskStatus = jobScopingTask.execute(null,

@@ -94,28 +94,17 @@ public class DtsJobFactoryImpl implements DtsJobFactory, BeanFactoryAware {
             throw new DtsJobCreationException(message);
         }
 
-        // TODO: Maybe? (only an idea so far...)
+        // Create a new instance of the job using the spring bean factory.
+        // (getBean(...) returns an instance, which may be shared or independent, 
+        // of the specified bean and allows for specifying explicit constructor 
+        // arguments / factory method arguments, overriding the specified 
+        // default arguments (if any) in the bean definition.
         //
-        // Prior to creating the DtsJob replace the children
-        // of the <Credential> elements with new CredentialType
-        // elements that are used to hold pointer/reference values
-        // to the credentials (e.g. <CredentialReference/>).
-        // We could then use a new service (e.g. CredentialStoreImpl)
-        // to get/put credentials in/out of a credential store. We could
-        // provide both persistent and non-persistent (hashmap)
-        // implementations at runtime as required depending on the request.
-        //
-        // The same CredentialStoreImpl could be passed-in as a constructor arg
-        // or injected into the DtsFileTransferJob (below).
-        //
-        // This service would provide a lookup method for resolving
-        // the credentials from a given <CredentialReference> value.
-        // The spring batch job could use this to resolve the creds.
-
-        // create a new instance of the job using the spring bean factory
+        // String name - the name of the bean to retrieve
+        // Object[] args - arguments to use if creating a prototype using
+        // explicit arguments to a contstructor or static factory method.
         return (DtsFileTransferJob) mBeanFactory.getBean(dtsJobName,
-            new Object[] {jobId, tag, criteria, mJobRepository,
-                mCredentialStore});
+            new Object[] {jobId, tag, criteria, mJobRepository, mCredentialStore});
     }
 
     /**

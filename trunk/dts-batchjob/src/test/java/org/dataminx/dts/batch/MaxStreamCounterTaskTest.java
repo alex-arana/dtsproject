@@ -13,10 +13,12 @@ import org.apache.commons.vfs.impl.DefaultFileSystemManager;
 //import org.dataminx.dts.common.batch.util.FileObjectMap;
 import org.dataminx.dts.common.vfs.DtsVfsUtil;
 import org.dataminx.dts.common.vfs.FileSystemManagerCache;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CopyType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityDocument;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.core.io.ClassPathResource;
 import org.testng.annotations.BeforeClass;
@@ -66,7 +68,7 @@ public class MaxStreamCounterTaskTest {
         //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
-        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        final DataCopyActivityDocument dtsJob = TestUtils.getTestDataCopyActivityDocument(f);
 
         DtsVfsUtil dtsVfsUtil = new DtsVfsUtil();
         /*dtsVfsUtil.setFtpSupported(false);
@@ -77,12 +79,11 @@ public class MaxStreamCounterTaskTest {
         dtsVfsUtil.setFileSupported(true);
         dtsVfsUtil.setTmpDirPath(System.getProperty("java.io.tmpdir"));*/
 
-        MinxJobDescriptionType minx = (MinxJobDescriptionType) dtsJob.getJobDefinition().getJobDescription();
-        assertTrue(minx.getDataTransferArray().length == 1);
-        DataTransferType transers[] = minx.getDataTransferArray();
+        assertTrue(dtsJob.getDataCopyActivity().getCopyArray().length == 1);
+        CopyType transers[] = dtsJob.getDataCopyActivity().getCopyArray();
 
-        String sourceUri = transers[0].getSource().getURI();
-        String targetUri = transers[0].getTarget().getURI();
+        String sourceUri = transers[0].getSource().getData().getDataUrl();
+        String targetUri = transers[0].getSink().getData().getDataUrl();
         DefaultFileSystemManager fsMan = dtsVfsUtil.createNewFsManager();
         String sourceRootURL = fsMan.resolveFile(sourceUri).getFileSystem().getRoot().getURL().toString();
         String targetRootURL = fsMan.resolveFile(targetUri).getFileSystem().getRoot().getURL().toString();
@@ -116,8 +117,8 @@ public class MaxStreamCounterTaskTest {
         maxStreamCounterTask.setDtsJobDetails(mockDtsJobDetails);
 
         // mokito objects here
-        when(mockSubmitJobRequest.getJobDefinition()).thenReturn(
-            dtsJob.getJobDefinition());
+        when(mockSubmitJobRequest.getDataCopyActivity()).thenReturn(
+            dtsJob.getDataCopyActivity());
 
         when(mockDtsJobDetails.getSourceTargetMaxTotalFilesToTransfer())
             .thenReturn(sourceTargetMaxTotalFilesToTransfer);
@@ -159,16 +160,16 @@ public class MaxStreamCounterTaskTest {
         //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
-        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        final DataCopyActivityDocument dtsJob = TestUtils.getTestDataCopyActivityDocument(f);
 
         DtsVfsUtil dtsVfsUtil = new DtsVfsUtil();
 
-        MinxJobDescriptionType minx = (MinxJobDescriptionType) dtsJob.getJobDefinition().getJobDescription();
-        assertTrue(minx.getDataTransferArray().length == 1);
-        DataTransferType transers[] = minx.getDataTransferArray();
+        //MinxJobDescriptionType minx = (MinxJobDescriptionType) dtsJob.getJobDefinition().getJobDescription();
+        assertTrue(dtsJob.getDataCopyActivity().getCopyArray().length == 1);
+        CopyType transers[] = dtsJob.getDataCopyActivity().getCopyArray();
 
-        String sourceUri = transers[0].getSource().getURI();
-        String targetUri = transers[0].getTarget().getURI();
+        String sourceUri = transers[0].getSource().getData().getDataUrl();
+        String targetUri = transers[0].getSink().getData().getDataUrl();
         DefaultFileSystemManager fsMan = dtsVfsUtil.createNewFsManager();
         String sourceRootURL = fsMan.resolveFile(sourceUri).getFileSystem().getRoot().getURL().toString();
         String targetRootURL = fsMan.resolveFile(targetUri).getFileSystem().getRoot().getURL().toString();
@@ -194,8 +195,8 @@ public class MaxStreamCounterTaskTest {
         maxStreamCounterTask.setDtsJobDetails(mockDtsJobDetails);
 
         // mokito objects here
-        when(mockSubmitJobRequest.getJobDefinition()).thenReturn(
-            dtsJob.getJobDefinition());
+        when(mockSubmitJobRequest.getDataCopyActivity()).thenReturn(
+            dtsJob.getDataCopyActivity());
 
         when(mockDtsJobDetails.getSourceTargetMaxTotalFilesToTransfer())
             .thenReturn(sourceTargetMaxTotalFilesToTransfer);

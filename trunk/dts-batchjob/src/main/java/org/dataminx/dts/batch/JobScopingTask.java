@@ -100,7 +100,7 @@ public class JobScopingTask implements Tasklet, StepExecutionListener,
 
         // partition the job and return partitioning results in the jobDetails
         final DtsJobDetails jobDetails = mJobPartitioningStrategy
-            .partitionTheJob(mSubmitJobRequest.getJobDefinition(),
+            .partitionTheJob(mSubmitJobRequest.getDataCopyActivity(),
                 mJobResourceKey, mJobTag);
 
         final StepContext stepContext = chunkContext.getStepContext();

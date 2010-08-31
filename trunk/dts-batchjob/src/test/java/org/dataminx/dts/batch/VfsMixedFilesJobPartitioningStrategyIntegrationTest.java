@@ -14,7 +14,8 @@ import org.apache.xmlbeans.XmlException;
 import org.dataminx.dts.batch.common.DtsBatchJobConstants;
 import org.dataminx.dts.common.DtsConstants;
 import org.dataminx.dts.common.vfs.DtsVfsUtil;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
@@ -68,14 +69,14 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-20files.xml").getFile();
 
-        final JobDefinitionDocument mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        final DataCopyActivityDocument mDtsJob = TestUtils.getTestDataCopyActivityDocument(f);
 
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(2);
         final String jobId = UUID.randomUUID().toString();
         final String jobTag = jobId;
         final DtsJobDetails jobDetails = mPartitioningStrategy.partitionTheJob(
-            mDtsJob.getJobDefinition(), jobId, jobTag);
+            mDtsJob.getDataCopyActivity(), jobId, jobTag);
 
         assertNotNull(jobDetails);
         assertEquals(jobDetails.getTotalBytes(), 30408704);
@@ -95,7 +96,7 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
         //final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-9files.xml").getFile();
-        final JobDefinitionDocument mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        final DataCopyActivityDocument mDtsJob = TestUtils.getTestDataCopyActivityDocument(f);
 
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
         mPartitioningStrategy
@@ -103,7 +104,7 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
         final String jobId = UUID.randomUUID().toString();
         final String jobTag = jobId;
         final DtsJobDetails jobDetails = mPartitioningStrategy.partitionTheJob(
-            mDtsJob.getJobDefinition(), jobId, jobTag);
+            mDtsJob.getDataCopyActivity(), jobId, jobTag);
 
         assertNotNull(jobDetails);
         assertEquals(jobDetails.getJobSteps().size(), expectedNumOfSteps);
@@ -120,7 +121,7 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
         //final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-mixedfiles.xml").getFile();
-        final JobDefinitionDocument mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        final DataCopyActivityDocument mDtsJob = TestUtils.getTestDataCopyActivityDocument(f);
 
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_1MB);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(3);
@@ -128,7 +129,7 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
         final String jobTag = jobId;
         // expect to throw a JobScopingException
         mPartitioningStrategy.partitionTheJob(
-                mDtsJob.getJobDefinition(), jobId, jobTag);
+                mDtsJob.getDataCopyActivity(), jobId, jobTag);
       
     }
 
@@ -141,14 +142,14 @@ public class VfsMixedFilesJobPartitioningStrategyIntegrationTest extends
         //final JobDefinitionDocument mDtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-mixedfiles.xml").getFile();
-        final JobDefinitionDocument mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        final DataCopyActivityDocument mDtsJob = TestUtils.getTestDataCopyActivityDocument(f);
  
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(3);
         final String jobId = UUID.randomUUID().toString();
         final String jobTag = jobId;
         final DtsJobDetails jobDetails = mPartitioningStrategy.partitionTheJob(
-            mDtsJob.getJobDefinition(), jobId, jobTag);
+            mDtsJob.getDataCopyActivity(), jobId, jobTag);
 
         assertNotNull(jobDetails);
         assertEquals(jobDetails.getJobSteps().size(), 5);

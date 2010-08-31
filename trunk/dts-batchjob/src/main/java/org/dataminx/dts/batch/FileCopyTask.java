@@ -50,9 +50,10 @@ import org.dataminx.dts.common.vfs.UnknownFileSystemManagerException;
 import org.dataminx.dts.common.vfs.UnknownRootFileObjectException;
 import org.dataminx.dts.security.crypto.DummyEncrypter;
 import org.dataminx.dts.security.crypto.Encrypter;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CopyType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -194,17 +195,19 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
                     + dataTransferUnit.getSourceFileUri() + " to "
                     + dataTransferUnit.getDestinationFileUri());
 
-                final DataTransferType dataTransfer = ((MinxJobDescriptionType) mSubmitJobRequest
+                /*final DataTransferType dataTransfer = ((MinxJobDescriptionType) mSubmitJobRequest
                     .getJobDefinition().getJobDescription())
                     .getDataTransferArray(dataTransferUnit
                         .getDataTransferIndex());
+                 */
+                final CopyType dataCopy = mSubmitJobRequest.getDataCopyActivity().getCopyArray(dataTransferUnit.getDataTransferIndex());
 
                 try {
                     // once we get to this point, we can safely assume that we have successfully authenticated and are
                     // authorised to access the files specified in the DTS job definition document.
                     mFileCopyingService.copyFiles(dataTransferUnit
                         .getSourceFileUri(), dataTransferUnit
-                        .getDestinationFileUri(), dataTransfer,
+                        .getDestinationFileUri(), dataCopy,
                         mSourceFileSystemManager, mTargetFileSystemManager);
 
                     // the only reason why the call to copyFile would fail might be due to a DtsException (a descendent
@@ -222,8 +225,8 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
                 try {
                     mBatchVolumeSize += mSourceFileSystemManager.resolveFile(
                         dataTransferUnit.getSourceFileUri(),
-                        mDtsVfsUtil.getFileSystemOptions(dataTransfer
-                            .getSource(), mEncrypter)).getContent().getSize();
+                        mDtsVfsUtil.getFileSystemOptions(
+                        dataCopy.getSource(), mEncrypter)).getContent().getSize();
                 }
                 catch (final FileSystemException e) {
                     LOGGER_FC.debug(

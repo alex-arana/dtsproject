@@ -45,10 +45,11 @@ import org.dataminx.dts.common.vfs.FileSystemManagerCache;
 import org.dataminx.dts.common.vfs.FileSystemManagerCacheAlreadyInitializedException;
 import org.dataminx.dts.security.crypto.DummyEncrypter;
 import org.dataminx.dts.security.crypto.Encrypter;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CopyType;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -213,26 +214,28 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
 
             // TODO: have this step rerun if it fails... use the user's provided info
 
-            final List<DataTransferType> dataTransfers = new ArrayList<DataTransferType>();
-
+            /*final List<DataTransferType> dataTransfers = new ArrayList<DataTransferType>();
             final JobDescriptionType jobDescription = mSubmitJobRequest.getJobDefinition().getJobDescription();
             if (jobDescription instanceof MinxJobDescriptionType) {
                 final MinxJobDescriptionType minxJobDescription = (MinxJobDescriptionType) jobDescription;
                 CollectionUtils.addAll(dataTransfers, minxJobDescription.getDataTransferArray());
-            }
+            }*/
+            final List<CopyType> dataTransfers = new ArrayList<CopyType>();
+            CollectionUtils.addAll(dataTransfers, mSubmitJobRequest.getDataCopyActivity().getCopyArray());
+
             if (CollectionUtils.isEmpty(dataTransfers)) {
                 LOGGER.warn("DTS job request is incomplete as it does not contain any data transfer elements.");
                 throw new DtsJobExecutionException(
                         "DTS job request contains no data transfer elements.");
             }
 
-            // for each DataTransferType, get the corresponding root FileObject from source
+            // for each CopyType, get the corresponding root FileObject from source
             // and target URIs and put each source and target unique ROOT FO in a map:
             // mFileObjectMap<ROOT URI String, ROOT FileObject>
-            for (final DataTransferType dataTransfer : dataTransfers) {
+            for (final CopyType dataTransfer : dataTransfers) {
 
-                final FileObject sourceFO = fileSystemManager.resolveFile(dataTransfer.getSource().getURI(), mDtsVfsUtil.getFileSystemOptions(dataTransfer.getSource(), mEncrypter));
-                final FileObject targetFO = fileSystemManager.resolveFile(dataTransfer.getTarget().getURI(), mDtsVfsUtil.getFileSystemOptions(dataTransfer.getTarget(), mEncrypter));
+                final FileObject sourceFO = fileSystemManager.resolveFile(dataTransfer.getSource().getData().getDataUrl(), mDtsVfsUtil.getFileSystemOptions(dataTransfer.getSource(), mEncrypter));
+                final FileObject targetFO = fileSystemManager.resolveFile(dataTransfer.getSink().getData().getDataUrl(), mDtsVfsUtil.getFileSystemOptions(dataTransfer.getSink(), mEncrypter));
 
                 // TODO: handle cases where in source and destination root File
                 // Object of File System are the same but the credentials to
@@ -245,7 +248,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
                 final FileObject targetRoot = targetFO.getFileSystem().getRoot();
 
                 if (!mFileObjectMap.containsKey(sourceRoot.getURL().toString())) {
-                    LOGGER.debug("put source in FileObject map: "+sourceRoot.getURL().toString());
+                    LOGGER.debug("put source root FileObject in map with key: "+sourceRoot.getURL().toString());
                     mFileObjectMap.put(sourceRoot.getURL().toString(), sourceRoot);
                 }
                 if (!mFileObjectMap.containsKey(targetRoot.getURL().toString())) {
@@ -268,7 +271,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
         }
         
         // For each ROOT FileObject in the map, establish the max connections we can
-        // make on each one using the sourceTargetMaxTotalFilesToTransfer Map<URI in String, Integer of max connections>
+        // make on each one using the sourceTargetMaxTotalFilesToTransfer Map<UriString, IntMaxConnections>
         GatherAndCacheConnectionsToRootUrl workerThreads[] = new GatherAndCacheConnectionsToRootUrl[mFileObjectMap.size()];
         int i = 0;
         for (final String foRootKey : mFileObjectMap.keySet()) {
