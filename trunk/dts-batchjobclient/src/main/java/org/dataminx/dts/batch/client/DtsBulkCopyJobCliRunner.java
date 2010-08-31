@@ -42,7 +42,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.xmlbeans.XmlException;
 import org.dataminx.dts.DtsException;
 import org.dataminx.dts.batch.DtsJobLauncher;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityDocument;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
@@ -147,8 +147,7 @@ public class DtsBulkCopyJobCliRunner {
         File f;
         try {
             f = new FileSystemResource(args[0]).getFile();
-            final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory
-                .parse(f);
+            final DataCopyActivityDocument dtsJob = DataCopyActivityDocument.Factory.parse(f);      
             jobRunner.runJob(UUID.randomUUID().toString(), dtsJob);
 
         }
@@ -210,7 +209,7 @@ public class DtsBulkCopyJobCliRunner {
      * @throws JobRestartException if an error occurs when a job is restarted
      * @throws JobInstanceAlreadyCompleteException if the job has already successfully finished
      */
-    public void runJob(final String jobId, final JobDefinitionDocument job)
+    public void runJob(final String jobId, final DataCopyActivityDocument job)
         throws JobExecutionAlreadyRunningException, JobRestartException,
         JobInstanceAlreadyCompleteException {
         mJobLauncher.run(jobId, job);
