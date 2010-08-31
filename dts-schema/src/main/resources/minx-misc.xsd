@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    targetNamespace="http://schemas.dataminx.org/dts/2009/07/jsdl"
-    xmlns:mjsdl="http://schemas.dataminx.org/dts/2009/07/jsdl"
+    targetNamespace="http://schemas.dmi.proposal.org/dts/2010/dmi-common"
+    xmlns:misc="http://schemas.dmi.proposal.org/dts/2010/dmi-common"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     elementFormDefault="qualified" version="1">
   <xsd:simpleType name="CredentialKeyPointerType">
@@ -14,5 +14,5 @@
     </xsd:annotation>
     <xsd:restriction base="xsd:string"/>
   </xsd:simpleType>
-  <xsd:element name="CredentialKeyPointer" type="mjsdl:CredentialKeyPointerType"/>
+  <xsd:element name="CredentialKeyPointer" type="misc:CredentialKeyPointerType"/>
 </xsd:schema>    

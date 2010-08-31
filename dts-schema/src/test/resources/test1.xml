@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DataCopyActivity xmlns="http://schemas.dmi.proposal.org/dts/2010/dmi-common"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://schemas.dmi.proposal.org/dts/2010/dmi-common dmi-common.xsd">
+    <DataCopyActivityRequirements>
+        <StartNotBefore>2006-05-04T18:13:51.0Z</StartNotBefore>
+        <EndNoLaterThan>2006-05-04T18:13:51.0Z</EndNoLaterThan>
+        <StayAliveTime>214748364</StayAliveTime>
+        <MaxAttempts>214748364</MaxAttempts>
+    </DataCopyActivityRequirements>
+    <Copy id="ID001">
+        <Source id="ID003">
+            <Data name="name3">
+                <DataUrl>http://www.oxygenxml.com/</DataUrl>
+                <ProtocolUri>http://www.oxygenxml.com/</ProtocolUri>
+                <IrodsURIProperties id="ID005">
+                    <IrodsZone>IrodsZone0</IrodsZone>
+                </IrodsURIProperties>
+                
+            </Data>
+        </Source>
+        <Sink id="ID011">
+            <Data name="name5">
+                <DataUrl>http://www.oxygenxml.com/</DataUrl>
+                <ProtocolUri>http://www.oxygenxml.com/</ProtocolUri>
+                <GridFtpURIProperties id="ID013">
+                </GridFtpURIProperties>
+                
+            </Data>
+        </Sink>
+        <CopyRequirements id="ID019">
+            <CreationFlag>overwrite</CreationFlag>
+        </CopyRequirements>
+    </Copy>
+    <Copy id="ID021">
+        <Source id="ID023">
+            <Data name="name7">
+                <DataUrl>http://www.oxygenxml.com/</DataUrl>
+                <ProtocolUri>http://www.oxygenxml.com/</ProtocolUri>
+                <SrbURIProperties id="ID025">
+                    <MdasDomainHome>MdasDomainHome0</MdasDomainHome>
+                    <MdasCollectionHome>MdasCollectionHome0</MdasCollectionHome>
+                </SrbURIProperties>
+              
+            </Data>
+        </Source>
+        <Sink id="ID031">
+            <Data name="name9">
+                <DataUrl>http://www.oxygenxml.com/</DataUrl>
+                <ProtocolUri>http://www.oxygenxml.com/</ProtocolUri>
+                <SrbURIProperties id="ID033">
+                    <MdasDomainHome>MdasDomainHome1</MdasDomainHome>
+                    <MdasCollectionHome>MdasCollectionHome1</MdasCollectionHome>
+                </SrbURIProperties>
+                <Credentials>
+                    <MyProxyToken>
+                        <MyProxyUsername>dave</MyProxyUsername>
+                        <MyProxyPassword>password</MyProxyPassword>
+                        <MyProxyServer>myproxy.ngs.ac.uk</MyProxyServer>
+                        <MyProxyPort>443</MyProxyPort>
+                    </MyProxyToken>
+                </Credentials>
+            </Data>
+        </Sink>
+        <CopyRequirements id="ID039">
+            <CreationFlag>overwrite</CreationFlag>
+        </CopyRequirements>
+    </Copy>
+</DataCopyActivity>
+

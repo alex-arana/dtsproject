@@ -42,7 +42,12 @@
   The limited permissions granted above are perpetual and will not be 
   revoked by the OGF or its successors or assignees.
 -->
-<schema targetNamespace="http://schemas.ogf.org/dmi/2008/05/dmi" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:dmi="http://schemas.ogf.org/dmi/2008/05/dmi" xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" elementFormDefault="qualified">
+<schema targetNamespace="http://schemas.ogf.org/dmi/2008/05/dmi"
+xmlns="http://www.w3.org/2001/XMLSchema"
+xmlns:dmi="http://schemas.ogf.org/dmi/2008/05/dmi"
+xmlns:wsa="http://www.w3.org/2005/08/addressing"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+elementFormDefault="qualified">
 
   <import namespace="http://www.w3.org/2005/08/addressing" schemaLocation="http://www.w3.org/2006/03/addressing/ws-addr.xsd"/>
 
