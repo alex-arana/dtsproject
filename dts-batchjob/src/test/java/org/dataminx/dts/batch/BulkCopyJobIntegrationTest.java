@@ -16,7 +16,8 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataminx.dts.batch.common.DtsBatchJobConstants;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityDocument;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
@@ -49,7 +50,7 @@ import org.testng.annotations.Test;
 public class BulkCopyJobIntegrationTest extends
     AbstractTestNGSpringContextTests {
 
-    private JobDefinitionDocument mDtsJob;
+    private DataCopyActivityDocument mDtsJob;
 
     private static final Log LOGGER = LogFactory
         .getLog(BulkCopyJobIntegrationTest.class);
@@ -93,7 +94,7 @@ public class BulkCopyJobIntegrationTest extends
     public void testExistenceOfPropertiesFromExecutionContextAfterJobFailed()
         throws Exception {
         final File f = new ClassPathResource("/org/dataminx/dts/batch/failedjob.xml").getFile();
-        mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        mDtsJob = TestUtils.getTestDataCopyActivityDocument(f);
         assertNotNull(mDtsJob);
 
         final String jobId = UUID.randomUUID().toString();
@@ -113,7 +114,7 @@ public class BulkCopyJobIntegrationTest extends
         throws Exception {
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file" + getTestFilePostfix()+ ".xml").getFile();
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
-        mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        mDtsJob = TestUtils.getTestDataCopyActivityDocument(f);
         assertNotNull(mDtsJob);
 
         final String jobId = UUID.randomUUID().toString();
@@ -149,7 +150,7 @@ public class BulkCopyJobIntegrationTest extends
     public void testSuspendResume() throws Exception {
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-suspend" + getTestFilePostfix()+ ".xml").getFile();
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-suspend.xml").getFile();
-        mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        mDtsJob = TestUtils.getTestDataCopyActivityDocument(f);
 
         assertNotNull(mDtsJob);
 
@@ -223,7 +224,7 @@ public class BulkCopyJobIntegrationTest extends
     @Test(enabled = false)
     public void testSuspendResumeSuspendResume() throws Exception {
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-suspend.xml").getFile();
-        mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        mDtsJob = TestUtils.getTestDataCopyActivityDocument(f);
         assertNotNull(mDtsJob);
 
         final String jobId = UUID.randomUUID().toString();

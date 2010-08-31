@@ -27,7 +27,8 @@
  */
 package org.dataminx.dts.batch;
 
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityType;
 
 /**
  * The JobPartitioningStrategy is an interface to be implemented by different partitioning strategies to be used
@@ -46,7 +47,7 @@ public interface JobPartitioningStrategy {
      * @return the details of the partitioned job as DtsJobDetails
      * @throws JobScopingException when any issues arise while the job is being partitioned
      */
-    DtsJobDetails partitionTheJob(JobDefinitionType jobDefinition,
+    DtsJobDetails partitionTheJob(DataCopyActivityType dataCopyActivity,
         String jobResourceKey, String jobTag) throws JobScopingException;
 
     /**

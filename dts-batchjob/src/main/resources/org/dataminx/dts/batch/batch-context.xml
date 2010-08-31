@@ -144,14 +144,17 @@
   </bean>
   
   <bean id="dtsJobDefinitionValidator" class="org.dataminx.dts.common.validator.DefaultDtsJobDefinitionValidator">
-    <property name="jobIdentificationValidator" ref="jobIdentificationValidator"/>
-    <property name="sourceTargetValidator" ref="sourceTargetValidator"/>
+    <!--<property name="jobIdentificationValidator" ref="jobIdentificationValidator"/>
+    <property name="sourceTargetValidator" ref="sourceTargetValidator"/>-->
+    <property name="dataLocationsTypeValidator" ref="dataLocationsTypeValidator"/>
   </bean>
 
+  <bean id="dataLocationsTypeValidator" class="org.dataminx.dts.common.validator.DefaultDataLocationsValidator"/>
+  <!--
   <bean id="jobIdentificationValidator" class="org.dataminx.dts.common.validator.DefaultJobIdentificationValidator"/>
-
   <bean id="sourceTargetValidator" class="org.dataminx.dts.common.validator.DefaultSourceTargetValidator"/>
-  
+  -->
+
   <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
     <property name="basename" value="validation-errors"/>
   </bean>

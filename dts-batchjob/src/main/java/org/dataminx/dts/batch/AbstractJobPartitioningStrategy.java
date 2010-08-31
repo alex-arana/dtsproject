@@ -46,11 +46,14 @@ import org.dataminx.dts.batch.common.DtsBatchJobConstants;
 import org.dataminx.dts.common.vfs.DtsVfsUtil;
 import org.dataminx.dts.security.crypto.DummyEncrypter;
 import org.dataminx.dts.security.crypto.Encrypter;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.CreationFlagEnumeration;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.CreationFlagEnumeration;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CopyType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CreationFlagEnumeration;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityType;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
@@ -189,12 +192,14 @@ public abstract class AbstractJobPartitioningStrategy implements
     /**
      * {@inheritDoc}
      */
-    public DtsJobDetails partitionTheJob(final JobDefinitionType jobDefinition,
+    public DtsJobDetails partitionTheJob(final DataCopyActivityType dataCopyActivity,
         final String jobResourceKey, final String jobTag)
         throws JobScopingException {
+
         Assert.hasText(jobResourceKey, "JobResourceKey should not be null or empty.");
         Assert.hasText(jobTag, "JobTag should not be null or empty.");
-        Assert.notNull(jobDefinition, "JobDefinitionType should not be null.");
+        Assert.notNull(dataCopyActivity, "dataCopyActivity should not be null.");
+
         if (mMaxTotalByteSizePerStepLimit < 0) {
             throw new DtsException("MaxTotalByteSizePerLimit should be a positive number.");
         }
@@ -221,7 +226,8 @@ public abstract class AbstractJobPartitioningStrategy implements
                     e);
             }
 
-            jobDetails.setJobDefinition(jobDefinition);
+            //jobDetails.setJobDefinition(jobDefinition);
+            jobDetails.setDataCopyActivity(dataCopyActivity);
             jobDetails.setJobId(jobResourceKey);
             jobDetails.setJobTag(jobTag);
 
@@ -233,21 +239,22 @@ public abstract class AbstractJobPartitioningStrategy implements
 
             // populate the dataTransfers List from the given jobDefinition (i.e. a
             // list of source to sink constructs).
-            final List<DataTransferType> dataTransfers = new ArrayList<DataTransferType>();
+            //final List<DataTransferType> dataTransfers = new ArrayList<DataTransferType>();
+            final List<CopyType> dataTransfers = new ArrayList<CopyType>();
+            CollectionUtils.addAll(dataTransfers, dataCopyActivity.getCopyArray());
 
-            final JobDescriptionType jobDescription = jobDefinition
-                .getJobDescription();
+            /*final JobDescriptionType jobDescription = jobDefinition.getJobDescription();
             if (jobDescription instanceof MinxJobDescriptionType) {
                 final MinxJobDescriptionType minxJobDescription = (MinxJobDescriptionType) jobDescription;
                 CollectionUtils.addAll(dataTransfers, minxJobDescription.getDataTransferArray());
-            }
+            }*/
             if (CollectionUtils.isEmpty(dataTransfers)) {
                 LOGGER.warn("DTS job request is incomplete as it does not contain any data transfer elements.");
                 throw new DtsJobExecutionException("DTS job request contains no data transfer elements.");
             }
 
             int dataTransferIndex = 0;
-            for (final DataTransferType dataTransfer : dataTransfers) {
+            for (final CopyType dataTransfer : dataTransfers) {
                 // reset the total number of files to be transferred within this DataTransfer element
                 mPerDataTransferTotalFiles = 0;
 
@@ -255,8 +262,9 @@ public abstract class AbstractJobPartitioningStrategy implements
                 FileObject sourceParent = null;
                 try {
                     sourceParent = fileSystemManager.resolveFile(
-                        dataTransfer.getSource().getURI(),
-                        mDtsVfsUtil.getFileSystemOptions(dataTransfer.getSource(),mEncrypter));
+                        //dataTransfer.getSource().getURI(),
+                            dataTransfer.getSource().getData().getDataUrl(),
+                        mDtsVfsUtil.getFileSystemOptions(dataTransfer.getSource(), mEncrypter));
 
                     if (!sourceParent.getContent().getFile().exists()
                         || !sourceParent.getContent().getFile().isReadable()) {
@@ -268,20 +276,21 @@ public abstract class AbstractJobPartitioningStrategy implements
                 catch (final FileSystemException e) {
                     throw new JobScopingException(
                         "FileSystemException was thrown while accessing the remote file "
-                            + dataTransfer.getSource().getURI() + ".", e);
+                            + dataTransfer.getSource().getData().getDataUrl() + ".", e);
                 }
 
                 // Resolve targetParent - destincation for copy
                 FileObject targetParent = null;
                 try {
                     targetParent = fileSystemManager.resolveFile(
-                            dataTransfer.getTarget().getURI(),
-                            mDtsVfsUtil.getFileSystemOptions(dataTransfer.getTarget(),mEncrypter));
+                            //dataTransfer.getTarget().getURI(),
+                            dataTransfer.getSink().getData().getDataUrl(),
+                            mDtsVfsUtil.getFileSystemOptions(dataTransfer.getSink(), mEncrypter));
                 }
                 catch (final FileSystemException e) {
                     throw new JobScopingException(
                         "FileSystemException was thrown while accessing the remote file "
-                            + dataTransfer.getTarget().getURI() + ".", e);
+                            + dataTransfer.getSink().getData().getDataUrl() + ".", e);
                 }
 
                 try {
@@ -365,8 +374,10 @@ public abstract class AbstractJobPartitioningStrategy implements
                     //      to the allocator's step list and re-create the current step, then:
                     //    - add the DTU to the allocator's current step 
 
-                    final CreationFlagEnumeration.Enum creationFlag = ((MinxJobDescriptionType) jobDescription)
-                        .getTransferRequirements().getCreationFlag();
+                    //final CreationFlagEnumeration.Enum creationFlag = ((MinxJobDescriptionType) jobDescription)
+                    //    .getTransferRequirements().getCreationFlag();
+
+                    final CreationFlagEnumeration.Enum creationFlag = dataTransfer.getCopyRequirements().getCreationFlag();
                     prepare(sourceParent, targetParent, dataTransferIndex, creationFlag);
 
                     // Update the max number of total files to be transferred for the

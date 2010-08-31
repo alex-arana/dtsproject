@@ -41,8 +41,9 @@ import org.dataminx.dts.common.util.SchemaUtils;
 import org.dataminx.dts.common.validator.DtsJobDefinitionValidator;
 import org.dataminx.dts.common.ws.InvalidJobDefinitionException;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
-import org.springframework.batch.core.Job;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityDocument;
+//import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -99,13 +100,13 @@ public class DtsJobLauncher extends SimpleJobLauncher {
      * @throws JobInstanceAlreadyCompleteException if the job has already completed
      * @throws IllegalArgumentException if the given valuesToAddToBatchParams contains objects other than String, Date, Double or Long
      */
-    public JobExecution run(final String jobId, final JobDefinitionDocument job, final Map<String, Object> valuesToAddToBatchParams)
+    public JobExecution run(final String jobId, final DataCopyActivityDocument job, final Map<String, Object> valuesToAddToBatchParams)
             throws JobExecutionAlreadyRunningException, JobRestartException,
             JobInstanceAlreadyCompleteException, InvalidJobDefinitionException {
         final MapBindingResult errors = new MapBindingResult(new HashMap(),
                 "jobDefinitionErrors");
 
-        mDtsJobDefinitionValidator.validate(job.getJobDefinition(), errors);
+        mDtsJobDefinitionValidator.validate(job.getDataCopyActivity(), errors);
         if (errors.hasErrors()) {
             //FieldError error = errors.getFieldError("jobIdentification.jobName");
             final List<FieldError> fieldErrors = errors.getFieldErrors();
@@ -121,12 +122,11 @@ public class DtsJobLauncher extends SimpleJobLauncher {
         }
 
         final SubmitJobRequestDocument dtsJobRequest = SubmitJobRequestDocument.Factory.newInstance();
-        //SubmitJobRequest submitJobRequest =
         dtsJobRequest.addNewSubmitJobRequest();
 
         // replace JobDefinition with the one read from the input file
-        dtsJobRequest.getSubmitJobRequest().setJobDefinition(
-                job.getJobDefinition());
+        //dtsJobRequest.getSubmitJobRequest().setJobDefinition(job.getJobDefinition());
+        dtsJobRequest.getSubmitJobRequest().setDataCopyActivity(job.getDataCopyActivity());
 
         // TODO: filter out the credential info from the logs using the one that WN uses
         final String auditableRequest = SchemaUtils.getAuditableString(dtsJobRequest);
@@ -183,7 +183,7 @@ public class DtsJobLauncher extends SimpleJobLauncher {
      * @throws JobRestartException if the job is not allowed to be restarted
      * @throws JobInstanceAlreadyCompleteException if the job has already completed
      */
-    public JobExecution run(final String jobId, final JobDefinitionDocument job)
+    public JobExecution run(final String jobId, final DataCopyActivityDocument job)
             throws JobExecutionAlreadyRunningException, JobRestartException,
             JobInstanceAlreadyCompleteException, InvalidJobDefinitionException {
         // call overloaded method and null for the header collection

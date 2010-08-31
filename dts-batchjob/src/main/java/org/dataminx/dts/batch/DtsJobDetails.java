@@ -27,16 +27,17 @@
  */
 package org.dataminx.dts.batch;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+//import java.io.FileNotFoundException;
+//import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dataminx.dts.batch.common.DtsBatchJobConstants;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
+//import org.dataminx.dts.batch.common.DtsBatchJobConstants;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +71,9 @@ public class DtsJobDetails implements Serializable {
     private int mTotalFiles;
 
     /** A reference to the JobDefinitionType. */
-    private JobDefinitionType mJobDefinition;
+    //private JobDefinitionType mJobDefinition;
+    private DataCopyActivityType mDataCopyActivity;
+
 
     /** The job resource key. */
     private String mJobId;
@@ -149,8 +152,11 @@ public class DtsJobDetails implements Serializable {
         return mExcludedFiles;
     }
 
-    public JobDefinitionType getJobDefinition() {
-        return mJobDefinition;
+    //public JobDefinitionType getJobDefinition() {
+    //    return mJobDefinition;
+    //}
+    public DataCopyActivityType getDataCopyActivity(){
+        return this.mDataCopyActivity;
     }
 
     public String getJobId() {
@@ -214,8 +220,12 @@ public class DtsJobDetails implements Serializable {
         mExcludedFiles = excludedFiles;
     }
 
-    public void setJobDefinition(final JobDefinitionType jobDefinition) {
-        mJobDefinition = jobDefinition;
+    //public void setJobDefinition(final JobDefinitionType jobDefinition) {
+    //    mJobDefinition = jobDefinition;
+    //}
+
+    public void setDataCopyActivity(final DataCopyActivityType dataCopyActivity){
+        this.mDataCopyActivity = dataCopyActivity; 
     }
 
     public void setJobId(final String jobId) {

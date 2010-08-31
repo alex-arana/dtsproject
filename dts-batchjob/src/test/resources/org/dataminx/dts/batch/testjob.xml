@@ -1,102 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jsdl:JobDefinition xmlns:mjsdl="http://schemas.dataminx.org/dts/2009/07/jsdl"
-  xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl"
-  xmlns:dmi="http://schemas.ogf.org/dmi/2008/05/dmi"
-  xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <!--
-    For some unknown reason, namespace definitions should be set in the JobDescription element again
-  -->
-  <jsdl:JobDescription xsi:type="mjsdl:MinxJobDescriptionType" xmlns:mjsdl="http://schemas.dataminx.org/dts/2009/07/jsdl"
-    xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl">
-    <jsdl:JobIdentification>
-      <jsdl:JobName>test-job</jsdl:JobName>
-      <jsdl:Description>Gerson's and Dave's Job</jsdl:Description>
-      <jsdl:JobAnnotation>Gerson's and Daves' Job Annotation</jsdl:JobAnnotation>
-      <jsdl:JobProject>apollo33</jsdl:JobProject>
-    </jsdl:JobIdentification>
-    <!-- 
-    <mjsdl:DataTransfer>
-      <mjsdl:Source>        
-        <jsdl:URI>file://${user.home}/testfiles/dir-with-mixedfiles</jsdl:URI>
-      </mjsdl:Source>
-      <mjsdl:Target>
-        <jsdl:URI>tmp://</jsdl:URI>
-      </mjsdl:Target>
-    </mjsdl:DataTransfer>
-   
-    <mjsdl:DataTransfer>
-      <mjsdl:Source>
-        <jsdl:URI>ftp://mirrors.usc.edu/pub/gnu/findutils/</jsdl:URI>
-      </mjsdl:Source>
-      <mjsdl:Target>
-        <jsdl:URI>gsiftp://ngdata.sapac.edu.au/data/grid/grid-test/StartUp/</jsdl:URI>
-        <mjsdl:Credential>
-          <mjsdl:MyProxyToken>
-            <mjsdl:MyProxyUsername>${myproxy.username}</mjsdl:MyProxyUsername>
-            <mjsdl:MyProxyPassword>${myproxy.password}</mjsdl:MyProxyPassword>
-            <mjsdl:MyProxyServer>myproxy2.arcs.org.au</mjsdl:MyProxyServer>
-            <mjsdl:MyProxyPort>7512</mjsdl:MyProxyPort>
-          </mjsdl:MyProxyToken>
-        </mjsdl:Credential>
-      </mjsdl:Target>
-    </mjsdl:DataTransfer>
-    
-    <mjsdl:DataTransfer>
-      <mjsdl:Source>        
-        <jsdl:URI>ftp://dataminx.chem.usyd.edu.au/home/gerson</jsdl:URI>
-        <mjsdl:Credential>
-          <wsse:UsernameToken>
-            <wsse:Username>${ftp.username}</wsse:Username>
-            <wsse:PasswordString>${ftp.password}</wsse:PasswordString>
-          </wsse:UsernameToken>
-        </mjsdl:Credential>
-      </mjsdl:Source>
-      <mjsdl:Target>
-        <jsdl:URI>srb://srb.versi.unimelb.edu.au:5544/versi.melbourne/home/gerson.versi.melbourne/mydir</jsdl:URI>
-        <mjsdl:Credential>
-          <wsse:UsernameToken>
-            <wsse:Username>${srb.username}</wsse:Username>
-            <wsse:PasswordString>${srb.password}</wsse:PasswordString>
-          </wsse:UsernameToken>
-        </mjsdl:Credential>
-        <mjsdl:SrbURIProperties>
-            <mjsdl:MdasDomainHome>versi.melbourne</mjsdl:MdasDomainHome>
-            <mjsdl:MdasCollectionHome>/versi.melbourne/home/gerson.versi.melbourne</mjsdl:MdasCollectionHome>
-            <mjsdl:DefaultResource>disk-vbl-mu</mjsdl:DefaultResource>
-            <mjsdl:McatZone>versi.melbourne</mjsdl:McatZone>
-        </mjsdl:SrbURIProperties>
-      </mjsdl:Target>
-    </mjsdl:DataTransfer>
-    -->
-    
-    <mjsdl:DataTransfer>
-      <mjsdl:Source>
-        <jsdl:URI>file://@home.dir.replacement@/testfiles/dir-with-9files/test01MB-0.bin</jsdl:URI>
-        <!--<jsdl:URI>file://@home.dir.replacement@/testfiles/dir-with-9files</jsdl:URI>-->
-      </mjsdl:Source>
-      <mjsdl:Target>
-        <!--<jsdl:URI>file://@home.dir.replacement@/testfilesCopiedDave</jsdl:URI>-->
-        <jsdl:URI>tmp://</jsdl:URI>
-      </mjsdl:Target>
-      <!--
-      <mjsdl:Target>
-        <jsdl:URI>gsiftp://ngdata.sapac.edu.au/data/grid/grid-test/StartUp/</jsdl:URI>
-        <mjsdl:Credential>
-          <mjsdl:MyProxyToken>
-            <mjsdl:MyProxyUsername>${myproxy.username}</mjsdl:MyProxyUsername>
-            <mjsdl:MyProxyPassword>${myproxy.password}</mjsdl:MyProxyPassword>
-            <mjsdl:MyProxyServer>myproxy2.arcs.org.au</mjsdl:MyProxyServer>
-            <mjsdl:MyProxyPort>7512</mjsdl:MyProxyPort>
-          </mjsdl:MyProxyToken>
-        </mjsdl:Credential>
-      </mjsdl:Target>
-      -->   
-    </mjsdl:DataTransfer>    
-    
-    <mjsdl:TransferRequirements>
-      <dmi:MaxAttempts>3</dmi:MaxAttempts>
-      <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
-    </mjsdl:TransferRequirements>
-  </jsdl:JobDescription>
-</jsdl:JobDefinition>
+<DataCopyActivity xmlns="http://schemas.dmi.proposal.org/dts/2010/dmi-common"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
+    <DataCopyActivityRequirements>
+        <MaxAttempts>1</MaxAttempts>
+    </DataCopyActivityRequirements>
+    <Copy>
+        <Source>
+            <Data>
+                <DataUrl>file://@home.dir.replacement@/testfiles</DataUrl>
+            </Data>
+        </Source>
+        <Sink>
+            <Data>
+                <DataUrl>tmp://</DataUrl>
+            </Data>
+        </Sink>
+        <CopyRequirements>
+            <CreationFlag>overwrite</CreationFlag>
+        </CopyRequirements>
+    </Copy>   
+</DataCopyActivity>

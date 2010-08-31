@@ -42,15 +42,20 @@ import org.dataminx.dts.batch.service.JobNotificationService;
 import org.dataminx.dts.common.model.JobStatus;
 import org.dataminx.dts.common.util.CredentialStore;
 import org.dataminx.dts.common.util.StopwatchTimer;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialKeyPointerDocument;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialKeyPointerDocument;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
+
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CopyType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CredentialKeyPointerDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CredentialType;
+
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
@@ -223,30 +228,33 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
     }
 
     /**
-     * Apply the credential filtering over all the specified credentials in the job submission
-     * document. This replaces the credentials in the mJobRequest with pointers. The credentials
-     * are then stored within the given credentialStore.
+     * Apply the credential filtering over all the credentials in the job submission
+     * document. This replaces the credentials in the mJobRequest with unique pointers. The credentials
+     * are then stored within the given credentialStore under that pointer.
      *
      * @param credentialStore the credential store
      */
     private void applyCredentialFiltering(final CredentialStore credentialStore) {
-        final DataTransferType[] dataTransfers = ((MinxJobDescriptionType) mJobRequest
-            .getJobDefinition().getJobDescription()).getDataTransferArray();
+
+        // get the job's JobRequest document
+        //final DataTransferType[] dataTransfers = ((MinxJobDescriptionType) mJobRequest
+        //    .getJobDefinition().getJobDescription()).getDataTransferArray();
+        final CopyType[] dataTransfers = mJobRequest.getDataCopyActivity().getCopyArray();
 
         for (int i = 0; i < dataTransfers.length; i++) {
-            final CredentialType sourceCredential = dataTransfers[i]
-                .getSource().getCredential();
-            final CredentialType targetCredential = dataTransfers[i]
-                .getTarget().getCredential();
+            //final CredentialType sourceCredential = dataTransfers[i].getSource().getCredential();
+            //final CredentialType targetCredential = dataTransfers[i].getTarget().getCredential();
+            final CredentialType sourceCredential = dataTransfers[i].getSource().getData().getCredentials();
+            final CredentialType targetCredential = dataTransfers[i].getSink().getData().getCredentials();
+
 
             // these are the credentials that need to be stored in the CredentialStore
             if (sourceCredential != null) {
-                final CredentialType sourceCredentialToStore = (CredentialType) sourceCredential
-                    .copy();
-
+                final CredentialType sourceCredentialToStore = (CredentialType) sourceCredential.copy();
+                // modify the credential by removing the original cred and inserting a key pointer
                 final String credUUID = replaceCredentialWithKeyPointer(sourceCredential);
 
-                // store the original source credential on the credential store
+                // store a copy of the original source credential on the credential store
                 // TODO: find out when we should write to memory or to database
                 credentialStore
                     .writeToMemory(credUUID, sourceCredentialToStore);
@@ -332,7 +340,7 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
         getJobNotificationService().notifyJobStatus(this,
             JobStatus.CREATED, execution); // this was JobStatus.TRANSFERRING
 
-        // first, store the DTS job request object in the job execution context
+        // first, store the credential-filtered DTS job request object in the job execution context
         final ExecutionContext context = execution.getExecutionContext();
         context.put(DTS_SUBMIT_JOB_REQUEST_KEY, mJobRequest);
         context.put(DTS_JOB_RESOURCE_KEY, getJobId());
@@ -421,12 +429,13 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
      * {@inheritDoc}
      */
     public String getDescription() {
-        String description = null;
+        /*String description = null;
         final JobIdentificationType jobIdentification = getJobIdentification();
         if (jobIdentification != null) {
             description = jobIdentification.getDescription();
         }
-        return description;
+        return description;*/
+        return "No description available";
     }
 
     /**
@@ -434,28 +443,28 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
      *
      * @return Job request details
      */
-    protected JobDescriptionType getJobDescription() {
+    /*protected JobDescriptionType getJobDescription() {
         JobDescriptionType result = null;
         final JobDefinitionType jobDefinition = mJobRequest.getJobDefinition();
         if (jobDefinition != null) {
             result = jobDefinition.getJobDescription();
         }
         return result;
-    }
+    }*/
 
     /**
      * Returns the job identification, containing all details about the underlying job.
      *
      * @return Job identification details
      */
-    protected JobIdentificationType getJobIdentification() {
+    /*protected JobIdentificationType getJobIdentification() {
         JobIdentificationType result = null;
         final JobDescriptionType jobDescription = getJobDescription();
         if (jobDescription != null) {
             result = jobDescription.getJobIdentification();
         }
         return result;
-    }
+    }*/
 
     /**
      * {@inheritDoc}

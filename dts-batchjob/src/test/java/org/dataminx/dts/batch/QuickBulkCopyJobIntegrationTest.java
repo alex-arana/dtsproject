@@ -9,7 +9,8 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityDocument;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class QuickBulkCopyJobIntegrationTest extends
     AbstractTestNGSpringContextTests {
 
 
-    private JobDefinitionDocument mDtsJob;
+    private DataCopyActivityDocument mDtsJob;
 
     private static final Log LOGGER = LogFactory
         .getLog(QuickBulkCopyJobIntegrationTest.class);
@@ -52,7 +53,7 @@ public class QuickBulkCopyJobIntegrationTest extends
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/testjob"+ getTestFilePostfix() + ".xml").getFile();
         //mDtsJob = JobDefinitionDocument.Factory.parse(f);
         final File f = new ClassPathResource("/org/dataminx/dts/batch/testjob.xml").getFile();
-        mDtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        mDtsJob = TestUtils.getTestDataCopyActivityDocument(f);
         
         assertNotNull(mDtsJob);
     }

@@ -28,8 +28,10 @@
 package org.dataminx.dts.batch.service;
 
 import org.apache.commons.vfs.FileSystemManager;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CopyType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataLocationsType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 
 /**
  * Describes the File Copying service behaviour.
@@ -53,6 +55,7 @@ public interface FileCopyingService {
     void copyFiles(String sourceURI, String targetURI,
         FileSystemManager sourceFileSystemManager,
         FileSystemManager targetFileSystemManager);
+     
 
     /**
      * Copies the content from a source file to a destination file. This method
@@ -78,9 +81,14 @@ public interface FileCopyingService {
      * @param sourceFileSystemManager the source's FileSystemManager
      * @param targetFileSystemManager the target's FileSystemManager
      */
-    void copyFiles(SourceTargetType source, SourceTargetType target,
+    /*void copyFiles(SourceTargetType source, SourceTargetType target,
         FileSystemManager sourceFileSystemManager,
         FileSystemManager targetFileSystemManager);
+     */
+    void copyFiles(DataLocationsType source, DataLocationsType sink,
+        FileSystemManager sourceFileSystemManager,
+        FileSystemManager targetFileSystemManager);
+
 
     /**
      * Copies the source to the destination. This method provides more
@@ -92,7 +100,7 @@ public interface FileCopyingService {
      * @param fileSystemManager the FileSystemManager to use for both the source
      *        and destination
      */
-    void copyFiles(SourceTargetType source, SourceTargetType target,
+    void copyFiles(DataLocationsType source, DataLocationsType sink,
         FileSystemManager fileSystemManager);
 
     /**
@@ -108,10 +116,15 @@ public interface FileCopyingService {
      * @param sourceFileSystemManager the source's FileSystemManager
      * @param targetFileSystemManager the target's FileSystemManager
      */
-    void copyFiles(String sourceURI, String targetURI,
+    /*void copyFiles(String sourceURI, String targetURI,
         DataTransferType dataTransferType,
         FileSystemManager sourceFileSystemManager,
         FileSystemManager targetFileSystemManager);
+     */
+     void copyFiles(final String sourceURI, final String targetURI,
+        final CopyType copyType,
+        final FileSystemManager sourceFileSystemManager,
+        final FileSystemManager targetFileSystemManager);
 
     /**
      * Copies the source to the destination. This method is used if a file
@@ -126,7 +139,7 @@ public interface FileCopyingService {
      * @param fileSystemManager the FileSystemManager to use for both the source
      *        and destination
      */
-    void copyFiles(String sourceURI, String targetURI,
-        DataTransferType dataTransferType, FileSystemManager fileSystemManager);
+    //void copyFiles(String sourceURI, String targetURI,
+    //    DataTransferType dataTransferType, FileSystemManager fileSystemManager);
 
 }

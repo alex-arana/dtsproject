@@ -38,8 +38,10 @@ import org.apache.commons.vfs.Selectors;
 import org.dataminx.dts.common.vfs.DtsVfsUtil;
 import org.dataminx.dts.security.crypto.DummyEncrypter;
 import org.dataminx.dts.security.crypto.Encrypter;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CopyType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataLocationsType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -79,7 +81,7 @@ public class FileCopyingServiceImpl implements FileCopyingService,
     /**
      * {@inheritDoc}
      */
-    public void copyFiles(final String sourceURI, final String targetURI,
+    public void copyFiles(final String sourceURI, final String targetURI, 
         final FileSystemManager sourceFileSystemManager,
         final FileSystemManager targetFileSystemManager) {
         LOGGER.info(String.format("Copying source '%s' to target '%s'...",
@@ -95,20 +97,21 @@ public class FileCopyingServiceImpl implements FileCopyingService,
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void copyFiles(final SourceTargetType source,
-        final SourceTargetType target,
-        final FileSystemManager sourceFileSystemManager,
-        final FileSystemManager targetFileSystemManager) {
+    public void copyFiles(DataLocationsType source,
+            DataLocationsType sink,
+            FileSystemManager sourceFileSystemManager,
+            FileSystemManager targetFileSystemManager) {
+        
         LOGGER.info(String.format("Copying source '%s' to target '%s'...",
-            source.getURI(), target.getURI()));
-        try {
-            copyFiles(sourceFileSystemManager.resolveFile(source.getURI(),
-                mDtsVfsUtil.getFileSystemOptions(source, mEncrypter)),
-                targetFileSystemManager.resolveFile(target.getURI(),
-                    mDtsVfsUtil.getFileSystemOptions(target, mEncrypter)));
+            source.getData().getDataUrl(), sink.getData().getDataUrl()));
+
+         try {
+            copyFiles(
+                    sourceFileSystemManager.resolveFile(source.getData().getDataUrl(),
+                    mDtsVfsUtil.getFileSystemOptions(source, mEncrypter)),
+                    targetFileSystemManager.resolveFile(sink.getData().getDataUrl(),
+                    mDtsVfsUtil.getFileSystemOptions(sink, mEncrypter))
+                    );
         }
         catch (final FileSystemException ex) {
             LOGGER.error("An error has occurred during a file copy operation: "
@@ -117,13 +120,58 @@ public class FileCopyingServiceImpl implements FileCopyingService,
         }
     }
 
+
+
+
+
+
+    public void copyFiles(DataLocationsType source, DataLocationsType target, FileSystemManager fileSystemManager) {
+        //throw new UnsupportedOperationException("Not supported yet.");
+        LOGGER.info(String.format("Copying source '%s' to target '%s'...",
+            source.getData().getDataUrl(), target.getData().getDataUrl()));
+        this.copyFiles(source, target, fileSystemManager, fileSystemManager);
+    }
+
+
+    public void copyFiles(final String sourceURI, final String targetURI,
+        final CopyType copyType,
+        final FileSystemManager sourceFileSystemManager,
+        final FileSystemManager targetFileSystemManager) {
+
+        final DataLocationsType source = copyType.getSource(); //dataTransferType.getSource();
+        final DataLocationsType target = copyType.getSink(); //dataTransferType.getTarget();
+        FileObject sourceFO = null;
+        FileObject targetFO = null;
+
+        try {
+            // could we simply resolve
+            //sourceFO = sourceFileSystemManager.resolveFile(sourceURI);
+            //targetFO = targetFileSystemManager.resolveFile(targetURI);
+            // we invoke the resolveFile(uri, fileSystemOptions) method
+
+            sourceFO = sourceFileSystemManager.resolveFile(sourceURI,
+                mDtsVfsUtil.getFileSystemOptions(source, mEncrypter));
+
+            targetFO = targetFileSystemManager.resolveFile(targetURI,
+                mDtsVfsUtil.getFileSystemOptions(target, mEncrypter));
+            copyFiles(sourceFO, targetFO);
+        }
+        catch (final FileSystemException e) {
+            LOGGER.error("An error has occurred during a file copy operation: "
+                + e, e);
+            throw new DtsFileCopyOperationException(e);
+        }
+    }
+
+
     /**
      * {@inheritDoc}
      */
-    public void copyFiles(final String sourceURI, final String targetURI,
+    /*public void copyFiles(final String sourceURI, final String targetURI,
         final DataTransferType dataTransferType,
         final FileSystemManager sourceFileSystemManager,
         final FileSystemManager targetFileSystemManager) {
+
         final SourceTargetType source = dataTransferType.getSource();
         final SourceTargetType target = dataTransferType.getTarget();
         FileObject sourceFO = null;
@@ -147,7 +195,7 @@ public class FileCopyingServiceImpl implements FileCopyingService,
                 + e, e);
             throw new DtsFileCopyOperationException(e);
         }
-    }
+    }*/
 
     /**
      * {@inheritDoc}
@@ -160,20 +208,20 @@ public class FileCopyingServiceImpl implements FileCopyingService,
     /**
      * {@inheritDoc}
      */
-    public void copyFiles(final SourceTargetType source,
+    /*public void copyFiles(final SourceTargetType source,
         final SourceTargetType target, final FileSystemManager fileSystemManager) {
         copyFiles(source, target, fileSystemManager, fileSystemManager);
-    }
+    }*/
 
     /**
      * {@inheritDoc}
      */
-    public void copyFiles(final String sourceURI, final String targetURI,
+    /*public void copyFiles(final String sourceURI, final String targetURI,
         final DataTransferType dataTransferType,
         final FileSystemManager fileSystemManager) {
         copyFiles(sourceURI, targetURI, dataTransferType, fileSystemManager,
             fileSystemManager);
-    }
+    }*/
 
     /**
      * Copies the content from a source file to a destination file.
@@ -245,5 +293,7 @@ public class FileCopyingServiceImpl implements FileCopyingService,
     public void setEncrypter(final Encrypter encrypter) {
         mEncrypter = encrypter;
     }
+
+
 
 }

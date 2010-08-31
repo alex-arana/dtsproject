@@ -8,7 +8,8 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import org.dataminx.dts.common.DtsConstants;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityDocument;
 
 /**
  * Some stuff that is usefull in all tests.
@@ -71,7 +72,16 @@ public class TestUtils {
      * @return
      * @throws Exception
      */
-    protected static JobDefinitionDocument getTestJobDefinitionDocument(final File f) throws Exception {
+    protected static DataCopyActivityDocument getTestDataCopyActivityDocument(final File f) throws Exception {
+        //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
+        String docString = TestUtils.readFileAsString(f.getAbsolutePath());
+        String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
+        docString = docString.replaceAll("@home.dir.replacement@", homeDir);
+        //System.out.println(docString);
+        final DataCopyActivityDocument dtsJob = DataCopyActivityDocument.Factory.parse(docString);
+        return dtsJob;
+    }
+    /*protected static JobDefinitionDocument getTestJobDefinitionDocument(final File f) throws Exception {
         //final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
         String docString = TestUtils.readFileAsString(f.getAbsolutePath());
         String homeDir = System.getProperty("user.home").replaceAll("\\\\", "/");
@@ -79,7 +89,7 @@ public class TestUtils {
         //System.out.println(docString);
         final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(docString);
         return dtsJob; 
-    }
+    }*/
 
     /**
      * Return the file contents as a string

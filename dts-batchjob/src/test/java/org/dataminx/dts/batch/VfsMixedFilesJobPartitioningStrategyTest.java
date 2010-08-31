@@ -17,7 +17,8 @@ import org.dataminx.dts.DtsException;
 import org.dataminx.dts.batch.common.DtsBatchJobConstants;
 import org.dataminx.dts.common.DtsConstants;
 import org.dataminx.dts.common.vfs.DtsVfsUtil;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
@@ -61,7 +62,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         JobScopingException, Exception {
        
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
-        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        final DataCopyActivityDocument dtsJob = TestUtils.getTestDataCopyActivityDocument(f);
 
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
@@ -79,7 +80,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         final String jobId = UUID.randomUUID().toString();
         final String jobTag = jobId;
         final DtsJobDetails jobDetails = mPartitioningStrategy.partitionTheJob(
-            dtsJob.getJobDefinition(), jobId, jobTag);
+            dtsJob.getDataCopyActivity(), jobId, jobTag);
 
         assertNotNull(jobDetails);
         assertEquals(jobDetails.getJobSteps().size(), 1);
@@ -104,7 +105,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         JobScopingException, Exception {
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-20files.xml").getFile();
-        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        final DataCopyActivityDocument dtsJob = TestUtils.getTestDataCopyActivityDocument(f);
 
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
@@ -122,7 +123,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         final String jobId = UUID.randomUUID().toString();
         final String jobTag = jobId;
         final DtsJobDetails jobDetails = mPartitioningStrategy.partitionTheJob(
-            dtsJob.getJobDefinition(), jobId, jobTag);
+            dtsJob.getDataCopyActivity(), jobId, jobTag);
 
         assertNotNull(jobDetails);
         /*
@@ -150,7 +151,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         JobScopingException, Exception {
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-20files.xml").getFile();
-        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        final DataCopyActivityDocument dtsJob = TestUtils.getTestDataCopyActivityDocument(f);
 
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
@@ -167,7 +168,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         final String jobId = UUID.randomUUID().toString();
         final String jobTag = jobId;
         final DtsJobDetails jobDetails = mPartitioningStrategy.partitionTheJob(
-            dtsJob.getJobDefinition(), jobId, jobTag);
+            dtsJob.getDataCopyActivity(), jobId, jobTag);
 
         assertNotNull(jobDetails);
 
@@ -194,7 +195,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
-        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        final DataCopyActivityDocument dtsJob = TestUtils.getTestDataCopyActivityDocument(f);
 
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
@@ -204,7 +205,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         mPartitioningStrategy.setTotalFilesLimit(-1);
         final String jobId = UUID.randomUUID().toString();
         final String jobTag = jobId;
-        mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), jobId,
+        mPartitioningStrategy.partitionTheJob(dtsJob.getDataCopyActivity(), jobId,
             jobTag);
     }
 
@@ -216,7 +217,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
-        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        final DataCopyActivityDocument dtsJob = TestUtils.getTestDataCopyActivityDocument(f);
 
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
@@ -226,7 +227,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         mPartitioningStrategy.setTotalFilesLimit(-1);
         final String jobId = UUID.randomUUID().toString();
         final String jobTag = jobId;
-        mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), jobId,
+        mPartitioningStrategy.partitionTheJob(dtsJob.getDataCopyActivity(), jobId,
             jobTag);
     }
 
@@ -236,7 +237,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
             XmlException, JobScopingException, Exception {
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-20files.xml").getFile();
-        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        final DataCopyActivityDocument dtsJob = TestUtils.getTestDataCopyActivityDocument(f);
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(3);
@@ -253,7 +254,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
 
         final String jobId = UUID.randomUUID().toString();
         final String jobTag = jobId;
-        mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), jobId,
+        mPartitioningStrategy.partitionTheJob(dtsJob.getDataCopyActivity(), jobId,
                 jobTag);
     }
 
@@ -264,7 +265,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
-        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        final DataCopyActivityDocument dtsJob = TestUtils.getTestDataCopyActivityDocument(f);
         mPartitioningStrategy.setDtsVfsUtil(mDtsVfsUtil);
         mPartitioningStrategy.setMaxTotalByteSizePerStepLimit(FILE_SIZE_10MB);
         mPartitioningStrategy.setMaxTotalFileNumPerStepLimit(3);
@@ -281,7 +282,7 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
 
         final String jobId = UUID.randomUUID().toString();
         final String jobTag = jobId;
-        mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), jobId,
+        mPartitioningStrategy.partitionTheJob(dtsJob.getDataCopyActivity(), jobId,
                 jobTag);
     }
 
@@ -344,10 +345,10 @@ public class VfsMixedFilesJobPartitioningStrategyTest extends
         //final JobDefinitionDocument dtsJob = JobDefinitionDocument.Factory.parse(f);
 
         final File f = new ClassPathResource("/org/dataminx/dts/batch/transfer-1file.xml").getFile();
-        final JobDefinitionDocument dtsJob = TestUtils.getTestJobDefinitionDocument(f);
+        final DataCopyActivityDocument dtsJob = TestUtils.getTestDataCopyActivityDocument(f);
 
         //mPartitioningStrategy = new VfsMixedFilesJobPartitioningStrategy();
-        mPartitioningStrategy.partitionTheJob(dtsJob.getJobDefinition(), null,
+        mPartitioningStrategy.partitionTheJob(dtsJob.getDataCopyActivity(), null,
             null);
     }
 
