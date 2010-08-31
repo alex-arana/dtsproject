@@ -28,7 +28,7 @@
 package org.dataminx.dts.common.vfs;
 
 import static org.apache.commons.lang.StringUtils.EMPTY;
-import static org.dataminx.dts.common.DtsConstants.DTS_JSDL_NAMESPACE_URI;
+import static org.dataminx.dts.common.DtsConstants.DTS_DMI_COMMON_NAMESPACE_URI;
 import static org.dataminx.dts.common.DtsConstants.WS_SECURITY_NAMESPACE_URI;
 import static org.dataminx.dts.common.util.XmlBeansUtils.extractElementTextAsString;
 import static org.dataminx.dts.common.util.XmlBeansUtils.selectAnyElement;
@@ -58,7 +58,8 @@ import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.common.util.CredentialStore;
 import org.dataminx.dts.security.crypto.Encrypter;
 import org.dataminx.dts.security.crypto.UnknownEncryptionAlgorithmException;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
+
+/*import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.GridFtpURIPropertiesType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.IrodsURIPropertiesType;
@@ -67,13 +68,23 @@ import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxSourceTargetType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MyProxyTokenType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.OtherCredentialTokenType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.SrbURIPropertiesType;
+ *
+ */
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 import org.globus.ftp.MarkerListener;
 import org.globus.myproxy.MyProxy;
 import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSCredential;
 import org.oasisOpen.docs.wss.x2004.x01.oasis200401WssWssecuritySecext10.UsernameTokenType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CopyType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CredentialType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataLocationsType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.GridFtpURIPropertiesType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.IrodsURIPropertiesType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.MyProxyTokenType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.OtherCredentialTokenType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.SrbURIPropertiesType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +104,7 @@ public class DtsVfsUtil extends VFSUtil {
         WS_SECURITY_NAMESPACE_URI, "PasswordString");
 
     private static final QName CREDENTIAL_KEY_POINTER_QNAME = new QName(
-        DTS_JSDL_NAMESPACE_URI, "CredentialKeyPointer");
+       DTS_DMI_COMMON_NAMESPACE_URI /*DTS_JSDL_NAMESPACE_URI*/, "CredentialKeyPointer");
 
     private CredentialStore mCredentialStore;
 
@@ -109,11 +120,11 @@ public class DtsVfsUtil extends VFSUtil {
 
     private static final int ONE_HUNDRED = 100;
 
-    private final Map<SourceTargetType, FileSystemOptions> sourceOrTargetFileSystemOptionsCache;
+    private final Map<DataLocationsType, FileSystemOptions> sourceOrTargetFileSystemOptionsCache;
 
     public DtsVfsUtil() {
         super();
-        sourceOrTargetFileSystemOptionsCache = new HashMap<SourceTargetType, FileSystemOptions>();
+        sourceOrTargetFileSystemOptionsCache = new HashMap<DataLocationsType, FileSystemOptions>();
     }
 
     // TODO: think of a better way of having this implemented rather than
@@ -324,8 +335,8 @@ public class DtsVfsUtil extends VFSUtil {
      * not, the cached FileSystemOptions object for the given SourceTarget
      * element is returned.
      *
-     * @param sourceOrTarget
-     *            the source or target entity
+     * @param sourceOrSink
+     *            the source or sink entity
      * @param encrypter
      *            the encrypter that will decrypt the password
      * @return the set of file system options for the given source or target
@@ -334,152 +345,137 @@ public class DtsVfsUtil extends VFSUtil {
      *             when an error occurs during a VFS file copy operation.
      */
     public FileSystemOptions getFileSystemOptions(
-        final SourceTargetType sourceOrTarget, final Encrypter encrypter)
-        throws FileSystemException {
+            final DataLocationsType sourceOrSink, final Encrypter encrypter)
+            throws FileSystemException {
 
         // have a look at the cache first to see if we've already got a
         // FileSystemOption for the provided SourceTarget element
-        if (sourceOrTargetFileSystemOptionsCache.containsKey(sourceOrTarget)) {
-            return sourceOrTargetFileSystemOptionsCache.get(sourceOrTarget);
+        if (sourceOrTargetFileSystemOptionsCache.containsKey(sourceOrSink)) {
+            return sourceOrTargetFileSystemOptionsCache.get(sourceOrSink);
         }
 
         // if not, we'll create a new one
         final FileSystemOptions options = new DtsFileSystemOptions();
 
-        if (sourceOrTarget instanceof MinxSourceTargetType) {
-            final MinxSourceTargetType minxSourceOrTarget = (MinxSourceTargetType) sourceOrTarget;
-            final CredentialType credentialType = minxSourceOrTarget
-                .getCredential();
-            final XmlObject uriPropertiesXML = minxSourceOrTarget
-                .getURIProperties();
-            if (credentialType != null) {
-                // at the moment we're only supporting MyProxy credentials
-                if (credentialType.getMyProxyToken() != null) {
-                    addMyProxyCredentialDetailsToFileSystemOptions(options,
+        // TODO cater for shared credentials for the source and sink. 
+        final CredentialType credentialType = sourceOrSink.getData().getCredentials();
+        final XmlObject uriPropertiesXML = sourceOrSink.getData().getURIProperties();
+        //final XmlObject uriPropertiesXML = minxSourceOrTarget.getURIProperties();
+
+        if (credentialType != null) {
+            // at the moment we're only supporting MyProxy credentials
+            if (credentialType.getMyProxyToken() != null) {
+                addMyProxyCredentialDetailsToFileSystemOptions(options,
                         credentialType.getMyProxyToken(), encrypter);
 
-                }
-                else if (credentialType.getUsernameToken() != null) {
-                    addUsernameCredentialDetailsToFileSystemOptions(options,
+            } else if (credentialType.getUsernameToken() != null) {
+                addUsernameCredentialDetailsToFileSystemOptions(options,
                         credentialType.getUsernameToken(), encrypter);
-                }
-                else if (credentialType.getOtherCredentialToken() != null) {
-                    addOtherCredentialDetailsToFileSystemOptions(options,
+            } else if (credentialType.getOtherCredentialToken() != null) {
+                addOtherCredentialDetailsToFileSystemOptions(options,
                         credentialType.getOtherCredentialToken(), encrypter);
-                }
-
-                //TODO support other types of credentials
             }
-            if (uriPropertiesXML != null) {
-                if (uriPropertiesXML instanceof GridFtpURIPropertiesType) {
-                    final GridFtpURIPropertiesType gridFtpUriProperties = (GridFtpURIPropertiesType) uriPropertiesXML;
 
-                    // TODO: need to check with the Commons VFS Grid guys if there's a way of setting
-                    // other GridFTP URI related properties through GridFtpFileSystemConfigBuilder
-                }
-                else if (uriPropertiesXML instanceof SrbURIPropertiesType) {
-                    final SrbURIPropertiesType srbUriProperties = (SrbURIPropertiesType) uriPropertiesXML;
-                    final String defaultStorageResource = srbUriProperties
-                        .getDefaultResource();
-                    //int firewallPortMax = srbUriProperties.
-                    //int firewallPortMin = srbUriProperties.
-                    final String homeDirectory = srbUriProperties
-                        .getMdasCollectionHome();
-                    final String mcatZone = srbUriProperties.getMcatZone();
-                    final String mdasDomainName = srbUriProperties
-                        .getMdasDomainHome();
+            //TODO support other types of credentials
+        }
+        if (uriPropertiesXML != null) {
+            if (uriPropertiesXML instanceof GridFtpURIPropertiesType) {
+                final GridFtpURIPropertiesType gridFtpUriProperties = (GridFtpURIPropertiesType) uriPropertiesXML;
 
-                    if (defaultStorageResource != null
+                // TODO: need to check with the Commons VFS Grid guys if there's a way of setting
+                // other GridFTP URI related properties through GridFtpFileSystemConfigBuilder
+            } else if (uriPropertiesXML instanceof SrbURIPropertiesType) {
+                final SrbURIPropertiesType srbUriProperties = (SrbURIPropertiesType) uriPropertiesXML;
+                final String defaultStorageResource = srbUriProperties.getDefaultResource();
+                //int firewallPortMax = srbUriProperties.
+                //int firewallPortMin = srbUriProperties.
+                final String homeDirectory = srbUriProperties.getMdasCollectionHome();
+                final String mcatZone = srbUriProperties.getMcatZone();
+                final String mdasDomainName = srbUriProperties.getMdasDomainHome();
+
+                if (defaultStorageResource != null
                         && !defaultStorageResource.trim().equals("")) {
-                        LOGGER.debug("Setting SRB.defaultStorageResource to "
+                    LOGGER.debug("Setting SRB.defaultStorageResource to "
                             + defaultStorageResource);
-                        SRBFileSystemConfigBuilder.getInstance()
-                            .setDefaultStorageResource(options,
-                                defaultStorageResource);
-                    }
+                    SRBFileSystemConfigBuilder.getInstance().setDefaultStorageResource(options,
+                            defaultStorageResource);
+                }
 
-                    //SRBFileSystemConfigBuilder.getInstance().setFileWallPortMax(options, max);
-                    //SRBFileSystemConfigBuilder.getInstance().setFileWallPortMin(options, min);
+                //SRBFileSystemConfigBuilder.getInstance().setFileWallPortMax(options, max);
+                //SRBFileSystemConfigBuilder.getInstance().setFileWallPortMin(options, min);
 
-                    if (homeDirectory != null
+                if (homeDirectory != null
                         && !homeDirectory.trim().equals("")) {
-                        LOGGER.debug("Setting SRB.homeDirectory to "
+                    LOGGER.debug("Setting SRB.homeDirectory to "
                             + homeDirectory);
-                        SRBFileSystemConfigBuilder.getInstance()
-                            .setHomeDirectory(options, homeDirectory);
-                    }
+                    SRBFileSystemConfigBuilder.getInstance().setHomeDirectory(options, homeDirectory);
+                }
 
-                    if (mcatZone != null && !mcatZone.trim().equals("")) {
-                        LOGGER.debug("Setting SRB.mcatZone to " + mcatZone);
-                        SRBFileSystemConfigBuilder.getInstance().setMcatZone(
+                if (mcatZone != null && !mcatZone.trim().equals("")) {
+                    LOGGER.debug("Setting SRB.mcatZone to " + mcatZone);
+                    SRBFileSystemConfigBuilder.getInstance().setMcatZone(
                             options, mcatZone);
-                    }
+                }
 
-                    if (mdasDomainName != null
+                if (mdasDomainName != null
                         && !mdasDomainName.trim().equals("")) {
-                        LOGGER.debug("Setting SRB.mdasDomainName to "
+                    LOGGER.debug("Setting SRB.mdasDomainName to "
                             + mdasDomainName);
-                        SRBFileSystemConfigBuilder.getInstance()
-                            .setMdasDomainName(options, mdasDomainName);
-                    }
+                    SRBFileSystemConfigBuilder.getInstance().setMdasDomainName(options, mdasDomainName);
+                }
 
-                    SRBFileSystemConfigBuilder.getInstance().setQueryTimeout(
+                SRBFileSystemConfigBuilder.getInstance().setQueryTimeout(
                         options, SRB_QUERY_TIMEOUT);
 
-                }
-                else if (uriPropertiesXML instanceof IrodsURIPropertiesType) {
-                    final IrodsURIPropertiesType irodsUriProperties = (IrodsURIPropertiesType) uriPropertiesXML;
-                    final String defaultStorageResource = irodsUriProperties
-                        .getIrodsDefaultResource();
-                    final String homeDirectory = irodsUriProperties
-                        .getIrodsHome();
-                    final String zone = irodsUriProperties.getIrodsZone();
+            } else if (uriPropertiesXML instanceof IrodsURIPropertiesType) {
+                final IrodsURIPropertiesType irodsUriProperties = (IrodsURIPropertiesType) uriPropertiesXML;
+                final String defaultStorageResource = irodsUriProperties.getIrodsDefaultResource();
+                final String homeDirectory = irodsUriProperties.getIrodsHome();
+                final String zone = irodsUriProperties.getIrodsZone();
 
-                    if (defaultStorageResource != null
+                if (defaultStorageResource != null
                         && !defaultStorageResource.trim().equals("")) {
-                        LOGGER.debug("Setting IRODS.defaultStorageResource to "
+                    LOGGER.debug("Setting IRODS.defaultStorageResource to "
                             + defaultStorageResource);
-                        IRODSFileSystemConfigBuilder.getInstance()
-                            .setDefaultStorageResource(options,
-                                defaultStorageResource);
-                    }
-                    if (homeDirectory != null
+                    IRODSFileSystemConfigBuilder.getInstance().setDefaultStorageResource(options,
+                            defaultStorageResource);
+                }
+                if (homeDirectory != null
                         && !homeDirectory.trim().equals("")) {
-                        LOGGER.debug("Setting IRODS.homeDirectory to "
+                    LOGGER.debug("Setting IRODS.homeDirectory to "
                             + homeDirectory);
-                        IRODSFileSystemConfigBuilder.getInstance()
-                            .setHomeDirectory(options, homeDirectory);
-                    }
-                    if (zone != null && !zone.trim().equals("")) {
-                        LOGGER.debug("Setting IRODS.zone to " + zone);
-                        IRODSFileSystemConfigBuilder.getInstance().setZone(
+                    IRODSFileSystemConfigBuilder.getInstance().setHomeDirectory(options, homeDirectory);
+                }
+                if (zone != null && !zone.trim().equals("")) {
+                    LOGGER.debug("Setting IRODS.zone to " + zone);
+                    IRODSFileSystemConfigBuilder.getInstance().setZone(
                             options, zone);
-                    }
-
                 }
 
             }
         }
-
-        // TODO set the other URI related options here like the min/max port numbers
-        //      for GridFTP if provided
-
         // let's put the newly generated FileSytemOptions in the cache
-        sourceOrTargetFileSystemOptionsCache.put(sourceOrTarget, options);
+        sourceOrTargetFileSystemOptionsCache.put(sourceOrSink, options);
 
         return options;
     }
 
     public void clearCachedFileSystemOptions(final SubmitJobRequest job) {
         LOGGER.debug("Clearing cached FileSystemOptions for this job");
-        final DataTransferType[] dataTransfers = ((MinxJobDescriptionType) job
+        CopyType[] copies = job.getDataCopyActivity().getCopyArray();
+        for(final CopyType copy : copies){
+            sourceOrTargetFileSystemOptionsCache.remove(copy.getSource());
+            sourceOrTargetFileSystemOptionsCache.remove(copy.getSink());
+        }
+
+        /*final DataTransferType[] dataTransfers = ((MinxJobDescriptionType) job
             .getJobDefinition().getJobDescription()).getDataTransferArray();
         for (final DataTransferType dataTransfer : dataTransfers) {
             sourceOrTargetFileSystemOptionsCache.remove(dataTransfer
                 .getSource());
             sourceOrTargetFileSystemOptionsCache.remove(dataTransfer
                 .getTarget());
-        }
+        }*/
     }
 
     private void addMyProxyCredentialDetailsToFileSystemOptions(

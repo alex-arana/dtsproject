@@ -29,8 +29,9 @@ package org.dataminx.dts.common.validator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CopyType;
-import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 
@@ -49,39 +50,13 @@ public class DefaultDtsJobDefinitionValidator extends AbstractDtsJobDefinitionVa
      * {@inheritDoc}
      */
     public boolean supports(Class clazz) {
-        //return JobDefinitionType.class.isAssignableFrom(clazz);
-        return DataCopyActivityType.class.isAssignableFrom(clazz);
-
+        return JobDefinitionType.class.isAssignableFrom(clazz);
     }
 
     /**
      * {@inheritDoc}
      */
     public void validate(Object object, Errors errors) {
-        LOGGER.debug("DefaultDtsJobDefinitionValidator validate()");
-        DataCopyActivityType dataCopyActivity = (DataCopyActivityType)object;
-
-        // hand over the validation work to the respective DtsJob element validators..
-        try {
-            errors.pushNestedPath("dataLocations");
-            
-            CopyType[] copies = dataCopyActivity.getCopyArray();
-            for (int i = 0; copies != null && i < copies.length; i++) {
-               ValidationUtils.invokeValidator(this.mDataLocationsValidator,
-                        copies[i].getSource(), errors);
-                ValidationUtils.invokeValidator(this.mDataLocationsValidator,
-                        copies[i].getSink(), errors);
-            }
-        }
-        finally {
-            errors.popNestedPath();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    /*public void validate(Object object, Errors errors) {
         LOGGER.debug("DefaultDtsJobDefinitionValidator validate()");
         // now let's check for semantic issues..
         // assume we require the following fields to be filled up in the job definition document
@@ -126,6 +101,6 @@ public class DefaultDtsJobDefinitionValidator extends AbstractDtsJobDefinitionVa
         finally {
             errors.popNestedPath();
         }
-    }*/
+    }
 
 }

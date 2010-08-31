@@ -29,9 +29,8 @@ package org.dataminx.dts.common.validator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataLocationsType;
-//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
-//import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
+import org.ggf.schemas.jsdl.x2005.x11.jsdl.SourceTargetType;
 
 /**
  * The AbstractDtsJobDefinitionValidator provides implementations to the DtsJobDefinitionValidator methods and will
@@ -46,17 +45,17 @@ public abstract class AbstractDtsJobDefinitionValidator implements DtsJobDefinit
     private static final Log LOGGER = LogFactory.getLog(AbstractDtsJobDefinitionValidator.class);
 
     /** The JobIdentificationValidator. */
-    //protected JobIdentificationValidator mJobIdentificationValidator;
+    protected JobIdentificationValidator mJobIdentificationValidator;
 
-    /** The DataLocationsValidator. */
-    protected DataLocationsValidator mDataLocationsValidator;
+    /** The SourceTargetValidator. */
+    protected SourceTargetValidator mSourceTargetValidator;
 
     /**
      * Sets the JobIdentificationValidator to use by the subclasses of this abstract class.
      *
      * @param jobIdentificationValidator the JobIdentificationValidator
      */
-    /*public void setJobIdentificationValidator(JobIdentificationValidator jobIdentificationValidator) {
+    public void setJobIdentificationValidator(JobIdentificationValidator jobIdentificationValidator) {
         LOGGER.debug("AbstractDtsJobDefinitionValidator setJobIdentificationValidator()");
         if (jobIdentificationValidator == null) {
             throw new IllegalArgumentException("The supplied [JobIdentificationValidator] must not be null.");
@@ -67,14 +66,14 @@ public abstract class AbstractDtsJobDefinitionValidator implements DtsJobDefinit
                 + "must support the validation of [JobIdentificationType] instances.");
         }
         mJobIdentificationValidator = jobIdentificationValidator;
-    }*/
+    }
 
     /**
      * Sets the SourceTargetValidator to use by the subclasses of this abstract class.
      *
      * @param sourceTargetValidator the SourceTargetValidator
      */
-    /*public void setSourceTargetValidator(DataLocationsValidator sourceTargetValidator) {
+    public void setSourceTargetValidator(SourceTargetValidator sourceTargetValidator) {
         LOGGER.debug("AbstractDtsJobDefinitionValidator setSourceTargetValidator()");
         if (sourceTargetValidator == null) {
             throw new IllegalArgumentException("The supplied [SourceTargetValidator] must not be null.");
@@ -85,25 +84,5 @@ public abstract class AbstractDtsJobDefinitionValidator implements DtsJobDefinit
                 +  "must support the validation of [SourceTargetType] instances.");
         }
         mSourceTargetValidator = sourceTargetValidator;
-    }*/
-
-    
-    /**
-     * Sets the DataLocationsValidator to use by the subclasses of this abstract class.
-     *
-     * @param dataLocationsValidator the DataLocationsValidator
-     */
-    public void setDataLocationsTypeValidator(DataLocationsValidator dataLocationsValidator){
-        LOGGER.debug("AbstractDtsJobDefinitionValidator setDataLocationsTypeValidator()");
-        if (dataLocationsValidator == null) {
-            throw new IllegalArgumentException("The supplied [dataLocationsValidator] must not be null.");
-        }
-        if (!dataLocationsValidator.supports(DataLocationsType.class)) {
-            throw new IllegalArgumentException(
-                "The supplied [dataLocationsValidator] "
-                +  "must support the validation of [DataLocationsType] instances.");
-        }
-        this.mDataLocationsValidator = dataLocationsValidator;
     }
-
 }
