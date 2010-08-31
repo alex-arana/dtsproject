@@ -39,12 +39,16 @@ import javax.xml.transform.TransformerException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.xmlbeans.XmlObject;
 import org.dataminx.dts.common.xml.XmlUtils;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
-import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
+
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.DataStagingType;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.DataStagingType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDescriptionType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CopyType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityRequirementsType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -90,6 +94,9 @@ public final class SchemaUtils {
     public static String getAuditableString(final Object schemaObject) {
         if (schemaObject instanceof XmlObject) {
             final XmlObject xmlObject = (XmlObject) schemaObject;
+            //TODO - Modify the xslt string ! 
+            if(true) return xmlObject.toString();
+
             try {
                 final StringResult result = new StringResult();
                 final Transformer transformer = AUDIT_LOGGING_TEMPLATE
@@ -128,7 +135,7 @@ public final class SchemaUtils {
      * @return A list holding instances of {@link DataStagingType} elements contained in the input DTS job request. This
      *         method will return an empty list when there are no data staging elements in the input request
      */
-    public static List<DataStagingType> getDataStagingList(
+    /*public static List<DataStagingType> getDataStagingList(
         final SubmitJobRequest submitJobRequest) {
         Assert.notNull(submitJobRequest);
         final List<DataStagingType> result = new ArrayList<DataStagingType>();
@@ -141,6 +148,16 @@ public final class SchemaUtils {
                 CollectionUtils.addAll(result, jobDescription
                     .getDataStagingArray());
             }
+        }
+        return result;
+    }*/
+    public static List<CopyType> getDataCopyList(
+        final SubmitJobRequest submitJobRequest) {
+        Assert.notNull(submitJobRequest);
+        final List<CopyType> result = new ArrayList<CopyType>();
+        final DataCopyActivityType dc = submitJobRequest.getDataCopyActivity();
+        if(dc != null){
+            CollectionUtils.addAll(result, dc.getCopyArray());
         }
         return result;
     }
@@ -157,7 +174,7 @@ public final class SchemaUtils {
      * @return A list holding instances of {@link DataTransferType} elements contained in the input DTS job request.
      *         This method will return an empty list when there are no data staging elements in the input request
      */
-    public static List<DataTransferType> getDataTransfers(
+    /*public static List<DataTransferType> getDataTransfers(
         final SubmitJobRequest submitJobRequest) {
         Assert.notNull(submitJobRequest);
         final List<DataTransferType> result = new ArrayList<DataTransferType>();
@@ -173,9 +190,11 @@ public final class SchemaUtils {
             }
         }
         return result;
-    }
+    }*/
 
-    public static long getMaxAttempts(final SubmitJobRequest submitJobRequest) {
+
+
+    /*public static long getMaxAttempts(final SubmitJobRequest submitJobRequest) {
         Assert.notNull(submitJobRequest);
         final JobDefinitionType jobDefinition = submitJobRequest.getJobDefinition();
         if (jobDefinition != null) {
@@ -187,5 +206,16 @@ public final class SchemaUtils {
         }
         return 0;
 
+    }*/
+    public static long getMaxAttempts(final SubmitJobRequest submitJobRequest) {
+        Assert.notNull(submitJobRequest);
+        final DataCopyActivityType dca = submitJobRequest.getDataCopyActivity();
+        if(dca != null){
+            DataCopyActivityRequirementsType dcar = dca.getDataCopyActivityRequirements();
+            if(dcar != null){
+                return dcar.getMaxAttempts();
+            }
+        }
+        return 1;
     }
 }

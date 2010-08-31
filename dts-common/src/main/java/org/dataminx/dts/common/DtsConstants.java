@@ -64,8 +64,9 @@ public class DtsConstants {
     public static final String WS_SECURITY_NAMESPACE_URI =
         "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
 
-    /** The dataminx JSDL namespace URI. */
-    public static final String DTS_JSDL_NAMESPACE_URI = "http://schemas.dataminx.org/dts/2009/07/jsdl";
+    /** The dataminx namespace URI. */
+    //public static final String DTS_JSDL_NAMESPACE_URI = "http://schemas.dataminx.org/dts/2009/07/jsdl";
+    public static final String DTS_DMI_COMMON_NAMESPACE_URI = "http://schemas.dmi.proposal.org/dts/2010/dmi-common";
 
     /** The tmp protocol scheme. */
     public static final String TMP_ROOT_PROTOCOL = "tmp:///";

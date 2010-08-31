@@ -27,7 +27,10 @@
  */
 package org.dataminx.dts.common.util;
 
-import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
+//import org.dataminx.schemas.dts.x2009.x07.jsdl.CredentialType;
+
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CredentialType;
+
 
 /**
  * The CredentialStore will be the container for real credentials that users
