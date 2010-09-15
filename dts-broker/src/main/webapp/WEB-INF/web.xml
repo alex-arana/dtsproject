@@ -1,0 +1,18 @@
+<web-app
+  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  version="2.4">
+  <display-name>Data Transfer (Prototype) Service Broker</display-name>
+
+  <servlet>
+    <servlet-name>dts-broker</servlet-name>
+    <servlet-class>
+       org.dataminx.dts.broker.DtsBrokerServlet
+    </servlet-class>
+    <init-param>
+      <param-name>dataminxDirectory</param-name>
+      <param-value>${dataminx.dir}</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+</web-app>

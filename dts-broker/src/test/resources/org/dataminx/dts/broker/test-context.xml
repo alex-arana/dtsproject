@@ -11,8 +11,8 @@
   <context:annotation-config/>
 
   <bean id="mQueueSender" class="org.dataminx.dts.common.jms.JobQueueSender">
-    <property name="mQueue" ref="brokerJobSubmissionQueue"/>
-    <property name="mJmsTemplate" ref="testJmsTemplate"/>
+    <property name="queue" ref="brokerJobSubmissionQueue"/>
+    <property name="jmsTemplate" ref="testJmsTemplate"/>
   </bean>
   
   <bean id="testJmsTemplate" class="org.springframework.jms.core.JmsTemplate">

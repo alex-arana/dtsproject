@@ -9,18 +9,22 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.dataminx.dts.common.jms.JobQueueSender;
+/*
 import org.dataminx.schemas.dts.x2009.x07.jsdl.DataTransferType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxJobDescriptionType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxSourceTargetType;
 import org.dataminx.schemas.dts.x2009.x07.jsdl.MinxTransferRequirementsType;
+*/
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
+/*
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument.SubmitJobRequest;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.CreationFlagEnumeration;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobIdentificationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+*/
+ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -33,20 +37,19 @@ import org.testng.annotations.Test;
  * @author hnguyen
  */
 @ContextConfiguration
-public class TestBrokeringDtsJobMessage extends
+public class BrokeringDtsJobMessageIntegrationTest extends
     AbstractTestNGSpringContextTests {
 
     @Autowired
     @Qualifier("mQueueSender")
     private JobQueueSender mQueueSender;
 
-
+    @Test
     public void submitDtsJobAsText() throws Exception {
         final Resource xml = new ClassPathResource("/job"
             + getTestFilePostfix() + ".xml");
         final SubmitJobRequestDocument root = SubmitJobRequestDocument.Factory
-            .parse(xml.getInputStream());
-        ;
+            .parse(xml.getInputStream());       
         final String dtsJobId = generateNewJobId();
         final Map<String, Object> jmsParameterMap = new HashMap<String, Object>();
         jmsParameterMap.put(ROUTING_HEADER_KEY, "ANSTO");
@@ -54,7 +57,7 @@ public class TestBrokeringDtsJobMessage extends
             .doSend(dtsJobId + "ANSTO", jmsParameterMap, root.xmlText());
 
     }
-
+/*
     @Test
     public void submitConstructedJob() throws Exception {
         final SubmitJobRequestDocument root = SubmitJobRequestDocument.Factory.newInstance();
@@ -96,7 +99,7 @@ public class TestBrokeringDtsJobMessage extends
         jmsParameterMap.put(ROUTING_HEADER_KEY, "ANSTO");
         mQueueSender.doSend(dtsJobId + "ANSTO", jmsParameterMap, root.xmlText());
     }
-
+*/
     private String generateNewJobId() {
         return "DTSTestJob_" + UUID.randomUUID();
     }
