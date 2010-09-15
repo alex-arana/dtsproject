@@ -95,9 +95,7 @@ public class DataTransferServiceImpl implements DataTransferService,
      * {@inheritDoc}
      */
     public String submitJob(final SubmitJobRequestDocument submitJobRequest) {
-        final String jobName = submitJobRequest.getSubmitJobRequest()
-            .getJobDefinition().getJobDescription().getJobIdentification()
-            .getJobName();
+      //  final String jobName = submitJobRequest.getSubmitJobRequest().getDataCopyActivity().getName().toString();
         String subjectName = "NEW_USER";
 
         final TransportContext txContext = TransportContextHolder
@@ -117,8 +115,8 @@ public class DataTransferServiceImpl implements DataTransferService,
         }
 
         LOGGER.debug("DataTransferServiceImpl submitJob()");
-        LOGGER.debug("Running job '" + jobName + "' submitted by user '"
-            + subjectName + "'");
+      //  LOGGER.debug("Running job '" + jobName + "' submitted by user '"
+      //      + subjectName + "'");
 
         // we'll assume that once we get to this point, the job definition that the user
         // submitted is valid (in XML terms) or conforms to the schema
@@ -127,7 +125,7 @@ public class DataTransferServiceImpl implements DataTransferService,
         // been provided by the user. let's give the job a resource key and save it in the DB
         final Job newJob = new Job();
         final String newJobResourceKey = UUID.randomUUID().toString();
-        newJob.setName(jobName);
+        newJob.setName("jobName123");
         newJob.setResourceKey(newJobResourceKey);
         newJob.setStatus(JobStatus.CREATED);
         newJob.setSubjectName(subjectName);

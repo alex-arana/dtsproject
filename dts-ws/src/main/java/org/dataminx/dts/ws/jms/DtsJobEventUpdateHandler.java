@@ -32,7 +32,8 @@ import java.util.Date;
 import org.dataminx.dts.common.model.JobStatus;
 import org.dataminx.dts.ws.model.Job;
 import org.dataminx.dts.ws.repo.JobDao;
-import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument;
+/*
+ import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument;
 import org.dataminx.schemas.dts.x2009.x07.jms.FireUpStepFailureEventDocument;
 import org.dataminx.schemas.dts.x2009.x07.jms.JobErrorEventDetailType;
 import org.dataminx.schemas.dts.x2009.x07.jms.JobEventDetailType;
@@ -40,6 +41,16 @@ import org.dataminx.schemas.dts.x2009.x07.jms.JobEventUpdateRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.jms.FireUpJobErrorEventDocument.FireUpJobErrorEvent;
 import org.dataminx.schemas.dts.x2009.x07.jms.JobEventUpdateRequestDocument.JobEventUpdateRequest;
 import org.ogf.schemas.dmi.x2008.x05.dmi.StatusValueType;
+ */
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.StatusValueType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.FireUpJobErrorEventDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.FireUpJobErrorEventDocument.FireUpJobErrorEvent;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.FireUpStepFailureEventDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.JobErrorEventDetailType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.JobEventDetailType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.JobEventUpdateRequestDocument;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.callbackevent.JobEventUpdateRequestDocument.JobEventUpdateRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.core.Message;
@@ -86,6 +97,11 @@ public class DtsJobEventUpdateHandler {
                 .findByResourceKey(updatedJobResourceKey);
 
             switch (updatedJobDetail.getStatus().intValue()) {
+
+                case StatusValueType.INT_CREATED:
+                    job.setStatus(JobStatus.CREATED);
+                    break;
+
                 case StatusValueType.INT_TRANSFERRING:
                     job.setWorkerNodeHost(updatedJobDetail.getWorkerNodeHost());
 
@@ -148,8 +164,33 @@ public class DtsJobEventUpdateHandler {
 
                     // TODO: need to think of how to handle error messages from WN so the success flag
                     // can be set
-
+                    
                     break;
+
+                case StatusValueType.INT_FAILED:
+                    job.setStatus(JobStatus.FAILED);
+                    break;
+
+                case StatusValueType.INT_FAILED_CLEAN:
+                    job.setStatus(JobStatus.FAILED_CLEAN);
+                    break;
+
+                case StatusValueType.INT_FAILED_UNCLEAN:
+                    job.setStatus(JobStatus.FAILED_UNCLEAN);
+                    break;
+
+                case StatusValueType.INT_FAILED_UNKNOWN:
+                    job.setStatus(JobStatus.FAILED_UNKNOWN);
+                    break;
+
+                case StatusValueType.INT_SCHEDULED:
+                    job.setStatus(JobStatus.SCHEDULED);
+                    break;
+
+                case StatusValueType.INT_SUSPENDED:
+                    job.setStatus(JobStatus.SUSPENDED);
+                    break;
+                    
                 default:
                     break;
             }
