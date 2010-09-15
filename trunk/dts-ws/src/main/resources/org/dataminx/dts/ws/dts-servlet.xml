@@ -24,6 +24,7 @@
   <bean id="schemaCollection" class="org.springframework.xml.xsd.commons.CommonsXsdSchemaCollection">
     <property name="xsds">
       <list>
+<!--
         <value>classpath:dmi.xsd</value>
         <value>classpath:dmi-redef.xsd</value>
         <value>classpath:jsdl.xsd</value>
@@ -31,6 +32,13 @@
         <value>classpath:minx-jsdl.xsd</value>
         <value>classpath:minx-jms-messages.xsd</value>
         <value>classpath:minx-dts-messages.xsd</value>
+-->
+        <value>classpath:dmi-common.xsd</value>
+        <value>classpath:minx-dts-messages.xsd</value>
+  <!--      <value>classpath:minx-event-callback-messages.xsd</value>
+        <value>classpath:minx-misc.xsd</value>
+   -->
+
       </list>
     </property>
     <property name="inline" value="true" />
@@ -88,13 +96,16 @@
   </bean>
 
   <bean id="dtsJobDefinitionValidator" class="org.dataminx.dts.common.validator.DefaultDtsJobDefinitionValidator">
-    <property name="jobIdentificationValidator" ref="jobIdentificationValidator"/>
-    <property name="sourceTargetValidator" ref="sourceTargetValidator"/>
+  <!--  <property name="jobIdentificationValidator" ref="jobIdentificationValidator"/>-->
+  <!--  <property name="sourceTargetValidator" ref="sourceTargetValidator"/> -->
+    <property name="dataLocationsTypeValidator" ref="dataLocationsTypeValidator"/>
   </bean>
 
-  <bean id="jobIdentificationValidator" class="org.dataminx.dts.common.validator.DefaultJobIdentificationValidator"/>
+   <!--  <bean id="jobIdentificationValidator" class="org.dataminx.dts.common.validator.DefaultJobIdentificationValidator"/> -->
 
-  <bean id="sourceTargetValidator" class="org.dataminx.dts.common.validator.DefaultSourceTargetValidator"/>
+   <!--  <bean id="sourceTargetValidator" class="org.dataminx.dts.common.validator.DefaultSourceTargetValidator"/> -->
+
+   <bean id="dataLocationsTypeValidator" class="org.dataminx.dts.common.validator.DefaultDataLocationsValidator"/>
 
   <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
     <property name="basename" value="validation-errors"/>

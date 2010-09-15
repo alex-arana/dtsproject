@@ -95,8 +95,8 @@ public class DtsFaultMappingExceptionResolver extends
             transform(faultDocument.getDomNode(), fault);
         }
         else if (ex instanceof JobStatusUpdateException) {
-            final AuthenticationException exception = (AuthenticationException) ex;
-            final AuthenticationFaultDocument faultDocument = translate(exception);
+            final JobStatusUpdateException exception = (JobStatusUpdateException) ex;
+            final JobStatusUpdateFaultDocument faultDocument = translate(exception);
             transform(faultDocument.getDomNode(), fault);
         }
         else if (ex instanceof NonExistentJobException) {

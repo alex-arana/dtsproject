@@ -32,7 +32,8 @@ import static org.dataminx.dts.common.util.TestFileChooser.getTestFilePostfix;
 import java.io.File;
 
 import org.dataminx.dts.ws.client.DataTransferServiceClient;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
@@ -55,7 +56,7 @@ public class DtsWsIntegrationTest extends AbstractTestNGSpringContextTests {
     private DataTransferServiceClient mClient;
 
     /** The DTS Job XML document. */
-    private JobDefinitionDocument mDtsJob;
+    private SubmitJobRequestDocument mDtsJob;
 
     /**
      * Parses the test job and convert to a org.w3c.dom.Document object
@@ -66,7 +67,7 @@ public class DtsWsIntegrationTest extends AbstractTestNGSpringContextTests {
     public void parseDtsJobDef() throws Exception {
         final File f = new ClassPathResource("ws-minx-dts"
             + getTestFilePostfix() + ".xml").getFile();
-        mDtsJob = JobDefinitionDocument.Factory.parse(f);
+        mDtsJob = SubmitJobRequestDocument.Factory.parse(f);
         Assert.assertNotNull(mDtsJob);
     }
 
@@ -99,10 +100,10 @@ public class DtsWsIntegrationTest extends AbstractTestNGSpringContextTests {
      *
      * @throws Exception the exception
      */
-    //@Test
+    @Test
     public void testGetJobStatus() throws Exception {
         final String jobResourceKey = mClient.submitJob(mDtsJob);
-        Assert.assertEquals("Created", mClient.getJobStatus(jobResourceKey));
+        Assert.assertEquals("Scheduled", mClient.getJobStatus(jobResourceKey));
     }
 
     /**
@@ -110,7 +111,7 @@ public class DtsWsIntegrationTest extends AbstractTestNGSpringContextTests {
      *
      * @throws Exception the exception
      */
-    //@Test
+    @Test
     public void testSuspendJob() throws Exception {
         final String jobResourceKey = mClient.submitJob(mDtsJob);
         mClient.suspendJob(jobResourceKey);
@@ -122,7 +123,7 @@ public class DtsWsIntegrationTest extends AbstractTestNGSpringContextTests {
      *
      * @throws Exception the exception
      */
-    //@Test
+    @Test
     public void testResumeJob() throws Exception {
         final String jobResourceKey = mClient.submitJob(mDtsJob);
         mClient.suspendJob(jobResourceKey);
@@ -136,7 +137,7 @@ public class DtsWsIntegrationTest extends AbstractTestNGSpringContextTests {
      *
      * @throws Exception the exception
      */
-    //@Test
+    @Test
     public void testCancelJob() throws Exception {
         final String jobResourceKey = mClient.submitJob(mDtsJob);
         mClient.cancelJob(jobResourceKey);

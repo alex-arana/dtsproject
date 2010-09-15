@@ -49,7 +49,7 @@ import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobResponseDocument;
 import org.dataminx.schemas.dts.x2009.x07.messages.SuspendJobRequestDocument;
-import org.ogf.schemas.dmi.x2008.x05.dmi.StatusValueType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.StatusValueType;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.MessageSource;
 import org.springframework.util.Assert;
@@ -120,9 +120,7 @@ public class DataTransferServiceEndpoint implements InitializingBean {
 
         final MapBindingResult errors = new MapBindingResult(new HashMap(),
             "jobDefinitionErrors");
-
-        mDtsJobDefinitionValidator.validate(request.getSubmitJobRequest()
-            .getJobDefinition(), errors);
+        mDtsJobDefinitionValidator.validate(request.getSubmitJobRequest().getDataCopyActivity(), errors);
 
         if (errors.hasErrors()) {
             //FieldError error = errors.getFieldError("jobIdentification.jobName");
