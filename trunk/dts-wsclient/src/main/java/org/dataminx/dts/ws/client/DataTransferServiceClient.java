@@ -28,7 +28,8 @@
 package org.dataminx.dts.ws.client;
 
 import org.dataminx.schemas.dts.x2009.x07.messages.JobDetailsType;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+//import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
+import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
 
 /**
@@ -45,7 +46,7 @@ public interface DataTransferServiceClient {
      * @return the Universally Unique Identifier for the submitted job or null
      *         if an error occurred during the job submission
      */
-    String submitJob(JobDefinitionDocument dtsJob);
+    String submitJob(SubmitJobRequestDocument dtsJob);
 
     /**
      * Cancel the job.

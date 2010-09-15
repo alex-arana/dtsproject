@@ -15,6 +15,19 @@
   <artifactId>dts-wsclient</artifactId>
   <packaging>jar</packaging>
 
+ <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>org.dataminx.dts.client.DtsWSClientCommandLineRunner</mainClass>
+          <classpathScope>runtime</classpathScope>
+        </configuration>
+      </plugin>
+      </plugins>
+  </build>
+  
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

@@ -48,7 +48,6 @@ import org.dataminx.schemas.dts.x2009.x07.messages.GetJobDetailsRequestDocument.
 import org.dataminx.schemas.dts.x2009.x07.messages.GetJobStatusRequestDocument.GetJobStatusRequest;
 import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument.ResumeJobRequest;
 import org.dataminx.schemas.dts.x2009.x07.messages.SuspendJobRequestDocument.SuspendJobRequest;
-import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionDocument;
 import org.springframework.ws.client.WebServiceIOException;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
 import org.springframework.ws.client.core.WebServiceTemplate;
@@ -78,14 +77,8 @@ public class DataTransferServiceClientImpl implements DataTransferServiceClient 
     /**
      * {@inheritDoc}
      */
-    public String submitJob(final JobDefinitionDocument dtsJob) {
-        final SubmitJobRequestDocument request = SubmitJobRequestDocument.Factory.newInstance();
-        //SubmitJobRequest submitJobRequest =
-        request.addNewSubmitJobRequest();
-
-        // replace JobDefinition with the one read from the input file
-        request.getSubmitJobRequest().setJobDefinition(dtsJob.getJobDefinition());
-
+    public String submitJob(final SubmitJobRequestDocument request) {
+        
         // TODO: filter out the credential info from the logs using the one that WN uses
         final String auditableRequest = SchemaUtils.getAuditableString(request);
         LOGGER.debug("request payload:\n" + auditableRequest);
