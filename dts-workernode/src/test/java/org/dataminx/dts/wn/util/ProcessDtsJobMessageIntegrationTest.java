@@ -39,6 +39,7 @@ import org.dataminx.schemas.dts.x2009.x07.messages.SubmitJobRequestDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
@@ -57,8 +58,13 @@ public class ProcessDtsJobMessageIntegrationTest extends
     @Qualifier("jobQueueSender")
     private JobQueueSender mJmsQueueSender;
 
+    @Autowired
+    @Qualifier("eventQueueListenerContainer")
+    private DefaultMessageListenerContainer mDefaultMessageListenerContainer;
+
     @Test
     public void submitDtsJobAsDocument() throws Exception {
+        mDefaultMessageListenerContainer.start();
         final File f = new ClassPathResource(
             "/org/dataminx/dts/wn/util/minx-dts" + getTestFilePostfix()
                 + ".xml").getFile();
@@ -69,8 +75,13 @@ public class ProcessDtsJobMessageIntegrationTest extends
         jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodemyhostname001");
         //jmsproperties.put("groupID", "physics");
         mJmsQueueSender.doSend(generateNewJobId(), jmsproperties, jobRequest);
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException iex) {
+        }
         // TODO: add a few lines of assert in here to make sure that the job really is running
         // or has completed
+        mDefaultMessageListenerContainer.destroy();
     }
 
     private String generateNewJobId() {
