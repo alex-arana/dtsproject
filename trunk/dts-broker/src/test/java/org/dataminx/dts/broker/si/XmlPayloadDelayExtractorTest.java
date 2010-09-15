@@ -22,7 +22,7 @@ import org.unitils.inject.annotation.TestedObject;
 @Test(groups = "testng-unit-tests")
 public class XmlPayloadDelayExtractorTest extends UnitilsTestNG {
 
-    private static final String QUERY_STR = "declare namespace dmi='http://schemas.ogf.org/dmi/2008/05/dmi';$this//dmi:StartNotBefore";
+    private static final String QUERY_STR = "declare namespace dmi2='http://schemas.dmi.proposal.org/dts/2010/dmi-common';$this//dmi2:StartNotBefore";
     private static final String EXPECTED = "2010-03-11T17:50:00";
     @TestedObject
     private XmlPayloadDelayExtractor mExtractor;

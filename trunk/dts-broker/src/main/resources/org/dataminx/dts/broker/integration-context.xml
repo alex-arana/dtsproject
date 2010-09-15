@@ -25,9 +25,10 @@
   
   <!-- Defines a point-to-point channel for receiving DTS job requests. -->
   <si:channel id="brokerJobSubmissionChannel">
-    <si:interceptors>
+<!--    <si:interceptors>
        <si:ref bean="securityInterceptor"/> 
     </si:interceptors>
+ -->
   </si:channel>
   <si:channel id="brokerSchedulingChannel" />
   <si:channel id="brokerRoutingChannel"/>
@@ -60,10 +61,11 @@
   <bean id="schemaVerifier" class="org.dataminx.dts.broker.si.DtsSchemaVerifier">
     <property name="transformer" ref="dtsMessagePayloadTransformer"/>
   </bean>
-  
+<!--
   <bean id="securityInterceptor" class="org.dataminx.dts.broker.si.DtsSecurityInterceptor">
     <property name="encrypter" ref="encryptionPlugin" />
   </bean>
+ -->
   
   <bean id="xmlPayloadDelayExtractor" class="org.dataminx.dts.broker.si.XmlPayloadDelayExtractor">
     <constructor-arg index="0" value="${broker.xml.queryStr}"/>
@@ -115,10 +117,10 @@
   <si:channel id="brokerANSTOChannel"/>
   <si-jms:outbound-channel-adapter
       channel="brokerANSTOChannel"
-      jms-template="jmsTemplate"/>
+      jms-template="anstoJmsTemplate"/>
       
   <si:channel id="brokerASFChannel"/>
   <si-jms:outbound-channel-adapter
       channel="brokerASFChannel"
-      jms-template="jmsTemplate"/>      
+      jms-template="asfJmsTemplate"/>
 </beans>
