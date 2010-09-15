@@ -167,10 +167,10 @@
     <module>dts-workernode</module>
     <module>dts-batchjob</module>
     <!-- temporarily disable the dts-ws module until we start working on it again -->
-    <!--<module>dts-ws</module>-->
+    <module>dts-ws</module>
     <module>dts-security</module>
     <!-- temporarily disable the dts-wsclient module until we start working on it again -->
-    <!--<module>dts-wsclient</module>-->
+    <module>dts-wsclient</module>
     <module>dts-broker</module>
     <module>dts-batchjobclient</module>
     <!--
