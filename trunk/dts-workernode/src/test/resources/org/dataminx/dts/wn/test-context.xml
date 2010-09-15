@@ -30,6 +30,7 @@
         <property name="locations">
             <list>
                 <value>file:///${dataminx.dir}/dts-workernode.properties</value>
+                <value>file:///${dataminx.dir}/dts-client.properties</value>
                 <!--<value>file:///${dataminx.dir}/dts-bulkcopyjob.properties</value>-->
             </list>
         </property>
@@ -53,12 +54,28 @@
         <property name="cacheProducers" value="${si.jms.cacheProducers}"/>
     </bean>
 
+    <bean id="jmsConnectionFactoryforEventQueue" class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory">
+            <bean class="org.apache.activemq.spring.ActiveMQConnectionFactory">
+                <property name="brokerURL" value="${si.jms.brokerURL}"/>
+                <property name="userName" value="${wn.user.name}"/>
+                <property name="password" value="${wn.user.password}"/>
+            </bean>
+        </property>
+        <property name="sessionCacheSize" value="${si.jms.sessionCacheSize}"/>
+        <property name="cacheProducers" value="${si.jms.cacheProducers}"/>
+    </bean>
+
     <bean id="jmsJobSubmitQueue" class="org.apache.activemq.command.ActiveMQQueue">
         <constructor-arg index="0" value="${si.jms.jobSubmitQueueName}"/>
     </bean>
 
     <bean id="jmsJobControlQueue" class="org.apache.activemq.command.ActiveMQQueue">
         <constructor-arg index="0" value="${si.jms.jobControlQueueName}"/>
+    </bean>
+
+    <bean id="jmsEventQueue" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg index="0" value="${si.jms.jobEventQueueName}"/>
     </bean>
 
     <!--
@@ -95,5 +112,14 @@
     </bean>
 
     <bean id="credentialStore" class="org.dataminx.dts.common.util.CredentialStoreImpl"/>
+
+<bean id="eventQueueListener" class="org.dataminx.dts.common.jms.EventQueueListener" />
+
+<bean id="eventQueueListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="jmsConnectionFactoryforEventQueue"/>
+    <property name="destination" ref="jmsEventQueue"/>
+    <property name="messageListener" ref="eventQueueListener" />
+    <property name="messageSelector" value="${si.jms.JobEventQueue.selector}"/>
+</bean>
 
 </beans>

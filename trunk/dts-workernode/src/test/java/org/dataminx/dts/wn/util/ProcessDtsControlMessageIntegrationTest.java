@@ -39,6 +39,7 @@ import org.dataminx.schemas.dts.x2009.x07.messages.ResumeJobRequestDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
@@ -58,9 +59,14 @@ public class ProcessDtsControlMessageIntegrationTest extends
     @Autowired
     @Qualifier("controlQueueSender")
     private ControlQueueSender mJmsQueueSender;
-    
+
+    @Autowired
+    @Qualifier("eventQueueListenerContainer")
+    private DefaultMessageListenerContainer mDefaultMessageListenerContainer;
+
     @Test
     public void cancelDtsJobAsDocument() throws Exception {
+        mDefaultMessageListenerContainer.start();
         final File f = new ClassPathResource("/org/dataminx/dts/wn/util/cancel-request.xml").getFile();
         final CancelJobRequestDocument jobRequest = CancelJobRequestDocument.Factory
             .parse(f);
@@ -68,11 +74,17 @@ public class ProcessDtsControlMessageIntegrationTest extends
         jmsproperties.put("ClientID","DtsClient001");
         jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodemyhostname001");
         mJmsQueueSender.doSend("cancel"+generateNewJobId(), jmsproperties, jobRequest);
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException iex) {
+        }
         // TODO: add a few lines of assert in here to make sure that the job really is running
         // or has completed
+        mDefaultMessageListenerContainer.destroy();
      }
     @Test
     public void resumeDtsJobAsDocument() throws Exception {
+        mDefaultMessageListenerContainer.start();
         final File f = new ClassPathResource("/org/dataminx/dts/wn/util/resume-request.xml").getFile();
         final ResumeJobRequestDocument jobRequest = ResumeJobRequestDocument.Factory
             .parse(f);
@@ -80,12 +92,18 @@ public class ProcessDtsControlMessageIntegrationTest extends
         jmsproperties.put("ClientID","DtsClient001");
         jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodemyhostname001");
         mJmsQueueSender.doSend("resume"+generateNewJobId(), jmsproperties, jobRequest);
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException iex) {
+        }
         // TODO: add a few lines of assert in here to make sure that the job really is running
         // or has completed
+        mDefaultMessageListenerContainer.destroy();
     }
 
     @Test
     public void getJobStatusRequestDocument() throws Exception {
+        mDefaultMessageListenerContainer.start();
         final File f = new ClassPathResource("/org/dataminx/dts/wn/util/getJobStatus-request.xml").getFile();
         final GetJobStatusRequestDocument jobRequest = GetJobStatusRequestDocument.Factory
             .parse(f);
@@ -93,8 +111,13 @@ public class ProcessDtsControlMessageIntegrationTest extends
         jmsproperties.put("ClientID","DtsClient001");
         jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodemyhostname001");
         mJmsQueueSender.doSend("getJobStatus"+generateNewJobId(), jmsproperties, jobRequest);
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException iex) {
+        }
         // TODO: add a few lines of assert in here to make sure that the job really is running
         // or has completed
+        mDefaultMessageListenerContainer.destroy();
     }
 
     private String generateNewJobId() {
