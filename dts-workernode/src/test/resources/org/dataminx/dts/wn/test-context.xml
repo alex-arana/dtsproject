@@ -30,7 +30,7 @@
         <property name="locations">
             <list>
                 <value>file:///${dataminx.dir}/dts-workernode.properties</value>
-                <value>file:///${dataminx.dir}/dts-client.properties</value>
+                <!--<value>file:///${dataminx.dir}/dts-client.properties</value>-->
                 <!--<value>file:///${dataminx.dir}/dts-bulkcopyjob.properties</value>-->
             </list>
         </property>
@@ -84,6 +84,7 @@
     <bean id="jobSubmitQueueJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
         <property name="connectionFactory" ref="jmsConnectionFactory"/>
         <property name="defaultDestination" ref="jmsJobSubmitQueue"/>
+        <!--<property name="messageConverter" ref="dtsMessageConverter"/>-->
     </bean>
 
     <!--
@@ -113,6 +114,9 @@
 
     <bean id="credentialStore" class="org.dataminx.dts.common.util.CredentialStoreImpl"/>
 
+
+
+<!--
 <bean id="eventQueueListener" class="org.dataminx.dts.common.jms.EventQueueListener" />
 
 <bean id="eventQueueListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
@@ -121,5 +125,6 @@
     <property name="messageListener" ref="eventQueueListener" />
     <property name="messageSelector" value="${si.jms.JobEventQueue.selector}"/>
 </bean>
+-->
 
 </beans>

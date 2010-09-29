@@ -43,6 +43,7 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 /**
  * Test that a DTS job is launched when a JMS message is posted on the DTS Job
@@ -60,64 +61,67 @@ public class ProcessDtsControlMessageIntegrationTest extends
     @Qualifier("controlQueueSender")
     private ControlQueueSender mJmsQueueSender;
 
-    @Autowired
-    @Qualifier("eventQueueListenerContainer")
-    private DefaultMessageListenerContainer mDefaultMessageListenerContainer;
+    //@Autowired
+    //@Qualifier("eventQueueListenerContainer")
+    //private DefaultMessageListenerContainer mDefaultMessageListenerContainer;
 
     @Test
     public void cancelDtsJobAsDocument() throws Exception {
-        mDefaultMessageListenerContainer.start();
+        //mDefaultMessageListenerContainer.start();
         final File f = new ClassPathResource("/org/dataminx/dts/wn/util/cancel-request.xml").getFile();
         final CancelJobRequestDocument jobRequest = CancelJobRequestDocument.Factory
             .parse(f);
+        Assert.assertTrue(jobRequest.validate());
         Map<String, Object> jmsproperties = new HashMap<String, Object>();
         jmsproperties.put("ClientID","DtsClient001");
         jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodemyhostname001");
         mJmsQueueSender.doSend("cancel"+generateNewJobId(), jmsproperties, jobRequest);
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException iex) {
-        }
+        //try {
+        //    Thread.sleep(10000);
+        //} catch (InterruptedException iex) {
+        //}
         // TODO: add a few lines of assert in here to make sure that the job really is running
         // or has completed
-        mDefaultMessageListenerContainer.destroy();
+        //mDefaultMessageListenerContainer.destroy();
      }
     @Test
     public void resumeDtsJobAsDocument() throws Exception {
-        mDefaultMessageListenerContainer.start();
+        //mDefaultMessageListenerContainer.start();
         final File f = new ClassPathResource("/org/dataminx/dts/wn/util/resume-request.xml").getFile();
         final ResumeJobRequestDocument jobRequest = ResumeJobRequestDocument.Factory
             .parse(f);
+        Assert.assertTrue(jobRequest.validate());
         Map<String, Object> jmsproperties = new HashMap<String, Object>();
         jmsproperties.put("ClientID","DtsClient001");
         jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodemyhostname001");
         mJmsQueueSender.doSend("resume"+generateNewJobId(), jmsproperties, jobRequest);
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException iex) {
-        }
+        //try {
+        //    Thread.sleep(10000);
+        //} catch (InterruptedException iex) {
+        //}
         // TODO: add a few lines of assert in here to make sure that the job really is running
         // or has completed
-        mDefaultMessageListenerContainer.destroy();
+        //mDefaultMessageListenerContainer.destroy();
     }
 
     @Test
     public void getJobStatusRequestDocument() throws Exception {
-        mDefaultMessageListenerContainer.start();
+        //mDefaultMessageListenerContainer.start();
         final File f = new ClassPathResource("/org/dataminx/dts/wn/util/getJobStatus-request.xml").getFile();
         final GetJobStatusRequestDocument jobRequest = GetJobStatusRequestDocument.Factory
             .parse(f);
+        Assert.assertTrue(jobRequest.validate());
         Map<String, Object> jmsproperties = new HashMap<String, Object>();
         jmsproperties.put("ClientID","DtsClient001");
         jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodemyhostname001");
         mJmsQueueSender.doSend("getJobStatus"+generateNewJobId(), jmsproperties, jobRequest);
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException iex) {
-        }
+        //try {
+        //    Thread.sleep(10000);
+        //} catch (InterruptedException iex) {
+        //}
         // TODO: add a few lines of assert in here to make sure that the job really is running
         // or has completed
-        mDefaultMessageListenerContainer.destroy();
+        //mDefaultMessageListenerContainer.destroy();
     }
 
     private String generateNewJobId() {
