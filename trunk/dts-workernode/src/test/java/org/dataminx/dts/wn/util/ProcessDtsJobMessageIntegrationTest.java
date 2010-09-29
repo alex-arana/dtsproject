@@ -44,6 +44,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
+import org.testng.Assert;
+
 /**
  * Test that a DTS job is launched when a JMS message is posted on the DTS Job
  * Submission queue.
@@ -58,30 +60,32 @@ public class ProcessDtsJobMessageIntegrationTest extends
     @Qualifier("jobQueueSender")
     private JobQueueSender mJmsQueueSender;
 
-    @Autowired
-    @Qualifier("eventQueueListenerContainer")
-    private DefaultMessageListenerContainer mDefaultMessageListenerContainer;
+    //@Autowired
+    //@Qualifier("eventQueueListenerContainer")
+    //private DefaultMessageListenerContainer mDefaultMessageListenerContainer;
 
     @Test
     public void submitDtsJobAsDocument() throws Exception {
-        mDefaultMessageListenerContainer.start();
+        //mDefaultMessageListenerContainer.start();
         final File f = new ClassPathResource(
             "/org/dataminx/dts/wn/util/minx-dts" + getTestFilePostfix()
                 + ".xml").getFile();
-        final SubmitJobRequestDocument jobRequest = SubmitJobRequestDocument.Factory
-            .parse(f);
+        final SubmitJobRequestDocument jobRequest = SubmitJobRequestDocument.Factory.parse(f);
+        Assert.assertTrue(jobRequest.validate());
+
+        //System.out.println("jobReq: "+jobRequest.toString());
         Map<String, Object> jmsproperties = new HashMap<String, Object>();
         jmsproperties.put("ClientID","DtsClient001");
         jmsproperties.put("DTSWorkerNodeID","DtsWorkerNodemyhostname001");
         //jmsproperties.put("groupID", "physics");
         mJmsQueueSender.doSend(generateNewJobId(), jmsproperties, jobRequest);
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException iex) {
-        }
+        //try {
+        //    Thread.sleep(10000);
+        //} catch (InterruptedException iex) {
+        //}
         // TODO: add a few lines of assert in here to make sure that the job really is running
         // or has completed
-        mDefaultMessageListenerContainer.destroy();
+        //mDefaultMessageListenerContainer.destroy();
     }
 
     private String generateNewJobId() {
