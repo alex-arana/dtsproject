@@ -10,13 +10,27 @@
   <!-- Enable Spring beans annotation support -->
   <context:annotation-config/>
 
-  <!-- Add automatic WSDL generation support -->
+  <!-- 
+  Add automatic WSDL generation/publishing support.
+  
+  WSDL Generation: 
+  This SpringWS bean uses the 'Request' and 'Response' naming conventions used in WS messages,
+  i.e. assuming there are both 'HolidayRequest' and 'HolidayResponse' elements in the
+  imported schema collection, then these elements will be used to define input and output
+  messages for a wsdl:operation called 'Holiday'
+
+  WSDL Publishing:
+  The bean id determines the URL where the '.wsdl' file can be retrieved, in this case
+  it will be "http://${ws.host}:${ws.port}/${ws.context.path}/dts.wsdl"
+  -->
   <bean id="dts"
     class="org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition">
     <property name="schemaCollection" ref="schemaCollection" />
     <property name="portTypeName" value="DataTransferService" />
     <property name="locationUri" value="http://${ws.host}:${ws.port}/${ws.context.path}/" />
     <!--
+    Optionally give the tns for the WSDL defintion itself. If not set, the WSDL
+    will have the same namespace as the schema.
       <property name="targetNamespace" value="http://schemas.dataminx.org/dts/2009/05/dts" />
     -->
   </bean>
@@ -24,7 +38,7 @@
   <bean id="schemaCollection" class="org.springframework.xml.xsd.commons.CommonsXsdSchemaCollection">
     <property name="xsds">
       <list>
-<!--
+        <!--
         <value>classpath:dmi.xsd</value>
         <value>classpath:dmi-redef.xsd</value>
         <value>classpath:jsdl.xsd</value>
@@ -32,19 +46,25 @@
         <value>classpath:minx-jsdl.xsd</value>
         <value>classpath:minx-jms-messages.xsd</value>
         <value>classpath:minx-dts-messages.xsd</value>
--->
+        -->
         <value>classpath:dmi-common.xsd</value>
         <value>classpath:minx-dts-messages.xsd</value>
-  <!--      <value>classpath:minx-event-callback-messages.xsd</value>
+        <!--
+        <value>classpath:minx-event-callback-messages.xsd</value>
         <value>classpath:minx-misc.xsd</value>
-   -->
-
+        -->
       </list>
     </property>
     <property name="inline" value="true" />
   </bean>
 
-  <!-- Register PayloadRootAnnotationMethodEndpointMapping -->
+
+  <!-- 
+  Register Endpoint Mapping
+  Defines how incoming messages are routed to the WS endpoint. Here we define a 
+  PayloadRootAnnotationMethodEndpointMapping which means Endpoints are identified 
+  using @Endpoint annotations in Spring WS beans (see dataTransferEndpoint below)
+  -->
   <bean class="org.springframework.ws.server.endpoint.mapping.PayloadRootAnnotationMethodEndpointMapping">
     <property name="interceptors">
       <list>
@@ -87,7 +107,12 @@
     <property name="loginContextName" value="DtsWebService" />
   </bean>
 
-  <!-- Register Endpoint -->
+  <!-- 
+  Register Endpoint.
+  Bean defines an @Endpoint and @PayloadRoot annotations to
+  invoke the correct endpoint operations (used in conjunction with 
+  PayloadRootAnnotationMethodEndpointMapping defined above).
+  -->
   <bean id="dataTransferEndpoint" class="org.dataminx.dts.ws.DataTransferServiceEndpoint">
     <description>This endpoint handles data transfer requests.</description>
     <property name="dtsJobDefinitionValidator" ref="dtsJobDefinitionValidator" />
@@ -96,16 +121,15 @@
   </bean>
 
   <bean id="dtsJobDefinitionValidator" class="org.dataminx.dts.common.validator.DefaultDtsJobDefinitionValidator">
-  <!--  <property name="jobIdentificationValidator" ref="jobIdentificationValidator"/>-->
-  <!--  <property name="sourceTargetValidator" ref="sourceTargetValidator"/> -->
+    <!--  <property name="jobIdentificationValidator" ref="jobIdentificationValidator"/>-->
+    <!--  <property name="sourceTargetValidator" ref="sourceTargetValidator"/> -->
     <property name="dataLocationsTypeValidator" ref="dataLocationsTypeValidator"/>
   </bean>
 
    <!--  <bean id="jobIdentificationValidator" class="org.dataminx.dts.common.validator.DefaultJobIdentificationValidator"/> -->
-
    <!--  <bean id="sourceTargetValidator" class="org.dataminx.dts.common.validator.DefaultSourceTargetValidator"/> -->
-
    <bean id="dataLocationsTypeValidator" class="org.dataminx.dts.common.validator.DefaultDataLocationsValidator"/>
+
 
   <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
     <property name="basename" value="validation-errors"/>
