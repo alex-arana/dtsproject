@@ -1,6 +1,16 @@
 Maven Build, install, test instructions
 =========================================
 
+The dts-batchjob is the long-running batch process that copies data from the different
+sources and sinks as defined in a datacopy activity document. The batchjob is multi-threaded
+and and can be configured as required (e.g. to restrict the size of the data that can be
+copied and the number of parallel threads). The batchjob requires a db in order to store/
+checkpoint its state as the job runs. Be default, no credentials are written to the
+database (a new persistent credentialStore impl is required for this - TODO).
+A platform independent HSQLDB is provided by default. It is pre-configured and can
+be used for testing and lightweight deployments.
+
+
 a) Recursivley copy and rename the 'sample-batchjob-dot-dataminx-dir' dir to your chosen location.
 Default is '$HOME/.dataminx', e.g:
   cp -r src/main/resources/sample-batchjob-dot-dataminx-dir ~/.dataminx
