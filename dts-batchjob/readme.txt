@@ -1,7 +1,7 @@
 Maven Build, install, test instructions
 =========================================
 
-a) Recursivley copy the 'sample-batchjob-dot-dataminx-dir' dir to your chosen location.
+a) Recursivley copy and rename the 'sample-batchjob-dot-dataminx-dir' dir to your chosen location.
 Default is '$HOME/.dataminx', e.g:
   cp -r src/main/resources/sample-batchjob-dot-dataminx-dir ~/.dataminx
 
@@ -10,7 +10,7 @@ b) Edit the 'batch.jdbc.url' property in your 'dts-bulkcopyjob.properties' file 
 Provide the FULL path to your dataminx dir that you copied above, e.g:
   'batch.jdbc.url=jdbc:hsqldb:file:<provide-full-path-to-your-dataminx-dir>/batchjob-hsqlDB/dtsdb'.
 
-The jdbc.url points to a pre-configured default database for use by the batchjob. 
+This points to a pre-configured default database for use by the batchjob.
 It is located in the 'batchjob-hsqlDB' directory and is used for testing and for lightweight batchhjob deployments.
 Of course, you can configure the batchjob to run against a different database as required. 
 Refer to the dts-bulkcopyjob.properties for config instructions.
