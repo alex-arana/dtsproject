@@ -1,7 +1,7 @@
 Maven Build, install, test instructions
 =========================================
 
-a) Copy 'src/main/resources/dts-workernode.properties.template' to your .dataminx dir
+a) Copy 'src/main/resources/dts-workernode.properties.template' to your .dataminx dir:
   mkdir ~/.dataminx  (if not aready created)
   cd dts-workernode
   cp src/main/resources/dts-workernode.properties.template ~/.dataminx/dts-workernode.properties
@@ -15,11 +15,14 @@ c) Start ActiveMQ
   $ACTIVEMQ_HOME/bin/activemq
 
 d) Run the worker node
-  1) Via maven
-  mvn -Ddataminx.dir=/home/dts-user/.dataminx exec:java
+  1) Via maven exec plugin (for testing/dev)
+     mvn -Ddataminx.dir=/home/dts-user/.dataminx exec:java
 
-  2) Assembly
-  3) As .war file
+  2) Assembly 
+     TODO
+
+  3) As .war file 
+     TODO
 
 
 
