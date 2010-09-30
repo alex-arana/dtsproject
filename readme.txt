@@ -43,9 +43,11 @@ You can check out the code by running:
 
 Build the Src code and Install
 ==============================
-This will build and install all the sub-modules of the dts project. Before you can
-run tests and integration tests, you will need to perform some post-install configurations
-for each sub-module.
+This will build and install all the sub-modules of the dts project. Note, if you are
+behind an Http proxy, you will need to provide proxyHost and proxyPort properties as shown
+below (the dts-schema sub-module downloads XSD schemas from the internet and so the
+build needs online access - would be better if the build could be done offline - TODO).
+
 
   cd minx-dts
   cp dts-batchjob/src/test/filters/filter.properties.template dts-batchjob/src/test/filters/filter.properties
@@ -55,5 +57,5 @@ for each sub-module.
   cp dts-ws/src/main/resources/dts-ws.properties.template ~/.dataminx/dts-ws.properties
   mvn -DskipTests=true -DproxyHost=optionalHostName -DproxyPort=8080 install
 
-IMPORTANT: Please refer to the 'readme.txt' of each sub-module for instruction on building, testing
-and configuring each sub-module.
+IMPORTANT:  Before you can run tests and integration tests, you will need to perform some post-install configurations
+for each sub-module. Please refer to the 'readme.txt' of each sub-module for instruction.
