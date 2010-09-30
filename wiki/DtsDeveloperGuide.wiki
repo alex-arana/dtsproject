@@ -45,11 +45,11 @@ The DTS codebase is currently hosted in the DTS Google Code SVN repository. You 
 Run the following commands...
 {{{
  > cd dts-batchjob
- > cp -r src/main/resources/sample-dot-dataminx-dir ~/.dataminx
+ > cp -r src/main/resources/sample-batchjob-dot-dataminx-dir ~/.dataminx
 }}}
 
 Edit the values of the following fields in ~/.dataminx/dts-bulkcopyjob.properties
-  * batch.jdbc.url (specify full path to your '~/.dataminx/hsqlDB/dtsdb' directory)
+  * batch.jdbc.url (specify full path to your '~/.dataminx/batchjob-hsqlDB/dtsdb' directory)
 
 Copy the testfiles.zip file to your {{{$HOME}}} directory, unzip and run tests: 
 
