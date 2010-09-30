@@ -125,7 +125,7 @@ public class DataTransferServiceImpl implements DataTransferService,
         // been provided by the user. let's give the job a resource key and save it in the DB
         final Job newJob = new Job();
         final String newJobResourceKey = UUID.randomUUID().toString();
-        newJob.setName("jobName123");
+        newJob.setName(newJobResourceKey); // TODO, set the job name to something custom from the xml.
         newJob.setResourceKey(newJobResourceKey);
         newJob.setStatus(JobStatus.CREATED);
         newJob.setSubjectName(subjectName);
