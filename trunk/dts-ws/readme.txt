@@ -1,6 +1,14 @@
 Maven Build, install, test instructions
 =========================================
 
+The dts-ws module contains the Web Service that provides a platform agnostic interface
+to submitting dts jobs to the dts broker (and onto a workernode/batchjob). The WS is
+built as a standard .war file. The WS requires access to a relational db in order to
+store job submission requests and to store asychronous status updates recieved from the dts-broker.
+A platform independent HSQLDB is provided by default. It is pre-configured and can
+be used for testing and lightweight deployments. 
+
+
 a) Recursivley copy and rename the 'src/main/resources/sample-ws-dot-dataminx-dir' dir to you chosen location:
 Default is '$HOME/.dataminx' e.g:
   cp -r src/main/resources/sample-ws-dot-dataminx-dir ~/.dataminx
