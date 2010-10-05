@@ -1,0 +1,127 @@
+Maven assembly bug means we cannot build a jar-with-dependencies.
+Rather, we build an assembly that collects all dependencies separatley
+rather than merging dependencies into a single jar-with-dependencies
+==================================================================
+
+See: http://jira.codehaus.org/browse/MASSEMBLY-360?page=com.atlassian.jira.plugin.system.issuetabpanels%3Achangehistory-tabpanel
+Fixed version:   2.2-beta-6 [ 16026 ] 21/Sep/10
+
+
+Description of Problem.
+=========================
+I'm working on a Java 5 project with maven 2 and I need to deliver an executable jar file.
+In this project I'm using different Spring dependencies:
+      <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+      <version>2.5.5</version>
+      </dependency>
+      <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>2.5.5</version>
+      </dependency>
+
+For maven packaging I'm using the maven-assembly plugin to create an executable jar
+with dependencies (using the jar-with-dependencies descriptor). Everything works fine,
+except that Spring's XSD files can't be found. At least: not all of them.
+The fact is: Every Spring JAR file contains a META-INF directory with files like
+spring.handlers and spring.schemas which contain list of locations of respectively
+namespace handlers and schemas. Unfortunately these files aren't merged during
+packaging so the META_INF of the executable JAR file only contains the last one added.
+
+This can result in errors like this:
+
+Example 1: The spring-context-2.5.xsd can't be found:
+WARN org.springframework.beans.factory.xml.XmlBeanDefinitionReader - Ignored XML validation warning org.xml.sax.SAXParseException: schema_reference.4: Failed to read schema document 'http://www.springframework.org/schema/context/spring-context-2.5.xsd', because 1) could not find the document; 2) the document could not be read; 3) the root element of the document is not <xsd:schema>.
+
+Example 2: The NamespaceHandler for the spring context namespace can't be located:
+Exception in thread "main" org.springframework.beans.factory.parsing.BeanDefinitionParsingException: Configuration problem: Unable to locate Spring NamespaceHandler for XML schema namespace http://www.springframework.org/schema/context
+
+When I manually merge the files, the executable JAR file works fine.
+I hope this problem can be solved.
+
+
+
+Our example of this bug;
+===========================
+djm76@djm76pc2:~/programming/java/dts/dtsproject/dts-wsclient/target$ java -Ddataminx.dir=/home/djm76/.dataminxes -cp dts-wsclient-0.0.1-SNAPSHOT-jar-with-dependencies.jar org.dataminx.dts.client.DtsWSClientCommandLineRunner
+starting DTSWSClient...
+12:09:06,413 INFO  [main] AbstractApplicationContext: Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@10e3293: display name [org.springframework.context.support.ClassPathXmlApplicationContext@10e3293]; startup date [Tue Oct 05 12:09:06 BST 2010]; root of context hierarchy
+12:09:06,460 INFO  [main] XmlBeanDefinitionReader: Loading XML bean definitions from class path resource [/org/dataminx/dts/client/client-context.xml]
+12:12:15,623 WARN  [main] SimpleSaxErrorHandler: Ignored XML validation warning
+org.xml.sax.SAXParseException: schema_reference.4: Failed to read schema document 'http://www.springframework.org/schema/beans/spring-beans-2.5.xsd', because 1) could not find the document; 2) the document could not be read; 3) the root element of the document is not <xsd:schema>.
+        at com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper.createSAXParseException(ErrorHandlerWrapper.java:195)
+        at com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper.warning(ErrorHandlerWrapper.java:96)
+        at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLErrorReporter.java:380)
+        at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLErrorReporter.java:318)
+        at com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler.reportSchemaErr(XSDHandler.java:2541)
+        at com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler.reportSchemaWarning(XSDHandler.java:2532)
+        at com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler.getSchemaDocument(XSDHandler.java:1836)
+        at com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler.parseSchema(XSDHandler.java:531)
+        at com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader.loadSchema(XMLSchemaLoader.java:552)
+        at com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator.findSchemaGrammar(XMLSchemaValidator.java:2408)
+        at com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator.handleStartElement(XMLSchemaValidator.java:1753)
+        at com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator.startElement(XMLSchemaValidator.java:685)
+        at com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl.scanStartElement(XMLNSDocumentScannerImpl.java:400)
+        at com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl$NSContentDriver.scanRootElementHook(XMLNSDocumentScannerImpl.java:626)
+        at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$FragmentContentDriver.next(XMLDocumentFragmentScannerImpl.java:3095)
+        at com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$PrologDriver.next(XMLDocumentScannerImpl.java:922)
+        at com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl.next(XMLDocumentScannerImpl.java:648)
+        at com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl.next(XMLNSDocumentScannerImpl.java:140)
+        at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl.scanDocument(XMLDocumentFragmentScannerImpl.java:510)
+        at com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(XML11Configuration.java:807)
+        at com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(XML11Configuration.java:737)
+        at com.sun.org.apache.xerces.internal.parsers.XMLParser.parse(XMLParser.java:107)
+        at com.sun.org.apache.xerces.internal.parsers.DOMParser.parse(DOMParser.java:225)
+        at com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderImpl.parse(DocumentBuilderImpl.java:283)
+        at org.springframework.beans.factory.xml.DefaultDocumentLoader.loadDocument(DefaultDocumentLoader.java:75)
+        at org.springframework.beans.factory.xml.XmlBeanDefinitionReader.doLoadBeanDefinitions(XmlBeanDefinitionReader.java:396)
+        at org.springframework.beans.factory.xml.XmlBeanDefinitionReader.loadBeanDefinitions(XmlBeanDefinitionReader.java:342)
+        at org.springframework.beans.factory.xml.XmlBeanDefinitionReader.loadBeanDefinitions(XmlBeanDefinitionReader.java:310)
+        at org.springframework.beans.factory.support.AbstractBeanDefinitionReader.loadBeanDefinitions(AbstractBeanDefinitionReader.java:143)
+        at org.springframework.context.support.AbstractXmlApplicationContext.loadBeanDefinitions(AbstractXmlApplicationContext.java:109)
+        at org.springframework.context.support.AbstractXmlApplicationContext.loadBeanDefinitions(AbstractXmlApplicationContext.java:80)
+        at org.springframework.context.support.AbstractRefreshableApplicationContext.refreshBeanFactory(AbstractRefreshableApplicationContext.java:123)
+        at org.springframework.context.support.AbstractApplicationContext.obtainFreshBeanFactory(AbstractApplicationContext.java:422)
+        at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:352)
+        at org.springframework.context.support.ClassPathXmlApplicationContext.<init>(ClassPathXmlApplicationContext.java:197)
+        at org.springframework.context.support.ClassPathXmlApplicationContext.<init>(ClassPathXmlApplicationContext.java:172)
+        at org.dataminx.dts.client.DtsWSClientCommandLineRunner.<init>(DtsWSClientCommandLineRunner.java:31)
+        at org.dataminx.dts.client.DtsWSClientCommandLineRunner.main(DtsWSClientCommandLineRunner.java:71)
+Exception in thread "main" org.springframework.beans.factory.xml.XmlBeanDefinitionStoreException: Line 8 in XML document from class path resource [/org/dataminx/dts/client/client-context.xml] is invalid; nested exception is org.xml.sax.SAXParseException: cvc-elt.1: Cannot find the declaration of element 'beans'.
+        at org.springframework.beans.factory.xml.XmlBeanDefinitionReader.doLoadBeanDefinitions(XmlBeanDefinitionReader.java:404)
+        at org.springframework.beans.factory.xml.XmlBeanDefinitionReader.loadBeanDefinitions(XmlBeanDefinitionReader.java:342)
+        at org.springframework.beans.factory.xml.XmlBeanDefinitionReader.loadBeanDefinitions(XmlBeanDefinitionReader.java:310)
+        at org.springframework.beans.factory.support.AbstractBeanDefinitionReader.loadBeanDefinitions(AbstractBeanDefinitionReader.java:143)
+        at org.springframework.context.support.AbstractXmlApplicationContext.loadBeanDefinitions(AbstractXmlApplicationContext.java:109)
+        at org.springframework.context.support.AbstractXmlApplicationContext.loadBeanDefinitions(AbstractXmlApplicationContext.java:80)
+        at org.springframework.context.support.AbstractRefreshableApplicationContext.refreshBeanFactory(AbstractRefreshableApplicationContext.java:123)
+        at org.springframework.context.support.AbstractApplicationContext.obtainFreshBeanFactory(AbstractApplicationContext.java:422)
+        at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:352)
+        at org.springframework.context.support.ClassPathXmlApplicationContext.<init>(ClassPathXmlApplicationContext.java:197)
+        at org.springframework.context.support.ClassPathXmlApplicationContext.<init>(ClassPathXmlApplicationContext.java:172)
+        at org.dataminx.dts.client.DtsWSClientCommandLineRunner.<init>(DtsWSClientCommandLineRunner.java:31)
+        at org.dataminx.dts.client.DtsWSClientCommandLineRunner.main(DtsWSClientCommandLineRunner.java:71)
+Caused by: org.xml.sax.SAXParseException: cvc-elt.1: Cannot find the declaration of element 'beans'.
+        at com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper.createSAXParseException(ErrorHandlerWrapper.java:195)
+        at com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper.error(ErrorHandlerWrapper.java:131)
+        at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLErrorReporter.java:384)
+        at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLErrorReporter.java:318)
+        at com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator.handleStartElement(XMLSchemaValidator.java:1887)
+        at com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator.startElement(XMLSchemaValidator.java:685)
+        at com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl.scanStartElement(XMLNSDocumentScannerImpl.java:400)
+        at com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl$NSContentDriver.scanRootElementHook(XMLNSDocumentScannerImpl.java:626)
+        at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$FragmentContentDriver.next(XMLDocumentFragmentScannerImpl.java:3095)
+        at com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$PrologDriver.next(XMLDocumentScannerImpl.java:922)
+        at com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl.next(XMLDocumentScannerImpl.java:648)
+        at com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl.next(XMLNSDocumentScannerImpl.java:140)
+        at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl.scanDocument(XMLDocumentFragmentScannerImpl.java:510)
+        at com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(XML11Configuration.java:807)
+        at com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(XML11Configuration.java:737)
+        at com.sun.org.apache.xerces.internal.parsers.XMLParser.parse(XMLParser.java:107)
+        at com.sun.org.apache.xerces.internal.parsers.DOMParser.parse(DOMParser.java:225)
+        at com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderImpl.parse(DocumentBuilderImpl.java:283)
+        at org.springframework.beans.factory.xml.DefaultDocumentLoader.loadDocument(DefaultDocumentLoader.java:75)
+        at org.springframework.beans.factory.xml.XmlBeanDefinitionReader.doLoadBeanDefinitions(XmlBeanDefinitionReader.java:396)
+        ... 12 more
