@@ -39,7 +39,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * PassiveCallbackHandler is used if username and password can't be provided from within the handle() method.
+ * PassiveCallbackHandler is used to passively set username and password info
+ * through the classes constructor (i.e. when un/pw can't be prompted for
+ * from within the handle() method, e.g. by requesting console
+ * input or by using a dialog input box). This is why this callback handler is
+ * called 'Passive' because it doesnot require user input.
  *
  * @author Gerson Galang
  */
