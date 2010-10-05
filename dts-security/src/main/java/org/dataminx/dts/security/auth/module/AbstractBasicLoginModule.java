@@ -50,7 +50,9 @@ import org.dataminx.dts.security.auth.callback.PassiveCallbackHandler;
  * This abstract class implements the <code>javax.security.auth.spi.LoginModule</code> but leaves the implementation
  * of the <code>authenticate</code> method's implementation to its subclasses.
  *
+ * @author  Paul Feuer and John Musser
  * @author Gerson Galang
+ * @see http://www.javaworld.com/javaworld/jw-09-2002/jw-0913-jaas.html
  */
 public abstract class AbstractBasicLoginModule implements LoginModule {
 
@@ -171,19 +173,29 @@ public abstract class AbstractBasicLoginModule implements LoginModule {
         }
 
         try {
-            // Setup default callback handlers.
+            // Setup default callbacks
+            // (the callbacks are passed to the given mCallbackHandler so that they
+            // can be populated with the un/pw when we inovke the handle(callbacks)
+            // method below). The callbackhandler recieves the un/pw by whatever
+            // custom means (e.g. dialog box, console, setters, whatever) and we are
+            // unaware of how that data was recieved.
             final Callback[] callbacks = new Callback[] {
                 new NameCallback("Username: "),
                 new PasswordCallback("Password: ", false)};
 
+            // Fire un/pw callbacks (invoke the given callback handler to recieve the un/pw)
             mCallbackHandler.handle(callbacks);
 
+            // get the un/pwd from the callbacks.
             final String username = ((NameCallback) callbacks[0]).getName();
             final String password = new String(
                 ((PasswordCallback) callbacks[1]).getPassword());
-
             ((PasswordCallback) callbacks[1]).clearPassword();
 
+            // Call our abstract authenticate method so that we can test
+            // un/pw against our custom auth scheme. If auth is successful,
+            // assign any <code>Principal</code>'s or credentials to the
+            // <code>mSubject</code> that are necessary for our application.
             mSuccess = authenticate(username, password);
 
             callbacks[0] = null;
