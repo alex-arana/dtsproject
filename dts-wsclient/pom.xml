@@ -25,26 +25,45 @@
           <classpathScope>runtime</classpathScope>
         </configuration>
       </plugin>
+
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <!--<configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>-->
+      </plugin>
+
       </plugins>
   </build>
-  
+
+
   <dependencies>
+
+    
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
+    
+    
+    <!--
+    Do not need all of the spring framework in its entirity (don't need ORM/TX/JMS etc).
+    Could include this if a more sophisticated client is needed that uses these
+    spring features.
+    -->
+    <!--<dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring</artifactId>
+    </dependency>-->
 
     <dependency>
-      <groupId>${dataminx.group}</groupId>
-      <artifactId>dts-common</artifactId>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>${dataminx.group}</groupId>
-      <artifactId>dts-schema</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>org.springframework.ws</groupId>
@@ -61,6 +80,153 @@
       <artifactId>saaj-api</artifactId>
     </dependency>
 
+    <dependency>
+        <groupId>${dataminx.group}</groupId>
+        <artifactId>dts-common</artifactId>
+        <!--
+        Exclusions:
+        Not sure if we need dts-security? (could remove from dts-common exclusion list and
+        then add as an explicit dependency with its own exclusions if necessary)-->
+        <exclusions>
+            <!--<exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+            </exclusion>-->
+            <exclusion>
+                <artifactId>dts-schema</artifactId>
+                <groupId>${dataminx.group}</groupId>
+            </exclusion>
+            <exclusion>
+                <artifactId>dts-security</artifactId>
+                <groupId>${dataminx.group}</groupId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework.integration</groupId>
+                <artifactId>spring-integration-xml</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>javax.jms</groupId>
+                <artifactId>jms</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>commons-vfs-grid</groupId>
+                <artifactId>commons-vfs-grid</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+
+
+
+    <dependency>
+        <groupId>${dataminx.group}</groupId>
+        <artifactId>dts-security</artifactId>
+        <exclusions>
+            <exclusion>
+                <groupId>external.jglobus</groupId>
+                <artifactId>cog-jglobus</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>external.jglobus</groupId>
+                <artifactId>cryptix32</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>external.jglobus</groupId>
+                <artifactId>cryptix-asn1</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>external.jglobus</groupId>
+                <artifactId>cryptix</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>external.jglobus</groupId>
+                <artifactId>puretls</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>bouncycastle</groupId>
+                <artifactId>bcprov-jdk16</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+
+    <dependency>
+        <groupId>${dataminx.group}</groupId>
+        <artifactId>dts-schema</artifactId>
+        <exclusions>
+            <!-- do we need all of xml beans? e.g.
+            no need for the schema compiler for a client -->
+            <!--<exclusion>
+                <groupId>org.apache.xmlbeans</groupId>
+                <artifactId>xmlbeans</artifactId>
+            </exclusion>-->
+        </exclusions>
+    </dependency>
+
+
+
   </dependencies>
+
+
+
+  <profiles>
+      <profile>
+         <!-- This profile should be used for running the assembly plugin, i.e:
+         "mvn assembly:assembly -Pdeploy-assembly1"
+         This profile is used to create a standalone ws agent that can be used
+         by running "java -jar dts-wsclient-${artifact.version}.jar" -->
+         <id>deploy-assembly1</id>
+          <build>
+              <plugins>
+                  <!--
+                  maven-jar-plugin
+                  Specify the manifest's mainClass as a standalone batch agent.
+                  Also addClasspath which will add all runtime
+                  dependencies to the classpath attribute in the manifest.
+                  -->
+                  <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-jar-plugin</artifactId>
+                      <configuration>
+                        <archive>
+                          <manifest>
+                             <mainClass>org.dataminx.dts.client.DtsWSClientCommandLineRunner</mainClass>
+                             <addClasspath>true</addClasspath>
+                             <!--<classpathPrefix>lib</classpathPrefix>-->
+                          </manifest>
+                        </archive>
+                      </configuration>
+                  </plugin>
+
+                  <!-- maven assembly plugin -->
+                  <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <configuration>
+                      <descriptors>
+                        <descriptor>src/main/assembly/assembly1.xml</descriptor>
+                      </descriptors>
+                      <!--<descriptorRefs>
+                            <descriptorRef>
+                                jar-with-dependencies
+                            </descriptorRef>
+                      </descriptorRefs>-->
+                    </configuration>
+                  </plugin>
+              </plugins>
+          </build>
+      </profile>
+  </profiles>
+
 
 </project>

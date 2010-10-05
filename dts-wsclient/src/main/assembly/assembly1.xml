@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : assembly1.xml
+    Created on : 06 April 2010, 15:23
+    Author     : djm76
+    Description:
+        TODO: Unfinished.
+        A maven assembly to build a dts-batch agent release that can be used
+        standalone without having to use maven as an execution container
+        (similar to maven's 'jar-with-dependencies' assembly, but we will need
+        to include an embedded database for 'out-of-the-box' usage')
+-->
+
+<assembly  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns='http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.1'
+   xsi:schemaLocation='http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.1 http://maven.apache.org/xsd/assembly-1.1.1.xsd'>
+
+    <id>dts-agent</id>
+    <formats>
+        <format>dir</format>
+    </formats>
+
+    <!-- not necessary -->
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <!--
+    Match all runtime dependencies (includes compile scope implicilty).
+    It will also copy the current project's main artifact into the assembly archive
+    if it exists (you have to explicilty exclude it using and <exclude/> or
+    set <useProjectArtifact> to false in the relevant dependencySet if thats
+    what you need).
+    -->
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+
+            <!--
+            The default value for the <outputFileNameMapping/> element is:
+            "${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}"
+            (see: http://maven.apache.org/plugins/maven-assembly-plugin/assembly.html)
+
+            However, the '${artifact.version}' has been replaced with '${artifact.baseVersion}'
+            thus changing the default value. This was required because the commons-vfs.jar dependency
+            was being resloved/included as 'commons-vfs-2.1-20090127.003652-1.jar'
+            (note the included timestamp in the ${artifact.version} value). However,
+            the maven archiver was creating the classpath entry in the manifest without
+            including the full timestamp (see: <manifest> element of the 'maven-jar-plugin' and
+            see: http://maven.apache.org/shared/maven-archiver/examples/classpath.html).
+            Rather, the classpath in the manifest appears to use
+            the ${artifact.baseVersion} not the ${artifact.version}. Therefore,
+            i needed to specify the baseVersion in order to build the correct
+            classpath value in the manifest.
+            -->
+            <!--<outputFileNameMapping>
+               ${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>-->
+        </dependencySet>
+    </dependencySets>
+
+</assembly>

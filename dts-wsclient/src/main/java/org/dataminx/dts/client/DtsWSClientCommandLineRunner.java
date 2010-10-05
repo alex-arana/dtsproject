@@ -67,6 +67,7 @@ public class DtsWSClientCommandLineRunner {
     }
 
     public static void main(String args[]) throws Exception {
+        System.out.println("starting DTSWSClient...");
         DtsWSClientCommandLineRunner commandRunner = new DtsWSClientCommandLineRunner();
         System.out.println("A DTSWSClient is ready to use.");
 
