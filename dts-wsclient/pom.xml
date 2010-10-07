@@ -83,10 +83,6 @@
     <dependency>
         <groupId>${dataminx.group}</groupId>
         <artifactId>dts-common</artifactId>
-        <!--
-        Exclusions:
-        Not sure if we need dts-security? (could remove from dts-common exclusion list and
-        then add as an explicit dependency with its own exclusions if necessary)-->
         <exclusions>
             <!--<exclusion>
                 <groupId>org.slf4j</groupId>
