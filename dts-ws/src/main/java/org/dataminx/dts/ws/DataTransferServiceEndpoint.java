@@ -108,7 +108,7 @@ public class DataTransferServiceEndpoint implements InitializingBean {
     private MessageSource mMessageSource;
 
     /**
-     * Handles the submit job request.
+     * Handles the submitJob wsdl operation.
      *
      * @param request the submit job request
      *
@@ -215,7 +215,7 @@ public class DataTransferServiceEndpoint implements InitializingBean {
 
         final JobDetailsType jobDetails = response
             .addNewGetJobDetailsResponse().addNewJobDetails();
-        fillInJobDetails(foundJob, jobDetails);
+        this.fillInJobDetails(foundJob, jobDetails);
 
         return response;
     }

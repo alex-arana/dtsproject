@@ -76,7 +76,8 @@ import org.globus.ftp.MarkerListener;
 import org.globus.myproxy.MyProxy;
 import org.globus.myproxy.MyProxyException;
 import org.ietf.jgss.GSSCredential;
-import org.oasisOpen.docs.wss.x2004.x01.oasis200401WssWssecuritySecext10.UsernameTokenType;
+//import org.oasisOpen.docs.wss.x2004.x01.oasis200401WssWssecuritySecext10.UsernameTokenType;
+
 import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CopyType;
 import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CredentialType;
 import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataLocationsType;
@@ -85,6 +86,7 @@ import org.proposal.dmi.schemas.dts.x2010.dmiCommon.IrodsURIPropertiesType;
 import org.proposal.dmi.schemas.dts.x2010.dmiCommon.MyProxyTokenType;
 import org.proposal.dmi.schemas.dts.x2010.dmiCommon.OtherCredentialTokenType;
 import org.proposal.dmi.schemas.dts.x2010.dmiCommon.SrbURIPropertiesType;
+import org.proposal.dmi.schemas.dts.x2010.dmiCommon.UsernamePasswordTokenType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -368,9 +370,13 @@ public class DtsVfsUtil extends VFSUtil {
                 addMyProxyCredentialDetailsToFileSystemOptions(options,
                         credentialType.getMyProxyToken(), encrypter);
 
-            } else if (credentialType.getUsernameToken() != null) {
-                addUsernameCredentialDetailsToFileSystemOptions(options,
-                        credentialType.getUsernameToken(), encrypter);
+            //} else if (credentialType.getUsernameToken() != null) {
+            //    addUsernameCredentialDetailsToFileSystemOptions(options,
+            //            credentialType.getUsernameToken(), encrypter);
+            } else if (credentialType.getUsernamePasswordToken() != null) {
+                addUsernamePasswordCredentialDetailsToFileSystemOptions(options,
+                        credentialType.getUsernamePasswordToken(), encrypter);
+
             } else if (credentialType.getOtherCredentialToken() != null) {
                 addOtherCredentialDetailsToFileSystemOptions(options,
                         credentialType.getOtherCredentialToken(), encrypter);
@@ -509,7 +515,36 @@ public class DtsVfsUtil extends VFSUtil {
         }
     }
 
-    private void addUsernameCredentialDetailsToFileSystemOptions(
+
+     private void addUsernamePasswordCredentialDetailsToFileSystemOptions(
+        final FileSystemOptions options,
+        final UsernamePasswordTokenType usernameTokenDetails, final Encrypter encrypter)
+        throws FileSystemException {
+        final String username = usernameTokenDetails.getUsername();
+        final String password;
+        try {
+             if (usernameTokenDetails.getPassword() == null || "".equals(usernameTokenDetails.getPassword())) {
+                 password = EMPTY;
+             } else {
+                 password = encrypter.decrypt(usernameTokenDetails.getPassword());
+             }
+             final StaticUserAuthenticator auth = new StaticUserAuthenticator(
+                     null, username, password);
+             DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(
+                     options, auth);
+             SRBFileSystemConfigBuilder.getInstance().setUserAuthenticator(
+                     options, auth);
+             IRODSFileSystemConfigBuilder.getInstance().setUserAuthenticator(
+                     options, auth);
+         }
+        catch (final UnknownEncryptionAlgorithmException ex) {
+            LOGGER.error("Password could not be decrypted", ex);
+            throw new FileSystemAuthenticationException(ex.getMessage());
+        }
+    }
+
+
+    /*private void addUsernameCredentialDetailsToFileSystemOptions(
         final FileSystemOptions options,
         final UsernameTokenType usernameTokenDetails, final Encrypter encrypter)
         throws FileSystemException {
@@ -533,7 +568,7 @@ public class DtsVfsUtil extends VFSUtil {
             LOGGER.error("Password could not be decrypted", ex);
             throw new FileSystemAuthenticationException(ex.getMessage());
         }
-    }
+    }*/
 
     private void addOtherCredentialDetailsToFileSystemOptions(
         final FileSystemOptions options,
@@ -554,10 +589,15 @@ public class DtsVfsUtil extends VFSUtil {
                         realCredential.getMyProxyToken(), encrypter);
 
                 }
-                else if (realCredential.getUsernameToken() != null) {
-                    addUsernameCredentialDetailsToFileSystemOptions(options,
-                        realCredential.getUsernameToken(), encrypter);
+                else if(realCredential.getUsernamePasswordToken() != null){
+                    this.addUsernamePasswordCredentialDetailsToFileSystemOptions(options,
+                            realCredential.getUsernamePasswordToken(),
+                            encrypter);
                 }
+                //else if (realCredential.getUsernameToken() != null) {
+                //    addUsernameCredentialDetailsToFileSystemOptions(options,
+                //        realCredential.getUsernameToken(), encrypter);
+                //}
             }
             else {
                 throw new FileSystemAuthenticationException(

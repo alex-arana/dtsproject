@@ -173,9 +173,20 @@ public class DtsJaasCredentialInterceptor implements EndpointInterceptor {
                 }
             }
 
+            // 1) Create call back handler and give it the clients un/pw
             final PassiveCallbackHandler callbackHandler = new PassiveCallbackHandler(
                 username, password);
+            // 2) Create a new (threadlocal) LoginContext.
+            // LC will read the jaas.config file
+            // pointed to by the -Djava.security.auth.login.config sys prop and
+            // init the sequence of LoginModules under the given LoginContext
+            // app name. The specified LoginModule(s)  initialize(....) method
+            // is called and is passed a the LC's sharedState map, options map,
+            // subject, and the given callbackHandler.
             mLoginContext = new LoginContext(mLoginContextName, callbackHandler);
+            // 3) Invoke (indirectly) the loginModules.login() method. In doing this,
+            // from within the module's login() method, the given callbackHandlers.handle(callbacks[])
+            // method is invoked in order to perform the authentication. 
             mLoginContext.login();
 
             final Subject subject = mLoginContext.getSubject();

@@ -14,7 +14,7 @@
 
   <name>MINX-DTS Worker Node</name>
   <artifactId>dts-workernode</artifactId>
-  <packaging>jar</packaging>
+  <packaging>war</packaging>
 
   <properties>
     <servlet.version>2.4</servlet.version>
@@ -144,6 +144,13 @@ To integration test:              mvn integration-test
     <dependency>
       <artifactId>dts-schema</artifactId>
       <groupId>${dataminx.group}</groupId>
+    </dependency>
+     
+    <!-- Mockito -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <!-- SL4J -->

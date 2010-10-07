@@ -13,6 +13,10 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+//import org.oasisOpen.docs.wss.x2004.x01.oasis200401WssWssecuritySecext10.AttributedString;
+//import org.oasisOpen.docs.wss.x2004.x01.oasis200401WssWssecuritySecext10.UsernameTokenDocument;
+//import org.oasisOpen.docs.wss.x2004.x01.oasis200401WssWssecuritySecext10.UsernameTokenType;
+//import org.oasisOpen.docs.wss.x2004.x01.oasis200401WssWssecuritySecext10.impl.UsernameTokenDocumentImpl;
 import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CopyType;
 //import org.proposal.dmi.schemas.dts.x2010.dmiCommon.CredentialsType;
 import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityDocument;
@@ -102,5 +106,10 @@ public class TestBindDoc {
         assertTrue(pointer.getStringValue().equals("credentialUUID")); 
         c.dispose();
   */
+
+        //UsernameTokenDocument doc2 = UsernameTokenDocument.Factory.newInstance();
+        //UsernameTokenType untoken = doc2.addNewUsernameToken();
+        //AttributedString attst = untoken.addNewUsername();
+
     }
 }

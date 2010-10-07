@@ -285,8 +285,11 @@ public class DtsFileTransferJob extends SimpleJob implements InitializingBean {
     private String replaceCredentialWithKeyPointer(
         final CredentialType sourceOrTargetCredential) {
         // unset the child element of the sourceCredentialCopy
-        if (sourceOrTargetCredential.isSetUsernameToken()) {
-            sourceOrTargetCredential.unsetUsernameToken();
+        //if (sourceOrTargetCredential.isSetUsernameToken()) {
+        //    sourceOrTargetCredential.unsetUsernameToken();
+        //}
+        if(sourceOrTargetCredential.isSetUsernamePasswordToken()){
+            sourceOrTargetCredential.unsetUsernamePasswordToken();
         }
         else if (sourceOrTargetCredential.isSetMyProxyToken()) {
             sourceOrTargetCredential.unsetMyProxyToken();
