@@ -39,6 +39,15 @@
     <property name="xsds">
       <list>
         <!--
+        Make sure the XSDs are listed in order of increasing dependencies...
+        e.g. if schema2.xsd imports schema1.xsd, schema1.xsd must be appear
+        1st in the list. This applies all the way up the chain...
+
+        A little note however, if you just list the highest level schema -
+        the one that imports all the rest, you do not technically need to declare
+        all the others, though it may be clearer to anyone reading the code.
+        -->
+        <!--
         <value>classpath:dmi.xsd</value>
         <value>classpath:dmi-redef.xsd</value>
         <value>classpath:jsdl.xsd</value>
@@ -47,8 +56,13 @@
         <value>classpath:minx-jms-messages.xsd</value>
         <value>classpath:minx-dts-messages.xsd</value>
         -->
+        <value>classpath:minx-dts-messages.xsd</value>
+        <!--
         <value>classpath:dmi-common.xsd</value>
         <value>classpath:minx-dts-messages.xsd</value>
+        <value>classpath:oasis-200401-wss-wssecurity-secext-1.0.xsd</value>
+        <value>classpath:oasis-200401-wss-wssecurity-utility-1.0.xsd</value>
+        <value>classpath:xmldsig-core-schema.xsd</value>-->
         <!--
         <value>classpath:minx-event-callback-messages.xsd</value>
         <value>classpath:minx-misc.xsd</value>
@@ -76,7 +90,12 @@
     </property>
   </bean>
 
+  <!--
+  Do not want to log the request because this will contain user auth tokens.
+  -->
   <bean id="loggingInterceptor" class="org.springframework.ws.soap.server.endpoint.interceptor.SoapEnvelopeLoggingInterceptor">
+      <property name="logRequest" value="false"/>
+      <property name="logResponse" value="true"/>
   </bean>
 
     <!-- this one's giving me the cos-noambit issue. might not be using the defined oxm -->
@@ -99,6 +118,13 @@
     </property>
   </bean>
 
+  <!--
+  This callback handler requires only a loginContextName to operate. It creates a new JAAS
+  loginContext using this name, and handles the standard JAAS NameCallback and
+  PasswordCallback using the username and password provided in the SOAP message.
+  This means that this callback handler integrates with any JAAS LoginModule that
+  fires these callbacks during the login() phase (standard behaviour).
+  -->
   <bean id="jaasValidationHandler" class="org.springframework.ws.soap.security.xwss.callback.jaas.JaasPlainTextPasswordValidationCallbackHandler">
     <property name="loginContextName" value="DtsWebService" />
   </bean>

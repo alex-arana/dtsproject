@@ -19,10 +19,29 @@ b) Edit '~/.dataminx/dts-workernode.properties'.
   By default, the values in the properties file should just work (see file for more info)
 
 
-c) Start ActiveMQ
+c) Unit Tests
+--------------
+Note, an ActiveMQ broker instance does NOT need to be running to run the unit tests
+as the tests do not submit messages to the broker.
+
+  mvn -Ddataminx.dir=/home/<path-to-dot-dataminx-dir>/.dataminx test
+
+
+
+d) Integration Tests
+---------------------
+Note, a working ActiveMQ instance needs to be up and running so that the integration
+tests can submit messages to the configured job-submit and job-control queues. At
+this point, the integ-tests do not test for responses on the event.queue.
+
+  mvn -Ddataminx.dir=/home/<path-to-dot-dataminx-dir>/.dataminx integration-test
+
+
+-) Start ActiveMQ
+---------------------
   $ACTIVEMQ_HOME/bin/activemq
 
-d) Run the worker node
+-) Run the worker node
   1) Via maven exec plugin (for testing/dev)
      mvn -Ddataminx.dir=/home/dts-user/.dataminx exec:java
 

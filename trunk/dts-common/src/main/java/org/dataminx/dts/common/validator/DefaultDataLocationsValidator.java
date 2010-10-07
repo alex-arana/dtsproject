@@ -74,7 +74,8 @@ public class DefaultDataLocationsValidator implements DataLocationsValidator {
         /*if (source.getURI().startsWith("file://")) {
             errorMessages.append("  Unsupported transfer protocol on SourceURI.\n");
         }*/
-        passwordExistsInUsernameToken(datalocations, errors);
+        //TODO
+        //passwordExistsInUsernameToken(datalocations, errors);
     }
 
     /**
@@ -110,7 +111,7 @@ public class DefaultDataLocationsValidator implements DataLocationsValidator {
      * @param sourceOrTarget the source or target element
      * @param errors the validation errors
      */
-    private void passwordExistsInUsernameToken(DataLocationsType  datalocations, Errors errors) {
+    /*private void passwordExistsInUsernameToken(DataLocationsType  datalocations, Errors errors) {
         if (datalocations.getData() != null && datalocations.getData().getCredentials() != null) {
             // check if credential provided is UsernameToken type
             if (datalocations.getData().getCredentials().getUsernameToken() != null) {
@@ -128,7 +129,7 @@ public class DefaultDataLocationsValidator implements DataLocationsValidator {
                 }
             }
         }
-    }
+    }*/
 
 
 

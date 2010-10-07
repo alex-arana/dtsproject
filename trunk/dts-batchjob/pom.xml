@@ -147,6 +147,13 @@ To integration test:              mvn integration-test
   </build>
   
   <dependencies>
+
+    <!--<dependency>
+      <groupId>org.springbyexample</groupId>
+      <artifactId>org.springbyexample.jdbc</artifactId>
+      <version>1.0.4</version>
+    </dependency>-->
+
     <dependency>
       <artifactId>dts-build-tools</artifactId>
       <groupId>${dataminx.group}</groupId>

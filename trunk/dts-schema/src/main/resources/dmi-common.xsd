@@ -2,22 +2,28 @@
 <xsd:schema targetNamespace="http://schemas.dmi.proposal.org/dts/2010/dmi-common"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:dmi2="http://schemas.dmi.proposal.org/dts/2010/dmi-common"
-    xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     elementFormDefault="qualified" version="1">
 
-<xsd:import namespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
-            schemaLocation="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"/>
-
 
 <!--
-Need to add these back in when binding - netbeans xml stuff can't cope with
-the remote schema locations !
+For convenience, we have removed the import of the wsse schema and replaced the
+wsse:UsernameToken type reference with our own dmi2:UsernamePasswordTokenType. This is a quick/temp
+fix to simplify dev/deployment of the WS. If we import the wsse schema, then the
+Spring based WS needs an active Web connection to dowload wsse related artefacts.
+
+Note, have tried to import the 3 wss-security schemas locally in same directory rather than relying on
+a Web connection and downloading them from their original schemaLocation, e.g:
+http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd
+Nevertheless, the WS still appeared to require an active web connection - i suspect this may 
+be because of the following line in the wsse schema: 
+<xsd:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>.
+Need to investigate this (time permitting) so that we add back the wsse schema import
+to support the wsse:UsernameToken.
 
 xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
-
 <xsd:import namespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
-            schemaLocation="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"/>
+            schemaLocation="oasis-200401-wss-wssecurity-secext-1.0.xsd"/>
 -->
 
 
@@ -208,7 +214,10 @@ xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-s
 
     <xsd:complexType name="CredentialType">
         <xsd:choice>
-            <xsd:element ref="wsse:UsernameToken"/>
+            <!-- for ease of use when when writing docs (by reducing namespace defs),
+            will include the dmi2:UsernamePasswordToken as an alternative to wsse:UsernameToken-->
+            <xsd:element ref="dmi2:UsernamePasswordToken"/>
+            <!--<xsd:element ref="wsse:UsernameToken"/>-->
             <xsd:element ref="dmi2:MyProxyToken"/>
             <xsd:element ref="dmi2:OtherCredentialToken"/>
         </xsd:choice>
@@ -237,6 +246,24 @@ xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-s
     </xsd:complexType>
     -->
 
+
+     
+     <xsd:complexType name="UsernamePasswordTokenType">
+        <xsd:annotation>
+            <xsd:documentation>
+                Username and password
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="Username" type="xsd:string"/>
+            <xsd:element name="Password" type="xsd:string"  minOccurs="0"/>
+            <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:ID" use="optional"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+    <xsd:element name="UsernamePasswordToken" type="dmi2:UsernamePasswordTokenType"/>
+   
 
 
 
