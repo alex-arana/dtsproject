@@ -14,45 +14,15 @@
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
- 
+
+  <!--
+  Import the spring config files in dataminx.dir, inc:
+  - batch-job-db-context.xml (for the 'dataSource' bean)
+  - plugin-context.xml (for the 'encryptionPlugin' bean)
+  -->
   <import resource="file:${dataminx.dir}/*-context.xml"/>  
 
 
-<!--
-  <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource">
-    <property name="driverClassName" value="${batch.jdbc.driver}" />
-    <property name="url" value="${batch.jdbc.url}" />
-    <property name="username" value="${batch.jdbc.user}" />
-    <property name="password" value="${batch.jdbc.password}" />
-  </bean>
-  -->
-
-  
-  <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
-    <property name="jdbcUrl" value="${batch.jdbc.url}" />
-    <property name="user" value="${batch.jdbc.user}" />
-    <property name="password" value="${batch.jdbc.password}" />
-    <property name="driverClass" value="${batch.jdbc.driver}" />
-    <property name="autoCommitOnClose" value="false" />
-    <property name="initialPoolSize" value="5" />
-    <property name="maxIdleTime" value="300" />
-  </bean>
-  
-
-  
-  <!--<bean id="dataSource"
-        class="org.springbyexample.jdbc.datasource.HsqldbInitializingDriverManagerDataSource">
-      <property name="sqlScriptProcessor">
-          <bean class="org.springbyexample.jdbc.core.SqlScriptProcessor">
-              <property name="charset" value="UTF-8" />
-              <property name="sqlScripts">
-                  <list>
-                      <value>classpath:/schema-hsqldb.sql</value>
-                  </list>
-              </property>
-          </bean>
-      </property>
-  </bean>-->
 
   <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" lazy-init="true">
     <property name="dataSource" ref="dataSource" />
