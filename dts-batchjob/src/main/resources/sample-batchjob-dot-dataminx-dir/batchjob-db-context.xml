@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+  <!--
+  Batch-Job Database Settings
+  ==============================
+  This file is included into the batch-job application at runtime. You can
+  edit this file as requried to choose between different batch-job
+  database configurations depending on the type of DTS deployment.
+  - 3 different database configurations are provided below (dataSource's):
+     a) In-memory DB (for testing and for batch-job command line client)
+     b) Pooled DB connection (full blown worker-node deployments)
+     c) Single DB connection (for light-weight deployments/testing)
+
+  - Ensure only one dataSource bean is defined (i.e. un-commented).
+  - The database properties referenced below (e.g. ${batch.jdbc.url})
+    are defined in the 'dataminx.dir/dts-bulkcopyjob.properties' file.
+  -->
+
+
+  <!--
+  In-memory DB
+  =============
+  This dataSource provides a new in-memory HSQL db instance for each separate
+  batch-job execution (for each separate JVM execution).
+  It is v.useful for;
+    a) testing, and
+    b) running the batch-job locally as the standalone Batch Job Client command line
+       application that returns when the job is finishes or fails.
+
+  This dataSource should *Not* be used when using the worker-node to invoke the batch-job!
+  The in-mem db is destroyed after the calling client application returns.
+  -->
+
+  <bean id="dataSource"
+      class="org.springbyexample.jdbc.datasource.InitializingDriverManagerDataSource">
+    <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+    <property name="url" value="jdbc:hsqldb:mem:Test"/>
+    <property name="username" value="sa"/>
+    <property name="password" value=""/>
+
+    <property name="sqlScriptProcessor">
+        <bean class="org.springbyexample.jdbc.core.SqlScriptProcessor">
+            <property name="sqlScripts">
+                <list>
+                    <value>classpath:/schema-hsqldb.sql</value>
+                </list>
+            </property>
+        </bean>
+    </property>
+  </bean>
+
+
+  <!--
+  Pooled DB connection (for multi-threaded/server/workernode setups)
+  ===================================================================
+  This datasource should be used when running the batch-job through the workernode,
+  i.e. when concurrently running many batch-jobs.
+  -->
+  <!--
+  <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+    <property name="jdbcUrl" value="${batch.jdbc.url}" />
+    <property name="user" value="${batch.jdbc.user}" />
+    <property name="password" value="${batch.jdbc.password}" />
+    <property name="driverClass" value="${batch.jdbc.driver}" />
+    <property name="autoCommitOnClose" value="false" />
+    <property name="initialPoolSize" value="5" />
+    <property name="maxIdleTime" value="300" />
+  </bean>
+  -->
+
+
+  <!--
+  Single DB connection
+  ====================
+  Simple implementation of the standard JDBC DataSource interface, configuring
+  a plain old JDBC Driver via bean properties, and returning a new Connection
+  for every getConnection call.
+  NOTE: This class is not an actual connection pool; it does not actually pool
+  Connections. It just serves as simple replacement for a full-blown connection
+  pool, implementing the same standard interface, but creating new Connections on every call.
+
+  Also see Springs 'org.springframework.jdbc.datasource.SingleConnectionDataSource'
+  -->
+  <!--
+  <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <property name="driverClassName" value="${batch.jdbc.driver}" />
+    <property name="url" value="${batch.jdbc.url}" />
+    <property name="username" value="${batch.jdbc.user}" />
+    <property name="password" value="${batch.jdbc.password}" />
+  </bean>
+  -->
+
+</beans>
