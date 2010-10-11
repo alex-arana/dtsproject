@@ -1,50 +1,82 @@
 #########################################################################
 #                       DTS-WorkerNode configuration
 #
+# Options for subscription and publishing messages to a JMS message broker
+# (To Scale and for Competing Consumer pattern)
+# ==============================================================
 
-#
-# Spring Integration configuration
-
-# URL for ActiveMQ running in stand-alone mode
-#si.jms.brokerURL = tcp://114.30.65.201:61616
+##### URL for ActiveMQ message broker
+# running in stand-alone mode:
 si.jms.brokerURL = tcp://localhost:61616
-
-# URL for ActiveMQ running in embedded mode
+# Running in embedded mode:
 #si.jms.brokerURL = vm://localhost
 
-# JMS listener container caching settings
+##### JMS listener container caching settings
 si.jms.sessionCacheSize = 10
 si.jms.cacheProducers = false
 
-# DTS JMS Queue/Topic names
+##### DTS JMS Queue/Topic names
 si.jms.jobSubmitQueueName = broker.default.output.queue
 si.jms.jobEventQueueName = dts.job.event.queue
 si.jms.jobControlQueueName = dts.job.control.queue
 
-# message selector value for the si.jms.jobSubmitQueueName (can leave blank
-# if want to receive all messages)
-si.jms.jobSubmitQueue.selector=
+##### The polling interval in milliseconds to poll the jobSubmitQueue.
+# 10000 = 10secs, 5000 = 5secs
+#wn.polling.interval.millisecs=5000
+#wn.polling.interval.millisecs=10000
+wn.polling.interval.millisecs=5000
 
-# message selector value for the si.jms.jobControlQueueName 
-# Use the following example commented out below to filter for messages that 
-# are intended only for this worker node instance. This would require the
-# message producer to add the corresponding wn.id.message.header. 
-#si.jms.jobControlQueue.selector=${wn.id.message.header.name} = '${wn.id}'
-si.jms.jobControlQueue.selector=
-
-# control logic for workernode manager
+##### Concurrent job count (scaling up).
+# E.g. if this value is 5, then the worker will attempt to consume, execute and manage
+# up to 5 jobs concurrently. It does this by consuming job requests from the broker
+# at the specified polling interval (wn.polling.interval.millisecs)
+# until this threshold value is reached.
 wn.manager.maxBatchJobNumber = 1
 
-#default worker node ID in format: DtsWorkerNode + hostname + UUID
-wn.id=DtsWorkerNodemyhostname001
-
-#default message header name of worker node ID
-wn.id.message.header.name=DTSWorkerNodeID
-
-# the polling interval in milliseconds to poll the jobSubmitQueue.
-# 10000 = 10secs (default)
-wn.polling.interval.millisecs=10000
-
-
+#### Optional (can leave blank if not used by jms broker)
+# un/pw used to authenticate this workernode to the JMS broker.
 wn.user.name=
 wn.user.password=
+
+
+# Message Selection (Optional - for Selective Consumer Pattern)
+# ==============================================================
+
+##### Message selector value for the 'si.jms.jobSubmitQueueName'
+# (leave blank if you don't want to filter job requests, i.e. you want to recieve
+# the next available job-submit request regardless of the message properties/headers).
+# E.g. To select all messages with the 'DEPARTMENT_JMS_HEADER_NAME' set to 'CHEM':
+# si.jms.jobSubmitQueue.selector=DEPARTMENT_JMS_HEADER_NAME = 'CHEM'
+# TODO more examples here. 
+si.jms.jobSubmitQueue.selector=
+
+
+##### Message selector value for the 'si.jms.jobControlQueueName'
+# Use the following example commented out below to filter for messages that 
+# are intended only for this worker node instance. This would require the
+# message producer to add the corresponding wn.id.message.header. This is required
+# if there are mulitple worker nodes so that each worker node will only
+# select its own control messages. This requires each workernode has a unique 'wn.id'
+# within the pool of workers.
+si.jms.jobControlQueue.selector=${wn.id.message.header.name} = '${wn.id}'
+#si.jms.jobControlQueue.selector=
+
+
+##### Worker node ID
+# Default id is in the following format: DtsWorkerNode + hostname + UUID
+# You must modify this value so that it is unique within a particular worker
+# node pool. This value is added to the JMS message properties when responding
+# on the 'si.jms.jobEventQueueName' so that the broker client (e.g. WS) can
+# add this property when sending control messages. Note, this value must be
+# 'DtsWorkerNodemyhostname001' for the integration tests to work because this value
+# is hard-wired into the integ-tests. 
+wn.id=DtsWorkerNodemyhostname001
+
+
+#### Default message header name of worker node ID
+# This value is used to compose the 'si.jms.jobControlQueue.selector value' above.
+# It is recommended that you leave this value so that all worker nodes will have
+# a consistent JMS header name when selecting control messages.
+wn.id.message.header.name=DTSWorkerNodeID
+
+
