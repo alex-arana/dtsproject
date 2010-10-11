@@ -3,10 +3,9 @@ Maven Build, install, test instructions
 
 The dts-workernode subscribes to the JMS broker's job-submit and job-control queues 
 and publishes status updates/events to the broker's event queue. 
-The workernode does not contain the actual batchjob, but rather it invokes a 
-batch job when a job is recieved. It can be configured 
+The workernode invokes a batch job when a job request is recieved. It can be configured
 to run 'n' jobs concurrently (scaling-up). Multipe worker nodes can be subscribed 
-to a single broker in order to scale (scaling-out).
+to a single broker in order to scale-out.
 
 
 a) Copy 'src/main/resources/dts-workernode.properties.template' to your .dataminx dir:
