@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.security.auth.Subject;
@@ -90,6 +92,11 @@ public class DataTransferServiceImpl implements DataTransferService,
 
     /** The xmlbeans marshaller. */
     private XmlBeansMarshaller mMarshaller;
+
+    private String mWebserviceIDMessageHeaderName;
+
+    private String mWebserviceID;
+
 
     /**
      * {@inheritDoc}
@@ -161,8 +168,17 @@ public class DataTransferServiceImpl implements DataTransferService,
 
         // TODO: decide if we are going to add any JMS Properties to the message we are sending
         // to the queue like routingHeader
-        mJobSubmitMessageSender.doSend(newJobResourceKey, result.toString());
-
+        final Map<String, Object> jmsParameterMap = new HashMap<String, Object>();
+        
+//      jmsParameterMap.put(ROUTING_HEADER_KEY, "");
+        jmsParameterMap.put("department", "'chem'");
+        jmsParameterMap.put(mWebserviceIDMessageHeaderName, mWebserviceID);
+        String deliveryMode = "NON_PERSISTENT";
+        if (deliveryMode.equals("PERSISTENT")) {
+            mJobSubmitMessageSender.doSend(newJobResourceKey, jmsParameterMap, result.toString(), false);
+        } else {
+            mJobSubmitMessageSender.doSend(newJobResourceKey, jmsParameterMap, result.toString(), true);
+        }
         // let's also set the status and queued time if we reach this point as we can safely assume that
         // no fault was sent back to the client at this point
         newJob.setStatus(JobStatus.SCHEDULED);
@@ -380,6 +396,14 @@ public class DataTransferServiceImpl implements DataTransferService,
 
     public void setMarshaller(final XmlBeansMarshaller marshaller) {
         mMarshaller = marshaller;
+    }
+
+    public void setWebserviceIDMessageHeaderName(final String webserviceIDMessageHeaderName ) {
+       mWebserviceIDMessageHeaderName = webserviceIDMessageHeaderName;
+    }
+
+    public void setWebserviceID(final String webserviceID) {
+        mWebserviceID = webserviceID;
     }
 
     /**
