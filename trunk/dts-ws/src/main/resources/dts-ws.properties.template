@@ -1,0 +1,81 @@
+#############################################################################
+#                  Properties to be used by Spring Integration
+#
+
+# URL for ActiveMQ running in stand-alone mode
+si.jms.brokerURL=tcp://localhost:61616
+
+# URL for ActiveMQ running in embedded mode
+#si.jms.brokerURL=vm://localhost
+
+# JMS listener container caching settings
+si.jms.sessionCacheSize=10
+si.jms.cacheProducers=false
+
+# DTS JMS Queue/Topic names
+si.jms.jobSubmitQueueName=broker.job.submission.queue
+# uncomment this if the WS is integrating directly to the workernode manager
+#si.jms.jobSubmitQueueName=broker.default.output.queue
+si.jms.jobEventQueueName=dts.job.event.queue
+si.jms.jobControlQueueName=dts.job.control.queue
+# A DLQ. prefix on the name of the dead letter queue is requested by a ActiveMQ broker
+si.jms.dtsdeadletterqueue=DLQ.dts.deadletter.queue
+
+
+# message selector value for the si.jms.dtsdeadletterqueue
+# Use the following example commented out below to filter for messages that
+# are intended only for this web service instance.
+si.jms.si.jms.dtsdeadletterqueue.selector=${brokerClient.id.message.header.name} = '${brokerClient.id}'
+#si.jms.si.jms.dtsdeadletterqueue.selector=
+
+# message selector value for the si.jms.jobEventQueueName
+# Use the following example commented out below to filter for messages that
+# are intended only for this web service instance. This would require the
+# message producer to add the corresponding ws.id.message.header.
+#si.jms.jobEventQueue.selector=${brokerClient.id.message.header.name} = '${brokerClient.id}'
+si.jms.jobEventQueue.selector=
+
+#default web service instanace ID in format: DtsWebService + hostname + UUID
+brokerClient.id=DtsWebServicemyhostname001
+
+#default message header name of web service ID
+brokerClient.id.message.header.name=DTSWebServiceID
+
+#############################################################################
+#        Used in both Embedded, non-Embedded DTS WS, and the WS tests
+#
+ws.port=18080
+ws.context.path=dts-ws
+
+######
+# Used only in non-Embedded DTS WS
+ws.host=localhost
+
+#############################################################################
+#                   WS Database details
+#
+hibernate.dialect=org.hibernate.dialect.MySQLDialect
+hibernate.database=MYSQL
+datasource.driverclassname=com.mysql.jdbc.Driver
+datasource.url=jdbc:mysql://localhost/dts
+datasource.username=dts
+datasource.password=dts
+
+
+#hibernate.dialect=org.hibernate.dialect.HSQLDialect
+#hibernate.database=HSQL
+#datasource.driverclassname=org.hsqldb.jdbcDriver
+#datasource.url=jdbc:hsqldb:mem:dts
+#datasource.username=sa
+#datasource.password=
+
+#############################################################################
+#                   WS Secure Connection to a ActiveMQ Broker
+#
+
+#As a JMS client connecting to the queues in a secured ActiveMQ Broker,
+#the WS nneds to send a JMS client user name and password the broker
+#A JMS client user name
+ws.name=testclient
+#A JMS client user password
+ws.password=defaultpassword

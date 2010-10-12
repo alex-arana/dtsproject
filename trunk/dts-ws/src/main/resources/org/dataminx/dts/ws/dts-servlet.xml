@@ -167,6 +167,8 @@
     <property name="jobControlQueueSender" ref="jobControlQueueSender" />
     <property name="jobRepository" ref="jobRepository" />
     <property name="marshaller" ref="marshaller" />
+    <property name="webserviceIDMessageHeaderName" value="${brokerClient.id.message.header.name}" />
+    <property name="webserviceID" value="${brokerClient.id}" />
   </bean>
 
   <!-- Job Submit Message Sender -->

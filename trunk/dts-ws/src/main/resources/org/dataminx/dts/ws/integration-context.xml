@@ -13,12 +13,14 @@
 
   <!-- Defines a point-to-point channel for receiving DTS job event updates. -->
   <channel id="dtsJobEvents"/>
+  <channel id="dtsDeadLetterMessages"/>
 
   <!--
     Defines an inbound JMS channel adapter for the DTS job event queue.
     The inbound adapter means we are receiving from JMS and placing an instance of
     org.springframework.integration.core.Message on the configured channel.
   -->
+  <!--
   <jms:message-driven-channel-adapter
       channel="dtsJobEvents"
       connection-factory="jmsConnectionFactory"
@@ -26,7 +28,19 @@
       message-converter="dtsWsMessageConverter"
       transaction-manager="jmsTransactionManager"
       />
+ -->
+    <jms:message-driven-channel-adapter
+        container="jobEventsMessageContainer"
+        message-converter="dtsWsMessageConverter"
+        channel="dtsJobEvents" />
 
+    <beans:bean id="jobEventsMessageContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <beans:property name="connectionFactory" ref="jmsConnectionFactory"/>
+        <beans:property name="destinationName" value="${si.jms.jobEventQueueName}"/>
+        <beans:property name="messageSelector" value="${si.jms.jobEventQueue.selector}"/>
+        <beans:property name="transactionManager" ref="jmsTransactionManager"/>
+    </beans:bean>
+    
   <beans:bean id="dtsWsMessageConverter"
               class="org.dataminx.dts.ws.jms.DtsWsMessageConverter">
     <beans:property name="transformer" ref="dtsWsMessagePayloadTransformer" />
@@ -47,4 +61,22 @@
     <beans:constructor-arg index="0" ref="marshaller"/>
   </beans:bean>
 
+  <jms:message-driven-channel-adapter
+        container="dtsDeadLetterMessageContainer"
+        message-converter="dtsWsMessageConverter"
+        channel="dtsDeadLetterMessages" />
+
+    <beans:bean id="dtsDeadLetterMessageContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <beans:property name="connectionFactory" ref="jmsConnectionFactory"/>
+        <beans:property name="destinationName" value="${si.jms.dtsdeadletterqueue}"/>
+        <beans:property name="messageSelector" value="${si.jms.si.jms.dtsdeadletterqueue.selector}"/>
+        <beans:property name="transactionManager" ref="jmsTransactionManager"/>
+    </beans:bean>
+
+ <!-- The DTS Dead Letter Queue Messages Endpoint -->
+<!--
+  <service-activator input-channel="dtsDeadLetterMessages"
+                     ref="dtsDeadLetterMessagesHandler"
+                     method="handleDeadLetterMessages"/>
+-->
 </beans:beans>

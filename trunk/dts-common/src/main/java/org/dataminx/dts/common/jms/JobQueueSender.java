@@ -56,9 +56,45 @@ public class JobQueueSender {
      * @param jobId DTS Job ID
      * @param jmsParameterMap a map of any JMS parameter that users might want to set
      * @param message JMS message payload
+     * @param persistentDeliveryMode a boolean value to decide the delivery mode of a JMS message
      */
     public void doSend(final String jobId,
+            final Map<String, Object> jmsParameterMap, final Object message, Boolean persistentDeliveryMode) {
+        // set DeliveryMode here
+        if(persistentDeliveryMode == null){
+        this.doSendImpl(jobId, jmsParameterMap, message, 1);//NON_PERSISTENT
+        }
+        else if(persistentDeliveryMode == true){
+            this.doSendImpl(jobId, jmsParameterMap, message, 1);//NON_PERSISTENT
+        }
+        else {
+            this.doSendImpl(jobId, jmsParameterMap, message, 2); //PERSISTENT
+        }
+    }
+
+    /**
+     * Sends a pre-configured message type to a remote destination.
+     *
+     * @param jobId DTS Job ID
+     * @param jmsParameterMap a map of any JMS parameter that users might want to set
+     * @param message JMS message payload
+     */
+
+    public void doSend(final String jobId,
             final Map<String, Object> jmsParameterMap, final Object message) {
+        this.doSendImpl(jobId, jmsParameterMap, message, 1);
+    }
+
+
+    /**
+     * Sends a pre-configured message type to a remote destination.
+     *
+     * @param jobId DTS Job ID
+     * @param jmsParameterMap a map of any JMS parameter that users might want to set
+     * @param message JMS message payload
+     */
+    private void doSendImpl(final String jobId,
+            final Map<String, Object> jmsParameterMap, final Object message, final int deliveryMode) {
         mJmsTemplate.send(mQueue, new MessageCreator() {
 
             public Message createMessage(final Session session)
@@ -67,6 +103,7 @@ public class JobQueueSender {
                 final Message jmsMessage = messageConverter.toMessage(message,
                         session);
                 jmsMessage.setJMSCorrelationID(jobId);
+                jmsMessage.setJMSDeliveryMode(deliveryMode);//NON_PERSISTENT
                 if (jmsParameterMap != null) {
                     Set<String> keys = jmsParameterMap.keySet();
                     Iterator<String> iterator = keys.iterator();
