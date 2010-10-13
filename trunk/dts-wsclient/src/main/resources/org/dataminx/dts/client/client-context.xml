@@ -21,7 +21,8 @@
     <property name="messageFactory">
       <bean class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory" />
     </property>
-    <property name="defaultUri" value="http://${ws.host}:${ws.port}/${ws.context.path}/" />
+  <!--<property name="defaultUri" value="http://${ws.host}:${ws.port}/${ws.context.path}/" />-->
+    <property name="defaultUri" value="${dtsws.url}" />
     <property name="messageSender" ref="messageSender" />
     <property name="marshaller" ref="marshaller" />
     <property name="unmarshaller" ref="marshaller" />
