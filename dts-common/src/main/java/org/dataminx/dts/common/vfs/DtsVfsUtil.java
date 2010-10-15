@@ -473,15 +473,6 @@ public class DtsVfsUtil extends VFSUtil {
             sourceOrTargetFileSystemOptionsCache.remove(copy.getSource());
             sourceOrTargetFileSystemOptionsCache.remove(copy.getSink());
         }
-
-        /*final DataTransferType[] dataTransfers = ((MinxJobDescriptionType) job
-            .getJobDefinition().getJobDescription()).getDataTransferArray();
-        for (final DataTransferType dataTransfer : dataTransfers) {
-            sourceOrTargetFileSystemOptionsCache.remove(dataTransfer
-                .getSource());
-            sourceOrTargetFileSystemOptionsCache.remove(dataTransfer
-                .getTarget());
-        }*/
     }
 
     private void addMyProxyCredentialDetailsToFileSystemOptions(
