@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+This is the Spring configuration file for the DTS Spring Batch-job (dtsFileTransferJob).
+-->
+
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:batch="http://www.springframework.org/schema/batch"
     xmlns:aop="http://www.springframework.org/schema/aop"
@@ -44,6 +49,12 @@
     <property name="dataSource" ref="dataSource"/>
   </bean>
 
+  <!--
+  The jobRepository is used to persist various Spring-Batch domain objects, such
+  as the JobExecution and StepExecution contexts. The 'jobRepository' id means that this
+  repo is auto-referenced by its collaborators (such as the job) who do no have to
+  explicitly reference the repo.
+  -->
   <bean id="jobRepository"
         class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
     <property name="dataSource" ref="dataSource"/>
@@ -64,10 +75,10 @@
     <property name="messageSource" ref="messageSource" />
   </bean>
 
-  <bean id="dtsJobPartitioner" scope="step" class="org.dataminx.dts.batch.DtsJobPartitioner">
-    <property name="dtsJobDetails" value="#{jobExecutionContext[JOB_DETAILS]}"/>
-  </bean>
-  
+
+  <!--
+  Step: JobScopingTask implements Tasklet (a Step with no ItemReader, ItemWriter).
+  -->
   <bean id="jobScopingTask" class="org.dataminx.dts.batch.JobScopingTask" scope="step">
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
     <property name="jobPartitioningStrategy" ref="jobPartitioningStrategy" />
@@ -79,6 +90,9 @@
   </bean>
 
 
+  <!--
+  Step: CheckRequirementsTask implements Tasklet
+  -->
   <bean id="checkRequirementsTask" class="org.dataminx.dts.batch.CheckRequirementsTask" scope="step">
     <!--<property name="jobStepDirectory" value="file://${user.home}/.dataminx/jobsteps" />-->
     <property name="jobStepDirectory" value="file:${dataminx.dir}/jobsteps" />
@@ -90,6 +104,7 @@
   from the Step ExecutionContext to the Job ExecutionContext at the
   end of a step. A list of keys should be provided that correspond to the items
   in the Step ExecutionContext that should be promoted.
+  To define multiple keys use: <beans:property name="keys" value="prop1,prop2,prop3">
   -->
   <bean id="jobScopingTaskPromotionListener" class="org.springframework.batch.core.listener.ExecutionContextPromotionListener">
     <property name="keys" value="JOB_DETAILS" />
@@ -99,9 +114,18 @@
     <property name="keys" value="lastCompletedSuspendedStep" />
   </bean>
 
+  <!--
+  Step: FileCopyTask implements Tasklet
+  This step uses late-binding so it must have step scope. This step is a PARTITIONED
+  step (and so there can be many instances of this particular step created at runtime).
+  Each instance is responsible for processing a single step file that records
+   a list of DTUs (i.e. a list of file-only source-to-sink transfers).
+  The step's jobStep value will be set by late-binding at runtime from the stepExeCtxt.
+  The steps submitJobRequest will be set by late-binding at runtime from the jobExeCtxt.
+  The step will be issued with a particular step file
+  -->
   <bean id="fileCopyTask" class="org.dataminx.dts.batch.FileCopyTask" scope="step">
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
-    <!-- the DtsJobStep value will be set from the stepExeCtxt -->
     <property name="jobStep" value="#{stepExecutionContext[DATA_TRANSFER_STEP]}"/>
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
     <property name="jobNotificationService" ref="jobNotificationService"/>
@@ -117,7 +141,17 @@
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
     <property name="encrypter" ref="encryptionPlugin" />
   </bean>
-  
+
+
+  <!--
+  Job: dtsFileTransferJob extends SimpleJob
+  A spring job is a container for steps. A job has 3 required dependencies:
+  A a) name, b) JobRepository and c) a list of Steps. The repo does not have to
+  be explictly referenced using a 'job-repository' attribute because it has the
+  default name of 'jobRepository'.
+  This job allows for restarts. It is considered a 'restart' if a JobExecution
+  already exists for the particular JobInstance in the repo.
+  -->
   <bean id="dtsFileTransferJob" scope="prototype" class="org.dataminx.dts.batch.DtsFileTransferJob">
     <property name="checkRequirementsStep" ref="checkRequirementsStep"/>
     <property name="jobScopingStep" ref="jobScopingStep"/>
@@ -179,18 +213,26 @@
 
 
   <!--
-  We are going to partition our fileCopyStep, i.e. execute our step
-  multiple times using a synchronous task-execution grid (gridSize=1).
-  The number of stepExecutions is derived from the jobScoping task which
-  generates a list of DtsJobStep instances, thus:
-  numb of DtsJobSteps == numb of fileCopyStep partions.
+  The Master PartionStep for partitioning the fileCopyStep
+  i.e. create muliple fileCopyStep instances and execute them all
+  using a synchronous task-execution grid (gridSize=1).
+  The 'PartitionStep' drives execution of the fileCopySteps using the
+  required partitionHandler and stepExecutionSplitter interfaces which must
+  be implemented for the specific environment.
+
+  The number of fileCopyStep instances is derived from the jobScoping task which
+  generates a list of DtsJobStep instances (with corresponding files) which get
+  injected into the file fileCopyStep at runtime using late-binding, thus:
+  numb of DtsJobSteps == numb of fileCopyStep instances.
+
   -->
   <bean id="partitioningStep"
         class="org.springframework.batch.core.partition.support.PartitionStep">
     <!--
-    PartitionHandler sends StepExecution requests to the remote steps
+    The PartitionHandler sends StepExecution requests to the (potentially remote) partitioned steps.
+    The partitionHandler therefore must know about the fabric of the remoting/grid environment.
     Spring Batch provides a useful implementation of PartitionHandler that executes Steps locally in
-    separate threads of execution using Spring's TaskExecutor strategy
+    separate threads of execution using Spring's TaskExecutor strategy.
     -->
     <property name="partitionHandler">
       <bean class="org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler">
@@ -198,9 +240,8 @@
           <bean class="org.springframework.core.task.SyncTaskExecutor"/>
         </property>
         <!-- 
-        We are going to partition the fileCopyStep,
-        i.e. run it many times as a parallel grid (with gridSize set to one,
-        we simply run fileCopyStep partitions sequentially).
+        The fileCopySteps are run in a parallel exeuction grid (But with gridSize set to one,
+        which is the default, we simply run fileCopyStep partitions/instances sequentially).
         -->
         <property name="step" ref="fileCopyStep"/>
         <!-- Rely on the default gridSize of one 
@@ -212,6 +253,8 @@
     </property>
 
     <!--
+    The partitioner's role (required by the stepExecutionSplitter) is to generate
+    a new step ExecutionContext (as an input parameter) for each partitioned step instance.
     Use a generic implementation of StepExecutionSplitter that delegates to a
     Partitioner to generate the required number of Step ExecutionContext instances.-->
     <property name="stepExecutionSplitter">
@@ -222,6 +265,11 @@
       </bean>
     </property>
     <property name="jobRepository" ref="jobRepository"/>
+  </bean>
+
+
+  <bean id="dtsJobPartitioner" scope="step" class="org.dataminx.dts.batch.DtsJobPartitioner">
+    <property name="dtsJobDetails" value="#{jobExecutionContext[JOB_DETAILS]}"/>
   </bean>
   
   
@@ -246,7 +294,14 @@
     <property name="maxTotalFileNumPerStepLimit" value="${max.total.num.files.perstep}" />
     <property name="encrypter" ref="encryptionPlugin" />
   </bean>
-  
+
+  <!--
+  In the case of a restartable job, there may be steps that should always
+  be run, regardless of wheter or not they were successful the first time. During
+  NORMAL processing of a restarted job, any step with a status of 'COMPLETED' will
+  be skipped. Setting allow-start-if-complete to true overrides this so the
+  step will always run:
+  -->
   <batch:step id="maxStreamCountingStep">
     <batch:tasklet ref="maxStreamCounterTask" allow-start-if-complete="true"/>
   </batch:step>
@@ -255,12 +310,16 @@
     <property name="submitJobRequest" value="#{jobExecutionContext[SUBMIT_JOB_REQUEST]}"/>
     <property name="maxConnectionsToTry" value="${default.max.parallel.connections}"/>
     <property name="dtsVfsUtil" ref="dtsVfsUtil"/>
-    <property name="fileSystemManagerCache" ref="fileSystemManagerCache"/>
+    <property name="fileSystemManagerCache" ref="fileSystemManagerCache" />
     <property name="jobRepository" ref="jobRepository"/>
     <property name="dtsJobDetails" value="#{jobExecutionContext[JOB_DETAILS]}"/>
     <property name="encrypter" ref="encryptionPlugin" />
   </bean>
-  
+
+
+  <!--
+  Stores a list of FileSystemManagers under a RootURLString.
+  -->
   <bean id="fileSystemManagerCache" class="org.dataminx.dts.common.vfs.FileSystemManagerCache"/>
   
   <bean id="executionContextCleaner" class="org.dataminx.dts.batch.common.util.ExecutionContextCleaner">

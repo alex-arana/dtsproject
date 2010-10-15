@@ -237,34 +237,39 @@ public abstract class AbstractJobPartitioningStrategy implements
             mTotalSize = 0;
             mTotalFiles = 0;
 
-            // populate the dataTransfers List from the given jobDefinition (i.e. a
-            // list of source to sink constructs).
-            //final List<DataTransferType> dataTransfers = new ArrayList<DataTransferType>();
-            final List<CopyType> dataTransfers = new ArrayList<CopyType>();
-            CollectionUtils.addAll(dataTransfers, dataCopyActivity.getCopyArray());
+            // populate the dataCopies List from the given jobDefinition.
+            final List<CopyType> dataCopies = new ArrayList<CopyType>();
+            CollectionUtils.addAll(dataCopies, dataCopyActivity.getCopyArray());
 
-            /*final JobDescriptionType jobDescription = jobDefinition.getJobDescription();
-            if (jobDescription instanceof MinxJobDescriptionType) {
-                final MinxJobDescriptionType minxJobDescription = (MinxJobDescriptionType) jobDescription;
-                CollectionUtils.addAll(dataTransfers, minxJobDescription.getDataTransferArray());
-            }*/
-            if (CollectionUtils.isEmpty(dataTransfers)) {
+            if (CollectionUtils.isEmpty(dataCopies)) {
                 LOGGER.warn("DTS job request is incomplete as it does not contain any data transfer elements.");
                 throw new DtsJobExecutionException("DTS job request contains no data transfer elements.");
             }
 
             int dataTransferIndex = 0;
-            for (final CopyType dataTransfer : dataTransfers) {
+            for (final CopyType dataCopy : dataCopies) {
                 // reset the total number of files to be transferred within this DataTransfer element
                 mPerDataTransferTotalFiles = 0;
 
                 // Resolve sourceParent - dir or file to be copied to targetParent
                 FileObject sourceParent = null;
                 try {
+                    /*
+                     // maintain a FileSystemOptions cache in this class rather than in mDtsVfsUtil.
+
+                     FileSystemOptions sourceOpts = null;
+                     if (this.fileSystemOptionsCache.containsKey(dataCopy.getSource())) {
+                        sourceOpts = this.fileSystemOptionsCache.get( dataCopy.getSource() );
+                     }
+                     else {
+                        sourceOpts = mDtsVfsUtil.getFileSystemOptions( dataCopy.getSource(), mEncrypter );
+                        this.fileSystemOptionsCache.put( dataCopy.getSource(), sourceOpts );
+                     }
+                    */
+
                     sourceParent = fileSystemManager.resolveFile(
-                        //dataTransfer.getSource().getURI(),
-                            dataTransfer.getSource().getData().getDataUrl(),
-                        mDtsVfsUtil.getFileSystemOptions(dataTransfer.getSource(), mEncrypter));
+                            dataCopy.getSource().getData().getDataUrl(),
+                            mDtsVfsUtil.getFileSystemOptions(dataCopy.getSource(), mEncrypter));
 
                     if (!sourceParent.getContent().getFile().exists()
                         || !sourceParent.getContent().getFile().isReadable()) {
@@ -276,21 +281,20 @@ public abstract class AbstractJobPartitioningStrategy implements
                 catch (final FileSystemException e) {
                     throw new JobScopingException(
                         "FileSystemException was thrown while accessing the remote file "
-                            + dataTransfer.getSource().getData().getDataUrl() + ".", e);
+                            + dataCopy.getSource().getData().getDataUrl() + ".", e);
                 }
 
                 // Resolve targetParent - destincation for copy
                 FileObject targetParent = null;
                 try {
                     targetParent = fileSystemManager.resolveFile(
-                            //dataTransfer.getTarget().getURI(),
-                            dataTransfer.getSink().getData().getDataUrl(),
-                            mDtsVfsUtil.getFileSystemOptions(dataTransfer.getSink(), mEncrypter));
+                            dataCopy.getSink().getData().getDataUrl(),
+                            mDtsVfsUtil.getFileSystemOptions(dataCopy.getSink(), mEncrypter));
                 }
                 catch (final FileSystemException e) {
                     throw new JobScopingException(
                         "FileSystemException was thrown while accessing the remote file "
-                            + dataTransfer.getSink().getData().getDataUrl() + ".", e);
+                            + dataCopy.getSink().getData().getDataUrl() + ".", e);
                 }
 
                 try {
@@ -348,7 +352,7 @@ public abstract class AbstractJobPartitioningStrategy implements
                     // (this step becomes the allocator's current step to which
                     // new DTUs are subsequently added in the prepare() call below).
                     // Thus, there is always at least ONE (often more) steps
-                    // per dataTransfer element which is what we want !
+                    // per dataCopy element which is what we want !
                     LOGGER.debug("Creating new dataTransfer: "+sourceParentRootStr + "  "+targetParentRootStr);
                     mDtsJobStepAllocator.createNewDataTransfer(
                         sourceParentRootStr,
@@ -377,7 +381,7 @@ public abstract class AbstractJobPartitioningStrategy implements
                     //final CreationFlagEnumeration.Enum creationFlag = ((MinxJobDescriptionType) jobDescription)
                     //    .getTransferRequirements().getCreationFlag();
 
-                    final CreationFlagEnumeration.Enum creationFlag = dataTransfer.getCopyRequirements().getCreationFlag();
+                    final CreationFlagEnumeration.Enum creationFlag = dataCopy.getCopyRequirements().getCreationFlag();
                     prepare(sourceParent, targetParent, dataTransferIndex, creationFlag);
 
                     // Update the max number of total files to be transferred for the

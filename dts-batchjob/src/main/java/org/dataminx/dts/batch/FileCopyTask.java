@@ -140,9 +140,15 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
 
             mDataTransferUnitIterator = dataTransferUnitIterator;
 
-            if (mRootFileObjectComparator.compare(mJobStep
-                .getSourceRootFileObjectString(), mJobStep
-                .getTargetRootFileObjectString()) == 0) {
+            // Init  mTargetFileSystemManager and mSourceFileSystemManager.
+            // Compare the sourceRootURL against the targetRooURL. If they are
+            // both TMP or FILE, then borrow one FSM from the
+            // cache (mTargetFileSystemManager = mSourceFileSystemManager) else
+            // borrow separate fsm from the cache.
+            if (mRootFileObjectComparator.compare(
+                    mJobStep.getSourceRootFileObjectString(),
+                    mJobStep.getTargetRootFileObjectString()) == 0) {
+
                 mSourceFileSystemManager = mFileSystemManagerCache
                     .borrowOne(mJobStep.getSourceRootFileObjectString());
                 mTargetFileSystemManager = mSourceFileSystemManager;
@@ -161,7 +167,6 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
 
         /**
          * Gets the next DtsDataTransferUnit to process.
-         *
          * @return the next DtsDataTransferUnit
          */
         /*public synchronized DtsDataTransferUnit getNextDataTransferUnit() {
@@ -176,11 +181,11 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
 
         /** Performs the actual data transfer. */
         public void run() {
+            // Do not use hasNext() when iterating the contents of the mDataTransferUnitIterator
+            // as there might be issues with race conditions - since the given
+            // mDataTransferUnitIterator is shared mutable state it needs to be
+            // accessed in a thread safe manner.
 
-            // we won't use hasNext() in testing for the contents of the mDataTransferUnitIterator
-            // as there might be issues with race conditions.
-
-            //DtsDataTransferUnit dataTransferUnit = getNextDataTransferUnit();
             DtsDataTransferUnit dataTransferUnit = getNextDataTransferUnit(mDataTransferUnitIterator, mCopierName);
             while (dataTransferUnit != null) { // TODO: && !stopped) {
 
@@ -195,33 +200,33 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
                     + dataTransferUnit.getSourceFileUri() + " to "
                     + dataTransferUnit.getDestinationFileUri());
 
-                /*final DataTransferType dataTransfer = ((MinxJobDescriptionType) mSubmitJobRequest
-                    .getJobDefinition().getJobDescription())
-                    .getDataTransferArray(dataTransferUnit
-                        .getDataTransferIndex());
-                 */
+
+                // For this DTU, get the corresponding dataCopy (XML) construct
+                // (using the data transfer index that is stored with the DTU).
                 final CopyType dataCopy = mSubmitJobRequest.getDataCopyActivity().getCopyArray(dataTransferUnit.getDataTransferIndex());
 
                 try {
-                    // once we get to this point, we can safely assume that we have successfully authenticated and are
-                    // authorised to access the files specified in the DTS job definition document.
-                    mFileCopyingService.copyFiles(dataTransferUnit
-                        .getSourceFileUri(), dataTransferUnit
-                        .getDestinationFileUri(), dataCopy,
-                        mSourceFileSystemManager, mTargetFileSystemManager);
+                    // 
+                    mFileCopyingService.copyFiles(
+                            dataTransferUnit.getSourceFileUri(),
+                            dataTransferUnit.getDestinationFileUri(),
+                            dataCopy, mSourceFileSystemManager, mTargetFileSystemManager);
 
-                    // the only reason why the call to copyFile would fail might be due to a DtsException (a descendent
-                    // of the RuntimeException) being thrown where we couldn't really do anything much (eg. a sudden
-                    // expiration of the user's credential while doing the transfer). at that point, we shouldn't
-                    // continue with the transfer anymore.
+                    // The only reason why the call to copyFiles would fail might be due to a DtsException (a descendent
+                    // of the RuntimeException) being thrown where we couldn't really do anything (eg. a sudden
+                    // expiration of the user's credential while doing the transfer). At that point, we shouldn't
+                    // continue with the transfer anymore thus flag that the prob has occurred and break.
                 }
                 catch (final DtsException e) {
-                    // no need to continue pro
                     LOGGER_FC.error("A DtsException was thrown while copying "
                         + dataTransferUnit.getSourceFileUri(), e);
+                    // flag error and break out of the while loop.
                     mHasTransferErrorArised = true;
                     break;
                 }
+
+                // update the mBatchVolumeSize (by re-resolving - may be quicker
+                // to get this value from the copyFiles call above).
                 try {
                     mBatchVolumeSize += mSourceFileSystemManager.resolveFile(
                         dataTransferUnit.getSourceFileUri(),
@@ -234,7 +239,7 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
                             + "file that was recently copied.", e);
                 }
 
-                //dataTransferUnit = getNextDataTransferUnit();
+                // Lets see if there is another DTU available to process.
                 dataTransferUnit = getNextDataTransferUnit(mDataTransferUnitIterator, mCopierName);
             }
 
@@ -501,11 +506,10 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
         final List<DtsDataTransferUnit> dataTransferUnits = mJobStep
             .getDataTransferUnits();
 
-        // shortcut! as we don't really need to send updates everytime a new dataTransferUnit is processed
         mBatchTotalFiles = dataTransferUnits.size();
         LOGGER.debug("Step's DTU count: "+mBatchTotalFiles);
 
-        // number of concurrent connections to the source - what about the target?
+        // number of concurrent connections to the source
         int numConcurrentConnections = mFileSystemManagerCache
             .getSizeOfAvailableFileSystemManagers(mJobStep.getSourceRootFileObjectString());
 
@@ -547,6 +551,9 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
 
         final Iterator<DtsDataTransferUnit> dataTransferUnitIterator = dataTransferUnits
             .iterator();
+        // Create the same number of FileCopier threads as there are connections
+        // (so each FileCopierThread will be able to get and hold-onto a connection to the src
+        // and a connection to the target).
         for (int i = 0; i < numConcurrentConnections; i++) {
             final FileCopier fileCopier = new FileCopier(
                 dataTransferUnitIterator, "CopierThread" + (i + 1));

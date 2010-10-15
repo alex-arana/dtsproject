@@ -124,7 +124,9 @@ public class FileCopyingServiceImpl implements FileCopyingService,
 
 
 
-
+    /**
+     * {@inheritDoc}
+     */
     public void copyFiles(DataLocationsType source, DataLocationsType target, FileSystemManager fileSystemManager) {
         //throw new UnsupportedOperationException("Not supported yet.");
         LOGGER.info(String.format("Copying source '%s' to target '%s'...",
@@ -132,7 +134,9 @@ public class FileCopyingServiceImpl implements FileCopyingService,
         this.copyFiles(source, target, fileSystemManager, fileSystemManager);
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     public void copyFiles(final String sourceURI, final String targetURI,
         final CopyType copyType,
         final FileSystemManager sourceFileSystemManager,
@@ -154,6 +158,7 @@ public class FileCopyingServiceImpl implements FileCopyingService,
 
             targetFO = targetFileSystemManager.resolveFile(targetURI,
                 mDtsVfsUtil.getFileSystemOptions(target, mEncrypter));
+            
             copyFiles(sourceFO, targetFO);
         }
         catch (final FileSystemException e) {
@@ -233,9 +238,9 @@ public class FileCopyingServiceImpl implements FileCopyingService,
      */
     private void copyFiles(final FileObject sourceFile,
         final FileObject destinationFile) throws FileSystemException {
+
         Assert.notNull(sourceFile);
         Assert.notNull(destinationFile);
-
         // TODO handle overwrites
         // only works on file to file type of transfer
         // destinationFile.copyFrom(sourceFile, DEFAULT_FILE_SELECTOR);
@@ -246,9 +251,8 @@ public class FileCopyingServiceImpl implements FileCopyingService,
         // do in every step of the
         // data transfer process.
         try {
-            VFSUtil.copy(sourceFile, destinationFile, new MarkerListenerImpl(),
-                true);
-
+            VFSUtil.copy(sourceFile, destinationFile, 
+                    new MarkerListenerImpl(), true);
         }
         catch (final IOException e) {
             LOGGER

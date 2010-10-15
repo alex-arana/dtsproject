@@ -38,12 +38,13 @@ import java.util.Map;
 //import org.dataminx.dts.batch.common.DtsBatchJobConstants;
 //import org.ggf.schemas.jsdl.x2005.x11.jsdl.JobDefinitionType;
 import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  * This class holds all the details about the DTS Job that Spring Batch will go through to process the data transfer
- * requests.
+ * requests. It is storred in the Job ExecutionContext and so the data in this
+ * object will be available to future steps.
  *
  * @author Gerson Galang
  * @author David Meredith (modifications)
@@ -51,8 +52,8 @@ import org.slf4j.LoggerFactory;
 public class DtsJobDetails implements Serializable {
 
     /** The logger. */
-    private static final Logger LOGGER = LoggerFactory
-        .getLogger(DtsJobDetails.class);
+    //private static final Logger LOGGER = LoggerFactory
+    //    .getLogger(DtsJobDetails.class);
 
     /** The serial version UID needed to serialize this class. */
     private static final long serialVersionUID = 1L;
@@ -125,6 +126,13 @@ public class DtsJobDetails implements Serializable {
      * </pre>
      */
     private final Map<String, Integer> mSourceTargetMaxTotalFilesToTransfer = new HashMap<String, Integer>();
+
+
+    /** TODO: The FSMCache is required by different steps but does not need to be persited
+     in the Spring Batch repository - hence it is transient.  It does not need to be
+     persited because the MaxStreamCounterTask is 'allow-start-if-complete' and so
+     will always re-init this cache on job-restarts **/
+    //private transient FileSystemManagerCache mFileSystemManagerCache = new FileSystemManagerCache();
 
     /**
      * The DtsJobDetails constructor.
