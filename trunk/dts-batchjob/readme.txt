@@ -13,7 +13,7 @@ database (a new persistent credentialStore impl is required for this - TODO).
   (Do not use this in production ! Please configure a db for use in production)
 
 - Note, you can use the pre-packaged platform independent [file-based] HSQL
-  Database provided in this download (see below for configruation instructions).
+  Database provided in this download for lightweight deployments (see below for configruation instructions).
 
 
 
@@ -35,23 +35,24 @@ Default is '$HOME/.dataminx' (this dir will be refered to as '$DATAMINXDIR') e.g
      'Pooled DB connection' dataSource or the 'Single DB connection' dataSource.
 
   ii) Edit your '$DATAMINXDIR/dts-bulkcopyjob.properties' and modify the DB
-      config properties as required (please refer to 'dts-bulkcopyjob.properties'
-      for more instructions).
+      config properties as required.
 
-      To use the pre-packaged, platform independent [file-based] HSQL db:
-      -------------------------------------------------------------------
-      You can use a pre-packaged 'embedded' HSQL database for the batchjob.
-      It is located in the '$DATAMINXDIR/batchjob-hsqlDB' directory and is used for testing and for lightweight batchjob deployments.
-      Of course, you can configure the batchjob to run against a different database as required
-      (we recommend you do this for production deployments). Because the
-      db is an embedded db, only a single batchjob JVM process will be able to connect to this database
-      (no other concurrent connections from different JVMs/processes/tools are allowed.
+  iii) JDBC driver and sql script (TODO)
+
+      To use the pre-packaged, platform independent [file-based] HSQL db (lightweight deployments/testing):
+      -----------------------------------------------------------------------------------------------------
+      You can use an 'embedded' HSQL database for the batchjob pre-packaged in the
+      '$DATAMINXDIR/batchjob-hsqlDB' dir (of course, you can configure a different database
+      for production usage). Because the db is an embedded db, only a single
+      batchjob JVM process will be able to connect to this database
+      (no other concurrent connections from different JVMs/processes/db-tools are allowed).
       Refer to the dts-bulkcopyjob.properties for instructions on deploying to different databases.
 
-      - Do i) above.
-      - Edit the 'batch.jdbc.url' property in '$DATAMINXDIR/dts-bulkcopyjob.properties'
-        and provide the FULL path to your $DATAMINXDIR directory.
-      - Make sure 'batch.jdbc.driver = org.hsqldb.jdbcDriver' property is set.
+      i)  Edit your '$DATAMINXDIR/batch-job-db-context.xml'file and un-comment either the
+           'Pooled DB connection' dataSource or the 'Single DB connection' dataSource.
+      ii) Edit the 'batch.jdbc.url' property in '$DATAMINXDIR/dts-bulkcopyjob.properties'
+           and provide the FULL path to your $DATAMINXDIR directory.
+      iii) Make sure 'batch.jdbc.driver = org.hsqldb.jdbcDriver' property is set.
 
 
 

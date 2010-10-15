@@ -38,6 +38,7 @@ import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataLocationsType;
  *
  * @author Alex Arana
  * @author Gerson Galang
+ * @author David Meredith
  */
 public interface FileCopyingService {
 
@@ -77,13 +78,9 @@ public interface FileCopyingService {
      * Properties.
      *
      * @param source the source
-     * @param target the target
+     * @param sink the target
      * @param sourceFileSystemManager the source's FileSystemManager
      * @param targetFileSystemManager the target's FileSystemManager
-     */
-    /*void copyFiles(SourceTargetType source, SourceTargetType target,
-        FileSystemManager sourceFileSystemManager,
-        FileSystemManager targetFileSystemManager);
      */
     void copyFiles(DataLocationsType source, DataLocationsType sink,
         FileSystemManager sourceFileSystemManager,
@@ -96,7 +93,7 @@ public interface FileCopyingService {
      * Properties.
      *
      * @param source the source
-     * @param target the target
+     * @param sink the target
      * @param fileSystemManager the FileSystemManager to use for both the source
      *        and destination
      */
@@ -111,15 +108,10 @@ public interface FileCopyingService {
      *
      * @param sourceURI Source URI string
      * @param targetURI Target URI string
-     * @param dataTransferType dataTransferType which will provide the URI
+     * @param copyType copy type which will provide the URI
      *        properties of the source and target and the user credentials.
      * @param sourceFileSystemManager the source's FileSystemManager
      * @param targetFileSystemManager the target's FileSystemManager
-     */
-    /*void copyFiles(String sourceURI, String targetURI,
-        DataTransferType dataTransferType,
-        FileSystemManager sourceFileSystemManager,
-        FileSystemManager targetFileSystemManager);
      */
      void copyFiles(final String sourceURI, final String targetURI,
         final CopyType copyType,

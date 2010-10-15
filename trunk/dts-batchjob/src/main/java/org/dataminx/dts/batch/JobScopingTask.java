@@ -99,6 +99,9 @@ public class JobScopingTask implements Tasklet, StepExecutionListener,
             "Unable to find DTS Job Request in execution context.");
 
         // partition the job and return partitioning results in the jobDetails
+        // The JobDetails will then be storred in the Job ExecutionContext after
+        // the step completes (i.e. via promotion from the step ExecutionContext
+        // to the Job ExeCtxt after the step completes).
         final DtsJobDetails jobDetails = mJobPartitioningStrategy
             .partitionTheJob(mSubmitJobRequest.getDataCopyActivity(),
                 mJobResourceKey, mJobTag);

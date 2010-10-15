@@ -168,6 +168,21 @@ public class DtsJobLauncher extends SimpleJobLauncher {
 
         // finally convert the builder to params
         final JobParameters params = builder.toJobParameters();
+
+        // Run the provided job with the given JobParameters.
+        // The JobParameters will be used to determine if this is an execution
+        // of an existing job instance, or if a new one should be created.
+        // Parameters:
+        //  job - the job to be run.
+        //   jobParameters - the JobParameters for this particular execution.
+        //                A new JobParameters object  will trigger a new jobInstance if the
+        //                parameters are diferent from any previous set of parameters !
+        // Returns:
+        //   JobExecution or JobExecutionAlreadyRunningException if the JobInstance already exists and has an execution already running.
+        // Throws:
+        //  JobRestartException - if the execution would be a re-start, but a re-start is either not allowed or not needed.
+        //  JobInstanceAlreadyCompleteException - if this instance has already completed successfully
+        //  JobExecutionAlreadyRunningException - if the JobInstance identified by the properties already has an execution running.
         return run(dtsJob, params);
     }
 

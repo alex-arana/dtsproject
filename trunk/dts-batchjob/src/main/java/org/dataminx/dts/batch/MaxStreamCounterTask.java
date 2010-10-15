@@ -120,7 +120,7 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
                     throw new DtsJobExecutionException("Unable to establish a single connection in MaxStreamCounterTask to: "+mRootURL);
                 }
                 // cache the working connections into the parent map
-                mWorkingConnectionsListPerRootFileObject.put(mRootURL, mWorkingConnectionsList);
+                mWorkingConnectionsListPerRootURL.put(mRootURL, mWorkingConnectionsList);
             }
         }
 
@@ -163,18 +163,16 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
     /** A reference to the Encrypter. */
     private Encrypter mEncrypter;
 
-    /** A container for unique FileObjects specified as source/targets in the job. */
-    //private final Map<String, FileObject> mFileObjectMap = new FileObjectMap<String, FileObject>();
-    private final Map<String, FileObject> mFileObjectMap = new java.util.HashMap<String, FileObject>();
 
     /**
      * The cache to hold the FileSystemManagers available for each source/target to use during the file copy process.
-     * Here we use a ConcurrentHashMap because the map is accessed by different threads.
+     * Here we use a ConcurrentHashMap because the map is accessed by different threads (the map
+     * is shared mutable state).
      */
-    //private final Map<String, List<FileSystemManager>> mWorkingConnectionsListPerRootFileObject =
-    //    new FileObjectMap<String, List<FileSystemManager>>();
-    private final Map<String, List<FileSystemManager>> mWorkingConnectionsListPerRootFileObject =
+    private final Map<String, List<FileSystemManager>> mWorkingConnectionsListPerRootURL =
         new java.util.concurrent.ConcurrentHashMap<String, List<FileSystemManager>>();
+    //private final Map<String, List<FileSystemManager>> mWorkingConnectionsListPerRootURL =
+    //  new FileObjectMap<String, List<FileSystemManager>>();
 
     /**
      * {@inheritDoc}
@@ -203,6 +201,10 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
         final ChunkContext chunkContext) throws Exception {
         LOGGER.debug("MaxStreamCounterTask execute()");
 
+        // A temporary cache of unique Root FileObjects derived from the list of source/targets.
+        // Map<RootUrlStr, RootFO>
+        final Map<String, FileObject> rootFileObjectMap = new java.util.HashMap<String, FileObject>();
+        
         FileSystemManager fileSystemManager = null;
         try {
             try {
@@ -212,48 +214,55 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
                         "FileSystemException was thrown while creating new FileSystemManager in the max stream counter task.",e);
             }
 
-            // TODO: have this step rerun if it fails... use the user's provided info
-
-            /*final List<DataTransferType> dataTransfers = new ArrayList<DataTransferType>();
-            final JobDescriptionType jobDescription = mSubmitJobRequest.getJobDefinition().getJobDescription();
-            if (jobDescription instanceof MinxJobDescriptionType) {
-                final MinxJobDescriptionType minxJobDescription = (MinxJobDescriptionType) jobDescription;
-                CollectionUtils.addAll(dataTransfers, minxJobDescription.getDataTransferArray());
-            }*/
-            final List<CopyType> dataTransfers = new ArrayList<CopyType>();
-            CollectionUtils.addAll(dataTransfers, mSubmitJobRequest.getDataCopyActivity().getCopyArray());
-
-            if (CollectionUtils.isEmpty(dataTransfers)) {
+            final List<CopyType> dataCopies = new ArrayList<CopyType>();
+            CollectionUtils.addAll(dataCopies, mSubmitJobRequest.getDataCopyActivity().getCopyArray());
+            if (CollectionUtils.isEmpty(dataCopies)) {
                 LOGGER.warn("DTS job request is incomplete as it does not contain any data transfer elements.");
                 throw new DtsJobExecutionException(
                         "DTS job request contains no data transfer elements.");
             }
 
-            // for each CopyType, get the corresponding root FileObject from source
-            // and target URIs and put each source and target unique ROOT FO in a map:
-            // mFileObjectMap<ROOT URI String, ROOT FileObject>
-            for (final CopyType dataTransfer : dataTransfers) {
+            // For each CopyType, get the corresponding Root FileObject from source
+            // and target URIs and put each source and target (unique) ROOT FO in a map:
+            // rootFileObjectMap<RootUriStr, RootFileObject>
+            for (final CopyType dataCopy : dataCopies) {
 
-                final FileObject sourceFO = fileSystemManager.resolveFile(dataTransfer.getSource().getData().getDataUrl(), mDtsVfsUtil.getFileSystemOptions(dataTransfer.getSource(), mEncrypter));
-                final FileObject targetFO = fileSystemManager.resolveFile(dataTransfer.getSink().getData().getDataUrl(), mDtsVfsUtil.getFileSystemOptions(dataTransfer.getSink(), mEncrypter));
+                // Perhaps move the FSOptions cache from mDtsVfsUtil into this class !
+                // <DataLocationsType, FSOptions>
+                // or maintain the cache as transient jobDetails field - this step is allow-start-if-complete="true"
+                // and so will be re-run on restarts which will always refresh the cache ?
+                final FileObject sourceFO = fileSystemManager.resolveFile(
+                        dataCopy.getSource().getData().getDataUrl(),
+                        mDtsVfsUtil.getFileSystemOptions(dataCopy.getSource(), mEncrypter));
 
-                // TODO: handle cases where in source and destination root File
-                // Object of File System are the same but the credentials to
-                // access them are different. So just means that those are still
-                // two different scenarios.
+                final FileObject targetFO = fileSystemManager.resolveFile(
+                        dataCopy.getSink().getData().getDataUrl(),
+                        mDtsVfsUtil.getFileSystemOptions(dataCopy.getSink(), mEncrypter));
+
                 // TODO: what do we do then if the restriction on access/connection
                 // is on a per-host rather than a per-user access
+
+                // TODO: BIG BUG Starts here.
+                // Cannot store RootFileObjects under its corresponding Root URL (as the map key)
+                // because the same root url may be accessed using DIFFERENT
+                // credentials/uriProperties (i.e. defined in in a different dataCopy element).
+                // Therefore, if there is already a map entry for a particular root url,
+                // new rootFOs that use different credentials/uriProps
+                // will never be added to the map !!
+                // This will cause problems later on because the rootFO map (<rootFO, rootURL>)
+                // is then used to gather/cache connections for that rootURL for
+                // subsequent usage in the file copy steps.
 
                 final FileObject sourceRoot = sourceFO.getFileSystem().getRoot();
                 final FileObject targetRoot = targetFO.getFileSystem().getRoot();
 
-                if (!mFileObjectMap.containsKey(sourceRoot.getURL().toString())) {
+                if (!rootFileObjectMap.containsKey(sourceRoot.getURL().toString())) {
                     LOGGER.debug("put source root FileObject in map with key: "+sourceRoot.getURL().toString());
-                    mFileObjectMap.put(sourceRoot.getURL().toString(), sourceRoot);
+                    rootFileObjectMap.put(sourceRoot.getURL().toString(), sourceRoot);
                 }
-                if (!mFileObjectMap.containsKey(targetRoot.getURL().toString())) {
+                if (!rootFileObjectMap.containsKey(targetRoot.getURL().toString())) {
                     LOGGER.debug("put target in File Object map: "+targetRoot.getURL().toString());
-                    mFileObjectMap.put(targetRoot.getURL().toString(), targetRoot);
+                    rootFileObjectMap.put(targetRoot.getURL().toString(), targetRoot);
                 }
             }
 
@@ -265,36 +274,33 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
         final Map<String, Integer> sourceTargetMaxTotalFilesToTransfer = mDtsJobDetails.getSourceTargetMaxTotalFilesToTransfer();
 
         if(LOGGER.isDebugEnabled()){
-          for (final String foRootKey : mFileObjectMap.keySet()) {
+          for (final String foRootKey : rootFileObjectMap.keySet()) {
             LOGGER.debug("iterate FileObject map, key : "+foRootKey);
           }
         }
         
         // For each ROOT FileObject in the map, establish the max connections we can
         // make on each one using the sourceTargetMaxTotalFilesToTransfer Map<UriString, IntMaxConnections>
-        GatherAndCacheConnectionsToRootUrl workerThreads[] = new GatherAndCacheConnectionsToRootUrl[mFileObjectMap.size()];
+        GatherAndCacheConnectionsToRootUrl workerThreads[] = new GatherAndCacheConnectionsToRootUrl[rootFileObjectMap.size()];
         int i = 0;
-        for (final String foRootKey : mFileObjectMap.keySet()) {
-            final FileObject foRoot = mFileObjectMap.get(foRootKey);
+        for (final String foRootUrl : rootFileObjectMap.keySet()) {
+            final FileObject foRoot = rootFileObjectMap.get(foRootUrl);
             int maxConnections;
 
             // If there are more files to transfer than the mMaxConnectionsToTry
             // for this source or target (most probably true), we'll try to use UP to our
             // own preset max parallel connections to try.
-            if (sourceTargetMaxTotalFilesToTransfer.get(foRootKey) > mMaxConnectionsToTry) {
-                //gatherMaxConnections(foRoot, mMaxConnectionsToTry);
+            if (sourceTargetMaxTotalFilesToTransfer.get(foRootUrl) > mMaxConnectionsToTry) {
                 maxConnections = mMaxConnectionsToTry;
             } else {
                 // Since there's not that many files to transfer for this source or target
-                // we'll try and open up connections UP to the same number of files that will
-                // be transferred to/from this source or target
-                //gatherMaxConnections(foRoot, sourceTargetMaxTotalFilesToTransfer.get(foRootKey));
-                maxConnections = sourceTargetMaxTotalFilesToTransfer.get(foRootKey);
+                // we'll try and open up connections UP to the same number of files that will be copied
+                maxConnections = sourceTargetMaxTotalFilesToTransfer.get(foRootUrl);
             }
-            LOGGER.debug("create GatherAndCacheConnectionsToRootUrl for RootURL: " + foRootKey +" with maxConnections: "+maxConnections);
+            LOGGER.debug("create GatherAndCacheConnectionsToRootUrl for RootURL: " + foRootUrl +" with maxConnections: "+maxConnections);
             // Attempt to create UP to maxConnections FileSystemManager connections
             // to the given foRoot and cache the successfull connections in
-            // this.mWorkingConnectionsListPerRootFileObject concurrent map.
+            // this.mWorkingConnectionsListPerRootURL concurrent map.
             workerThreads[i] = new GatherAndCacheConnectionsToRootUrl(
                     foRoot.getURL().toString(),
                     foRoot.getFileSystem().getFileSystemOptions(), maxConnections);
@@ -310,7 +316,10 @@ public class MaxStreamCounterTask implements Tasklet, InitializingBean {
 
         try {
             // TODO: remove this later on... or change FileSystemManagerCache implementation
-            mFileSystemManagerCache.initFileSystemManagerCache(mWorkingConnectionsListPerRootFileObject);
+            // the cached connections will need to go into JobDetails in JobScope as a transient collection !
+            // and a task promomtion listener added to this task (if adding to a new ?
+
+            mFileSystemManagerCache.initFileSystemManagerCache(mWorkingConnectionsListPerRootURL);
         } catch (final FileSystemManagerCacheAlreadyInitializedException e) {
             LOGGER.error("Initialisation of FileSystemManagerCache failed because it has not been cleared yet.", e);
             throw e;
