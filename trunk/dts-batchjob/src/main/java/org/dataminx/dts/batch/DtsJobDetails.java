@@ -51,6 +51,14 @@ import org.proposal.dmi.schemas.dts.x2010.dmiCommon.DataCopyActivityType;
  */
 public class DtsJobDetails implements Serializable {
 
+    /**
+     * Because this object is stored in Spring Batch's JobExecutionContext
+     * by serialization, the object has to be small ! Should not really store
+     * any collections.
+     *  //http://forum.springsource.org/archive/index.php/t-77757.html
+     *  //http://stackoverflow.com/questions/2292667/how-can-we-share-data-between-the-different-steps-of-a-job-in-spring-batch
+     */
+
     /** The logger. */
     //private static final Logger LOGGER = LoggerFactory
     //    .getLogger(DtsJobDetails.class);
@@ -133,6 +141,7 @@ public class DtsJobDetails implements Serializable {
      persited because the MaxStreamCounterTask is 'allow-start-if-complete' and so
      will always re-init this cache on job-restarts **/
     //private transient FileSystemManagerCache mFileSystemManagerCache = new FileSystemManagerCache();
+
 
     /**
      * The DtsJobDetails constructor.
