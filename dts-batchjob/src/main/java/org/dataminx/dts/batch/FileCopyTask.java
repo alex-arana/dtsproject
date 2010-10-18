@@ -28,6 +28,7 @@
 package org.dataminx.dts.batch;
 
 import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_DATA_TRANSFER_STEP_KEY;
+import static org.dataminx.dts.batch.common.DtsBatchJobConstants.DTS_JOB_DETAILS;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -39,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileSystemManager;
 import org.dataminx.dts.DtsException;
+import org.dataminx.dts.batch.DtsJobDetails;
 import org.dataminx.dts.batch.common.util.ExecutionContextCleaner;
 import org.dataminx.dts.batch.service.FileCopyingService;
 import org.dataminx.dts.batch.service.JobNotificationService;
@@ -58,6 +60,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
@@ -66,6 +69,7 @@ import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.scope.context.StepContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
@@ -461,6 +465,13 @@ public class FileCopyTask implements Tasklet, StepExecutionListener,
             + mSuspendedStepToSkip);
 
         finishedTransfer = false;
+
+        //http://forum.springsource.org/archive/index.php/t-77757.html
+        //http://stackoverflow.com/questions/2292667/how-can-we-share-data-between-the-different-steps-of-a-job-in-spring-batch
+        //JobExecution jobExecution = stepExecution.getJobExecution();
+        //ExecutionContext jobContext = jobExecution.getExecutionContext();
+        //final DtsJobDetails jd = (DtsJobDetails)jobContext.get(DTS_JOB_DETAILS);
+        
     }
 
     /**

@@ -116,6 +116,8 @@ public class JobScopingTask implements Tasklet, StepExecutionListener,
         // store the jobDetails in the step execution context. these will get
         // promoted to the Job execution context by the jobScopingTaskPromotionListener
         // so that the jobDetails will be available from the job.
+        //
+        // http://forum.springsource.org/archive/index.php/t-77757.html
         final ExecutionContext stepExecutionContext = stepContext
             .getStepExecution().getExecutionContext();
         stepExecutionContext.put(DTS_JOB_DETAILS, jobDetails);
